@@ -75,6 +75,8 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
       isDismissible: false,
       enableDrag: false,
       showDragHandle: false,
+      // Lebih tinggi dari batas bawaan (9/16 layar) → atur sendiri & bisa digulir.
+      isScrollControlled: true,
       builder: (_) => const _BiometricSheet(),
     );
     if (enable != true) {
@@ -223,7 +225,7 @@ class _BiometricSheet extends StatelessWidget {
     final c = context.colors;
     final t = context.text;
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.x24, AppSpace.screenH, AppSpace.x24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
