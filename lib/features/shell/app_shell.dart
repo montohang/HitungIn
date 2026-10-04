@@ -1,16 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/widgets/pressable.dart';
+import '../ads/ad_policy.dart';
+import '../ads/ads_service.dart';
+import '../ads/banner_slot.dart';
+import '../premium/pro_controller.dart';
 import '../security/app_gate.dart';
 
-/// Kerangka 4 tab + tombol Catat di tengah.
-class AppShell extends StatelessWidget {
+/// Kerangka 4 tab + tombol Catat di tengah. Banner iklan (versi gratis)
+/// tampil di atas navigasi pada tab yang diizinkan [AdPolicy].
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.shell});
 
   final StatefulNavigationShell shell;
+
+  @override
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  StatefulNavigationShell get shell => widget.shell;
+
+  @override
+  void initState() {
+    super.initState();
+    // Shell hanya tampil setelah onboarding & buka kunci, jadi dialog
+    // persetujuan iklan tidak mengganggu alur pertama kali buka.
+    Future.microtask(() async {
+      final pro = ref.read(proControllerProvider.notifier);
+      await pro.restore(silent: true);
+      if (ref.read(isProProvider)) return;
+      final bool ready = await withAutoLockPaused(ref, () => ref.read(adsServiceProvider).init());
+      if (mounted) ref.read(adsReadyProvider.notifier).state = ready;
+    });
+  }
 
   static const List<(IconData, IconData, String)> _tabs = [
     (Icons.home_outlined, Icons.home_rounded, 'Beranda'),
@@ -24,6 +51,11 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final bool banner = AdPolicy.showBanner(
+      tab: shell.currentIndex,
+      isPro: ref.watch(isProProvider),
+      adsReady: ref.watch(adsReadyProvider),
+    );
     Widget tab(int i) {
       final (IconData icon, IconData active, String label) = _tabs[i];
       final bool selected = shell.currentIndex == i;
@@ -52,33 +84,39 @@ class AppShell extends StatelessWidget {
 
     return Scaffold(
       body: shell,
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(color: c.surface, border: Border(top: BorderSide(color: c.line))),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpace.x8, vertical: AppSpace.x4),
-            child: Row(
-              children: [
-                tab(0),
-                tab(1),
-                Pressable(
-                  onTap: () => context.push(Routes.catat),
-                  semanticLabel: 'Catat transaksi',
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    margin: const EdgeInsets.symmetric(horizontal: AppSpace.x8),
-                    decoration: BoxDecoration(color: c.accent, borderRadius: AppRadius.mdAll),
-                    child: Icon(Icons.add, color: c.onAccent, size: 28),
-                  ),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (banner) const BannerSlot(),
+          DecoratedBox(
+            decoration: BoxDecoration(color: c.surface, border: Border(top: BorderSide(color: c.line))),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpace.x8, vertical: AppSpace.x4),
+                child: Row(
+                  children: [
+                    tab(0),
+                    tab(1),
+                    Pressable(
+                      onTap: () => context.push(Routes.catat),
+                      semanticLabel: 'Catat transaksi',
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        margin: const EdgeInsets.symmetric(horizontal: AppSpace.x8),
+                        decoration: BoxDecoration(color: c.accent, borderRadius: AppRadius.mdAll),
+                        child: Icon(Icons.add, color: c.onAccent, size: 28),
+                      ),
+                    ),
+                    tab(2),
+                    tab(3),
+                  ],
                 ),
-                tab(2),
-                tab(3),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -10,10 +10,20 @@ import '../../core/theme/theme_controller.dart';
 import '../../core/widgets/app_button.dart';
 import '../security/app_gate.dart';
 import '../security/auto_lock_setting.dart';
+import '../../core/widgets/app_chip.dart';
+import '../ads/ads_service.dart';
+import '../premium/data/pro_limits.dart';
+import '../premium/pro_controller.dart';
+import '../premium/widgets/pro_teaser.dart';
 import 'data/settings_dao.dart';
 import 'widgets/settings_tile.dart';
 
 const String appVersion = '0.1.0';
+
+final _adPrivacyRequiredProvider = FutureProvider.autoDispose<bool>((ref) async {
+  if (!ref.watch(adsReadyProvider)) return false;
+  return ref.watch(adsServiceProvider).privacyOptionsRequired();
+});
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -59,12 +69,25 @@ class SettingsScreen extends ConsumerWidget {
     final AutoLockDelay autoLock = ref.watch(autoLockProvider);
     final int wallets = ref.watch(walletBalancesProvider).valueOrNull?.length ?? 0;
     final bool hasPin = ref.watch(appGateProvider.select((g) => g.hasPin));
+    final bool isPro = ref.watch(isProProvider);
+    final bool adPrivacy = ref.watch(_adPrivacyRequiredProvider).valueOrNull ?? false;
 
     return Scaffold(
       appBar: AppBar(title: Text('Pengaturan', style: t.screenTitle)),
       body: ListView(
         padding: AppSpace.screen.copyWith(top: AppSpace.x8),
         children: [
+          SettingsGroup(
+            children: [
+              SettingsTile(
+                icon: Icons.workspace_premium_outlined,
+                title: isPro ? 'HitungIn Pro aktif' : 'HitungIn Pro',
+                subtitle: isPro ? 'Terima kasih sudah mendukung!' : 'Tanpa iklan, budget & tagihan tanpa batas',
+                trailing: const AppBadge.pro(),
+                onTap: () => openPremium(context, isPro ? ProReason.umum : ProReason.iklan),
+              ),
+            ],
+          ),
           SettingsGroup(
             title: 'Profil',
             children: [
@@ -109,6 +132,13 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: hasPin ? 'Kunci otomatis: ${autoLock.label.toLowerCase()}' : 'PIN belum dibuat',
                 onTap: () => context.push(Routes.keamanan),
               ),
+              if (!isPro && adPrivacy)
+                SettingsTile(
+                  icon: Icons.privacy_tip_outlined,
+                  title: 'Privasi iklan',
+                  subtitle: 'Atur persetujuan iklan Google',
+                  onTap: () => withAutoLockPaused(ref, () => ref.read(adsServiceProvider).showPrivacyOptions()),
+                ),
               SettingsTile(
                 icon: Icons.backup_outlined,
                 title: 'Cadangan & ekspor',
@@ -123,7 +153,7 @@ class SettingsScreen extends ConsumerWidget {
               const SettingsTile(
                 icon: Icons.info_outline,
                 title: 'HitungIn $appVersion',
-                subtitle: '100% offline · tanpa akun · data terenkripsi di HP ini',
+                subtitle: 'Tanpa akun · data keuangan terenkripsi & hanya di HP ini',
               ),
               SettingsTile(
                 icon: Icons.description_outlined,
@@ -133,7 +163,9 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           Text(
-            'HitungIn tidak mengirim data ke mana pun. Cadangan hanya dibuat saat kamu memintanya.',
+            'Catatan keuanganmu tidak pernah dikirim ke mana pun — tidak ada server HitungIn. '
+            'Versi gratis menampilkan iklan Google AdMob, yang memakai ID iklan perangkat (bukan data keuanganmu). '
+            'Cadangan hanya dibuat saat kamu memintanya.',
             style: t.caption.copyWith(color: c.muted),
             textAlign: TextAlign.center,
           ),

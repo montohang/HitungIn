@@ -103,6 +103,9 @@ abstract final class Routes {
   static const String gantiPin = '/pengaturan/keamanan/ganti-pin';
   static const String cadangan = '/pengaturan/cadangan';
   static const String tampilan = '/pengaturan/tampilan';
+
+  /// `?from=<ProReason.name>`.
+  static const String premium = '/premium';
   static const String gallery = '/dev/gallery';
 
   static const Set<String> setup = {welcome, setupPin, setupBiometric, setupWallet};

@@ -3,9 +3,9 @@
 Pencatat keuangan pribadi **100% offline** — tanpa login, data tidak pernah meninggalkan HP.
 Flutter · Android dulu · tema default **gelap**.
 
-Status: **Tahap 5 — Pengaturan & sisa MVP** selesai: kelola dompet & kategori, Tagihan (bayar → tercatat
-otomatis), cadangan terenkripsi + pulihkan, ekspor CSV, ganti PIN, sidik jari, kunci otomatis, tema, nama panggilan.
-Pengaturan dibuka dari ikon ⚙️ di beranda. *Design Gallery* ada di ikon palet (mode debug).
+Status: **Tahap 6 — Premium + iklan** selesai: HitungIn Pro sekali bayar lewat Google Play
+(termasuk pembayaran tertunda & pulihkan pembelian), banner AdMob + iklan berhadiah + persetujuan UMP,
+dan batas versi gratis. Fitur Pro tambahan (tren, transaksi berulang, aksen ekstra) menyusul di Tahap 6b.
 
 ---
 
@@ -87,6 +87,8 @@ lib/
     wallets/wallets_screen.dart       # tambah/ubah/urutkan/arsipkan/hapus dompet
     categories/categories_screen.dart # tambah/ubah ikon & kata kunci/urutkan/arsipkan kategori
     bills/                  # bills_screen.dart (daftar, bayar, form) · data/bill_due.dart (status jatuh tempo)
+    premium/                # premium_screen.dart · pro_controller.dart · data/ (limits, billing, entitlement)
+    ads/                    # ad_ids.dart · ad_policy.dart · ads_service.dart (UMP + rewarded) · banner_slot.dart
     backup/                 # backup_screen.dart · data/backup_codec.dart · backup_service.dart · csv_export.dart
     security/security_screen.dart     # sidik jari, kunci otomatis, ganti PIN
     transactions/
@@ -106,6 +108,7 @@ test/
   onboarding/flow_test.dart # alur onboarding & layar kunci lewat UI
   features/core_screens_test.dart  # Catat, transfer, detail, riwayat, laporan, budget lewat UI
   backup/backup_test.dart   # enkripsi cadangan, cadangkan→pulihkan, rollback, CSV
+  premium/premium_test.dart # batas gratis, aturan iklan, simpan Pro, alur pembelian (Google Play palsu)
   settings/settings_logic_test.dart  # jatuh tempo, kunci otomatis, ganti PIN, kelola kategori/dompet
   helpers/fakes.dart        # TestEnv: DB memori, SecureStore memori, jam & biometrik palsu
 ```
@@ -123,6 +126,40 @@ dengan `tester.runAsync(db.close)` — kalau tidak, tes menggantung di zona fake
   PIN, kunci database, dan status onboarding tidak ikut (milik perangkat).
 - CSV: UTF-8 + BOM, nominal bertanda (pengeluaran negatif), sel yang diawali `= + - @` diberi `'` agar tidak dieksekusi spreadsheet.
 
+## Premium & iklan
+
+"Offline" di HitungIn = **tanpa server untuk data**. Catatan keuangan tidak pernah dikirim;
+internet hanya dipakai AdMob dan Google Play Billing.
+
+| | Gratis | Pro (`hitungin_pro`, sekali bayar, saran Rp59.000) |
+|---|---|---|
+| Iklan | Banner di Beranda, Riwayat, Laporan | Tanpa iklan |
+| Budget | Total + 2 kategori | Tak terbatas |
+| Tagihan aktif | 3 | Tak terbatas |
+| Laporan | Bulan ini & bulan lalu | Semua bulan |
+| Ekspor CSV | 1× per iklan berhadiah | Bebas |
+| Catat, riwayat, dompet, cadangan terenkripsi | ✅ | ✅ |
+
+Semua batas ada di `lib/features/premium/data/pro_limits.dart` (`FreeLimits`), aturan iklan di
+`lib/features/ads/ad_policy.dart`. Tidak ada iklan di Catat, kunci/PIN, onboarding, Budget, Pengaturan, Cadangan.
+Tidak ada interstitial. Permintaan iklan polos — tanpa kata kunci/penargetan dari data keuangan.
+
+Pembelian dicek lokal (tanpa server): Pro aktif bila Google Play melaporkan `purchased`/`restored`,
+lalu disimpan di Keystore supaya tetap berlaku offline. Pembelian selalu di-*acknowledge*
+(kalau tidak, Google mengembalikan dana setelah 3 hari).
+
+### Sebelum rilis (wajib)
+
+1. **AdMob**: buat aplikasi & 2 unit iklan (banner adaptif, berhadiah). Ganti ID aplikasi di
+   `android/app/src/main/AndroidManifest.xml`, dan isi unit iklan saat build:
+   `flutter build appbundle --dart-define=ADMOB_BANNER_ID=… --dart-define=ADMOB_REWARDED_ID=…`
+   (tanpa itu, ID **uji** Google yang dipakai).
+2. **AdMob → Privasi & pesan**: buat pesan persetujuan GDPR (UMP) — dipakai otomatis oleh aplikasi.
+3. **Play Console**: produk dalam aplikasi `hitungin_pro` (sekali beli), aktifkan; tambahkan penguji lisensi.
+4. **Play Console → Keamanan data**: nyatakan *ID iklan* dikumpulkan oleh SDK AdMob untuk iklan;
+   data keuangan **tidak** dikumpulkan/dibagikan. Centang "Berisi iklan".
+5. Kebijakan privasi (URL) yang menjelaskan hal di atas.
+
 ## Rute
 
 | Rute | Layar |
@@ -131,6 +168,7 @@ dengan `tester.runAsync(db.close)` — kalau tidak, tes menggantung di zona fake
 | `/riwayat?month=2026-10&category=3` | Riwayat terfilter (dipakai dari Laporan) |
 | `/catat?text=kopi%2025rb` · `/catat?id=12` | Catat dengan isian awal · ubah transaksi |
 | `/tx/12` | Detail transaksi |
+| `/premium?from=budget` | Layar HitungIn Pro (judul mengikuti alasan) |
 | `/pengaturan` (+ `/dompet`, `/kategori`, `/keamanan`, `/keamanan/ganti-pin`, `/cadangan`, `/tampilan`) · `/tagihan` | Pengaturan & sub-layarnya |
 
 ## Grafik
@@ -191,6 +229,7 @@ Referensi desain: kanvas "HitungIn — UI Design v1" di Claude.
 3. ~~Alur pertama kali buka: splash, onboarding, PIN + biometrik, dompet awal, layar kunci~~
 4. ~~Layar inti: Beranda, Catat, Riwayat/Detail, Laporan, Budget~~
 5. ~~Pengaturan & sisa MVP: dompet, kategori, tagihan, cadangan, CSV, ganti PIN, kunci otomatis, tema~~
-6. Premium + iklan
-7. Tes UI (widget) untuk layar Tahap 5: Pengaturan, Dompet, Kategori, Tagihan, Keamanan/Ganti PIN, Cadangan, Tema
+6. ~~Premium + iklan~~
+6b. Fitur Pro tambahan: laporan tren 6–12 bulan & filter dompet, transaksi berulang, aksen & ikon aplikasi tambahan
+7. Tes UI (widget) untuk layar Tahap 5–6: Pengaturan, Dompet, Kategori, Tagihan, Keamanan/Ganti PIN, Cadangan, Tema, Premium, batas gratis
 8. Notifikasi pengingat tagihan (saat ini pengingat hanya tampil di dalam aplikasi)

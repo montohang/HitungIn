@@ -16,6 +16,9 @@ import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/month_switcher.dart';
 import '../../core/widgets/progress_bar.dart';
+import '../premium/data/pro_limits.dart';
+import '../premium/pro_controller.dart';
+import '../premium/widgets/pro_teaser.dart';
 import 'data/budgets_dao.dart';
 
 class BudgetScreen extends ConsumerStatefulWidget {
@@ -34,12 +37,22 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         if (c.kind == TxKind.pengeluaran) c,
     ];
     final Set<int?> taken = {for (final b in all) b.budget.categoryId};
+    final bool categoryAllowed = existing != null ||
+        FreeLimits.canAddCategoryBudget(existing: all.where((b) => b.category != null).length, isPro: ref.read(isProProvider));
+    // Budget total sudah ada & kuota kategori habis → langsung tawarkan Pro.
+    if (existing == null && taken.contains(null) && !categoryAllowed) {
+      openPremium(context, ProReason.budget);
+      return;
+    }
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (_) => _BudgetSheet(
         existing: existing,
-        categories: [for (final c in expense) if (!taken.contains(c.id) || c.id == existing?.budget.categoryId) c],
+        categories: categoryAllowed
+            ? [for (final c in expense) if (!taken.contains(c.id) || c.id == existing?.budget.categoryId) c]
+            : const [],
+        categoryLocked: !categoryAllowed,
         totalTaken: taken.contains(null) && !(existing != null && existing.category == null),
         onSave: (categoryId, amount) =>
             ref.read(appDatabaseProvider).budgetsDao.setLimit(categoryId: categoryId, limitAmount: amount),
@@ -186,6 +199,7 @@ class _BudgetSheet extends StatefulWidget {
     required this.categories,
     required this.totalTaken,
     required this.onSave,
+    this.categoryLocked = false,
     this.existing,
     this.onDelete,
   });
@@ -195,6 +209,9 @@ class _BudgetSheet extends StatefulWidget {
 
   /// Budget total sudah ada (dan bukan yang sedang diubah).
   final bool totalTaken;
+
+  /// Kuota budget kategori versi gratis sudah terpakai.
+  final bool categoryLocked;
   final Future<void> Function(int? categoryId, int amount) onSave;
   final Future<void> Function()? onDelete;
 
@@ -260,6 +277,26 @@ class _BudgetSheetState extends State<_BudgetSheet> {
                       ),
                   ],
                 ),
+                if (widget.categoryLocked) ...[
+                  const SizedBox(height: AppSpace.x12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Versi gratis: ${FreeLimits.categoryBudgets} budget kategori. Tambah lagi dengan Pro.',
+                          style: t.caption.copyWith(color: c.muted),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          openPremium(context, ProReason.budget);
+                        },
+                        child: const Text('Lihat Pro'),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: AppSpace.x16),
               ] else
                 Padding(

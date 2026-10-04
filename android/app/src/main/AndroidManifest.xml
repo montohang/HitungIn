@@ -2,6 +2,10 @@
     <!-- Sidik jari / wajah untuk membuka aplikasi. -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
+    <!-- Hanya untuk iklan AdMob & Google Play Billing. Data keuangan tidak
+         pernah dikirim; tidak ada server HitungIn. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- allowBackup=false: database tidak boleh ikut dicadangkan otomatis
          ke Google Drive (HitungIn 100% offline, dan kunci Keystore tidak
          ikut tersalin sehingga hasil pulihnya tak bisa dibuka). -->
@@ -34,6 +38,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- ID aplikasi AdMob. Ini ID UJI Google — ganti dengan ID asli dari
+             konsol AdMob sebelum rilis (lihat lib/features/ads/ad_ids.dart). -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

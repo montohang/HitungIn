@@ -18,6 +18,9 @@ import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/empty_state.dart';
 import '../settings/widgets/settings_tile.dart';
+import '../premium/data/pro_limits.dart';
+import '../premium/pro_controller.dart';
+import '../premium/widgets/pro_teaser.dart';
 import 'data/bill_due.dart';
 
 final activeBillsProvider = StreamProvider<List<Bill>>((ref) => ref.watch(appDatabaseProvider).billsDao.watchActive());
@@ -38,7 +41,7 @@ class BillsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text('Tagihan', style: t.screenTitle)),
-      floatingActionButton: AppFab(label: 'Tambah tagihan', onPressed: () => openBillForm(context, null)),
+      floatingActionButton: AppFab(label: 'Tambah tagihan', onPressed: () => addBill(context, ref, bills.length)),
       body: ListView(
         padding: AppSpace.screen.copyWith(top: AppSpace.x8, bottom: 96),
         children: [
@@ -49,7 +52,7 @@ class BillsScreen extends ConsumerWidget {
                 title: 'Belum ada tagihan',
                 body: 'Catat kos, listrik, cicilan, atau langganan — HitungIn menandai yang sudah dekat jatuh tempo.',
                 action: 'Tambah tagihan',
-                onAction: () => openBillForm(context, null),
+                onAction: () => addBill(context, ref, bills.length),
               ),
             )
           else ...[
@@ -215,6 +218,15 @@ class _PaySheetState extends ConsumerState<_PaySheet> {
       ],
     );
   }
+}
+
+/// Tambah tagihan, atau tawarkan Pro bila kuota versi gratis habis.
+void addBill(BuildContext context, WidgetRef ref, int activeCount) {
+  if (!FreeLimits.canAddBill(active: activeCount, isPro: ref.read(isProProvider))) {
+    openPremium(context, ProReason.tagihan);
+    return;
+  }
+  openBillForm(context, null);
 }
 
 Future<void> openBillForm(BuildContext context, Bill? existing) => showAppSheet<void>(

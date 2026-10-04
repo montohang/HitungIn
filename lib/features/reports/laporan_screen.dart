@@ -16,6 +16,9 @@ import '../../core/widgets/month_switcher.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/progress_bar.dart';
 import '../../core/widgets/segmented_control.dart';
+import '../premium/data/pro_limits.dart';
+import '../premium/pro_controller.dart';
+import '../premium/widgets/pro_teaser.dart';
 import '../security/app_gate.dart';
 import '../transactions/data/transactions_dao.dart';
 import 'widgets/daily_chart.dart';
@@ -55,75 +58,83 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
             const SizedBox(height: AppSpace.block),
             MonthSwitcher(month: _month, now: now, onChanged: (m) => setState(() => _month = m)),
             const SizedBox(height: AppSpace.block),
-            Row(
-              children: [
-                Expanded(child: _Stat(label: 'Pemasukan', value: Rupiah.compact(s.income))),
-                const SizedBox(width: AppSpace.x8),
-                Expanded(
-                  child: _Stat(
-                    label: 'Pengeluaran',
-                    value: Rupiah.compact(s.expense),
-                    delta: _delta(s.expense, prev.expense, DateFmt.monthsShort[prevMonth.month - 1]),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpace.x8),
-            AppCard(
-              child: Row(
+            if (!FreeLimits.canViewReport(_month, now, isPro: ref.watch(isProProvider)))
+              const ProTeaser(
+                reason: ProReason.laporan,
+                body: 'Versi gratis menampilkan laporan bulan ini dan bulan lalu. '
+                    'Riwayat transaksi bulan-bulan sebelumnya tetap bisa dilihat di tab Riwayat.',
+              )
+            else ...[
+              Row(
                 children: [
-                  Expanded(child: Text('Selisih bulan ini', style: t.caption.copyWith(color: c.muted))),
-                  Text(
-                    Rupiah.format(net, signed: true),
-                    style: t.number.copyWith(color: net >= 0 ? c.good : c.danger),
+                  Expanded(child: _Stat(label: 'Pemasukan', value: Rupiah.compact(s.income))),
+                  const SizedBox(width: AppSpace.x8),
+                  Expanded(
+                    child: _Stat(
+                      label: 'Pengeluaran',
+                      value: Rupiah.compact(s.expense),
+                      delta: _delta(s.expense, prev.expense, DateFmt.monthsShort[prevMonth.month - 1]),
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: AppSpace.x24),
-            const SectionHeader('Pengeluaran harian'),
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DailyExpenseChart(month: _month, values: daily, now: now),
-                  if (s.expense > 0) ...[
-                    const SizedBox(height: AppSpace.x8),
+              const SizedBox(height: AppSpace.x8),
+              AppCard(
+                child: Row(
+                  children: [
+                    Expanded(child: Text('Selisih bulan ini', style: t.caption.copyWith(color: c.muted))),
                     Text(
-                      'Rata-rata ${Rupiah.format((s.expense / daysCounted).round())} per hari',
-                      style: t.caption.copyWith(color: c.muted),
+                      Rupiah.format(net, signed: true),
+                      style: t.number.copyWith(color: net >= 0 ? c.good : c.danger),
                     ),
                   ],
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpace.x24),
-            const SectionHeader('Per kategori'),
-            AppSegmentedControl<TxKind>(
-              options: const [TxKind.pengeluaran, TxKind.pemasukan],
-              selected: _kind,
-              labelOf: (k) => k.label,
-              onChanged: (k) => setState(() => _kind = k),
-            ),
-            const SizedBox(height: AppSpace.x12),
-            if (totals.isEmpty)
+              const SizedBox(height: AppSpace.x24),
+              const SectionHeader('Pengeluaran harian'),
               AppCard(
-                child: EmptyState(
-                  icon: Icons.insights_outlined,
-                  title: 'Belum ada ${_kind.label.toLowerCase()}',
-                  body: 'di ${DateFmt.month(_month)}',
-                ),
-              )
-            else
-              _CategoryBreakdown(
-                totals: totals,
-                onTap: (cat) => context.go(
-                  Uri(path: Routes.riwayat, queryParameters: {
-                    'month': DateFmt.monthKey(_month),
-                    'category': '${cat.id}',
-                  }).toString(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DailyExpenseChart(month: _month, values: daily, now: now),
+                    if (s.expense > 0) ...[
+                      const SizedBox(height: AppSpace.x8),
+                      Text(
+                        'Rata-rata ${Rupiah.format((s.expense / daysCounted).round())} per hari',
+                        style: t.caption.copyWith(color: c.muted),
+                      ),
+                    ],
+                  ],
                 ),
               ),
+              const SizedBox(height: AppSpace.x24),
+              const SectionHeader('Per kategori'),
+              AppSegmentedControl<TxKind>(
+                options: const [TxKind.pengeluaran, TxKind.pemasukan],
+                selected: _kind,
+                labelOf: (k) => k.label,
+                onChanged: (k) => setState(() => _kind = k),
+              ),
+              const SizedBox(height: AppSpace.x12),
+              if (totals.isEmpty)
+                AppCard(
+                  child: EmptyState(
+                    icon: Icons.insights_outlined,
+                    title: 'Belum ada ${_kind.label.toLowerCase()}',
+                    body: 'di ${DateFmt.month(_month)}',
+                  ),
+                )
+              else
+                _CategoryBreakdown(
+                  totals: totals,
+                  onTap: (cat) => context.go(
+                    Uri(path: Routes.riwayat, queryParameters: {
+                      'month': DateFmt.monthKey(_month),
+                      'category': '${cat.id}',
+                    }).toString(),
+                  ),
+                ),
+            ],
           ],
         ),
       ),
@@ -200,7 +211,9 @@ class _CategoryBreakdown extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Expanded(child: Text(e.category.name, style: t.item, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                              Expanded(
+                                  child: Text(e.category.name,
+                                      style: t.item, maxLines: 1, overflow: TextOverflow.ellipsis)),
                               Text(Rupiah.format(e.total), style: t.number),
                             ],
                           ),

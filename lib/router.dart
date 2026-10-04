@@ -15,6 +15,8 @@ import 'features/onboarding/first_wallet_screen.dart';
 import 'features/onboarding/pin_setup_screen.dart';
 import 'features/onboarding/splash_screen.dart';
 import 'features/onboarding/welcome_screen.dart';
+import 'features/premium/data/pro_limits.dart';
+import 'features/premium/premium_screen.dart';
 import 'features/reports/laporan_screen.dart';
 import 'features/security/app_gate.dart';
 import 'features/security/lock_screen.dart';
@@ -74,6 +76,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             editId: int.tryParse(state.uri.queryParameters['id'] ?? ''),
           ),
         ),
+      ),
+      GoRoute(
+        path: Routes.premium,
+        parentNavigatorKey: _rootKey,
+        builder: (_, state) => PremiumScreen(reason: ProReason.parse(state.uri.queryParameters['from'])),
       ),
       GoRoute(
         path: '/tx/:id',

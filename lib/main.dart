@@ -8,6 +8,8 @@ import 'core/db/connection.dart';
 import 'core/db/providers.dart';
 import 'core/security/secure_store.dart';
 import 'core/theme/theme_controller.dart';
+import 'features/premium/data/entitlement_store.dart';
+import 'features/premium/pro_controller.dart';
 import 'features/security/app_gate.dart';
 import 'features/security/auto_lock_setting.dart';
 import 'features/security/pin_service.dart';
@@ -22,6 +24,7 @@ Future<void> main() async {
   final ThemeSettings theme = await loadThemeSettings(db.settingsDao);
   final GateState gate = await loadGateState(db.settingsDao, PinService(const FlutterSecureStore()));
   final AutoLockDelay autoLock = await loadAutoLockDelay(db.settingsDao);
+  final bool isPro = await EntitlementStore(const FlutterSecureStore()).isPro();
 
   runApp(ProviderScope(
     overrides: [
@@ -29,6 +32,7 @@ Future<void> main() async {
       initialThemeSettingsProvider.overrideWithValue(theme),
       initialGateProvider.overrideWithValue(gate),
       initialAutoLockProvider.overrideWithValue(autoLock),
+      initialProProvider.overrideWithValue(isPro),
     ],
     child: const HitungInApp(),
   ));

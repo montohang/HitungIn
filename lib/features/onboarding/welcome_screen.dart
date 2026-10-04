@@ -72,7 +72,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   _Slide(
                     hero: IconTile(icon: Icons.lock_outline, size: 96, color: c.goodInk, background: c.goodSoft),
                     title: '100% offline.\nDatamu milikmu.',
-                    body: 'Tanpa akun, tanpa login, tanpa server. Semua catatan terenkripsi dan tidak pernah meninggalkan HP ini.',
+                    body: 'Tanpa akun, tanpa login, tanpa server. Catatan keuanganmu terenkripsi dan tidak pernah meninggalkan HP ini.',
                   ),
                   _NameSlide(controller: _name, onSubmit: _next),
                 ],
