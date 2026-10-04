@@ -110,6 +110,13 @@ class SettingsScreen extends ConsumerWidget {
               ),
               SettingsTile(icon: Icons.category_outlined, title: 'Kategori', onTap: () => context.push(Routes.kategori)),
               SettingsTile(icon: Icons.event_repeat_outlined, title: 'Tagihan', onTap: () => context.push(Routes.tagihan)),
+              SettingsTile(
+                icon: Icons.autorenew,
+                title: 'Transaksi berulang',
+                subtitle: 'Gaji & langganan dicatat otomatis',
+                trailing: isPro ? null : const AppBadge.pro(),
+                onTap: () => context.push(Routes.berulang),
+              ),
             ],
           ),
           SettingsGroup(

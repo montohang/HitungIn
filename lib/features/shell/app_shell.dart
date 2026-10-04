@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/widgets/pressable.dart';
+import '../../core/db/providers.dart';
+import '../../core/security/secure_store.dart';
 import '../ads/ad_policy.dart';
 import '../ads/ads_service.dart';
 import '../ads/banner_slot.dart';
@@ -25,9 +27,28 @@ class AppShell extends ConsumerStatefulWidget {
 class _AppShellState extends ConsumerState<AppShell> {
   StatefulNavigationShell get shell => widget.shell;
 
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(onResume: _runRecurring);
+
+  /// Catat transaksi berulang yang jatuh tempo (berjalan untuk semua
+  /// pengguna: jadwal yang sudah ada tidak dihentikan bila Pro hilang).
+  Future<void> _runRecurring() async {
+    final int n = await ref.read(appDatabaseProvider).recurringDao.runDue(ref.read(clockProvider)());
+    if (n > 0 && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$n transaksi berulang dicatat otomatis')));
+    }
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    _lifecycle;
+    Future.microtask(_runRecurring);
     // Shell hanya tampil setelah onboarding & buka kunci, jadi dialog
     // persetujuan iklan tidak mengganggu alur pertama kali buka.
     Future.microtask(() async {

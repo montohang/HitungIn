@@ -4,7 +4,15 @@ import '../../../core/db/app_database.dart';
 import '../../settings/data/settings_dao.dart';
 
 /// Ringkasan isi cadangan, ditampilkan sebelum pengguna memulihkan.
-typedef BackupSummary = ({DateTime createdAt, int wallets, int transactions, int categories, int bills, int budgets});
+typedef BackupSummary = ({
+  DateTime createdAt,
+  int wallets,
+  int transactions,
+  int categories,
+  int bills,
+  int budgets,
+  int recurring,
+});
 
 /// Mengubah seluruh isi database menjadi peta JSON dan sebaliknya.
 /// PIN & kunci database tidak ikut (ada di Keystore, bukan di database).
@@ -31,6 +39,7 @@ class BackupService {
         'wallets': rows(await db.select(db.wallets).get()),
         'categories': rows(await db.select(db.categories).get()),
         'bills': rows(await db.select(db.bills).get()),
+        'recurring': rows(await db.select(db.recurringTxs).get()),
         'transactions': rows(await db.select(db.transactions).get()),
         'budgets': rows(await db.select(db.budgets).get()),
         'settings': rows([
@@ -52,6 +61,7 @@ class BackupService {
       categories: count('categories'),
       bills: count('bills'),
       budgets: count('budgets'),
+      recurring: count('recurring'),
     );
   }
 
@@ -66,6 +76,7 @@ class BackupService {
     await db.transaction(() async {
       // Hapus dari anak ke induk (foreign key aktif).
       await db.delete(db.transactions).go();
+      await db.delete(db.recurringTxs).go();
       await db.delete(db.budgets).go();
       await db.delete(db.bills).go();
       await db.delete(db.categories).go();
@@ -76,6 +87,8 @@ class BackupService {
         b.insertAll(db.wallets, [for (final r in rows('wallets')) Wallet.fromJson(r)]);
         b.insertAll(db.categories, [for (final r in rows('categories')) Category.fromJson(r)]);
         b.insertAll(db.bills, [for (final r in rows('bills')) Bill.fromJson(r)]);
+        // Cadangan v1 tidak punya 'recurring' → kosong.
+        b.insertAll(db.recurringTxs, [for (final r in rows('recurring')) RecurringTx.fromJson(r)]);
         b.insertAll(db.transactions, [for (final r in rows('transactions')) Txn.fromJson(r)]);
         b.insertAll(db.budgets, [for (final r in rows('budgets')) Budget.fromJson(r)]);
         b.insertAll(

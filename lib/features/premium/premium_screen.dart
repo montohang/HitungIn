@@ -20,9 +20,10 @@ const List<(IconData, String, String, bool)> proBenefits = [
   (Icons.event_repeat_outlined, 'Tagihan tanpa batas', 'Gratis: ${FreeLimits.activeBills} tagihan aktif', true),
   (Icons.insights_outlined, 'Laporan semua bulan', 'Gratis: bulan ini & bulan lalu', true),
   (Icons.table_chart_outlined, 'Ekspor CSV kapan saja', 'Gratis: sekali per iklan berhadiah', true),
-  (Icons.trending_up, 'Tren 6–12 bulan & filter dompet', 'Laporan lanjutan', false),
-  (Icons.autorenew, 'Transaksi berulang', 'Gaji & langganan tercatat otomatis', false),
-  (Icons.palette_outlined, 'Aksen & ikon aplikasi tambahan', 'Lebih banyak pilihan tampilan', false),
+  (Icons.trending_up, 'Tren 6–12 bulan & filter dompet', 'Laporan lanjutan', true),
+  (Icons.autorenew, 'Transaksi berulang', 'Gaji & langganan tercatat otomatis', true),
+  (Icons.palette_outlined, 'Aksen warna tambahan', 'Plum, Laut, Kopi, Arang', true),
+  (Icons.apps, 'Ikon aplikasi alternatif', 'Pilih tampilan ikon di layar utama', false),
 ];
 
 class PremiumScreen extends ConsumerStatefulWidget {

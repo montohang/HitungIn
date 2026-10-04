@@ -17,6 +17,7 @@ import 'features/onboarding/splash_screen.dart';
 import 'features/onboarding/welcome_screen.dart';
 import 'features/premium/data/pro_limits.dart';
 import 'features/premium/premium_screen.dart';
+import 'features/recurring/recurring_screen.dart';
 import 'features/reports/laporan_screen.dart';
 import 'features/security/app_gate.dart';
 import 'features/security/lock_screen.dart';
@@ -96,6 +97,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         (Routes.gantiPin, ChangePinScreen()),
         (Routes.cadangan, BackupScreen()),
         (Routes.tampilan, AppearanceScreen()),
+        (Routes.berulang, RecurringScreen()),
       ])
         GoRoute(path: path, parentNavigatorKey: _rootKey, builder: (_, __) => screen),
       if (kDebugMode) GoRoute(path: Routes.gallery, builder: (_, __) => const DesignGalleryScreen()),

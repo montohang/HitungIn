@@ -13,6 +13,9 @@ typedef PeriodSummary = ({int income, int expense});
 /// Total pengeluaran/pemasukan per kategori.
 typedef CategoryTotal = ({Category category, int total});
 
+/// Pemasukan & pengeluaran satu bulan (kunci = tanggal 1).
+typedef MonthTotal = ({DateTime month, int income, int expense});
+
 @DriftAccessor(tables: [Transactions, Categories, Wallets])
 class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsDaoMixin {
   TransactionsDao(super.attachedDatabase);
@@ -81,17 +84,24 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
 
   Stream<List<TxDetail>> watchRecent({int limit = 5}) => (_detailQuery()..limit(limit)).watch().map(_mapDetails);
 
-  Stream<PeriodSummary> watchSummary(DateTime from, DateTime to) {
+  /// [walletId] membatasi ke satu dompet (transfer tidak dihitung).
+  Stream<PeriodSummary> watchSummary(DateTime from, DateTime to, {int? walletId}) {
     final Expression<int> income = _sumWhen(TxKind.pemasukan);
     final Expression<int> expense = _sumWhen(TxKind.pengeluaran);
     final q = selectOnly(transactions)
       ..addColumns([income, expense])
       ..where(transactions.occurredAt.isBiggerOrEqualValue(from) & transactions.occurredAt.isSmallerThanValue(to));
+    if (walletId != null) q.where(transactions.walletId.equals(walletId));
     return q.map((r) => (income: r.read(income) ?? 0, expense: r.read(expense) ?? 0)).watchSingle();
   }
 
   /// Total per kategori untuk [kind], terbesar dulu.
-  Stream<List<CategoryTotal>> watchCategoryTotals(DateTime from, DateTime to, {TxKind kind = TxKind.pengeluaran}) {
+  Stream<List<CategoryTotal>> watchCategoryTotals(
+    DateTime from,
+    DateTime to, {
+    TxKind kind = TxKind.pengeluaran,
+    int? walletId,
+  }) {
     final Expression<int> total = transactions.amount.sum();
     final q = select(transactions).join([innerJoin(categories, categories.id.equalsExp(transactions.categoryId))])
       ..addColumns([total])
@@ -100,18 +110,20 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
           transactions.occurredAt.isSmallerThanValue(to))
       ..groupBy([categories.id])
       ..orderBy([OrderingTerm.desc(total)]);
+    if (walletId != null) q.where(transactions.walletId.equals(walletId));
     return q.watch().map((rows) => [
           for (final r in rows) (category: r.readTable(categories), total: r.read(total) ?? 0),
         ]);
   }
 
   /// Pengeluaran per hari (kunci = tanggal 00.00) untuk grafik laporan.
-  Stream<Map<DateTime, int>> watchDailyExpense(DateTime from, DateTime to) {
+  Stream<Map<DateTime, int>> watchDailyExpense(DateTime from, DateTime to, {int? walletId}) {
     final q = selectOnly(transactions)
       ..addColumns([transactions.occurredAt, transactions.amount])
       ..where(transactions.kind.equalsValue(TxKind.pengeluaran) &
           transactions.occurredAt.isBiggerOrEqualValue(from) &
           transactions.occurredAt.isSmallerThanValue(to));
+    if (walletId != null) q.where(transactions.walletId.equals(walletId));
     return q.watch().map((rows) {
       final Map<DateTime, int> out = {};
       for (final r in rows) {
@@ -120,6 +132,32 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
         out[day] = (out[day] ?? 0) + r.read(transactions.amount)!;
       }
       return out;
+    });
+  }
+
+  /// Tren: [months] bulan terakhir sampai [lastMonth] (inklusif), urut lama → baru.
+  /// Bulan tanpa transaksi tetap muncul dengan nilai 0.
+  Stream<List<MonthTotal>> watchMonthlyTotals(DateTime lastMonth, {int months = 6, int? walletId}) {
+    final DateTime first = DateTime(lastMonth.year, lastMonth.month - months + 1);
+    final DateTime end = DateTime(lastMonth.year, lastMonth.month + 1);
+    final q = selectOnly(transactions)
+      ..addColumns([transactions.kind, transactions.amount, transactions.occurredAt])
+      ..where(transactions.kind.isNotValue(TxKind.transfer.name) &
+          transactions.occurredAt.isBiggerOrEqualValue(first) &
+          transactions.occurredAt.isSmallerThanValue(end));
+    if (walletId != null) q.where(transactions.walletId.equals(walletId));
+    return q.watch().map((rows) {
+      final Map<DateTime, (int, int)> acc = {
+        for (int i = 0; i < months; i++) DateTime(first.year, first.month + i): (0, 0),
+      };
+      for (final r in rows) {
+        final DateTime at = r.read(transactions.occurredAt)!;
+        final DateTime key = DateTime(at.year, at.month);
+        final int amount = r.read(transactions.amount)!;
+        final (int inc, int exp) = acc[key]!;
+        acc[key] = r.read(transactions.kind) == TxKind.pemasukan.name ? (inc + amount, exp) : (inc, exp + amount);
+      }
+      return [for (final e in acc.entries) (month: e.key, income: e.value.$1, expense: e.value.$2)];
     });
   }
 

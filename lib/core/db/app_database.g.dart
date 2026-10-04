@@ -1357,6 +1357,603 @@ class BillsCompanion extends UpdateCompanion<Bill> {
   }
 }
 
+class $RecurringTxsTable extends RecurringTxs
+    with TableInfo<$RecurringTxsTable, RecurringTx> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RecurringTxsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  @override
+  late final GeneratedColumnWithTypeConverter<TxKind, String> kind =
+      GeneratedColumn<String>('kind', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<TxKind>($RecurringTxsTable.$converterkind);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+      'amount', aliasedName, false,
+      check: () => ComparableExpr(amount).isBiggerThanValue(0),
+      type: DriftSqlType.int,
+      requiredDuringInsert: true);
+  static const VerificationMeta _walletIdMeta =
+      const VerificationMeta('walletId');
+  @override
+  late final GeneratedColumn<int> walletId = GeneratedColumn<int>(
+      'wallet_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES wallets (id)'));
+  static const VerificationMeta _toWalletIdMeta =
+      const VerificationMeta('toWalletId');
+  @override
+  late final GeneratedColumn<int> toWalletId = GeneratedColumn<int>(
+      'to_wallet_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES wallets (id)'));
+  static const VerificationMeta _categoryIdMeta =
+      const VerificationMeta('categoryId');
+  @override
+  late final GeneratedColumn<int> categoryId = GeneratedColumn<int>(
+      'category_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES categories (id) ON DELETE SET NULL'));
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+      'note', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  @override
+  late final GeneratedColumnWithTypeConverter<BillRepeat, String> repeat =
+      GeneratedColumn<String>('repeat', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<BillRepeat>($RecurringTxsTable.$converterrepeat);
+  static const VerificationMeta _anchorDayMeta =
+      const VerificationMeta('anchorDay');
+  @override
+  late final GeneratedColumn<int> anchorDay = GeneratedColumn<int>(
+      'anchor_day', aliasedName, false,
+      check: () => ComparableExpr(anchorDay).isBetweenValues(1, 31),
+      type: DriftSqlType.int,
+      requiredDuringInsert: true);
+  static const VerificationMeta _nextRunMeta =
+      const VerificationMeta('nextRun');
+  @override
+  late final GeneratedColumn<DateTime> nextRun = GeneratedColumn<DateTime>(
+      'next_run', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _activeMeta = const VerificationMeta('active');
+  @override
+  late final GeneratedColumn<bool> active = GeneratedColumn<bool>(
+      'active', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("active" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        kind,
+        amount,
+        walletId,
+        toWalletId,
+        categoryId,
+        note,
+        repeat,
+        anchorDay,
+        nextRun,
+        active,
+        createdAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'recurring_txs';
+  @override
+  VerificationContext validateIntegrity(Insertable<RecurringTx> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('wallet_id')) {
+      context.handle(_walletIdMeta,
+          walletId.isAcceptableOrUnknown(data['wallet_id']!, _walletIdMeta));
+    } else if (isInserting) {
+      context.missing(_walletIdMeta);
+    }
+    if (data.containsKey('to_wallet_id')) {
+      context.handle(
+          _toWalletIdMeta,
+          toWalletId.isAcceptableOrUnknown(
+              data['to_wallet_id']!, _toWalletIdMeta));
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+          _categoryIdMeta,
+          categoryId.isAcceptableOrUnknown(
+              data['category_id']!, _categoryIdMeta));
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+          _noteMeta, note.isAcceptableOrUnknown(data['note']!, _noteMeta));
+    }
+    if (data.containsKey('anchor_day')) {
+      context.handle(_anchorDayMeta,
+          anchorDay.isAcceptableOrUnknown(data['anchor_day']!, _anchorDayMeta));
+    } else if (isInserting) {
+      context.missing(_anchorDayMeta);
+    }
+    if (data.containsKey('next_run')) {
+      context.handle(_nextRunMeta,
+          nextRun.isAcceptableOrUnknown(data['next_run']!, _nextRunMeta));
+    } else if (isInserting) {
+      context.missing(_nextRunMeta);
+    }
+    if (data.containsKey('active')) {
+      context.handle(_activeMeta,
+          active.isAcceptableOrUnknown(data['active']!, _activeMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RecurringTx map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RecurringTx(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      kind: $RecurringTxsTable.$converterkind.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!),
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}amount'])!,
+      walletId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}wallet_id'])!,
+      toWalletId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}to_wallet_id']),
+      categoryId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}category_id']),
+      note: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}note'])!,
+      repeat: $RecurringTxsTable.$converterrepeat.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}repeat'])!),
+      anchorDay: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}anchor_day'])!,
+      nextRun: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}next_run'])!,
+      active: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}active'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $RecurringTxsTable createAlias(String alias) {
+    return $RecurringTxsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<TxKind, String, String> $converterkind =
+      const EnumNameConverter<TxKind>(TxKind.values);
+  static JsonTypeConverter2<BillRepeat, String, String> $converterrepeat =
+      const EnumNameConverter<BillRepeat>(BillRepeat.values);
+}
+
+class RecurringTx extends DataClass implements Insertable<RecurringTx> {
+  final int id;
+  final TxKind kind;
+  final int amount;
+  final int walletId;
+  final int? toWalletId;
+  final int? categoryId;
+  final String note;
+
+  /// Hanya mingguan/bulanan/tahunan (bukan [BillRepeat.sekali]).
+  final BillRepeat repeat;
+  final int anchorDay;
+
+  /// Tanggal pencatatan berikutnya (00.00).
+  final DateTime nextRun;
+  final bool active;
+  final DateTime createdAt;
+  const RecurringTx(
+      {required this.id,
+      required this.kind,
+      required this.amount,
+      required this.walletId,
+      this.toWalletId,
+      this.categoryId,
+      required this.note,
+      required this.repeat,
+      required this.anchorDay,
+      required this.nextRun,
+      required this.active,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    {
+      map['kind'] =
+          Variable<String>($RecurringTxsTable.$converterkind.toSql(kind));
+    }
+    map['amount'] = Variable<int>(amount);
+    map['wallet_id'] = Variable<int>(walletId);
+    if (!nullToAbsent || toWalletId != null) {
+      map['to_wallet_id'] = Variable<int>(toWalletId);
+    }
+    if (!nullToAbsent || categoryId != null) {
+      map['category_id'] = Variable<int>(categoryId);
+    }
+    map['note'] = Variable<String>(note);
+    {
+      map['repeat'] =
+          Variable<String>($RecurringTxsTable.$converterrepeat.toSql(repeat));
+    }
+    map['anchor_day'] = Variable<int>(anchorDay);
+    map['next_run'] = Variable<DateTime>(nextRun);
+    map['active'] = Variable<bool>(active);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  RecurringTxsCompanion toCompanion(bool nullToAbsent) {
+    return RecurringTxsCompanion(
+      id: Value(id),
+      kind: Value(kind),
+      amount: Value(amount),
+      walletId: Value(walletId),
+      toWalletId: toWalletId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(toWalletId),
+      categoryId: categoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryId),
+      note: Value(note),
+      repeat: Value(repeat),
+      anchorDay: Value(anchorDay),
+      nextRun: Value(nextRun),
+      active: Value(active),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory RecurringTx.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RecurringTx(
+      id: serializer.fromJson<int>(json['id']),
+      kind: $RecurringTxsTable.$converterkind
+          .fromJson(serializer.fromJson<String>(json['kind'])),
+      amount: serializer.fromJson<int>(json['amount']),
+      walletId: serializer.fromJson<int>(json['walletId']),
+      toWalletId: serializer.fromJson<int?>(json['toWalletId']),
+      categoryId: serializer.fromJson<int?>(json['categoryId']),
+      note: serializer.fromJson<String>(json['note']),
+      repeat: $RecurringTxsTable.$converterrepeat
+          .fromJson(serializer.fromJson<String>(json['repeat'])),
+      anchorDay: serializer.fromJson<int>(json['anchorDay']),
+      nextRun: serializer.fromJson<DateTime>(json['nextRun']),
+      active: serializer.fromJson<bool>(json['active']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'kind': serializer
+          .toJson<String>($RecurringTxsTable.$converterkind.toJson(kind)),
+      'amount': serializer.toJson<int>(amount),
+      'walletId': serializer.toJson<int>(walletId),
+      'toWalletId': serializer.toJson<int?>(toWalletId),
+      'categoryId': serializer.toJson<int?>(categoryId),
+      'note': serializer.toJson<String>(note),
+      'repeat': serializer
+          .toJson<String>($RecurringTxsTable.$converterrepeat.toJson(repeat)),
+      'anchorDay': serializer.toJson<int>(anchorDay),
+      'nextRun': serializer.toJson<DateTime>(nextRun),
+      'active': serializer.toJson<bool>(active),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  RecurringTx copyWith(
+          {int? id,
+          TxKind? kind,
+          int? amount,
+          int? walletId,
+          Value<int?> toWalletId = const Value.absent(),
+          Value<int?> categoryId = const Value.absent(),
+          String? note,
+          BillRepeat? repeat,
+          int? anchorDay,
+          DateTime? nextRun,
+          bool? active,
+          DateTime? createdAt}) =>
+      RecurringTx(
+        id: id ?? this.id,
+        kind: kind ?? this.kind,
+        amount: amount ?? this.amount,
+        walletId: walletId ?? this.walletId,
+        toWalletId: toWalletId.present ? toWalletId.value : this.toWalletId,
+        categoryId: categoryId.present ? categoryId.value : this.categoryId,
+        note: note ?? this.note,
+        repeat: repeat ?? this.repeat,
+        anchorDay: anchorDay ?? this.anchorDay,
+        nextRun: nextRun ?? this.nextRun,
+        active: active ?? this.active,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  RecurringTx copyWithCompanion(RecurringTxsCompanion data) {
+    return RecurringTx(
+      id: data.id.present ? data.id.value : this.id,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      walletId: data.walletId.present ? data.walletId.value : this.walletId,
+      toWalletId:
+          data.toWalletId.present ? data.toWalletId.value : this.toWalletId,
+      categoryId:
+          data.categoryId.present ? data.categoryId.value : this.categoryId,
+      note: data.note.present ? data.note.value : this.note,
+      repeat: data.repeat.present ? data.repeat.value : this.repeat,
+      anchorDay: data.anchorDay.present ? data.anchorDay.value : this.anchorDay,
+      nextRun: data.nextRun.present ? data.nextRun.value : this.nextRun,
+      active: data.active.present ? data.active.value : this.active,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecurringTx(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('amount: $amount, ')
+          ..write('walletId: $walletId, ')
+          ..write('toWalletId: $toWalletId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('note: $note, ')
+          ..write('repeat: $repeat, ')
+          ..write('anchorDay: $anchorDay, ')
+          ..write('nextRun: $nextRun, ')
+          ..write('active: $active, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, kind, amount, walletId, toWalletId,
+      categoryId, note, repeat, anchorDay, nextRun, active, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RecurringTx &&
+          other.id == this.id &&
+          other.kind == this.kind &&
+          other.amount == this.amount &&
+          other.walletId == this.walletId &&
+          other.toWalletId == this.toWalletId &&
+          other.categoryId == this.categoryId &&
+          other.note == this.note &&
+          other.repeat == this.repeat &&
+          other.anchorDay == this.anchorDay &&
+          other.nextRun == this.nextRun &&
+          other.active == this.active &&
+          other.createdAt == this.createdAt);
+}
+
+class RecurringTxsCompanion extends UpdateCompanion<RecurringTx> {
+  final Value<int> id;
+  final Value<TxKind> kind;
+  final Value<int> amount;
+  final Value<int> walletId;
+  final Value<int?> toWalletId;
+  final Value<int?> categoryId;
+  final Value<String> note;
+  final Value<BillRepeat> repeat;
+  final Value<int> anchorDay;
+  final Value<DateTime> nextRun;
+  final Value<bool> active;
+  final Value<DateTime> createdAt;
+  const RecurringTxsCompanion({
+    this.id = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.walletId = const Value.absent(),
+    this.toWalletId = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.note = const Value.absent(),
+    this.repeat = const Value.absent(),
+    this.anchorDay = const Value.absent(),
+    this.nextRun = const Value.absent(),
+    this.active = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  RecurringTxsCompanion.insert({
+    this.id = const Value.absent(),
+    required TxKind kind,
+    required int amount,
+    required int walletId,
+    this.toWalletId = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.note = const Value.absent(),
+    required BillRepeat repeat,
+    required int anchorDay,
+    required DateTime nextRun,
+    this.active = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  })  : kind = Value(kind),
+        amount = Value(amount),
+        walletId = Value(walletId),
+        repeat = Value(repeat),
+        anchorDay = Value(anchorDay),
+        nextRun = Value(nextRun);
+  static Insertable<RecurringTx> custom({
+    Expression<int>? id,
+    Expression<String>? kind,
+    Expression<int>? amount,
+    Expression<int>? walletId,
+    Expression<int>? toWalletId,
+    Expression<int>? categoryId,
+    Expression<String>? note,
+    Expression<String>? repeat,
+    Expression<int>? anchorDay,
+    Expression<DateTime>? nextRun,
+    Expression<bool>? active,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (kind != null) 'kind': kind,
+      if (amount != null) 'amount': amount,
+      if (walletId != null) 'wallet_id': walletId,
+      if (toWalletId != null) 'to_wallet_id': toWalletId,
+      if (categoryId != null) 'category_id': categoryId,
+      if (note != null) 'note': note,
+      if (repeat != null) 'repeat': repeat,
+      if (anchorDay != null) 'anchor_day': anchorDay,
+      if (nextRun != null) 'next_run': nextRun,
+      if (active != null) 'active': active,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  RecurringTxsCompanion copyWith(
+      {Value<int>? id,
+      Value<TxKind>? kind,
+      Value<int>? amount,
+      Value<int>? walletId,
+      Value<int?>? toWalletId,
+      Value<int?>? categoryId,
+      Value<String>? note,
+      Value<BillRepeat>? repeat,
+      Value<int>? anchorDay,
+      Value<DateTime>? nextRun,
+      Value<bool>? active,
+      Value<DateTime>? createdAt}) {
+    return RecurringTxsCompanion(
+      id: id ?? this.id,
+      kind: kind ?? this.kind,
+      amount: amount ?? this.amount,
+      walletId: walletId ?? this.walletId,
+      toWalletId: toWalletId ?? this.toWalletId,
+      categoryId: categoryId ?? this.categoryId,
+      note: note ?? this.note,
+      repeat: repeat ?? this.repeat,
+      anchorDay: anchorDay ?? this.anchorDay,
+      nextRun: nextRun ?? this.nextRun,
+      active: active ?? this.active,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (kind.present) {
+      map['kind'] =
+          Variable<String>($RecurringTxsTable.$converterkind.toSql(kind.value));
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (walletId.present) {
+      map['wallet_id'] = Variable<int>(walletId.value);
+    }
+    if (toWalletId.present) {
+      map['to_wallet_id'] = Variable<int>(toWalletId.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<int>(categoryId.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (repeat.present) {
+      map['repeat'] = Variable<String>(
+          $RecurringTxsTable.$converterrepeat.toSql(repeat.value));
+    }
+    if (anchorDay.present) {
+      map['anchor_day'] = Variable<int>(anchorDay.value);
+    }
+    if (nextRun.present) {
+      map['next_run'] = Variable<DateTime>(nextRun.value);
+    }
+    if (active.present) {
+      map['active'] = Variable<bool>(active.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecurringTxsCompanion(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('amount: $amount, ')
+          ..write('walletId: $walletId, ')
+          ..write('toWalletId: $toWalletId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('note: $note, ')
+          ..write('repeat: $repeat, ')
+          ..write('anchorDay: $anchorDay, ')
+          ..write('nextRun: $nextRun, ')
+          ..write('active: $active, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $TransactionsTable extends Transactions
     with TableInfo<$TransactionsTable, Txn> {
   @override
@@ -1426,6 +2023,15 @@ class $TransactionsTable extends Transactions
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES bills (id) ON DELETE SET NULL'));
+  static const VerificationMeta _recurringIdMeta =
+      const VerificationMeta('recurringId');
+  @override
+  late final GeneratedColumn<int> recurringId = GeneratedColumn<int>(
+      'recurring_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES recurring_txs (id) ON DELETE SET NULL'));
   static const VerificationMeta _occurredAtMeta =
       const VerificationMeta('occurredAt');
   @override
@@ -1458,6 +2064,7 @@ class $TransactionsTable extends Transactions
         categoryId,
         note,
         billId,
+        recurringId,
         occurredAt,
         createdAt,
         updatedAt
@@ -1507,6 +2114,12 @@ class $TransactionsTable extends Transactions
       context.handle(_billIdMeta,
           billId.isAcceptableOrUnknown(data['bill_id']!, _billIdMeta));
     }
+    if (data.containsKey('recurring_id')) {
+      context.handle(
+          _recurringIdMeta,
+          recurringId.isAcceptableOrUnknown(
+              data['recurring_id']!, _recurringIdMeta));
+    }
     if (data.containsKey('occurred_at')) {
       context.handle(
           _occurredAtMeta,
@@ -1549,6 +2162,8 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.string, data['${effectivePrefix}note'])!,
       billId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}bill_id']),
+      recurringId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}recurring_id']),
       occurredAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}occurred_at'])!,
       createdAt: attachedDatabase.typeMapping
@@ -1586,6 +2201,9 @@ class Txn extends DataClass implements Insertable<Txn> {
 
   /// Tagihan asal, bila transaksi dibuat dari "Bayar tagihan".
   final int? billId;
+
+  /// Jadwal asal, bila transaksi dicatat otomatis oleh transaksi berulang (v2).
+  final int? recurringId;
   final DateTime occurredAt;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -1598,6 +2216,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       this.categoryId,
       required this.note,
       this.billId,
+      this.recurringId,
       required this.occurredAt,
       required this.createdAt,
       required this.updatedAt});
@@ -1621,6 +2240,9 @@ class Txn extends DataClass implements Insertable<Txn> {
     if (!nullToAbsent || billId != null) {
       map['bill_id'] = Variable<int>(billId);
     }
+    if (!nullToAbsent || recurringId != null) {
+      map['recurring_id'] = Variable<int>(recurringId);
+    }
     map['occurred_at'] = Variable<DateTime>(occurredAt);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -1642,6 +2264,9 @@ class Txn extends DataClass implements Insertable<Txn> {
       note: Value(note),
       billId:
           billId == null && nullToAbsent ? const Value.absent() : Value(billId),
+      recurringId: recurringId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(recurringId),
       occurredAt: Value(occurredAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -1661,6 +2286,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       categoryId: serializer.fromJson<int?>(json['categoryId']),
       note: serializer.fromJson<String>(json['note']),
       billId: serializer.fromJson<int?>(json['billId']),
+      recurringId: serializer.fromJson<int?>(json['recurringId']),
       occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -1679,6 +2305,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       'categoryId': serializer.toJson<int?>(categoryId),
       'note': serializer.toJson<String>(note),
       'billId': serializer.toJson<int?>(billId),
+      'recurringId': serializer.toJson<int?>(recurringId),
       'occurredAt': serializer.toJson<DateTime>(occurredAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -1694,6 +2321,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           Value<int?> categoryId = const Value.absent(),
           String? note,
           Value<int?> billId = const Value.absent(),
+          Value<int?> recurringId = const Value.absent(),
           DateTime? occurredAt,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
@@ -1706,6 +2334,7 @@ class Txn extends DataClass implements Insertable<Txn> {
         categoryId: categoryId.present ? categoryId.value : this.categoryId,
         note: note ?? this.note,
         billId: billId.present ? billId.value : this.billId,
+        recurringId: recurringId.present ? recurringId.value : this.recurringId,
         occurredAt: occurredAt ?? this.occurredAt,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -1722,6 +2351,8 @@ class Txn extends DataClass implements Insertable<Txn> {
           data.categoryId.present ? data.categoryId.value : this.categoryId,
       note: data.note.present ? data.note.value : this.note,
       billId: data.billId.present ? data.billId.value : this.billId,
+      recurringId:
+          data.recurringId.present ? data.recurringId.value : this.recurringId,
       occurredAt:
           data.occurredAt.present ? data.occurredAt.value : this.occurredAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -1740,6 +2371,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           ..write('categoryId: $categoryId, ')
           ..write('note: $note, ')
           ..write('billId: $billId, ')
+          ..write('recurringId: $recurringId, ')
           ..write('occurredAt: $occurredAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -1749,7 +2381,7 @@ class Txn extends DataClass implements Insertable<Txn> {
 
   @override
   int get hashCode => Object.hash(id, kind, amount, walletId, toWalletId,
-      categoryId, note, billId, occurredAt, createdAt, updatedAt);
+      categoryId, note, billId, recurringId, occurredAt, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1762,6 +2394,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           other.categoryId == this.categoryId &&
           other.note == this.note &&
           other.billId == this.billId &&
+          other.recurringId == this.recurringId &&
           other.occurredAt == this.occurredAt &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -1776,6 +2409,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
   final Value<int?> categoryId;
   final Value<String> note;
   final Value<int?> billId;
+  final Value<int?> recurringId;
   final Value<DateTime> occurredAt;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -1788,6 +2422,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     this.categoryId = const Value.absent(),
     this.note = const Value.absent(),
     this.billId = const Value.absent(),
+    this.recurringId = const Value.absent(),
     this.occurredAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1801,6 +2436,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     this.categoryId = const Value.absent(),
     this.note = const Value.absent(),
     this.billId = const Value.absent(),
+    this.recurringId = const Value.absent(),
     required DateTime occurredAt,
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1817,6 +2453,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     Expression<int>? categoryId,
     Expression<String>? note,
     Expression<int>? billId,
+    Expression<int>? recurringId,
     Expression<DateTime>? occurredAt,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -1830,6 +2467,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       if (categoryId != null) 'category_id': categoryId,
       if (note != null) 'note': note,
       if (billId != null) 'bill_id': billId,
+      if (recurringId != null) 'recurring_id': recurringId,
       if (occurredAt != null) 'occurred_at': occurredAt,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1845,6 +2483,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       Value<int?>? categoryId,
       Value<String>? note,
       Value<int?>? billId,
+      Value<int?>? recurringId,
       Value<DateTime>? occurredAt,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt}) {
@@ -1857,6 +2496,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       categoryId: categoryId ?? this.categoryId,
       note: note ?? this.note,
       billId: billId ?? this.billId,
+      recurringId: recurringId ?? this.recurringId,
       occurredAt: occurredAt ?? this.occurredAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1891,6 +2531,9 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     if (billId.present) {
       map['bill_id'] = Variable<int>(billId.value);
     }
+    if (recurringId.present) {
+      map['recurring_id'] = Variable<int>(recurringId.value);
+    }
     if (occurredAt.present) {
       map['occurred_at'] = Variable<DateTime>(occurredAt.value);
     }
@@ -1914,6 +2557,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
           ..write('categoryId: $categoryId, ')
           ..write('note: $note, ')
           ..write('billId: $billId, ')
+          ..write('recurringId: $recurringId, ')
           ..write('occurredAt: $occurredAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -2387,6 +3031,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $WalletsTable wallets = $WalletsTable(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $BillsTable bills = $BillsTable(this);
+  late final $RecurringTxsTable recurringTxs = $RecurringTxsTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $BudgetsTable budgets = $BudgetsTable(this);
   late final $SettingsTable settings = $SettingsTable(this);
@@ -2403,6 +3048,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final BudgetsDao budgetsDao = BudgetsDao(this as AppDatabase);
   late final BillsDao billsDao = BillsDao(this as AppDatabase);
   late final SettingsDao settingsDao = SettingsDao(this as AppDatabase);
+  late final RecurringDao recurringDao = RecurringDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2411,6 +3057,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         wallets,
         categories,
         bills,
+        recurringTxs,
         transactions,
         budgets,
         settings,
@@ -2439,11 +3086,25 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             on: TableUpdateQuery.onTableName('categories',
                 limitUpdateKind: UpdateKind.delete),
             result: [
+              TableUpdate('recurring_txs', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('categories',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
               TableUpdate('transactions', kind: UpdateKind.update),
             ],
           ),
           WritePropagation(
             on: TableUpdateQuery.onTableName('bills',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('transactions', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('recurring_txs',
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('transactions', kind: UpdateKind.update),
@@ -2495,6 +3156,34 @@ final class $$WalletsTableReferences
         .filter((f) => f.walletId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_billsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$RecurringTxsTable, List<RecurringTx>>
+      _recurringSourcesTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.recurringTxs,
+              aliasName: 'wallets__id__recurring_txs__wallet_id');
+
+  $$RecurringTxsTableProcessedTableManager get recurringSources {
+    final manager = $$RecurringTxsTableTableManager($_db, $_db.recurringTxs)
+        .filter((f) => f.walletId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_recurringSourcesTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$RecurringTxsTable, List<RecurringTx>>
+      _recurringTargetsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.recurringTxs,
+              aliasName: 'wallets__id__recurring_txs__to_wallet_id');
+
+  $$RecurringTxsTableProcessedTableManager get recurringTargets {
+    final manager = $$RecurringTxsTableTableManager($_db, $_db.recurringTxs)
+        .filter((f) => f.toWalletId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_recurringTargetsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -2577,6 +3266,48 @@ class $$WalletsTableFilterComposer
             $$BillsTableFilterComposer(
               $db: $db,
               $table: $db.bills,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> recurringSources(
+      Expression<bool> Function($$RecurringTxsTableFilterComposer f) f) {
+    final $$RecurringTxsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.recurringTxs,
+        getReferencedColumn: (t) => t.walletId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RecurringTxsTableFilterComposer(
+              $db: $db,
+              $table: $db.recurringTxs,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> recurringTargets(
+      Expression<bool> Function($$RecurringTxsTableFilterComposer f) f) {
+    final $$RecurringTxsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.recurringTxs,
+        getReferencedColumn: (t) => t.toWalletId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RecurringTxsTableFilterComposer(
+              $db: $db,
+              $table: $db.recurringTxs,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -2717,6 +3448,48 @@ class $$WalletsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> recurringSources<T extends Object>(
+      Expression<T> Function($$RecurringTxsTableAnnotationComposer a) f) {
+    final $$RecurringTxsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.recurringTxs,
+        getReferencedColumn: (t) => t.walletId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RecurringTxsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.recurringTxs,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> recurringTargets<T extends Object>(
+      Expression<T> Function($$RecurringTxsTableAnnotationComposer a) f) {
+    final $$RecurringTxsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.recurringTxs,
+        getReferencedColumn: (t) => t.toWalletId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RecurringTxsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.recurringTxs,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
   Expression<T> sourceTransactions<T extends Object>(
       Expression<T> Function($$TransactionsTableAnnotationComposer a) f) {
     final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
@@ -2772,7 +3545,11 @@ class $$WalletsTableTableManager extends RootTableManager<
     (Wallet, $$WalletsTableReferences),
     Wallet,
     PrefetchHooks Function(
-        {bool billsRefs, bool sourceTransactions, bool incomingTransfers})> {
+        {bool billsRefs,
+        bool recurringSources,
+        bool recurringTargets,
+        bool sourceTransactions,
+        bool incomingTransfers})> {
   $$WalletsTableTableManager(_$AppDatabase db, $WalletsTable table)
       : super(TableManagerState(
           db: db,
@@ -2829,12 +3606,16 @@ class $$WalletsTableTableManager extends RootTableManager<
               .toList(),
           prefetchHooksCallback: (
               {billsRefs = false,
+              recurringSources = false,
+              recurringTargets = false,
               sourceTransactions = false,
               incomingTransfers = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (billsRefs) db.bills,
+                if (recurringSources) db.recurringTxs,
+                if (recurringTargets) db.recurringTxs,
                 if (sourceTransactions) db.transactions,
                 if (incomingTransfers) db.transactions
               ],
@@ -2851,6 +3632,32 @@ class $$WalletsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.walletId == item.id),
+                        typedResults: items),
+                  if (recurringSources)
+                    await $_getPrefetchedData<Wallet, $WalletsTable,
+                            RecurringTx>(
+                        currentTable: table,
+                        referencedTable:
+                            $$WalletsTableReferences._recurringSourcesTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$WalletsTableReferences(db, table, p0)
+                                .recurringSources,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.walletId == item.id),
+                        typedResults: items),
+                  if (recurringTargets)
+                    await $_getPrefetchedData<Wallet, $WalletsTable,
+                            RecurringTx>(
+                        currentTable: table,
+                        referencedTable:
+                            $$WalletsTableReferences._recurringTargetsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$WalletsTableReferences(db, table, p0)
+                                .recurringTargets,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.toWalletId == item.id),
                         typedResults: items),
                   if (sourceTransactions)
                     await $_getPrefetchedData<Wallet, $WalletsTable, Txn>(
@@ -2895,7 +3702,11 @@ typedef $$WalletsTableProcessedTableManager = ProcessedTableManager<
     (Wallet, $$WalletsTableReferences),
     Wallet,
     PrefetchHooks Function(
-        {bool billsRefs, bool sourceTransactions, bool incomingTransfers})>;
+        {bool billsRefs,
+        bool recurringSources,
+        bool recurringTargets,
+        bool sourceTransactions,
+        bool incomingTransfers})>;
 typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
   Value<int> id,
   required String name,
@@ -2929,6 +3740,20 @@ final class $$CategoriesTableReferences
         .filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_billsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$RecurringTxsTable, List<RecurringTx>>
+      _recurringTxsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.recurringTxs,
+              aliasName: 'categories__id__recurring_txs__category_id');
+
+  $$RecurringTxsTableProcessedTableManager get recurringTxsRefs {
+    final manager = $$RecurringTxsTableTableManager($_db, $_db.recurringTxs)
+        .filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_recurringTxsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -3007,6 +3832,27 @@ class $$CategoriesTableFilterComposer
             $$BillsTableFilterComposer(
               $db: $db,
               $table: $db.bills,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> recurringTxsRefs(
+      Expression<bool> Function($$RecurringTxsTableFilterComposer f) f) {
+    final $$RecurringTxsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.recurringTxs,
+        getReferencedColumn: (t) => t.categoryId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RecurringTxsTableFilterComposer(
+              $db: $db,
+              $table: $db.recurringTxs,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -3140,6 +3986,27 @@ class $$CategoriesTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> recurringTxsRefs<T extends Object>(
+      Expression<T> Function($$RecurringTxsTableAnnotationComposer a) f) {
+    final $$RecurringTxsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.recurringTxs,
+        getReferencedColumn: (t) => t.categoryId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RecurringTxsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.recurringTxs,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
   Expression<T> transactionsRefs<T extends Object>(
       Expression<T> Function($$TransactionsTableAnnotationComposer a) f) {
     final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
@@ -3195,7 +4062,10 @@ class $$CategoriesTableTableManager extends RootTableManager<
     (Category, $$CategoriesTableReferences),
     Category,
     PrefetchHooks Function(
-        {bool billsRefs, bool transactionsRefs, bool budgetsRefs})> {
+        {bool billsRefs,
+        bool recurringTxsRefs,
+        bool transactionsRefs,
+        bool budgetsRefs})> {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
       : super(TableManagerState(
           db: db,
@@ -3250,12 +4120,14 @@ class $$CategoriesTableTableManager extends RootTableManager<
               .toList(),
           prefetchHooksCallback: (
               {billsRefs = false,
+              recurringTxsRefs = false,
               transactionsRefs = false,
               budgetsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (billsRefs) db.bills,
+                if (recurringTxsRefs) db.recurringTxs,
                 if (transactionsRefs) db.transactions,
                 if (budgetsRefs) db.budgets
               ],
@@ -3270,6 +4142,19 @@ class $$CategoriesTableTableManager extends RootTableManager<
                         managerFromTypedResult: (p0) =>
                             $$CategoriesTableReferences(db, table, p0)
                                 .billsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.categoryId == item.id),
+                        typedResults: items),
+                  if (recurringTxsRefs)
+                    await $_getPrefetchedData<Category, $CategoriesTable,
+                            RecurringTx>(
+                        currentTable: table,
+                        referencedTable: $$CategoriesTableReferences
+                            ._recurringTxsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CategoriesTableReferences(db, table, p0)
+                                .recurringTxsRefs,
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.categoryId == item.id),
@@ -3318,7 +4203,10 @@ typedef $$CategoriesTableProcessedTableManager = ProcessedTableManager<
     (Category, $$CategoriesTableReferences),
     Category,
     PrefetchHooks Function(
-        {bool billsRefs, bool transactionsRefs, bool budgetsRefs})>;
+        {bool billsRefs,
+        bool recurringTxsRefs,
+        bool transactionsRefs,
+        bool budgetsRefs})>;
 typedef $$BillsTableCreateCompanionBuilder = BillsCompanion Function({
   Value<int> id,
   required String name,
@@ -3824,6 +4712,615 @@ typedef $$BillsTableProcessedTableManager = ProcessedTableManager<
     Bill,
     PrefetchHooks Function(
         {bool categoryId, bool walletId, bool transactionsRefs})>;
+typedef $$RecurringTxsTableCreateCompanionBuilder = RecurringTxsCompanion
+    Function({
+  Value<int> id,
+  required TxKind kind,
+  required int amount,
+  required int walletId,
+  Value<int?> toWalletId,
+  Value<int?> categoryId,
+  Value<String> note,
+  required BillRepeat repeat,
+  required int anchorDay,
+  required DateTime nextRun,
+  Value<bool> active,
+  Value<DateTime> createdAt,
+});
+typedef $$RecurringTxsTableUpdateCompanionBuilder = RecurringTxsCompanion
+    Function({
+  Value<int> id,
+  Value<TxKind> kind,
+  Value<int> amount,
+  Value<int> walletId,
+  Value<int?> toWalletId,
+  Value<int?> categoryId,
+  Value<String> note,
+  Value<BillRepeat> repeat,
+  Value<int> anchorDay,
+  Value<DateTime> nextRun,
+  Value<bool> active,
+  Value<DateTime> createdAt,
+});
+
+final class $$RecurringTxsTableReferences
+    extends BaseReferences<_$AppDatabase, $RecurringTxsTable, RecurringTx> {
+  $$RecurringTxsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $WalletsTable _walletIdTable(_$AppDatabase db) =>
+      db.wallets.createAlias('recurring_txs__wallet_id__wallets__id');
+
+  $$WalletsTableProcessedTableManager get walletId {
+    final $_column = $_itemColumn<int>('wallet_id')!;
+
+    final manager = $$WalletsTableTableManager($_db, $_db.wallets)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_walletIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $WalletsTable _toWalletIdTable(_$AppDatabase db) =>
+      db.wallets.createAlias('recurring_txs__to_wallet_id__wallets__id');
+
+  $$WalletsTableProcessedTableManager? get toWalletId {
+    final $_column = $_itemColumn<int>('to_wallet_id');
+    if ($_column == null) return null;
+    final manager = $$WalletsTableTableManager($_db, $_db.wallets)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_toWalletIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
+      db.categories.createAlias('recurring_txs__category_id__categories__id');
+
+  $$CategoriesTableProcessedTableManager? get categoryId {
+    final $_column = $_itemColumn<int>('category_id');
+    if ($_column == null) return null;
+    final manager = $$CategoriesTableTableManager($_db, $_db.categories)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$TransactionsTable, List<Txn>>
+      _transactionsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.transactions,
+              aliasName: 'recurring_txs__id__transactions__recurring_id');
+
+  $$TransactionsTableProcessedTableManager get transactionsRefs {
+    final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
+        .filter((f) => f.recurringId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_transactionsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$RecurringTxsTableFilterComposer
+    extends Composer<_$AppDatabase, $RecurringTxsTable> {
+  $$RecurringTxsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<TxKind, TxKind, String> get kind =>
+      $composableBuilder(
+          column: $table.kind,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<int> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get note => $composableBuilder(
+      column: $table.note, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<BillRepeat, BillRepeat, String> get repeat =>
+      $composableBuilder(
+          column: $table.repeat,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<int> get anchorDay => $composableBuilder(
+      column: $table.anchorDay, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get nextRun => $composableBuilder(
+      column: $table.nextRun, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get active => $composableBuilder(
+      column: $table.active, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  $$WalletsTableFilterComposer get walletId {
+    final $$WalletsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.walletId,
+        referencedTable: $db.wallets,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WalletsTableFilterComposer(
+              $db: $db,
+              $table: $db.wallets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$WalletsTableFilterComposer get toWalletId {
+    final $$WalletsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.toWalletId,
+        referencedTable: $db.wallets,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WalletsTableFilterComposer(
+              $db: $db,
+              $table: $db.wallets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> transactionsRefs(
+      Expression<bool> Function($$TransactionsTableFilterComposer f) f) {
+    final $$TransactionsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.transactions,
+        getReferencedColumn: (t) => t.recurringId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TransactionsTableFilterComposer(
+              $db: $db,
+              $table: $db.transactions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$RecurringTxsTableOrderingComposer
+    extends Composer<_$AppDatabase, $RecurringTxsTable> {
+  $$RecurringTxsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get note => $composableBuilder(
+      column: $table.note, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get repeat => $composableBuilder(
+      column: $table.repeat, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get anchorDay => $composableBuilder(
+      column: $table.anchorDay, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get nextRun => $composableBuilder(
+      column: $table.nextRun, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get active => $composableBuilder(
+      column: $table.active, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  $$WalletsTableOrderingComposer get walletId {
+    final $$WalletsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.walletId,
+        referencedTable: $db.wallets,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WalletsTableOrderingComposer(
+              $db: $db,
+              $table: $db.wallets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$WalletsTableOrderingComposer get toWalletId {
+    final $$WalletsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.toWalletId,
+        referencedTable: $db.wallets,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WalletsTableOrderingComposer(
+              $db: $db,
+              $table: $db.wallets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableOrderingComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$RecurringTxsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RecurringTxsTable> {
+  $$RecurringTxsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<TxKind, String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<BillRepeat, String> get repeat =>
+      $composableBuilder(column: $table.repeat, builder: (column) => column);
+
+  GeneratedColumn<int> get anchorDay =>
+      $composableBuilder(column: $table.anchorDay, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get nextRun =>
+      $composableBuilder(column: $table.nextRun, builder: (column) => column);
+
+  GeneratedColumn<bool> get active =>
+      $composableBuilder(column: $table.active, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$WalletsTableAnnotationComposer get walletId {
+    final $$WalletsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.walletId,
+        referencedTable: $db.wallets,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WalletsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.wallets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$WalletsTableAnnotationComposer get toWalletId {
+    final $$WalletsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.toWalletId,
+        referencedTable: $db.wallets,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WalletsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.wallets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<T> transactionsRefs<T extends Object>(
+      Expression<T> Function($$TransactionsTableAnnotationComposer a) f) {
+    final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.transactions,
+        getReferencedColumn: (t) => t.recurringId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TransactionsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.transactions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$RecurringTxsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RecurringTxsTable,
+    RecurringTx,
+    $$RecurringTxsTableFilterComposer,
+    $$RecurringTxsTableOrderingComposer,
+    $$RecurringTxsTableAnnotationComposer,
+    $$RecurringTxsTableCreateCompanionBuilder,
+    $$RecurringTxsTableUpdateCompanionBuilder,
+    (RecurringTx, $$RecurringTxsTableReferences),
+    RecurringTx,
+    PrefetchHooks Function(
+        {bool walletId,
+        bool toWalletId,
+        bool categoryId,
+        bool transactionsRefs})> {
+  $$RecurringTxsTableTableManager(_$AppDatabase db, $RecurringTxsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RecurringTxsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RecurringTxsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RecurringTxsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<TxKind> kind = const Value.absent(),
+            Value<int> amount = const Value.absent(),
+            Value<int> walletId = const Value.absent(),
+            Value<int?> toWalletId = const Value.absent(),
+            Value<int?> categoryId = const Value.absent(),
+            Value<String> note = const Value.absent(),
+            Value<BillRepeat> repeat = const Value.absent(),
+            Value<int> anchorDay = const Value.absent(),
+            Value<DateTime> nextRun = const Value.absent(),
+            Value<bool> active = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              RecurringTxsCompanion(
+            id: id,
+            kind: kind,
+            amount: amount,
+            walletId: walletId,
+            toWalletId: toWalletId,
+            categoryId: categoryId,
+            note: note,
+            repeat: repeat,
+            anchorDay: anchorDay,
+            nextRun: nextRun,
+            active: active,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required TxKind kind,
+            required int amount,
+            required int walletId,
+            Value<int?> toWalletId = const Value.absent(),
+            Value<int?> categoryId = const Value.absent(),
+            Value<String> note = const Value.absent(),
+            required BillRepeat repeat,
+            required int anchorDay,
+            required DateTime nextRun,
+            Value<bool> active = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              RecurringTxsCompanion.insert(
+            id: id,
+            kind: kind,
+            amount: amount,
+            walletId: walletId,
+            toWalletId: toWalletId,
+            categoryId: categoryId,
+            note: note,
+            repeat: repeat,
+            anchorDay: anchorDay,
+            nextRun: nextRun,
+            active: active,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$RecurringTxsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {walletId = false,
+              toWalletId = false,
+              categoryId = false,
+              transactionsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (transactionsRefs) db.transactions],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (walletId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.walletId,
+                    referencedTable:
+                        $$RecurringTxsTableReferences._walletIdTable(db),
+                    referencedColumn:
+                        $$RecurringTxsTableReferences._walletIdTable(db).id,
+                  ) as T;
+                }
+                if (toWalletId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.toWalletId,
+                    referencedTable:
+                        $$RecurringTxsTableReferences._toWalletIdTable(db),
+                    referencedColumn:
+                        $$RecurringTxsTableReferences._toWalletIdTable(db).id,
+                  ) as T;
+                }
+                if (categoryId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.categoryId,
+                    referencedTable:
+                        $$RecurringTxsTableReferences._categoryIdTable(db),
+                    referencedColumn:
+                        $$RecurringTxsTableReferences._categoryIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (transactionsRefs)
+                    await $_getPrefetchedData<RecurringTx, $RecurringTxsTable,
+                            Txn>(
+                        currentTable: table,
+                        referencedTable: $$RecurringTxsTableReferences
+                            ._transactionsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$RecurringTxsTableReferences(db, table, p0)
+                                .transactionsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.recurringId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$RecurringTxsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $RecurringTxsTable,
+    RecurringTx,
+    $$RecurringTxsTableFilterComposer,
+    $$RecurringTxsTableOrderingComposer,
+    $$RecurringTxsTableAnnotationComposer,
+    $$RecurringTxsTableCreateCompanionBuilder,
+    $$RecurringTxsTableUpdateCompanionBuilder,
+    (RecurringTx, $$RecurringTxsTableReferences),
+    RecurringTx,
+    PrefetchHooks Function(
+        {bool walletId,
+        bool toWalletId,
+        bool categoryId,
+        bool transactionsRefs})>;
 typedef $$TransactionsTableCreateCompanionBuilder = TransactionsCompanion
     Function({
   Value<int> id,
@@ -3834,6 +5331,7 @@ typedef $$TransactionsTableCreateCompanionBuilder = TransactionsCompanion
   Value<int?> categoryId,
   Value<String> note,
   Value<int?> billId,
+  Value<int?> recurringId,
   required DateTime occurredAt,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -3848,6 +5346,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
   Value<int?> categoryId,
   Value<String> note,
   Value<int?> billId,
+  Value<int?> recurringId,
   Value<DateTime> occurredAt,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -3908,6 +5407,21 @@ final class $$TransactionsTableReferences
     final manager = $$BillsTableTableManager($_db, $_db.bills)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_billIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $RecurringTxsTable _recurringIdTable(_$AppDatabase db) =>
+      db.recurringTxs
+          .createAlias('transactions__recurring_id__recurring_txs__id');
+
+  $$RecurringTxsTableProcessedTableManager? get recurringId {
+    final $_column = $_itemColumn<int>('recurring_id');
+    if ($_column == null) return null;
+    final manager = $$RecurringTxsTableTableManager($_db, $_db.recurringTxs)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_recurringIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -4018,6 +5532,26 @@ class $$TransactionsTableFilterComposer
             $$BillsTableFilterComposer(
               $db: $db,
               $table: $db.bills,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$RecurringTxsTableFilterComposer get recurringId {
+    final $$RecurringTxsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.recurringId,
+        referencedTable: $db.recurringTxs,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RecurringTxsTableFilterComposer(
+              $db: $db,
+              $table: $db.recurringTxs,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -4136,6 +5670,26 @@ class $$TransactionsTableOrderingComposer
             ));
     return composer;
   }
+
+  $$RecurringTxsTableOrderingComposer get recurringId {
+    final $$RecurringTxsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.recurringId,
+        referencedTable: $db.recurringTxs,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RecurringTxsTableOrderingComposer(
+              $db: $db,
+              $table: $db.recurringTxs,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$TransactionsTableAnnotationComposer
@@ -4247,6 +5801,26 @@ class $$TransactionsTableAnnotationComposer
             ));
     return composer;
   }
+
+  $$RecurringTxsTableAnnotationComposer get recurringId {
+    final $$RecurringTxsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.recurringId,
+        referencedTable: $db.recurringTxs,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RecurringTxsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.recurringTxs,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$TransactionsTableTableManager extends RootTableManager<
@@ -4261,7 +5835,11 @@ class $$TransactionsTableTableManager extends RootTableManager<
     (Txn, $$TransactionsTableReferences),
     Txn,
     PrefetchHooks Function(
-        {bool walletId, bool toWalletId, bool categoryId, bool billId})> {
+        {bool walletId,
+        bool toWalletId,
+        bool categoryId,
+        bool billId,
+        bool recurringId})> {
   $$TransactionsTableTableManager(_$AppDatabase db, $TransactionsTable table)
       : super(TableManagerState(
           db: db,
@@ -4281,6 +5859,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<int?> categoryId = const Value.absent(),
             Value<String> note = const Value.absent(),
             Value<int?> billId = const Value.absent(),
+            Value<int?> recurringId = const Value.absent(),
             Value<DateTime> occurredAt = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
@@ -4294,6 +5873,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             categoryId: categoryId,
             note: note,
             billId: billId,
+            recurringId: recurringId,
             occurredAt: occurredAt,
             createdAt: createdAt,
             updatedAt: updatedAt,
@@ -4307,6 +5887,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<int?> categoryId = const Value.absent(),
             Value<String> note = const Value.absent(),
             Value<int?> billId = const Value.absent(),
+            Value<int?> recurringId = const Value.absent(),
             required DateTime occurredAt,
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
@@ -4320,6 +5901,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             categoryId: categoryId,
             note: note,
             billId: billId,
+            recurringId: recurringId,
             occurredAt: occurredAt,
             createdAt: createdAt,
             updatedAt: updatedAt,
@@ -4334,7 +5916,8 @@ class $$TransactionsTableTableManager extends RootTableManager<
               {walletId = false,
               toWalletId = false,
               categoryId = false,
-              billId = false}) {
+              billId = false,
+              recurringId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -4391,6 +5974,16 @@ class $$TransactionsTableTableManager extends RootTableManager<
                         $$TransactionsTableReferences._billIdTable(db).id,
                   ) as T;
                 }
+                if (recurringId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.recurringId,
+                    referencedTable:
+                        $$TransactionsTableReferences._recurringIdTable(db),
+                    referencedColumn:
+                        $$TransactionsTableReferences._recurringIdTable(db).id,
+                  ) as T;
+                }
 
                 return state;
               },
@@ -4414,7 +6007,11 @@ typedef $$TransactionsTableProcessedTableManager = ProcessedTableManager<
     (Txn, $$TransactionsTableReferences),
     Txn,
     PrefetchHooks Function(
-        {bool walletId, bool toWalletId, bool categoryId, bool billId})>;
+        {bool walletId,
+        bool toWalletId,
+        bool categoryId,
+        bool billId,
+        bool recurringId})>;
 typedef $$BudgetsTableCreateCompanionBuilder = BudgetsCompanion Function({
   Value<int> id,
   Value<int?> categoryId,
@@ -4794,6 +6391,8 @@ class $AppDatabaseManager {
       $$CategoriesTableTableManager(_db, _db.categories);
   $$BillsTableTableManager get bills =>
       $$BillsTableTableManager(_db, _db.bills);
+  $$RecurringTxsTableTableManager get recurringTxs =>
+      $$RecurringTxsTableTableManager(_db, _db.recurringTxs);
   $$TransactionsTableTableManager get transactions =>
       $$TransactionsTableTableManager(_db, _db.transactions);
   $$BudgetsTableTableManager get budgets =>

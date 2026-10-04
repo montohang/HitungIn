@@ -25,6 +25,7 @@ Future<void> _seed(AppDatabase db) async {
   await db.billsDao.add(name: 'Kos', amount: 1500000, dueDate: DateTime(2026, 10, 31), repeat: BillRepeat.bulanan, walletId: bca);
   await db.settingsDao.write(SettingKeys.userName, 'Rina');
   await db.settingsDao.write(SettingKeys.onboardingDone, 'true');
+  await db.recurringDao.add(kind: TxKind.pengeluaran, amount: 54000, walletId: gopay, categoryId: food, note: 'Langganan', repeat: BillRepeat.bulanan, firstRun: DateTime(2026, 11, 2));
 }
 
 void main() {
@@ -80,7 +81,7 @@ void main() {
       final service = BackupService(target);
 
       final s = service.inspect(restored);
-      expect((s.wallets, s.transactions, s.budgets, s.bills), (2, 2, 1, 1));
+      expect((s.wallets, s.transactions, s.budgets, s.bills, s.recurring), (2, 2, 1, 1, 1));
       expect(s.createdAt, DateTime(2026, 10, 4, 13));
 
       await service.restore(restored);
@@ -93,11 +94,26 @@ void main() {
       final bill = (await target.billsDao.watchActive().first).single;
       expect((bill.name, bill.anchorDay, bill.repeat), ('Kos', 31, BillRepeat.bulanan));
       expect(await target.settingsDao.read(SettingKeys.userName), 'Rina');
+      final rec = (await target.recurringDao.watchAll().first).single;
+      expect((rec.note, rec.nextRun, rec.anchorDay), ('Langganan', DateTime(2026, 11, 2), 2));
       expect(await target.settingsDao.read(SettingKeys.onboardingDone), 'true', reason: 'status perangkat tetap');
 
       // Data baru setelah pulih tetap bisa ditambah (id tidak bentrok).
       await target.walletsDao.add(name: 'OVO', type: WalletType.ewallet);
       await source.close();
+      await target.close();
+    });
+
+    test('cadangan lama (v1, tanpa transaksi berulang) tetap bisa dipulihkan', () async {
+      final db = _db();
+      await _seed(db);
+      final snap = await BackupService(db).snapshot();
+      final tables = Map<String, Object?>.from(snap['tables']! as Map)..remove('recurring');
+      final target = _db();
+      await BackupService(target).restore({...snap, 'schemaVersion': 1, 'tables': tables});
+      expect(await target.walletsDao.active(), hasLength(2));
+      expect(await target.recurringDao.watchAll().first, isEmpty);
+      await db.close();
       await target.close();
     });
 

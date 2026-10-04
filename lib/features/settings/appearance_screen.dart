@@ -6,6 +6,9 @@ import '../../core/theme/context_ext.dart';
 import '../../core/theme/theme_controller.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/segmented_control.dart';
+import '../premium/data/pro_limits.dart';
+import '../premium/pro_controller.dart';
+import '../premium/widgets/pro_teaser.dart';
 import 'widgets/settings_tile.dart';
 
 class AppearanceScreen extends ConsumerWidget {
@@ -18,6 +21,7 @@ class AppearanceScreen extends ConsumerWidget {
     final ThemeSettings s = ref.watch(themeControllerProvider);
     final ThemeController ctl = ref.read(themeControllerProvider.notifier);
     final bool dark = Theme.of(context).brightness == Brightness.dark;
+    final bool isPro = ref.watch(isProProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text('Tema & warna', style: t.screenTitle)),
@@ -41,7 +45,7 @@ class AppearanceScreen extends ConsumerWidget {
                 Semantics(
                   selected: a == s.accent,
                   child: Pressable(
-                    onTap: () => ctl.setAccent(a),
+                    onTap: () => a.pro && !isPro ? openPremium(context, ProReason.tema) : ctl.setAccent(a),
                     semanticLabel: 'Aksen ${a.label}',
                     child: Column(
                       children: [
@@ -56,11 +60,15 @@ class AppearanceScreen extends ConsumerWidget {
                           ),
                           child: DecoratedBox(
                             decoration: BoxDecoration(color: dark ? a.dark : a.light, shape: BoxShape.circle),
-                            child: a == s.accent ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
+                            child: a == s.accent
+                                ? const Icon(Icons.check, color: Colors.white, size: 20)
+                                : a.pro && !isPro
+                                    ? const Icon(Icons.lock_outline, color: Colors.white, size: 18)
+                                    : null,
                           ),
                         ),
                         const SizedBox(height: AppSpace.x4),
-                        Text(a.label, style: t.label.copyWith(color: c.sub)),
+                        Text(a.pro ? '${a.label} · Pro' : a.label, style: t.label.copyWith(color: c.sub)),
                       ],
                     ),
                   ),

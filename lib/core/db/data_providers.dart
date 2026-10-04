@@ -38,15 +38,30 @@ final monthSummaryProvider = StreamProvider.family<PeriodSummary, DateTime>((ref
   return ref.watch(appDatabaseProvider).transactionsDao.watchSummary(from, to);
 });
 
-final categoryTotalsProvider = StreamProvider.family<List<CategoryTotal>, (DateTime, TxKind)>((ref, key) {
-  final (DateTime from, DateTime to) = Dates.monthRange(key.$1);
-  return ref.watch(appDatabaseProvider).transactionsDao.watchCategoryTotals(from, to, kind: key.$2);
+/// Laporan dengan filter dompet opsional (null = semua dompet).
+typedef ReportKey = ({DateTime month, int? walletId});
+
+final reportSummaryProvider = StreamProvider.family<PeriodSummary, ReportKey>((ref, k) {
+  final (DateTime from, DateTime to) = Dates.monthRange(k.month);
+  return ref.watch(appDatabaseProvider).transactionsDao.watchSummary(from, to, walletId: k.walletId);
 });
 
-final dailyExpenseProvider = StreamProvider.family<Map<DateTime, int>, DateTime>((ref, month) {
-  final (DateTime from, DateTime to) = Dates.monthRange(month);
-  return ref.watch(appDatabaseProvider).transactionsDao.watchDailyExpense(from, to);
+final categoryTotalsProvider = StreamProvider.family<List<CategoryTotal>, ({DateTime month, TxKind kind, int? walletId})>((ref, k) {
+  final (DateTime from, DateTime to) = Dates.monthRange(k.month);
+  return ref.watch(appDatabaseProvider).transactionsDao.watchCategoryTotals(from, to, kind: k.kind, walletId: k.walletId);
 });
+
+final dailyExpenseProvider = StreamProvider.family<Map<DateTime, int>, ReportKey>((ref, k) {
+  final (DateTime from, DateTime to) = Dates.monthRange(k.month);
+  return ref.watch(appDatabaseProvider).transactionsDao.watchDailyExpense(from, to, walletId: k.walletId);
+});
+
+final monthlyTotalsProvider = StreamProvider.family<List<MonthTotal>, ({DateTime lastMonth, int months, int? walletId})>(
+  (ref, k) => ref
+      .watch(appDatabaseProvider)
+      .transactionsDao
+      .watchMonthlyTotals(k.lastMonth, months: k.months, walletId: k.walletId),
+);
 
 final budgetProgressProvider = StreamProvider.family<List<BudgetProgress>, DateTime>(
   (ref, month) => ref.watch(appDatabaseProvider).budgetsDao.watchProgress(month),

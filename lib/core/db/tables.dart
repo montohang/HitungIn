@@ -97,6 +97,9 @@ class Transactions extends Table {
 
   /// Tagihan asal, bila transaksi dibuat dari "Bayar tagihan".
   IntColumn get billId => integer().nullable().references(Bills, #id, onDelete: KeyAction.setNull)();
+
+  /// Jadwal asal, bila transaksi dicatat otomatis oleh transaksi berulang (v2).
+  IntColumn get recurringId => integer().nullable().references(RecurringTxs, #id, onDelete: KeyAction.setNull)();
   DateTimeColumn get occurredAt => dateTime()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
@@ -136,6 +139,37 @@ class Bills extends Table {
   IntColumn get remindDaysBefore => integer().withDefault(const Constant(1))();
   BoolColumn get active => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Transaksi berulang (Pro, v2): dicatat otomatis setiap jatuh tempo,
+/// mis. gaji tiap tanggal 25 atau langganan bulanan yang didebet otomatis.
+/// Berbeda dengan [Bills] yang hanya mengingatkan dan dibayar manual.
+@DataClassName('RecurringTx')
+class RecurringTxs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get kind => textEnum<TxKind>()();
+  IntColumn get amount => integer().check(amount.isBiggerThanValue(0))();
+  @ReferenceName('recurringSources')
+  IntColumn get walletId => integer().references(Wallets, #id)();
+  @ReferenceName('recurringTargets')
+  IntColumn get toWalletId => integer().nullable().references(Wallets, #id)();
+  IntColumn get categoryId => integer().nullable().references(Categories, #id, onDelete: KeyAction.setNull)();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  /// Hanya mingguan/bulanan/tahunan (bukan [BillRepeat.sekali]).
+  TextColumn get repeat => textEnum<BillRepeat>()();
+  IntColumn get anchorDay => integer().check(anchorDay.isBetweenValues(1, 31))();
+
+  /// Tanggal pencatatan berikutnya (00.00).
+  DateTimeColumn get nextRun => dateTime()();
+  BoolColumn get active => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  List<String> get customConstraints => [
+        "CHECK ((kind = 'transfer') = (to_wallet_id IS NOT NULL))",
+        "CHECK (repeat != 'sekali')",
+      ];
 }
 
 /// Pengaturan sederhana kunci–nilai (tema, aksen, onboarding selesai, …).

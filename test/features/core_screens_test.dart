@@ -215,7 +215,8 @@ void main() {
     expect(find.text('+Rp8.800.000'), findsOneWidget);
     expect(find.text('Tertinggi 1 Okt · Rp300.000'), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Transportasi'));
+    await tester.scrollUntilVisible(find.text('Transportasi'), 200, scrollable: find.byType(Scrollable).first);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -200));
     await tester.pumpAndSettle();
     expect(find.text('75%'), findsOneWidget);
     expect(find.text('25%'), findsOneWidget);

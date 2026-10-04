@@ -1,0 +1,50 @@
+import 'package:drift/drift.dart' hide isNull;
+import 'package:drift_dev/api/migrations_native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hitungin/core/db/app_database.dart';
+
+import 'generated/schema.dart';
+
+void main() {
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  late SchemaVerifier verifier;
+
+  setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
+
+  test('v1 → v2: skema hasil migrasi sama dengan skema baru', () async {
+    final schema = await verifier.schemaAt(1);
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 2);
+    await db.close();
+  });
+
+  test('v1 → v2: data lama tetap utuh & fitur baru langsung bisa dipakai', () async {
+    final schema = await verifier.schemaAt(1);
+    // Isi data dengan SQL polos versi 1.
+    schema.rawDatabase
+      ..execute("INSERT INTO wallets (id, name, type, initial_balance, icon, sort_order, archived, created_at) "
+          "VALUES (1, 'BCA', 'bank', 1000000, 'bank', 0, 0, 1759000000)")
+      ..execute("INSERT INTO categories (id, name, kind, icon, keywords, sort_order, archived) "
+          "VALUES (1, 'Gaji', 'pemasukan', 'salary', 'gaji', 0, 0)")
+      ..execute("INSERT INTO transactions (kind, amount, wallet_id, category_id, note, occurred_at, created_at, updated_at) "
+          "VALUES ('pemasukan', 9200000, 1, 1, 'Gaji', 1759300000, 1759300000, 1759300000)");
+
+    final db = AppDatabase(schema.newConnection());
+    final balances = await db.walletsDao.watchBalances().first;
+    expect(balances.single.balance, 10200000);
+    final tx = (await db.transactionsDao.watchRecent().first).single.tx;
+    expect(tx.recurringId, isNull);
+
+    await db.recurringDao.add(
+      kind: TxKind.pemasukan,
+      amount: 9200000,
+      walletId: 1,
+      categoryId: 1,
+      note: 'Gaji',
+      repeat: BillRepeat.bulanan,
+      firstRun: DateTime(2026, 10, 25),
+    );
+    expect(await db.recurringDao.runDue(DateTime(2026, 10, 25, 9)), 1);
+    await db.close();
+  });
+}

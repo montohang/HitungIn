@@ -67,18 +67,26 @@ abstract final class AppMotion {
   static const double pressScaleCard = 0.98;
 }
 
-/// Pilihan warna aksen (6 preset gratis).
+/// Pilihan warna aksen: 6 preset gratis + 4 khusus Pro.
+/// Hijau & merah sengaja tidak dipakai — sudah berarti pemasukan & bahaya.
 enum AccentPreset {
   indigo('Indigo', Color(0xFF5B4BDB), Color(0xFF6C5CE7)),
   ungu('Ungu', Color(0xFF7C3AED), Color(0xFF8B5CF6)),
   teal('Teal', Color(0xFF0F766E), Color(0xFF14897C)),
   mawar('Mawar', Color(0xFFBE185D), Color(0xFFD63C74)),
   biru('Biru', Color(0xFF2563EB), Color(0xFF3B74F0)),
-  tembaga('Tembaga', Color(0xFFB45309), Color(0xFFC2620F));
+  tembaga('Tembaga', Color(0xFFB45309), Color(0xFFC2620F)),
+  plum('Plum', Color(0xFF86198F), Color(0xFFA62DAF), pro: true),
+  laut('Laut', Color(0xFF075985), Color(0xFF0B76AD), pro: true),
+  kopi('Kopi', Color(0xFF6F4E37), Color(0xFF8A6448), pro: true),
+  arang('Arang', Color(0xFF334155), Color(0xFF5B6B82), pro: true);
 
-  const AccentPreset(this.label, this.light, this.dark);
+  const AccentPreset(this.label, this.light, this.dark, {this.pro = false});
 
   final String label;
+
+  /// Hanya bisa dipilih pengguna Pro.
+  final bool pro;
 
   /// Aksen untuk mode terang.
   final Color light;

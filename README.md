@@ -3,9 +3,9 @@
 Pencatat keuangan pribadi **100% offline** — tanpa login, data tidak pernah meninggalkan HP.
 Flutter · Android dulu · tema default **gelap**.
 
-Status: **Tahap 6 — Premium + iklan** selesai: HitungIn Pro sekali bayar lewat Google Play
-(termasuk pembayaran tertunda & pulihkan pembelian), banner AdMob + iklan berhadiah + persetujuan UMP,
-dan batas versi gratis. Fitur Pro tambahan (tren, transaksi berulang, aksen ekstra) menyusul di Tahap 6b.
+Status: **Tahap 6b — Fitur Pro** selesai: laporan tren 6/12 bulan + filter per dompet, transaksi berulang
+(dicatat otomatis, termasuk susulan), dan 4 aksen warna Pro. Database naik ke **skema v2** (migrasi teruji).
+Ikon aplikasi alternatif menunggu ikon peluncur resmi (lihat Tahapan).
 
 ---
 
@@ -87,6 +87,8 @@ lib/
     wallets/wallets_screen.dart       # tambah/ubah/urutkan/arsipkan/hapus dompet
     categories/categories_screen.dart # tambah/ubah ikon & kata kunci/urutkan/arsipkan kategori
     bills/                  # bills_screen.dart (daftar, bayar, form) · data/bill_due.dart (status jatuh tempo)
+    recurring/              # recurring_screen.dart · data/recurring_dao.dart (runDue: catat jadwal jatuh tempo)
+    reports/widgets/        # daily_chart.dart · trend_chart.dart
     premium/                # premium_screen.dart · pro_controller.dart · data/ (limits, billing, entitlement)
     ads/                    # ad_ids.dart · ad_policy.dart · ads_service.dart (UMP + rewarded) · banner_slot.dart
     backup/                 # backup_screen.dart · data/backup_codec.dart · backup_service.dart · csv_export.dart
@@ -108,6 +110,8 @@ test/
   onboarding/flow_test.dart # alur onboarding & layar kunci lewat UI
   features/core_screens_test.dart  # Catat, transfer, detail, riwayat, laporan, budget lewat UI
   backup/backup_test.dart   # enkripsi cadangan, cadangkan→pulihkan, rollback, CSV
+  recurring/recurring_test.dart  # jadwal berulang, susulan, tanggal 31, tren bulanan, filter dompet
+  db/migration_test.dart    # v1 → v2 (skema & data lama) — helper di db/generated/ dari drift_dev
   premium/premium_test.dart # batas gratis, aturan iklan, simpan Pro, alur pembelian (Google Play palsu)
   settings/settings_logic_test.dart  # jatuh tempo, kunci otomatis, ganti PIN, kelola kategori/dompet
   helpers/fakes.dart        # TestEnv: DB memori, SecureStore memori, jam & biometrik palsu
@@ -138,6 +142,9 @@ internet hanya dipakai AdMob dan Google Play Billing.
 | Tagihan aktif | 3 | Tak terbatas |
 | Laporan | Bulan ini & bulan lalu | Semua bulan |
 | Ekspor CSV | 1× per iklan berhadiah | Bebas |
+| Laporan tren 6/12 bulan & filter dompet | – | ✅ |
+| Transaksi berulang (gaji, langganan) | – | ✅ (jadwal yang sudah ada tetap jalan walau Pro hilang) |
+| Aksen warna | 6 | +4 (Plum, Laut, Kopi, Arang) |
 | Catat, riwayat, dompet, cadangan terenkripsi | ✅ | ✅ |
 
 Semua batas ada di `lib/features/premium/data/pro_limits.dart` (`FreeLimits`), aturan iklan di
@@ -169,6 +176,7 @@ lalu disimpan di Keystore supaya tetap berlaku offline. Pembelian selalu di-*ack
 | `/catat?text=kopi%2025rb` · `/catat?id=12` | Catat dengan isian awal · ubah transaksi |
 | `/tx/12` | Detail transaksi |
 | `/premium?from=budget` | Layar HitungIn Pro (judul mengikuti alasan) |
+| `/pengaturan/berulang` | Transaksi berulang |
 | `/pengaturan` (+ `/dompet`, `/kategori`, `/keamanan`, `/keamanan/ganti-pin`, `/cadangan`, `/tampilan`) · `/tagihan` | Pengaturan & sub-layarnya |
 
 ## Grafik
@@ -195,8 +203,14 @@ ketuk kolom untuk melihat nilainya; per kategori = daftar batang terurut dengan 
   `applyCipherKey` menolak berjalan bila SQLCipher tidak termuat, supaya data tak pernah tersimpan polos.
 - Nominal = `int` Rupiah, selalu positif; arah ditentukan `TxKind`. Saldo dompet dihitung dari transaksi, tidak disimpan.
 - Kategori tidak dihapus, hanya diarsipkan (riwayat tetap utuh). Dompet hanya bisa dihapus bila belum dipakai.
-- Setelah mengubah `tables.dart` atau DAO: jalankan `dart run build_runner build`, naikkan
-  `schemaVersion`, dan tambahkan langkah di `migration`.
+- **Migrasi skema** (v1 → v2: tabel `recurring_txs` + `transactions.recurring_id`). Setelah mengubah `tables.dart`:
+  1. naikkan `schemaVersion` dan tambahkan langkah di `onUpgrade`,
+  2. `dart run build_runner build`,
+  3. `dart run drift_dev schema dump lib/core/db/app_database.dart drift_schemas/`,
+  4. `dart run drift_dev schema generate drift_schemas/ test/db/generated/`,
+  5. tambah kasus di `test/db/migration_test.dart` (skema & data lama harus utuh).
+- `drift` dan `drift_dev` **dikunci di 2.34.0**: versi `drift_dev` yang lebih baru butuh `meta` lebih baru
+  daripada yang dibawa Flutter 3.41, dan versi yang tidak sama membuat `schema dump` gagal.
 
 ### Catat Cepat
 
@@ -230,6 +244,7 @@ Referensi desain: kanvas "HitungIn — UI Design v1" di Claude.
 4. ~~Layar inti: Beranda, Catat, Riwayat/Detail, Laporan, Budget~~
 5. ~~Pengaturan & sisa MVP: dompet, kategori, tagihan, cadangan, CSV, ganti PIN, kunci otomatis, tema~~
 6. ~~Premium + iklan~~
-6b. Fitur Pro tambahan: laporan tren 6–12 bulan & filter dompet, transaksi berulang, aksen & ikon aplikasi tambahan
-7. Tes UI (widget) untuk layar Tahap 5–6: Pengaturan, Dompet, Kategori, Tagihan, Keamanan/Ganti PIN, Cadangan, Tema, Premium, batas gratis
+6b. ~~Fitur Pro: laporan tren 6–12 bulan & filter dompet, transaksi berulang, aksen tambahan~~
+6c. Ikon peluncur resmi HitungIn (sekarang masih ikon bawaan Flutter) + ikon alternatif untuk Pro
+7. Tes UI (widget) untuk layar Tahap 5–6b: Pengaturan, Dompet, Kategori, Tagihan, Keamanan/Ganti PIN, Cadangan, Tema, Premium, batas gratis, Transaksi berulang, tren & filter Laporan
 8. Notifikasi pengingat tagihan (saat ini pengingat hanya tampil di dalam aplikasi)

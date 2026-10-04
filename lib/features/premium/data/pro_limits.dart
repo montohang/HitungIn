@@ -32,7 +32,9 @@ enum ProReason {
   tagihan('Tagihan tanpa batas'),
   laporan('Laporan semua bulan'),
   csv('Ekspor CSV kapan saja'),
-  iklan('Tanpa iklan');
+  iklan('Tanpa iklan'),
+  berulang('Transaksi berulang otomatis'),
+  tema('Aksen warna tambahan');
 
   const ProReason(this.headline);
   final String headline;
