@@ -78,6 +78,9 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
     return q.watch().map(_mapDetails);
   }
 
+  /// Semua transaksi (terbaru dulu), untuk ekspor.
+  Future<List<TxDetail>> allDetails() => _detailQuery().get().then(_mapDetails);
+
   /// Satu transaksi beserta relasinya; null bila sudah dihapus.
   Stream<TxDetail?> watchDetail(int id) =>
       (_detailQuery()..where(transactions.id.equals(id))).watch().map((rows) => rows.isEmpty ? null : _mapDetails(rows).single);

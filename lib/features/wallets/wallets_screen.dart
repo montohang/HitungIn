@@ -146,8 +146,8 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
     final String name = _name.text.trim();
     if (name.isEmpty) return setState(() => _error = 'Isi nama dompet.');
     final dao = ref.read(appDatabaseProvider).walletsDao;
-    final bool taken = (await dao.watchBalances(includeArchived: true).first)
-        .any((w) => w.wallet.id != _w?.id && w.wallet.name.toLowerCase() == name.toLowerCase());
+    final bool taken =
+        (await dao.all()).any((w) => w.id != _w?.id && w.name.toLowerCase() == name.toLowerCase());
     if (taken) return setState(() => _error = 'Nama dompet sudah dipakai.');
     final int initial = RupiahInputFormatter.parse(_initial.text);
     if (_w == null) {

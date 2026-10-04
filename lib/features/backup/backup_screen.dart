@@ -158,7 +158,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   Future<void> _exportCsv() async {
     if (!await _unlockCsv()) return;
     await _run(() async {
-      final items = await ref.read(appDatabaseProvider).transactionsDao.watchBetween(DateTime(1970), DateTime(9999)).first;
+      final items = await ref.read(appDatabaseProvider).transactionsDao.allDetails();
       if (items.isEmpty) {
         if (mounted) _toast('Belum ada transaksi untuk diekspor.');
         return;

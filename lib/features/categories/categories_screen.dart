@@ -157,7 +157,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
     final String name = _name.text.trim();
     if (name.isEmpty) return setState(() => _error = 'Isi nama kategori.');
     final dao = ref.read(appDatabaseProvider).categoriesDao;
-    final bool taken = (await dao.watchAll(widget.kind).first)
+    final bool taken = (await dao.allOfKind(widget.kind))
         .any((c) => c.id != _cat?.id && c.name.toLowerCase() == name.toLowerCase());
     if (taken) return setState(() => _error = 'Nama kategori sudah dipakai.');
     final String keywords = normalizeCategoryKeywords(_keywords.text);

@@ -3,9 +3,8 @@
 Pencatat keuangan pribadi **100% offline** — tanpa login, data tidak pernah meninggalkan HP.
 Flutter · Android dulu · tema default **gelap**.
 
-Status: **Tahap 8 — Notifikasi pengingat tagihan** selesai (Pro): notifikasi lokal H-n & hari H pada jam pilihan,
-tetap jalan walau aplikasi tertutup dan setelah HP dinyalakan ulang; ketuk → layar Tagihan (lewat PIN bila terkunci).
-Sebelumnya: 6c ikon aplikasi resmi + alternatif Pro, splash gelap.
+Status: **MVP lengkap (Tahap 1–8)** + tes UI untuk semua layar (Tahap 7). Berikutnya: uji manual di HP sungguhan
+— daftar periksanya di [docs/UJI_MANUAL.md](docs/UJI_MANUAL.md) — lalu persiapan rilis (lihat "Sebelum rilis").
 
 ---
 
@@ -111,6 +110,8 @@ test/
   security/                 # aturan redirect, PIN & penguncian
   onboarding/flow_test.dart # alur onboarding & layar kunci lewat UI
   features/core_screens_test.dart  # Catat, transfer, detail, riwayat, laporan, budget lewat UI
+  features/settings_flow_test.dart # Pengaturan, dompet, kategori, ganti PIN, tema & ikon, cadangan
+  features/pro_flow_test.dart      # beli Pro, batas gratis, tagihan + notifikasi, laporan Pro, transaksi berulang
   backup/backup_test.dart   # enkripsi cadangan, cadangkan→pulihkan, rollback, CSV
   recurring/recurring_test.dart  # jadwal berulang, susulan, tanggal 31, tren bulanan, filter dompet
   db/migration_test.dart    # v1 → v2 (skema & data lama) — helper di db/generated/ dari drift_dev
@@ -118,11 +119,13 @@ test/
   branding/app_icon_test.dart  # kanal ganti ikon + konsistensi varian Dart ↔ manifest ↔ Kotlin ↔ berkas ikon
   premium/premium_test.dart # batas gratis, aturan iklan, simpan Pro, alur pembelian (Google Play palsu)
   settings/settings_logic_test.dart  # jatuh tempo, kunci otomatis, ganti PIN, kelola kategori/dompet
-  helpers/fakes.dart        # TestEnv: DB memori, SecureStore memori, jam & biometrik palsu
+  helpers/fakes.dart        # TestEnv: DB memori, SecureStore memori, jam, biometrik, Google Play, ikon, notifikasi palsu
+  helpers/app_harness.dart  # AppHarness: aplikasi utuh siap uji (seed, go/push/back, tap, scrollTo, run)
 ```
 
-Catatan tes widget: query Drift di luar frame wajib lewat `tester.runAsync`, dan DB ditutup
-dengan `tester.runAsync(db.close)` — kalau tidak, tes menggantung di zona fake-async.
+Catatan tes widget: query Drift di luar frame wajib lewat `tester.runAsync` (`AppHarness.run`), dan DB ditutup
+dengan `tester.runAsync(db.close)` — kalau tidak, tes menggantung di zona fake-async. Untuk alasan yang sama,
+kode UI tidak boleh memakai `watch…().first` untuk sekali baca; pakai query `Future` (`get()`).
 
 ## Cadangan
 
@@ -172,6 +175,9 @@ lalu disimpan di Keystore supaya tetap berlaku offline. Pembelian selalu di-*ack
    data keuangan **tidak** dikumpulkan/dibagikan. Centang "Berisi iklan".
 5. Kebijakan privasi (URL) yang menjelaskan hal di atas.
 6. Ikon Play Store: `branding/play_store_icon_512.png`.
+7. **Kunci tanda tangan rilis**: `android/app/build.gradle.kts` masih menandatangani build rilis dengan kunci debug.
+   Buat keystore upload + `key.properties` (sudah di `.gitignore`), dan aktifkan Play App Signing.
+8. Uji manual di HP: [docs/UJI_MANUAL.md](docs/UJI_MANUAL.md).
 
 ## Notifikasi pengingat tagihan
 
@@ -281,5 +287,5 @@ Referensi desain: kanvas "HitungIn — UI Design v1" di Claude.
 6. ~~Premium + iklan~~
 6b. ~~Fitur Pro: laporan tren 6–12 bulan & filter dompet, transaksi berulang, aksen tambahan~~
 6c. ~~Ikon peluncur resmi + ikon alternatif Pro + splash gelap~~
-7. Tes UI (widget) untuk layar Tahap 5–8 (termasuk kartu notifikasi Tagihan & pemilih ikon): Pengaturan, Dompet, Kategori, Tagihan, Keamanan/Ganti PIN, Cadangan, Tema, Premium, batas gratis, Transaksi berulang, tren & filter Laporan
+7. ~~Tes UI (widget) untuk layar Tahap 5–8~~: Pengaturan, Dompet, Kategori, Tagihan, Keamanan/Ganti PIN, Cadangan, Tema, Premium, batas gratis, Transaksi berulang, tren & filter Laporan
 8. ~~Notifikasi pengingat tagihan~~

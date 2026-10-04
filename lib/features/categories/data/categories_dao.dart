@@ -34,6 +34,9 @@ class CategoriesDao extends DatabaseAccessor<AppDatabase> with _$CategoriesDaoMi
         ]))
       .watch();
 
+  /// Semua kategori satu jenis, termasuk yang diarsipkan (cek nama kembar).
+  Future<List<Category>> allOfKind(TxKind kind) => (select(categories)..where((c) => c.kind.equalsValue(kind))).get();
+
   Future<void> reorder(List<int> idsInOrder) => batch((b) {
         for (final (int i, int id) in idsInOrder.indexed) {
           b.update(categories, CategoriesCompanion(sortOrder: Value(i)), where: (c) => c.id.equals(id));

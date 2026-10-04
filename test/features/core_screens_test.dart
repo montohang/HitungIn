@@ -1,67 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hitungin/app.dart';
 import 'package:hitungin/core/db/app_database.dart';
-import 'package:hitungin/features/security/app_gate.dart';
-import 'package:hitungin/router.dart';
 
-import '../helpers/fakes.dart';
-
-/// Lingkungan siap pakai: onboarding selesai, tanpa PIN, 3 dompet.
-class _App {
-  _App(this.tester) : env = TestEnv(gate: const GateState(onboardingDone: true));
-
-  final WidgetTester tester;
-  final TestEnv env;
-  late int tunai, gopay, bca;
-  late Map<String, int> cat;
-
-  AppDatabase get db => env.db;
-
-  /// Query Drift di luar frame harus berjalan dengan waktu nyata,
-  /// kalau tidak tes menggantung di zona fake-async.
-  Future<T> run<T>(Future<T> Function(AppDatabase db) f) async => (await tester.runAsync(() => f(db))) as T;
-
-  Future<void> seed() => run((db) async {
-        tunai = await db.walletsDao.add(name: 'Tunai', type: WalletType.tunai, initialBalance: 50000);
-        gopay = await db.walletsDao.add(name: 'GoPay', type: WalletType.ewallet, initialBalance: 100000);
-        bca = await db.walletsDao.add(name: 'BCA', type: WalletType.bank, initialBalance: 1000000);
-        cat = {for (final c in await db.categoriesDao.active()) '${c.name}/${c.kind.name}': c.id};
-      });
-
-  Future<int> addTx(TxKind kind, int amount, int wallet, DateTime at, {int? category, String note = ''}) => run(
-        (db) => db.transactionsDao.add(kind: kind, amount: amount, walletId: wallet, categoryId: category, note: note, occurredAt: at),
-      );
-
-  int food() => cat['Makan & Minum/pengeluaran']!;
-  int transport() => cat['Transportasi/pengeluaran']!;
-
-  Future<void> pump(WidgetTester tester) async {
-    await tester.binding.setSurfaceSize(const Size(420, 900));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(ProviderScope(overrides: env.overrides, child: const HitungInApp()));
-    await tester.pumpAndSettle();
-  }
-
-  Future<void> go(WidgetTester tester, String location) async {
-    ProviderScope.containerOf(tester.element(find.byType(HitungInApp))).read(routerProvider).go(location);
-    await tester.pumpAndSettle();
-  }
-
-  Future<void> close(WidgetTester tester) async {
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump(const Duration(seconds: 1));
-    await tester.runAsync(db.close);
-  }
-
-  Future<Map<String, int>> balances() =>
-      run((db) async => {for (final b in await db.walletsDao.watchBalances().first) b.wallet.name: b.balance});
-}
+import '../helpers/app_harness.dart';
 
 void main() {
   testWidgets('Catat cepat dari beranda → tersimpan & muncul di transaksi terbaru', (tester) async {
-    final app = _App(tester);
+    final app = AppHarness(tester);
     await app.seed();
     await app.pump(tester);
 
@@ -87,7 +32,7 @@ void main() {
   });
 
   testWidgets('Catat manual: validasi lalu simpan pemasukan', (tester) async {
-    final app = _App(tester);
+    final app = AppHarness(tester);
     await app.seed();
     await app.pump(tester);
 
@@ -120,7 +65,7 @@ void main() {
   });
 
   testWidgets('Pindah saldo lewat Catat cepat', (tester) async {
-    final app = _App(tester);
+    final app = AppHarness(tester);
     await app.seed();
     await app.pump(tester);
     await app.go(tester, '/catat?text=tf%20bca%20ke%20gopay%20100rb');
@@ -135,7 +80,7 @@ void main() {
   });
 
   testWidgets('Detail: ubah nominal lalu hapus', (tester) async {
-    final app = _App(tester);
+    final app = AppHarness(tester);
     await app.seed();
     final id = await app.addTx(TxKind.pengeluaran, 30000, app.tunai, DateTime(2026, 10, 2, 7), category: app.food(), note: 'Bakso');
     await app.pump(tester);
@@ -163,7 +108,7 @@ void main() {
   });
 
   testWidgets('Riwayat: per bulan, filter jenis, dan pencarian', (tester) async {
-    final app = _App(tester);
+    final app = AppHarness(tester);
     await app.seed();
     await app.addTx(TxKind.pengeluaran, 25000, app.gopay, DateTime(2026, 10, 2, 8), category: app.food(), note: 'Kopi');
     await app.addTx(TxKind.pengeluaran, 50000, app.tunai, DateTime(2026, 10, 1, 18), category: app.transport(), note: 'Bensin');
@@ -200,7 +145,7 @@ void main() {
   });
 
   testWidgets('Laporan: ringkasan, per kategori, dan lompat ke riwayat', (tester) async {
-    final app = _App(tester);
+    final app = AppHarness(tester);
     await app.seed();
     await app.addTx(TxKind.pengeluaran, 300000, app.tunai, DateTime(2026, 10, 1), category: app.food());
     await app.addTx(TxKind.pengeluaran, 100000, app.tunai, DateTime(2026, 10, 2), category: app.transport(), note: 'Bensin');
@@ -231,7 +176,7 @@ void main() {
   });
 
   testWidgets('Budget: atur total & kategori, tanda lewat batas', (tester) async {
-    final app = _App(tester);
+    final app = AppHarness(tester);
     await app.seed();
     await app.addTx(TxKind.pengeluaran, 120000, app.tunai, DateTime(2026, 10, 1), category: app.food());
     await app.pump(tester);

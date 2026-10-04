@@ -140,7 +140,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
         if (!mounted) return;
         if (r is PinOk) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('PIN diganti')));
-          context.pop();
+          context.canPop() ? context.pop() : context.go(Routes.keamanan);
         } else {
           setState(() {
             _busy = false;

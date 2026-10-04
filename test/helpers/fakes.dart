@@ -8,7 +8,11 @@ import 'package:hitungin/core/db/app_database.dart';
 import 'package:hitungin/core/db/providers.dart';
 import 'package:hitungin/core/security/secure_store.dart';
 import 'package:hitungin/features/ads/ads_service.dart';
+import 'package:hitungin/core/branding/app_icon_service.dart';
+import 'package:hitungin/core/branding/app_icon_variants.dart';
+import 'package:hitungin/features/bills/data/bill_reminders.dart';
 import 'package:hitungin/features/bills/reminder_scheduler.dart';
+import 'package:hitungin/features/premium/pro_controller.dart';
 import 'package:hitungin/features/premium/data/billing.dart';
 import 'package:hitungin/features/security/app_gate.dart';
 import 'package:hitungin/features/security/biometric_service.dart';
@@ -71,6 +75,45 @@ class FakeBilling implements BillingGateway {
   Future<void> complete(PurchaseDetails purchase) async => completed.add(purchase);
 }
 
+class FakeAppIconService implements AppIconService {
+  AppIconVariant icon = AppIconVariant.standar;
+  final List<AppIconVariant> sets = [];
+
+  @override
+  Future<AppIconVariant> current() async => icon;
+
+  @override
+  Future<void> set(AppIconVariant variant) async {
+    sets.add(variant);
+    icon = variant;
+  }
+}
+
+/// Notifikasi palsu: mencatat jadwal & permintaan izin.
+class FakeReminderScheduler implements ReminderScheduler {
+  bool granted = true;
+  int permissionRequests = 0;
+  final List<ReminderPlan> scheduled = [];
+
+  @override
+  Future<void> init({required void Function(String payload) onTap}) async {}
+
+  @override
+  Future<bool> requestPermission() async {
+    permissionRequests++;
+    return granted;
+  }
+
+  @override
+  Future<bool> permissionGranted() async => granted;
+
+  @override
+  Future<void> cancelAll() async => scheduled.clear();
+
+  @override
+  Future<void> schedule(List<ReminderPlan> plans) async => scheduled.addAll(plans);
+}
+
 /// Jam palsu yang bisa dimajukan.
 class FakeClock {
   FakeClock([DateTime? start]) : now = start ?? DateTime(2026, 10, 2, 8);
@@ -81,11 +124,16 @@ class FakeClock {
 
 /// Semua dependensi aplikasi versi tes (DB memori, PIN cepat, tanpa Keystore).
 class TestEnv {
-  TestEnv({GateState gate = const GateState(), bool biometric = false})
+  TestEnv({GateState gate = const GateState(), bool biometric = false, this.pro = false})
       : initialGate = gate,
         biometric = FakeBiometric(available: biometric) {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   }
+
+  /// Mulai sebagai pengguna Pro.
+  final bool pro;
+  final FakeAppIconService appIcons = FakeAppIconService();
+  final FakeReminderScheduler reminders = FakeReminderScheduler();
 
   final AppDatabase db = AppDatabase(NativeDatabase.memory());
   final MemorySecureStore store = MemorySecureStore();
@@ -105,6 +153,8 @@ class TestEnv {
         initialGateProvider.overrideWithValue(initialGate),
         adsServiceProvider.overrideWithValue(const NoAdsService()),
         billingGatewayProvider.overrideWithValue(billing),
-        reminderSchedulerProvider.overrideWithValue(const NoReminderScheduler()),
+        reminderSchedulerProvider.overrideWithValue(reminders),
+        appIconServiceProvider.overrideWithValue(appIcons),
+        initialProProvider.overrideWithValue(pro),
       ];
 }

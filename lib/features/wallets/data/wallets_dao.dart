@@ -37,6 +37,9 @@ class WalletsDao extends DatabaseAccessor<AppDatabase> with _$WalletsDaoMixin {
   Future<List<Wallet>> active() =>
       (select(wallets)..where((w) => w.archived.equals(false))..orderBy([(w) => OrderingTerm(expression: w.sortOrder)])).get();
 
+  /// Semua dompet termasuk yang diarsipkan (cek nama kembar).
+  Future<List<Wallet>> all() => select(wallets).get();
+
   Future<int> add({required String name, required WalletType type, int initialBalance = 0, String? icon}) async {
     final int order = await _nextSortOrder();
     return into(wallets).insert(WalletsCompanion.insert(

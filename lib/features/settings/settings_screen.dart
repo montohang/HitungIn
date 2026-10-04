@@ -28,37 +28,8 @@ final _adPrivacyRequiredProvider = FutureProvider.autoDispose<bool>((ref) async 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _editName(BuildContext context, WidgetRef ref, String? current) async {
-    final TextEditingController text = TextEditingController(text: current ?? '');
-    await showAppSheet<void>(
-      context,
-      title: 'Nama panggilan',
-      builder: (context) => Column(
-        children: [
-          TextField(
-            controller: text,
-            autofocus: true,
-            maxLength: 24,
-            textCapitalization: TextCapitalization.words,
-            style: context.text.item,
-            decoration: const InputDecoration(hintText: 'Boleh dikosongkan', counterText: ''),
-          ),
-          const SizedBox(height: AppSpace.x16),
-          AppButton(
-            label: 'Simpan',
-            large: true,
-            onPressed: () async {
-              final dao = ref.read(appDatabaseProvider).settingsDao;
-              final String v = text.text.trim();
-              v.isEmpty ? await dao.remove(SettingKeys.userName) : await dao.write(SettingKeys.userName, v);
-              if (context.mounted) Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
-    text.dispose();
-  }
+  Future<void> _editName(BuildContext context, String? current) =>
+      showAppSheet<void>(context, title: 'Nama panggilan', builder: (_) => _NameForm(current: current));
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -95,7 +66,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.person_outline,
                 title: 'Nama panggilan',
                 subtitle: name ?? 'Belum diisi',
-                onTap: () => _editName(context, ref, name),
+                onTap: () => _editName(context, name),
               ),
             ],
           ),
@@ -180,4 +151,49 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Form nama panggilan. Memegang controller sendiri supaya tidak dibuang
+/// saat lembar bawah masih beranimasi menutup.
+class _NameForm extends ConsumerStatefulWidget {
+  const _NameForm({this.current});
+
+  final String? current;
+
+  @override
+  ConsumerState<_NameForm> createState() => _NameFormState();
+}
+
+class _NameFormState extends ConsumerState<_NameForm> {
+  late final TextEditingController _text = TextEditingController(text: widget.current ?? '');
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final dao = ref.read(appDatabaseProvider).settingsDao;
+    final String v = _text.text.trim();
+    v.isEmpty ? await dao.remove(SettingKeys.userName) : await dao.write(SettingKeys.userName, v);
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+        children: [
+          TextField(
+            controller: _text,
+            autofocus: true,
+            maxLength: 24,
+            textCapitalization: TextCapitalization.words,
+            style: context.text.item,
+            decoration: const InputDecoration(hintText: 'Boleh dikosongkan', counterText: ''),
+            onSubmitted: (_) => _save(),
+          ),
+          const SizedBox(height: AppSpace.x16),
+          AppButton(label: 'Simpan', large: true, onPressed: _save),
+        ],
+      );
 }
