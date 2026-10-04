@@ -11,6 +11,7 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/pressable.dart';
+import '../../core/widgets/rupiah_prefix.dart';
 import '../security/app_gate.dart';
 import 'pin_setup_screen.dart' show StepHeader;
 
@@ -233,10 +234,9 @@ class _DraftCard extends StatelessWidget {
             keyboardType: TextInputType.number,
             inputFormatters: const [RupiahInputFormatter()],
             style: t.number,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: '0',
-              prefixText: 'Rp',
-              prefixStyle: t.number.copyWith(color: c.muted),
+              prefixIcon: RupiahPrefix(), prefixIconConstraints: RupiahPrefix.constraints,
               labelText: 'Saldo sekarang',
             ),
           ),

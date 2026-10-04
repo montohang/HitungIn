@@ -167,6 +167,7 @@ void main() {
 
       env.clock.advance(const Duration(seconds: 31));
       await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle(); // pesan memudar keluar
       expect(find.textContaining('Coba lagi'), findsNothing);
       await _enterPin(tester, '258013');
       expect(find.textContaining('Total saldo'), findsOneWidget);

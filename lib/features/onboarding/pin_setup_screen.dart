@@ -57,6 +57,8 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
     final bool bio = await ref.read(biometricServiceProvider).isAvailable();
     final bool hasWallets = (await ref.read(appDatabaseProvider).walletsDao.active()).isNotEmpty;
     if (!mounted) return;
+    // Selesai menyimpan → indikator berhenti sebelum lembar sidik jari muncul.
+    setState(() => _busy = false);
     ref.read(appGateProvider.notifier).pinCreated();
     if (bio) await _offerBiometric();
     if (!mounted) return;
@@ -126,6 +128,7 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
               error: _error,
               shakeKey: _errors,
               busy: _busy,
+              status: _busy ? const PinBusyStatus('Menyimpan PIN…', style: PinPadStyle.light) : null,
               onCompleted: _onPin,
               header: Column(
                 children: [

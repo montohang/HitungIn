@@ -18,6 +18,7 @@ import '../../core/widgets/app_fab.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/segmented_control.dart';
+import '../../core/widgets/rupiah_prefix.dart';
 import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
@@ -289,7 +290,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
           keyboardType: TextInputType.number,
           inputFormatters: const [RupiahInputFormatter()],
           style: t.number,
-          decoration: InputDecoration(labelText: 'Nominal', prefixText: 'Rp', prefixStyle: t.number.copyWith(color: c.muted)),
+          decoration: const InputDecoration(
+              labelText: 'Nominal', prefixIcon: RupiahPrefix(), prefixIconConstraints: RupiahPrefix.constraints),
         ),
         const SizedBox(height: AppSpace.x12),
         TextField(
@@ -326,7 +328,8 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
           spacing: AppSpace.x8,
           runSpacing: AppSpace.x8,
           children: [
-            for (final r in recurringRepeats) AppChip(label: r.label, selected: r == _repeat, onTap: () => setState(() => _repeat = r)),
+            for (final r in recurringRepeats)
+              AppChip(label: r.label, selected: r == _repeat, onTap: () => setState(() => _repeat = r)),
           ],
         ),
         FieldLabel(_r == null ? 'Mulai' : 'Berikutnya'),

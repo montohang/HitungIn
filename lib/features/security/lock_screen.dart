@@ -24,7 +24,25 @@ class LockScreen extends ConsumerStatefulWidget {
   ConsumerState<LockScreen> createState() => _LockScreenState();
 }
 
-class _LockScreenState extends ConsumerState<LockScreen> {
+class _LockScreenState extends ConsumerState<LockScreen> with SingleTickerProviderStateMixin {
+  /// "✓ Terbuka" tampil sebentar (desain), lalu isi layar kunci memudar
+  /// sebelum Beranda muncul — supaya perpindahannya halus, bukan loncat.
+  late final AnimationController _success =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 520));
+  late final Animation<double> _fadeOut =
+      CurvedAnimation(parent: _success, curve: const Interval(0.55, 1, curve: Curves.easeIn));
+  bool _unlocked = false;
+
+  Future<void> _finishUnlock() async {
+    if (_unlocked) return;
+    setState(() {
+      _unlocked = true;
+      _error = null;
+    });
+    if (!context.reduceMotion) await _success.forward();
+    if (mounted) ref.read(appGateProvider.notifier).unlock();
+  }
+
   bool _biometric = false;
   bool _busy = false;
   String? _error;
@@ -54,7 +72,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     notifier.state = false;
     if (!ok || !mounted) return;
     await ref.read(pinServiceProvider).resetAttempts();
-    ref.read(appGateProvider.notifier).unlock();
+    await _finishUnlock();
   }
 
   Future<void> _onPin(String pin) async {
@@ -64,7 +82,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     setState(() => _busy = false);
     switch (result) {
       case PinOk():
-        ref.read(appGateProvider.notifier).unlock();
+        await _finishUnlock();
       case PinWrong(:final int attemptsLeft):
         setState(() => _error = 'PIN salah. Sisa $attemptsLeft percobaan.');
       case PinLockedOut(:final DateTime until):
@@ -130,6 +148,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
 
   @override
   void dispose() {
+    _success.dispose();
     _ticker?.cancel();
     super.dispose();
   }
@@ -166,40 +185,48 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                 ),
               ),
               SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.x24, AppSpace.screenH, AppSpace.x8),
-                  child: PinField(
-                    style: PinPadStyle.onDark,
-                    error: _error,
-                    busy: _busy,
-                    enabled: _lockedUntil == null,
-                    onCompleted: _onPin,
-                    onBiometric: _biometric ? _useBiometric : null,
-                    header: Column(
-                      children: [
-                        const SizedBox(height: AppSpace.x32),
-                        const LogoMark(size: 64),
-                        const SizedBox(height: AppSpace.x12),
-                        Text(
-                          name == null ? 'Hai lagi' : 'Hai lagi, $name',
-                          textAlign: TextAlign.center,
-                          style: t.screenTitle.copyWith(fontSize: 26, color: Colors.white),
-                        ),
-                        const SizedBox(height: AppSpace.x8),
-                        Text(
-                          _biometric ? 'Masukkan PIN atau pakai sidik jari' : 'Masukkan PIN untuk membuka',
-                          style: t.body.copyWith(fontSize: 14, color: LockColors.hint),
-                        ),
-                      ],
-                    ),
-                    footer: Padding(
-                      padding: const EdgeInsets.only(top: AppSpace.x8),
-                      child: Pressable(
-                        onTap: _forgot,
-                        semanticLabel: 'Lupa PIN',
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpace.x12),
-                          child: Text('Lupa PIN?', style: t.label.copyWith(fontSize: 14, color: accentLight)),
+                child: FadeTransition(
+                  opacity: ReverseAnimation(_fadeOut),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.x24, AppSpace.screenH, AppSpace.x8),
+                    child: PinField(
+                      style: PinPadStyle.onDark,
+                      error: _error,
+                      busy: _busy || _unlocked,
+                      status: _unlocked
+                          ? const PinUnlockedBadge()
+                          : _busy
+                              ? const PinBusyStatus('Memeriksa PIN…', style: PinPadStyle.onDark)
+                              : null,
+                      enabled: _lockedUntil == null,
+                      onCompleted: _onPin,
+                      onBiometric: _biometric ? _useBiometric : null,
+                      header: Column(
+                        children: [
+                          const SizedBox(height: AppSpace.x32),
+                          const LogoMark(size: 64),
+                          const SizedBox(height: AppSpace.x12),
+                          Text(
+                            name == null ? 'Hai lagi' : 'Hai lagi, $name',
+                            textAlign: TextAlign.center,
+                            style: t.screenTitle.copyWith(fontSize: 26, color: Colors.white),
+                          ),
+                          const SizedBox(height: AppSpace.x8),
+                          Text(
+                            _biometric ? 'Masukkan PIN atau pakai sidik jari' : 'Masukkan PIN untuk membuka',
+                            style: t.body.copyWith(fontSize: 14, color: LockColors.hint),
+                          ),
+                        ],
+                      ),
+                      footer: Padding(
+                        padding: const EdgeInsets.only(top: AppSpace.x8),
+                        child: Pressable(
+                          onTap: _forgot,
+                          semanticLabel: 'Lupa PIN',
+                          child: Padding(
+                            padding: const EdgeInsets.all(AppSpace.x12),
+                            child: Text('Lupa PIN?', style: t.label.copyWith(fontSize: 14, color: accentLight)),
+                          ),
                         ),
                       ),
                     ),

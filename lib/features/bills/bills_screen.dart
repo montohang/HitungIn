@@ -17,6 +17,7 @@ import '../../core/widgets/app_fab.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/empty_state.dart';
+import '../../core/widgets/rupiah_prefix.dart';
 import '../security/app_gate.dart';
 import '../settings/widgets/settings_tile.dart';
 import '../premium/data/pro_limits.dart';
@@ -38,9 +39,8 @@ class BillsScreen extends ConsumerWidget {
     final DateTime now = ref.watch(clockProvider)();
     final AsyncValue<List<Bill>> async = ref.watch(activeBillsProvider);
     final List<Bill> bills = async.valueOrNull ?? const [];
-    final int monthTotal = bills
-        .where((b) => b.nextDue.year == now.year && b.nextDue.month == now.month)
-        .fold(0, (s, b) => s + b.amount);
+    final int monthTotal =
+        bills.where((b) => b.nextDue.year == now.year && b.nextDue.month == now.month).fold(0, (s, b) => s + b.amount);
 
     return Scaffold(
       appBar: AppBar(title: Text('Tagihan', style: t.screenTitle)),
@@ -64,7 +64,8 @@ class BillsScreen extends ConsumerWidget {
             if (monthTotal > 0)
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpace.x12),
-                child: Text('Jatuh tempo bulan ini: ${Rupiah.format(monthTotal)}', style: t.caption.copyWith(color: c.muted)),
+                child: Text('Jatuh tempo bulan ini: ${Rupiah.format(monthTotal)}',
+                    style: t.caption.copyWith(color: c.muted)),
               ),
             for (final b in bills)
               Padding(
@@ -172,7 +173,10 @@ class _PaySheetState extends ConsumerState<_PaySheet> {
     final int amount = RupiahInputFormatter.parse(_amount.text);
     if (amount <= 0) return setState(() => _error = 'Isi nominalnya.');
     if (_walletId == null) return setState(() => _error = 'Pilih dompet.');
-    await ref.read(appDatabaseProvider).billsDao.pay(widget.bill, walletId: _walletId, amount: amount, paidAt: ref.read(clockProvider)());
+    await ref
+        .read(appDatabaseProvider)
+        .billsDao
+        .pay(widget.bill, walletId: _walletId, amount: amount, paidAt: ref.read(clockProvider)());
     if (!mounted) return;
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
     Navigator.pop(context);
@@ -198,7 +202,8 @@ class _PaySheetState extends ConsumerState<_PaySheet> {
           keyboardType: TextInputType.number,
           inputFormatters: const [RupiahInputFormatter()],
           style: t.number,
-          decoration: InputDecoration(labelText: 'Nominal', prefixText: 'Rp', prefixStyle: t.number.copyWith(color: c.muted)),
+          decoration: const InputDecoration(
+              labelText: 'Nominal', prefixIcon: RupiahPrefix(), prefixIconConstraints: RupiahPrefix.constraints),
         ),
         const FieldLabel('Bayar dari'),
         Wrap(
@@ -340,7 +345,8 @@ class _BillFormState extends ConsumerState<_BillForm> {
           maxLength: 60,
           style: t.item,
           textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(labelText: 'Nama tagihan', hintText: 'Kos, listrik, cicilan motor', counterText: ''),
+          decoration: const InputDecoration(
+              labelText: 'Nama tagihan', hintText: 'Kos, listrik, cicilan motor', counterText: ''),
         ),
         const SizedBox(height: AppSpace.x12),
         TextField(
@@ -348,7 +354,8 @@ class _BillFormState extends ConsumerState<_BillForm> {
           keyboardType: TextInputType.number,
           inputFormatters: const [RupiahInputFormatter()],
           style: t.number,
-          decoration: InputDecoration(labelText: 'Nominal', prefixText: 'Rp', prefixStyle: t.number.copyWith(color: c.muted)),
+          decoration: const InputDecoration(
+              labelText: 'Nominal', prefixIcon: RupiahPrefix(), prefixIconConstraints: RupiahPrefix.constraints),
         ),
         const FieldLabel('Jatuh tempo'),
         AppChip(label: DateFmt.longDate(_due), icon: Icons.calendar_today_outlined, selected: true, onTap: _pickDate),
@@ -357,7 +364,8 @@ class _BillFormState extends ConsumerState<_BillForm> {
           spacing: AppSpace.x8,
           runSpacing: AppSpace.x8,
           children: [
-            for (final r in BillRepeat.values) AppChip(label: r.label, selected: r == _repeat, onTap: () => setState(() => _repeat = r)),
+            for (final r in BillRepeat.values)
+              AppChip(label: r.label, selected: r == _repeat, onTap: () => setState(() => _repeat = r)),
           ],
         ),
         const FieldLabel('Tandai sejak'),
@@ -446,7 +454,8 @@ class _ReminderCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Notifikasi pengingat', style: t.item),
-                  Text('Diingatkan sebelum jatuh tempo, walau aplikasi tertutup', style: t.caption.copyWith(color: c.muted)),
+                  Text('Diingatkan sebelum jatuh tempo, walau aplikasi tertutup',
+                      style: t.caption.copyWith(color: c.muted)),
                 ],
               ),
             ),

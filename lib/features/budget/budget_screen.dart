@@ -16,6 +16,7 @@ import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/month_switcher.dart';
 import '../../core/widgets/progress_bar.dart';
+import '../../core/widgets/rupiah_prefix.dart';
 import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
@@ -310,10 +311,9 @@ class _BudgetSheetState extends State<_BudgetSheet> {
                 keyboardType: TextInputType.number,
                 inputFormatters: const [RupiahInputFormatter()],
                 style: t.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Batas per bulan',
-                  prefixText: 'Rp',
-                  prefixStyle: t.number.copyWith(color: c.muted),
+                  prefixIcon: RupiahPrefix(), prefixIconConstraints: RupiahPrefix.constraints,
                 ),
               ),
               if (_error != null) ...[

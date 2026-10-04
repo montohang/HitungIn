@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/db/providers.dart';
@@ -51,6 +52,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   bool get _isNamePage => _step == _pages - 1;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Proses ke-4 ilustrasi sekarang supaya tidak ada jeda saat ganti halaman.
+    for (final WelcomeArt art in WelcomeArt.values) {
+      final SvgStringLoader loader = SvgStringLoader(welcomeSvg(art, context.colors));
+      svg.cache.putIfAbsent(loader.cacheKey(context), () => loader.loadBytes(context));
+    }
+  }
+
+  @override
   void dispose() {
     _name.dispose();
     super.dispose();
@@ -87,9 +98,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    final bool reduce = context.reduceMotion;
     final (WelcomeArt art, String title, String body) = _isNamePage
-        ? (WelcomeArt.nama, 'Mau dipanggil apa?', 'Untuk sapaan di beranda dan layar kunci. Boleh dikosongkan, bisa diubah nanti.')
+        ? (
+            WelcomeArt.nama,
+            'Mau dipanggil apa?',
+            'Untuk sapaan di beranda dan layar kunci. Boleh dikosongkan, bisa diubah nanti.'
+          )
         : welcomeSlides[_step];
 
     return PopScope(
@@ -133,38 +147,24 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       if (v < -250) _go(_step + 1);
                       if (v > 250) _go(_step - 1);
                     },
-                    child: AnimatedSwitcher(
-                      duration: reduce ? Duration.zero : const Duration(milliseconds: 450),
-                      switchInCurve: AppMotion.easeOut,
-                      // Isi menempel di atas (ilustrasi tepat di bawah header, seperti desain).
-                      layoutBuilder: (current, previous) => Stack(
-                        alignment: Alignment.topCenter,
-                        children: [...previous, if (current != null) current],
-                      ),
-                      transitionBuilder: (child, anim) => FadeTransition(
-                        opacity: anim,
-                        child: SlideTransition(
-                          position: Tween(begin: const Offset(0, 0.03), end: Offset.zero).animate(anim),
-                          child: child,
-                        ),
-                      ),
-                      child: _Slide(
-                        key: ValueKey(_step),
-                        art: art,
-                        title: title,
-                        body: body,
-                        nameField: _isNamePage
-                            ? TextField(
-                                controller: _name,
-                                textCapitalization: TextCapitalization.words,
-                                textInputAction: TextInputAction.done,
-                                maxLength: 24,
-                                style: t.item,
-                                decoration: const InputDecoration(hintText: 'Nama panggilan', counterText: ''),
-                                onSubmitted: (_) => _finish(),
-                              )
-                            : null,
-                      ),
+                    // Seperti desain: halaman lama langsung diganti, yang baru masuk
+                    // (ilustrasi lalu teks) — tanpa crossfade bertumpuk.
+                    child: _Slide(
+                      key: ValueKey(_step),
+                      art: art,
+                      title: title,
+                      body: body,
+                      nameField: _isNamePage
+                          ? TextField(
+                              controller: _name,
+                              textCapitalization: TextCapitalization.words,
+                              textInputAction: TextInputAction.done,
+                              maxLength: 24,
+                              style: t.item,
+                              decoration: const InputDecoration(hintText: 'Nama panggilan', counterText: ''),
+                              onSubmitted: (_) => _finish(),
+                            )
+                          : null,
                     ),
                   ),
                 ),
@@ -231,18 +231,28 @@ class _Slide extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (artH >= 160)
-                SizedBox(
-                  height: artH,
-                  child: Center(child: WelcomeIllustration(art: art, colors: c)),
+                _Entrance(
+                  child: SizedBox(
+                    height: artH,
+                    child: Center(child: WelcomeIllustration(art: art, colors: c)),
+                  ),
                 ),
               const SizedBox(height: AppSpace.x16),
-              Text(title, style: t.greeting.copyWith(fontSize: 30, height: 1.15)),
-              const SizedBox(height: AppSpace.x12),
-              Text(body, style: t.body.copyWith(fontSize: 16, height: 1.6, color: c.sub)),
-              if (nameField != null) ...[
-                const SizedBox(height: AppSpace.x16),
-                nameField!,
-              ],
+              _Entrance(
+                delay: const Duration(milliseconds: 80),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: t.greeting.copyWith(fontSize: 30, height: 1.15)),
+                    const SizedBox(height: AppSpace.x12),
+                    Text(body, style: t.body.copyWith(fontSize: 16, height: 1.6, color: c.sub)),
+                    if (nameField != null) ...[
+                      const SizedBox(height: AppSpace.x16),
+                      nameField!,
+                    ],
+                  ],
+                ),
+              ),
             ],
           ),
         );
@@ -278,4 +288,49 @@ class _Dots extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Animasi masuk dari desain: muncul + naik 12 px, 450 ms,
+/// cubic-bezier(.2,.8,.2,1). Mati bila "kurangi gerakan" aktif.
+class _Entrance extends StatefulWidget {
+  const _Entrance({required this.child, this.delay = Duration.zero});
+
+  final Widget child;
+  final Duration delay;
+
+  @override
+  State<_Entrance> createState() => _EntranceState();
+}
+
+class _EntranceState extends State<_Entrance> with SingleTickerProviderStateMixin {
+  static const Duration _duration = Duration(milliseconds: 450);
+  late final AnimationController _c = AnimationController(vsync: this, duration: _duration + widget.delay);
+  late final Animation<double> _v = CurvedAnimation(
+    parent: _c,
+    curve:
+        Interval(widget.delay.inMilliseconds / (_duration + widget.delay).inMilliseconds, 1, curve: AppMotion.easeOut),
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_c.isAnimating || _c.isCompleted) return;
+    context.reduceMotion ? _c.value = 1 : _c.forward();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: _v,
+        builder: (context, child) => Opacity(
+          opacity: _v.value,
+          child: Transform.translate(offset: Offset(0, 12 * (1 - _v.value)), child: child),
+        ),
+        child: widget.child,
+      );
 }

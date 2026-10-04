@@ -198,6 +198,7 @@ class PinField extends StatefulWidget {
     this.busy = false,
     this.onBiometric,
     this.shakeKey,
+    this.status,
   });
 
   final PinPadStyle style;
@@ -205,6 +206,9 @@ class PinField extends StatefulWidget {
 
   /// Titik bergoyang setiap nilai ini berubah (default: setiap [error] berubah).
   final Object? shakeKey;
+
+  /// Pengganti baris pesan di bawah titik (mis. indikator "Memeriksa PIN…").
+  final Widget? status;
   final Widget? header;
   final Widget? footer;
   final String? error;
@@ -266,10 +270,15 @@ class _PinFieldState extends State<PinField> {
                   SizedBox(
                     height: 40,
                     child: Center(
-                      child: Text(
-                        widget.error ?? '',
-                        textAlign: TextAlign.center,
-                        style: context.text.caption.copyWith(color: errorColor, fontWeight: FontWeight.w600),
+                      child: AnimatedSwitcher(
+                        duration: context.reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+                        child: widget.status ??
+                            Text(
+                              widget.error ?? '',
+                              key: ValueKey(widget.error),
+                              textAlign: TextAlign.center,
+                              style: context.text.caption.copyWith(color: errorColor, fontWeight: FontWeight.w600),
+                            ),
                       ),
                     ),
                   ),
@@ -336,4 +345,47 @@ class PinEntry extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Indikator kecil + teks untuk baris status PIN ("Memeriksa PIN…").
+class PinBusyStatus extends StatelessWidget {
+  const PinBusyStatus(this.label, {super.key, required this.style});
+
+  final String label;
+  final PinPadStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = style == PinPadStyle.onDark ? LockColors.hint : context.colors.muted;
+    return Row(
+      key: ValueKey(label),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox.square(dimension: 14, child: CircularProgressIndicator(strokeWidth: 2, color: color)),
+        const SizedBox(width: AppSpace.x8),
+        Text(label, style: context.text.caption.copyWith(color: color, fontWeight: FontWeight.w600)),
+      ],
+    );
+  }
+}
+
+/// Lencana hijau "✓ Terbuka" (desain Layar Kunci) sebelum masuk ke Beranda.
+class PinUnlockedBadge extends StatelessWidget {
+  const PinUnlockedBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        key: const ValueKey('terbuka'),
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16),
+        decoration: const BoxDecoration(color: Color(0x332FA37A), borderRadius: AppRadius.pillAll),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_rounded, size: 16, color: Color(0xFF7FE0B5)),
+            const SizedBox(width: AppSpace.x8),
+            Text('Terbuka', style: context.text.title.copyWith(fontSize: 14, color: const Color(0xFF7FE0B5))),
+          ],
+        ),
+      );
 }

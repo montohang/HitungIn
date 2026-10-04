@@ -12,6 +12,7 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_fab.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
+import '../../core/widgets/rupiah_prefix.dart';
 import '../settings/widgets/settings_tile.dart';
 import 'data/wallets_dao.dart';
 
@@ -227,8 +228,7 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
           decoration: InputDecoration(
             labelText: 'Saldo awal',
             helperText: _w == null ? 'Saldo saat ini, sebelum transaksi pertama dicatat.' : 'Saldo sebelum transaksi pertama. Saldo sekarang ikut berubah.',
-            prefixText: 'Rp',
-            prefixStyle: t.number.copyWith(color: c.muted),
+            prefixIcon: const RupiahPrefix(), prefixIconConstraints: RupiahPrefix.constraints,
           ),
         ),
         if (_error != null) ...[
