@@ -1,0 +1,87 @@
+import 'package:drift/drift.dart';
+
+import '../../../core/db/app_database.dart';
+
+part 'wallets_dao.g.dart';
+
+/// Dompet beserta saldo berjalannya.
+typedef WalletBalance = ({Wallet wallet, int balance});
+
+@DriftAccessor(tables: [Wallets, Transactions])
+class WalletsDao extends DatabaseAccessor<AppDatabase> with _$WalletsDaoMixin {
+  WalletsDao(super.attachedDatabase);
+
+  /// Saldo = saldo awal + pemasukan − pengeluaran − transfer keluar + transfer masuk.
+  static const String _balanceSql = '''
+    w.initial_balance
+    + COALESCE((SELECT SUM(CASE t.kind WHEN 'pemasukan' THEN t.amount ELSE -t.amount END)
+                FROM transactions t WHERE t.wallet_id = w.id), 0)
+    + COALESCE((SELECT SUM(t.amount) FROM transactions t WHERE t.to_wallet_id = w.id), 0)
+  ''';
+
+  Stream<List<WalletBalance>> watchBalances({bool includeArchived = false}) {
+    return customSelect(
+      'SELECT w.*, $_balanceSql AS balance FROM wallets w '
+      '${includeArchived ? '' : 'WHERE w.archived = 0 '}'
+      'ORDER BY w.sort_order, w.id',
+      readsFrom: {wallets, transactions},
+    ).watch().map((rows) => [
+          for (final row in rows) (wallet: wallets.map(row.data), balance: row.read<int>('balance')),
+        ]);
+  }
+
+  /// Total saldo semua dompet aktif.
+  Stream<int> watchTotalBalance() =>
+      watchBalances().map((list) => list.fold(0, (sum, w) => sum + w.balance));
+
+  Future<List<Wallet>> active() =>
+      (select(wallets)..where((w) => w.archived.equals(false))..orderBy([(w) => OrderingTerm(expression: w.sortOrder)])).get();
+
+  Future<int> add({required String name, required WalletType type, int initialBalance = 0, String? icon}) async {
+    final int order = await _nextSortOrder();
+    return into(wallets).insert(WalletsCompanion.insert(
+      name: name.trim(),
+      type: type,
+      initialBalance: Value(initialBalance),
+      icon: Value(icon ?? _defaultIcon(type)),
+      sortOrder: Value(order),
+    ));
+  }
+
+  Future<void> edit(Wallet wallet) => update(wallets).replace(wallet);
+
+  Future<void> setArchived(int id, bool archived) =>
+      (update(wallets)..where((w) => w.id.equals(id))).write(WalletsCompanion(archived: Value(archived)));
+
+  /// Menghapus hanya bila belum punya transaksi; selain itu arsipkan saja.
+  Future<bool> deleteIfUnused(int id) => transaction(() async {
+        final Expression<int> count = transactions.id.count();
+        final int used = await (selectOnly(transactions)
+              ..addColumns([count])
+              ..where(transactions.walletId.equals(id) | transactions.toWalletId.equals(id)))
+            .map((r) => r.read(count)!)
+            .getSingle();
+        if (used > 0) return false;
+        await (delete(wallets)..where((w) => w.id.equals(id))).go();
+        return true;
+      });
+
+  Future<void> reorder(List<int> idsInOrder) => batch((b) {
+        for (final (int i, int id) in idsInOrder.indexed) {
+          b.update(wallets, WalletsCompanion(sortOrder: Value(i)), where: (w) => w.id.equals(id));
+        }
+      });
+
+  Future<int> _nextSortOrder() async {
+    final Expression<int> max = wallets.sortOrder.max();
+    final int? current = await (selectOnly(wallets)..addColumns([max])).map((r) => r.read(max)).getSingle();
+    return (current ?? -1) + 1;
+  }
+
+  static String _defaultIcon(WalletType type) => switch (type) {
+        WalletType.tunai => 'cash',
+        WalletType.bank => 'bank',
+        WalletType.ewallet => 'ewallet',
+        WalletType.lainnya => 'wallet',
+      };
+}
