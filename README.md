@@ -3,9 +3,9 @@
 Pencatat keuangan pribadi **100% offline** — tanpa login, data tidak pernah meninggalkan HP.
 Flutter · Android dulu · tema default **gelap**.
 
-Status: **Tahap 6c — Ikon aplikasi** selesai: ikon peluncur resmi (adaptif + monokrom Android 13 + ikon Play Store),
-3 ikon alternatif untuk Pro (Gelap, Emas, Terang), dan splash gelap tanpa kilatan putih.
-Semua fitur yang dijanjikan di layar Pro sudah tersedia.
+Status: **Tahap 8 — Notifikasi pengingat tagihan** selesai (Pro): notifikasi lokal H-n & hari H pada jam pilihan,
+tetap jalan walau aplikasi tertutup dan setelah HP dinyalakan ulang; ketuk → layar Tagihan (lewat PIN bila terkunci).
+Sebelumnya: 6c ikon aplikasi resmi + alternatif Pro, splash gelap.
 
 ---
 
@@ -87,7 +87,8 @@ lib/
     settings/               # Pengaturan, Tema & warna, widgets/settings_tile.dart (tile, sheet, dialog)
     wallets/wallets_screen.dart       # tambah/ubah/urutkan/arsipkan/hapus dompet
     categories/categories_screen.dart # tambah/ubah ikon & kata kunci/urutkan/arsipkan kategori
-    bills/                  # bills_screen.dart (daftar, bayar, form) · data/bill_due.dart (status jatuh tempo)
+    bills/                  # bills_screen.dart (daftar, bayar, form, kartu notifikasi) · reminder_scheduler.dart
+                            # data/bill_due.dart (status jatuh tempo) · data/bill_reminders.dart (rencana notifikasi)
     recurring/              # recurring_screen.dart · data/recurring_dao.dart (runDue: catat jadwal jatuh tempo)
     reports/widgets/        # daily_chart.dart · trend_chart.dart
     premium/                # premium_screen.dart · pro_controller.dart · data/ (limits, billing, entitlement)
@@ -113,6 +114,7 @@ test/
   backup/backup_test.dart   # enkripsi cadangan, cadangkan→pulihkan, rollback, CSV
   recurring/recurring_test.dart  # jadwal berulang, susulan, tanggal 31, tren bulanan, filter dompet
   db/migration_test.dart    # v1 → v2 (skema & data lama) — helper di db/generated/ dari drift_dev
+  bills/bill_reminders_test.dart  # rencana H-n/H, jam, lewat waktu, batas, pengaturan, sinkronisasi
   branding/app_icon_test.dart  # kanal ganti ikon + konsistensi varian Dart ↔ manifest ↔ Kotlin ↔ berkas ikon
   premium/premium_test.dart # batas gratis, aturan iklan, simpan Pro, alur pembelian (Google Play palsu)
   settings/settings_logic_test.dart  # jatuh tempo, kunci otomatis, ganti PIN, kelola kategori/dompet
@@ -142,6 +144,7 @@ internet hanya dipakai AdMob dan Google Play Billing.
 | Iklan | Banner di Beranda, Riwayat, Laporan | Tanpa iklan |
 | Budget | Total + 2 kategori | Tak terbatas |
 | Tagihan aktif | 3 | Tak terbatas |
+| Notifikasi pengingat tagihan | – (pengingat di dalam aplikasi tetap ada) | ✅ |
 | Laporan | Bulan ini & bulan lalu | Semua bulan |
 | Ekspor CSV | 1× per iklan berhadiah | Bebas |
 | Laporan tren 6/12 bulan & filter dompet | – | ✅ |
@@ -169,6 +172,20 @@ lalu disimpan di Keystore supaya tetap berlaku offline. Pembelian selalu di-*ack
    data keuangan **tidak** dikumpulkan/dibagikan. Centang "Berisi iklan".
 5. Kebijakan privasi (URL) yang menjelaskan hal di atas.
 6. Ikon Play Store: `branding/play_store_icon_512.png`.
+
+## Notifikasi pengingat tagihan
+
+- Murni lokal (`flutter_local_notifications`), tanpa server/push. Rencana dibuat oleh `planBillReminders`
+  (`lib/features/bills/data/bill_reminders.dart`): H-*Tandai sejak* dan hari H pada jam pilihan (07/09/12/19),
+  waktu yang sudah lewat dilewati, maks. 64 terjadwal.
+- Disinkronkan (batalkan semua → jadwalkan ulang) saat aplikasi dibuka dan setiap kali tagihan, pengaturan
+  pengingat, atau status Pro berubah (`AppShell`). Membayar tagihan memajukan jatuh tempo → jadwal ikut maju.
+- Penjadwalan *inexact* (`inexactAllowWhileIdle`): tidak memakai izin alarm tepat waktu yang dibatasi Play Store,
+  jadi notifikasi bisa meleset beberapa menit. Dijadwalkan ulang setelah reboot (`RECEIVE_BOOT_COMPLETED`).
+- Izin notifikasi Android 13+ diminta saat pengguna menyalakan pengingat; kartu di layar Tagihan memberi tahu bila
+  izin dimatikan dari pengaturan HP.
+- Privasi: visibilitas `private` — di layar kunci yang aman, judul & nominal disembunyikan.
+- Butuh *core library desugaring* di `android/app/build.gradle.kts` (sudah diaktifkan).
 
 ## Ikon aplikasi
 
@@ -264,5 +281,5 @@ Referensi desain: kanvas "HitungIn — UI Design v1" di Claude.
 6. ~~Premium + iklan~~
 6b. ~~Fitur Pro: laporan tren 6–12 bulan & filter dompet, transaksi berulang, aksen tambahan~~
 6c. ~~Ikon peluncur resmi + ikon alternatif Pro + splash gelap~~
-7. Tes UI (widget) untuk layar Tahap 5–6b: Pengaturan, Dompet, Kategori, Tagihan, Keamanan/Ganti PIN, Cadangan, Tema, Premium, batas gratis, Transaksi berulang, tren & filter Laporan
-8. Notifikasi pengingat tagihan (saat ini pengingat hanya tampil di dalam aplikasi)
+7. Tes UI (widget) untuk layar Tahap 5–8 (termasuk kartu notifikasi Tagihan & pemilih ikon): Pengaturan, Dompet, Kategori, Tagihan, Keamanan/Ganti PIN, Cadangan, Tema, Premium, batas gratis, Transaksi berulang, tren & filter Laporan
+8. ~~Notifikasi pengingat tagihan~~

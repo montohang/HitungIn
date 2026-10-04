@@ -13,6 +13,8 @@ abstract final class SettingKeys {
   static const String onboardingDone = 'onboarding.done';
   static const String userName = 'user.name';
   static const String autoLock = 'security.autoLock';
+  static const String billReminders = 'bills.reminders';
+  static const String billReminderHour = 'bills.reminderHour';
 }
 
 @DriftAccessor(tables: [Settings])

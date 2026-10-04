@@ -6,6 +6,11 @@
          pernah dikirim; tidak ada server HitungIn. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Pengingat tagihan dijadwalkan ulang setelah HP dinyalakan ulang.
+         Sengaja TIDAK memakai izin alarm tepat waktu (dibatasi Play Store);
+         pengingat boleh meleset beberapa menit. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <!-- allowBackup=false: database tidak boleh ikut dicadangkan otomatis
          ke Google Drive (HitungIn 100% offline, dan kunci Keystore tidak
          ikut tersalin sehingga hasil pulihnya tak bisa dibuka). -->
@@ -91,6 +96,16 @@
             </intent-filter>
         </activity-alias>
 
+        <!-- flutter_local_notifications: tampilkan & jadwalkan ulang pengingat tagihan. -->
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

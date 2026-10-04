@@ -21,6 +21,9 @@ abstract final class FreeLimits {
     return diff <= reportMonthsBack;
   }
 
+  /// Notifikasi pengingat tagihan (pengingat di dalam aplikasi tetap gratis).
+  static bool canUseBillNotifications({required bool isPro}) => isPro;
+
   /// Ekspor CSV: Pro, atau sekali setelah menonton iklan berhadiah.
   static bool canExportCsv({required bool isPro, required bool rewardEarned}) => isPro || rewardEarned;
 }
@@ -34,7 +37,8 @@ enum ProReason {
   csv('Ekspor CSV kapan saja'),
   iklan('Tanpa iklan'),
   berulang('Transaksi berulang otomatis'),
-  tema('Aksen & ikon aplikasi tambahan');
+  tema('Aksen & ikon aplikasi tambahan'),
+  notifikasi('Pengingat tagihan lewat notifikasi');
 
   const ProReason(this.headline);
   final String headline;

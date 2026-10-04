@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +9,11 @@ import '../../core/theme/context_ext.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/db/providers.dart';
 import '../../core/security/secure_store.dart';
+import '../../core/db/app_database.dart';
 import '../ads/ad_policy.dart';
+import '../bills/bills_screen.dart';
+import '../bills/data/bill_reminders.dart';
+import '../bills/reminder_scheduler.dart';
 import '../ads/ads_service.dart';
 import '../ads/banner_slot.dart';
 import '../premium/pro_controller.dart';
@@ -38,8 +44,33 @@ class _AppShellState extends ConsumerState<AppShell> {
     }
   }
 
+  Timer? _reminderDebounce;
+
+  /// Jadwalkan ulang notifikasi tagihan (ditunda sebentar supaya beberapa
+  /// perubahan beruntun cukup sekali disinkronkan).
+  void _scheduleReminderSync() {
+    _reminderDebounce?.cancel();
+    _reminderDebounce = Timer(const Duration(milliseconds: 600), () async {
+      final List<Bill>? bills = ref.read(activeBillsProvider).valueOrNull;
+      final ReminderSettings? settings = ref.read(reminderSettingsProvider).valueOrNull;
+      if (bills == null || settings == null || !mounted) return;
+      await syncBillReminders(
+        scheduler: ref.read(reminderSchedulerProvider),
+        bills: bills,
+        settings: settings,
+        isPro: ref.read(isProProvider),
+        now: ref.read(clockProvider)(),
+      );
+    });
+  }
+
+  void _onNotificationTap(String payload) {
+    if (payload.startsWith(billPayloadPrefix) && mounted) context.push(Routes.tagihan);
+  }
+
   @override
   void dispose() {
+    _reminderDebounce?.cancel();
     _lifecycle.dispose();
     super.dispose();
   }
@@ -49,6 +80,10 @@ class _AppShellState extends ConsumerState<AppShell> {
     super.initState();
     _lifecycle;
     Future.microtask(_runRecurring);
+    Future.microtask(() async {
+      await ref.read(reminderSchedulerProvider).init(onTap: _onNotificationTap);
+      _scheduleReminderSync();
+    });
     // Shell hanya tampil setelah onboarding & buka kunci, jadi dialog
     // persetujuan iklan tidak mengganggu alur pertama kali buka.
     Future.microtask(() async {
@@ -71,6 +106,9 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(activeBillsProvider, (_, __) => _scheduleReminderSync());
+    ref.listen(reminderSettingsProvider, (_, __) => _scheduleReminderSync());
+    ref.listen(isProProvider, (_, __) => _scheduleReminderSync());
     final c = context.colors;
     final bool banner = AdPolicy.showBanner(
       tab: shell.currentIndex,

@@ -18,6 +18,7 @@ const List<(IconData, String, String, bool)> proBenefits = [
   (Icons.block, 'Tanpa iklan', 'Selamanya, di semua layar', true),
   (Icons.savings_outlined, 'Budget tanpa batas', 'Gratis: total + ${FreeLimits.categoryBudgets} kategori', true),
   (Icons.event_repeat_outlined, 'Tagihan tanpa batas', 'Gratis: ${FreeLimits.activeBills} tagihan aktif', true),
+  (Icons.notifications_outlined, 'Notifikasi pengingat tagihan', 'Diingatkan walau aplikasi tertutup', true),
   (Icons.insights_outlined, 'Laporan semua bulan', 'Gratis: bulan ini & bulan lalu', true),
   (Icons.table_chart_outlined, 'Ekspor CSV kapan saja', 'Gratis: sekali per iklan berhadiah', true),
   (Icons.trending_up, 'Tren 6–12 bulan & filter dompet', 'Laporan lanjutan', true),

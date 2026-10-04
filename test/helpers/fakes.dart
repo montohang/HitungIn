@@ -8,6 +8,7 @@ import 'package:hitungin/core/db/app_database.dart';
 import 'package:hitungin/core/db/providers.dart';
 import 'package:hitungin/core/security/secure_store.dart';
 import 'package:hitungin/features/ads/ads_service.dart';
+import 'package:hitungin/features/bills/reminder_scheduler.dart';
 import 'package:hitungin/features/premium/data/billing.dart';
 import 'package:hitungin/features/security/app_gate.dart';
 import 'package:hitungin/features/security/biometric_service.dart';
@@ -104,5 +105,6 @@ class TestEnv {
         initialGateProvider.overrideWithValue(initialGate),
         adsServiceProvider.overrideWithValue(const NoAdsService()),
         billingGatewayProvider.overrideWithValue(billing),
+        reminderSchedulerProvider.overrideWithValue(const NoReminderScheduler()),
       ];
 }

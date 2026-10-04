@@ -17,11 +17,14 @@ import '../../core/widgets/app_fab.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/empty_state.dart';
+import '../security/app_gate.dart';
 import '../settings/widgets/settings_tile.dart';
 import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
 import 'data/bill_due.dart';
+import 'data/bill_reminders.dart';
+import 'reminder_scheduler.dart';
 
 final activeBillsProvider = StreamProvider<List<Bill>>((ref) => ref.watch(appDatabaseProvider).billsDao.watchActive());
 
@@ -45,6 +48,8 @@ class BillsScreen extends ConsumerWidget {
       body: ListView(
         padding: AppSpace.screen.copyWith(top: AppSpace.x8, bottom: 96),
         children: [
+          const _ReminderCard(),
+          const SizedBox(height: AppSpace.x12),
           if (async.hasValue && bills.isEmpty)
             AppCard(
               child: EmptyState(
@@ -407,6 +412,113 @@ class _BillFormState extends ConsumerState<_BillForm> {
           AppButton(label: 'Hapus tagihan', variant: AppButtonVariant.danger, onPressed: _delete),
         ],
       ],
+    );
+  }
+}
+
+/// Pengaturan notifikasi pengingat (Pro). Pengingat di dalam aplikasi
+/// (status jatuh tempo, kartu di beranda) tetap untuk semua pengguna.
+class _ReminderCard extends ConsumerWidget {
+  const _ReminderCard();
+
+  Future<void> _toggle(WidgetRef ref, ReminderSettings s, bool on) async {
+    if (on && !await ref.read(reminderSchedulerProvider).permissionGranted()) {
+      await withAutoLockPaused(ref, () => ref.read(reminderSchedulerProvider).requestPermission());
+      ref.invalidate(notificationPermissionProvider);
+    }
+    await ref.read(reminderSettingsProvider.notifier).set((enabled: on, hour: s.hour));
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
+    final t = context.text;
+    final bool isPro = ref.watch(isProProvider);
+    if (!FreeLimits.canUseBillNotifications(isPro: isPro)) {
+      return AppCard(
+        onTap: () => openPremium(context, ProReason.notifikasi),
+        child: Row(
+          children: [
+            const IconTile(icon: Icons.notifications_outlined, size: 40),
+            const SizedBox(width: AppSpace.x12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Notifikasi pengingat', style: t.item),
+                  Text('Diingatkan sebelum jatuh tempo, walau aplikasi tertutup', style: t.caption.copyWith(color: c.muted)),
+                ],
+              ),
+            ),
+            const AppBadge.pro(),
+          ],
+        ),
+      );
+    }
+
+    final ReminderSettings? s = ref.watch(reminderSettingsProvider).valueOrNull;
+    if (s == null) return const SizedBox.shrink();
+    final bool granted = ref.watch(notificationPermissionProvider).valueOrNull ?? true;
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const IconTile(icon: Icons.notifications_outlined, size: 40),
+              const SizedBox(width: AppSpace.x12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Notifikasi pengingat', style: t.item),
+                    Text(
+                      s.enabled ? 'H-n sesuai "Tandai sejak" dan di hari H' : 'Mati',
+                      style: t.caption.copyWith(color: c.muted),
+                    ),
+                  ],
+                ),
+              ),
+              Switch.adaptive(value: s.enabled, activeTrackColor: c.accent, onChanged: (v) => _toggle(ref, s, v)),
+            ],
+          ),
+          if (s.enabled) ...[
+            const SizedBox(height: AppSpace.x12),
+            Wrap(
+              spacing: AppSpace.x8,
+              runSpacing: AppSpace.x8,
+              children: [
+                for (final h in reminderHours)
+                  AppChip(
+                    label: '${h.toString().padLeft(2, '0')}.00',
+                    selected: h == s.hour,
+                    onTap: () => ref.read(reminderSettingsProvider.notifier).set((enabled: true, hour: h)),
+                  ),
+              ],
+            ),
+            if (!granted) ...[
+              const SizedBox(height: AppSpace.x12),
+              Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, size: 18, color: c.warnInk),
+                  const SizedBox(width: AppSpace.x8),
+                  Expanded(
+                    child: Text('Notifikasi HitungIn sedang dimatikan di pengaturan HP.',
+                        style: t.caption.copyWith(color: c.warnInk)),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      await withAutoLockPaused(ref, () => ref.read(reminderSchedulerProvider).requestPermission());
+                      ref.invalidate(notificationPermissionProvider);
+                    },
+                    child: const Text('Izinkan'),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ],
+      ),
     );
   }
 }
