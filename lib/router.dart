@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/utils/date_format.dart';
+import 'features/budget/budget_screen.dart';
 import 'features/dev/design_gallery_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/onboarding/biometric_setup_screen.dart';
@@ -9,8 +12,15 @@ import 'features/onboarding/first_wallet_screen.dart';
 import 'features/onboarding/pin_setup_screen.dart';
 import 'features/onboarding/splash_screen.dart';
 import 'features/onboarding/welcome_screen.dart';
+import 'features/reports/laporan_screen.dart';
 import 'features/security/app_gate.dart';
 import 'features/security/lock_screen.dart';
+import 'features/shell/app_shell.dart';
+import 'features/transactions/catat_screen.dart';
+import 'features/transactions/riwayat_screen.dart';
+import 'features/transactions/tx_detail_screen.dart';
+
+final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 /// Router aplikasi. Setiap perubahan [appGateProvider] (PIN dibuat,
 /// onboarding selesai, terkunci/terbuka) memicu `gateRedirect` lagi.
@@ -19,6 +29,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(appGateProvider, (_, next) => gate.value = next);
 
   final GoRouter router = GoRouter(
+    navigatorKey: _rootKey,
     initialLocation: Routes.splash,
     refreshListenable: gate,
     redirect: (context, state) => gateRedirect(gate.value, state.uri),
@@ -29,7 +40,39 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.setupBiometric, builder: (_, __) => const BiometricSetupScreen()),
       GoRoute(path: Routes.setupWallet, builder: (_, __) => const FirstWalletScreen()),
       GoRoute(path: Routes.lock, builder: (_, __) => const LockScreen()),
-      GoRoute(path: Routes.home, builder: (_, __) => const HomeScreen()),
+      StatefulShellRoute.indexedStack(
+        builder: (_, __, shell) => AppShell(shell: shell),
+        branches: [
+          StatefulShellBranch(routes: [GoRoute(path: Routes.home, builder: (_, __) => const HomeScreen())]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.riwayat,
+              builder: (_, state) => RiwayatScreen(
+                initialMonth: DateFmt.parseMonthKey(state.uri.queryParameters['month']),
+                categoryId: int.tryParse(state.uri.queryParameters['category'] ?? ''),
+              ),
+            ),
+          ]),
+          StatefulShellBranch(routes: [GoRoute(path: Routes.laporan, builder: (_, __) => const LaporanScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: Routes.budget, builder: (_, __) => const BudgetScreen())]),
+        ],
+      ),
+      GoRoute(
+        path: Routes.catat,
+        parentNavigatorKey: _rootKey,
+        pageBuilder: (_, state) => MaterialPage(
+          fullscreenDialog: true,
+          child: CatatScreen(
+            initialText: state.uri.queryParameters['text'],
+            editId: int.tryParse(state.uri.queryParameters['id'] ?? ''),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/tx/:id',
+        parentNavigatorKey: _rootKey,
+        builder: (_, state) => TxDetailScreen(id: int.parse(state.pathParameters['id']!)),
+      ),
       if (kDebugMode) GoRoute(path: Routes.gallery, builder: (_, __) => const DesignGalleryScreen()),
     ],
   );

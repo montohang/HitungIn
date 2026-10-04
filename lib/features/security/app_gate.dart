@@ -76,6 +76,13 @@ abstract final class Routes {
   static const String setupWallet = '/setup/wallet';
   static const String lock = '/lock';
   static const String home = '/home';
+  static const String riwayat = '/riwayat';
+  static const String laporan = '/laporan';
+  static const String budget = '/budget';
+
+  /// `?text=` (isi Catat Cepat) atau `?id=` (ubah transaksi).
+  static const String catat = '/catat';
+  static String tx(int id) => '/tx/$id';
   static const String gallery = '/dev/gallery';
 
   static const Set<String> setup = {welcome, setupPin, setupBiometric, setupWallet};

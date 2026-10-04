@@ -71,9 +71,10 @@ void main() {
     await tester.tap(find.text('Selesai'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Total saldo'), findsOneWidget);
+    expect(find.textContaining('Total saldo'), findsOneWidget);
     expect(find.text('Rp225.000'), findsOneWidget);
     expect(find.textContaining('Rina', findRichText: true), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('GoPay'), 200, scrollable: find.byType(Scrollable).first);
     expect(find.text('GoPay'), findsOneWidget);
     expect(await env.db.settingsDao.read(SettingKeys.onboardingDone), 'true');
 
@@ -108,7 +109,7 @@ void main() {
       await _enterPin(tester, '000000');
       expect(find.text('PIN salah. Sisa 4 percobaan.'), findsOneWidget);
       await _enterPin(tester, '258013');
-      expect(find.text('Total saldo'), findsOneWidget);
+      expect(find.textContaining('Total saldo'), findsOneWidget);
       await _close(tester, env);
     });
 
@@ -127,7 +128,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(find.textContaining('Coba lagi'), findsNothing);
       await _enterPin(tester, '258013');
-      expect(find.text('Total saldo'), findsOneWidget);
+      expect(find.textContaining('Total saldo'), findsOneWidget);
       await _close(tester, env);
     });
 
@@ -137,7 +138,7 @@ void main() {
       await env.pin.setBiometricEnabled(true);
       await _pump(tester, env);
       expect(env.biometric.prompts, 1);
-      expect(find.text('Total saldo'), findsOneWidget);
+      expect(find.textContaining('Total saldo'), findsOneWidget);
       await _close(tester, env);
     });
 
@@ -150,7 +151,7 @@ void main() {
       expect(find.text('Masukkan PIN'), findsOneWidget);
       expect(find.bySemanticsLabel('Buka dengan sidik jari'), findsOneWidget);
       await _enterPin(tester, '258013');
-      expect(find.text('Total saldo'), findsOneWidget);
+      expect(find.textContaining('Total saldo'), findsOneWidget);
       await _close(tester, env);
     });
   });
@@ -159,7 +160,7 @@ void main() {
     final env = TestEnv(gate: const GateState(onboardingDone: true, hasPin: true, unlocked: true));
     await env.pin.setPin('258013');
     await _pump(tester, env);
-    expect(find.text('Total saldo'), findsOneWidget);
+    expect(find.textContaining('Total saldo'), findsOneWidget);
 
     // Sebentar saja → tidak terkunci.
     void background() {
@@ -176,7 +177,7 @@ void main() {
     env.clock.advance(const Duration(seconds: 10));
     foreground();
     await tester.pumpAndSettle();
-    expect(find.text('Total saldo'), findsOneWidget);
+    expect(find.textContaining('Total saldo'), findsOneWidget);
 
     background();
     env.clock.advance(const Duration(seconds: 31));

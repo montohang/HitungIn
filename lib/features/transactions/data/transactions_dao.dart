@@ -75,6 +75,10 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
     return q.watch().map(_mapDetails);
   }
 
+  /// Satu transaksi beserta relasinya; null bila sudah dihapus.
+  Stream<TxDetail?> watchDetail(int id) =>
+      (_detailQuery()..where(transactions.id.equals(id))).watch().map((rows) => rows.isEmpty ? null : _mapDetails(rows).single);
+
   Stream<List<TxDetail>> watchRecent({int limit = 5}) => (_detailQuery()..limit(limit)).watch().map(_mapDetails);
 
   Stream<PeriodSummary> watchSummary(DateTime from, DateTime to) {

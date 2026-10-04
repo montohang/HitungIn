@@ -3,9 +3,9 @@
 Pencatat keuangan pribadi **100% offline** — tanpa login, data tidak pernah meninggalkan HP.
 Flutter · Android dulu · tema default **gelap**.
 
-Status: **Tahap 3 — Alur pertama kali buka** selesai: splash, onboarding, PIN + sidik jari,
-dompet awal, layar kunci, kunci otomatis. Beranda masih versi sementara (saldo + daftar dompet);
-beranda lengkap di Tahap 4. *Design Gallery* bisa dibuka dari ikon palet di beranda (mode debug).
+Status: **Tahap 4 — Layar inti** selesai: Beranda, Catat (dengan Catat Cepat), Riwayat + Detail,
+Laporan, dan Budget dalam navigasi 4 tab + tombol Catat di tengah.
+*Design Gallery* bisa dibuka dari ikon palet di beranda (mode debug).
 
 ---
 
@@ -62,6 +62,9 @@ lib/
     utils/rupiah.dart       # format Rp8.450.000, Rp3,12 jt, Rp164rb
     utils/dates.dart        # rentang bulan, jatuh tempo berikutnya
     utils/rupiah_input.dart # format isian nominal 2.500.000 saat mengetik
+    utils/date_format.dart  # "Oktober 2026", "Kemarin", "08.42" tanpa data locale intl
+    db/data_providers.dart  # StreamProvider bersama (saldo, ringkasan, riwayat, budget)
+    widgets/month_switcher.dart, empty_state.dart
     security/secure_store.dart  # SecureStore (Keystore) + clockProvider
     widgets/                # Pressable, AppButton, AppCard, IconTile, AppChip,
                             # AppBadge, AppProgressBar, AppSegmentedControl,
@@ -78,7 +81,15 @@ lib/
       biometric_service.dart
       auto_lock.dart        # kunci setelah 30 dtk di latar belakang
       lock_screen.dart, widgets/pin_pad.dart
-    home/home_screen.dart   # beranda sementara
+    shell/app_shell.dart    # navigasi bawah: Beranda · Riwayat · [Catat] · Laporan · Budget
+    home/home_screen.dart   # sapaan, kartu saldo, Catat cepat, budget, transaksi terbaru, dompet
+    transactions/
+      catat_screen.dart     # catat/ubah; kolom Catat cepat mengisi form otomatis
+      riwayat_screen.dart   # per bulan, cari, filter jenis/kategori, dikelompokkan per hari
+      tx_detail_screen.dart # detail, ubah, hapus
+      widgets/tx_row.dart
+    reports/laporan_screen.dart  # ringkasan, grafik harian, per kategori → riwayat
+    budget/budget_screen.dart    # budget total & per kategori, sisa per hari
     dev/design_gallery_screen.dart
 test/
   rupiah_test.dart          # format Rupiah
@@ -87,8 +98,27 @@ test/
   db/database_test.dart     # saldo, ringkasan, budget, tagihan, enkripsi file
   security/                 # aturan redirect, PIN & penguncian
   onboarding/flow_test.dart # alur onboarding & layar kunci lewat UI
+  features/core_screens_test.dart  # Catat, transfer, detail, riwayat, laporan, budget lewat UI
   helpers/fakes.dart        # TestEnv: DB memori, SecureStore memori, jam & biometrik palsu
 ```
+
+Catatan tes widget: query Drift di luar frame wajib lewat `tester.runAsync`, dan DB ditutup
+dengan `tester.runAsync(db.close)` — kalau tidak, tes menggantung di zona fake-async.
+
+## Rute
+
+| Rute | Layar |
+|---|---|
+| `/home`, `/riwayat`, `/laporan`, `/budget` | 4 tab (StatefulShellRoute, state tiap tab dipertahankan) |
+| `/riwayat?month=2026-10&category=3` | Riwayat terfilter (dipakai dari Laporan) |
+| `/catat?text=kopi%2025rb` · `/catat?id=12` | Catat dengan isian awal · ubah transaksi |
+| `/tx/12` | Detail transaksi |
+
+## Grafik
+
+Laporan memakai satu warna (aksen) — tanpa palet kategorikal:
+pengeluaran harian = kolom (≤24 px, ujung atas membulat 4 px, celah 2 px, garis bantu tipis),
+ketuk kolom untuk melihat nilainya; per kategori = daftar batang terurut dengan nama, nominal, dan persen sebagai teks.
 
 ## Keamanan & alur masuk
 
@@ -140,5 +170,5 @@ Referensi desain: kanvas "HitungIn — UI Design v1" di Claude.
 1. ~~Fondasi~~
 2. ~~Lapisan data: Drift + SQLCipher, skema dompet/kategori/transaksi/budget/tagihan, parser "kopi 25rb gopay"~~
 3. ~~Alur pertama kali buka: splash, onboarding, PIN + biometrik, dompet awal, layar kunci~~
-4. Layar inti: Beranda, Catat, Riwayat/Detail, Laporan, Budget
+4. ~~Layar inti: Beranda, Catat, Riwayat/Detail, Laporan, Budget~~
 5. Pengaturan & sisa MVP, lalu Premium + iklan
