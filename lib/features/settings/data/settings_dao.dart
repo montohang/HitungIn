@@ -12,6 +12,7 @@ abstract final class SettingKeys {
   static const String themeGradientCard = 'theme.gradientCard';
   static const String onboardingDone = 'onboarding.done';
   static const String userName = 'user.name';
+  static const String autoLock = 'security.autoLock';
 }
 
 @DriftAccessor(tables: [Settings])

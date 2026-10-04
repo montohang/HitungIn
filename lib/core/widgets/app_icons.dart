@@ -26,5 +26,11 @@ abstract final class AppIcons {
     'other': Icons.more_horiz,
   };
 
+  /// Pilihan ikon di form kategori.
+  static const List<String> categoryKeys = [
+    'food', 'transport', 'shopping', 'bills', 'home', 'fun', 'health', 'education',
+    'gift', 'salary', 'bonus', 'business', 'invest', 'other',
+  ];
+
   static IconData of(String key) => _map[key] ?? Icons.more_horiz;
 }

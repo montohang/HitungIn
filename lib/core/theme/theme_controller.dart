@@ -56,6 +56,9 @@ class ThemeController extends Notifier<ThemeSettings> {
   @override
   ThemeSettings build() => ref.read(initialThemeSettingsProvider);
 
+  /// Dipakai setelah memulihkan cadangan (sudah tersimpan di database).
+  void applyLoaded(ThemeSettings settings) => state = settings;
+
   void setMode(AppThemeMode mode) {
     state = state.copyWith(mode: mode);
     _save(SettingKeys.themeMode, mode.name);

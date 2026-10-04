@@ -64,9 +64,20 @@ class AppGate extends Notifier<GateState> {
 
 final appGateProvider = NotifierProvider<AppGate, GateState>(AppGate.new);
 
-/// True selama dialog biometrik tampil, supaya kunci otomatis tidak
-/// terpicu oleh jeda lifecycle yang ditimbulkan dialog itu sendiri.
-final biometricPromptActiveProvider = StateProvider<bool>((ref) => false);
+/// True selama dialog sistem tampil (sidik jari, pemilih berkas), supaya
+/// kunci otomatis tidak terpicu oleh jeda lifecycle dari dialog itu sendiri.
+final autoLockPausedProvider = StateProvider<bool>((ref) => false);
+
+/// Jalankan [action] (yang membuka dialog sistem) tanpa memicu kunci otomatis.
+Future<T> withAutoLockPaused<T>(WidgetRef ref, Future<T> Function() action) async {
+  final notifier = ref.read(autoLockPausedProvider.notifier);
+  notifier.state = true;
+  try {
+    return await action();
+  } finally {
+    notifier.state = false;
+  }
+}
 
 abstract final class Routes {
   static const String splash = '/splash';
@@ -83,6 +94,15 @@ abstract final class Routes {
   /// `?text=` (isi Catat Cepat) atau `?id=` (ubah transaksi).
   static const String catat = '/catat';
   static String tx(int id) => '/tx/$id';
+
+  static const String pengaturan = '/pengaturan';
+  static const String dompet = '/pengaturan/dompet';
+  static const String kategori = '/pengaturan/kategori';
+  static const String tagihan = '/tagihan';
+  static const String keamanan = '/pengaturan/keamanan';
+  static const String gantiPin = '/pengaturan/keamanan/ganti-pin';
+  static const String cadangan = '/pengaturan/cadangan';
+  static const String tampilan = '/pengaturan/tampilan';
   static const String gallery = '/dev/gallery';
 
   static const Set<String> setup = {welcome, setupPin, setupBiometric, setupWallet};

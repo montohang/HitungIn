@@ -9,6 +9,7 @@ import 'core/db/providers.dart';
 import 'core/security/secure_store.dart';
 import 'core/theme/theme_controller.dart';
 import 'features/security/app_gate.dart';
+import 'features/security/auto_lock_setting.dart';
 import 'features/security/pin_service.dart';
 
 Future<void> main() async {
@@ -20,12 +21,14 @@ Future<void> main() async {
   final AppDatabase db = AppDatabase(openEncryptedConnection());
   final ThemeSettings theme = await loadThemeSettings(db.settingsDao);
   final GateState gate = await loadGateState(db.settingsDao, PinService(const FlutterSecureStore()));
+  final AutoLockDelay autoLock = await loadAutoLockDelay(db.settingsDao);
 
   runApp(ProviderScope(
     overrides: [
       appDatabaseProvider.overrideWithValue(db),
       initialThemeSettingsProvider.overrideWithValue(theme),
       initialGateProvider.overrideWithValue(gate),
+      initialAutoLockProvider.overrideWithValue(autoLock),
     ],
     child: const HitungInApp(),
   ));

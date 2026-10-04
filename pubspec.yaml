@@ -8,7 +8,9 @@ environment:
 
 dependencies:
   crypto: ^3.0.7
+  cryptography: ^2.9.0
   drift: ^2.34.4
+  file_picker: ^13.1.0
   flutter:
     sdk: flutter
   flutter_localizations:

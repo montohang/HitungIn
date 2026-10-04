@@ -17,6 +17,9 @@ import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/logo_mark.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/progress_bar.dart';
+import '../../core/db/app_database.dart';
+import '../bills/bills_screen.dart';
+import '../bills/data/bill_due.dart';
 import '../budget/data/budgets_dao.dart';
 import '../security/app_gate.dart';
 import '../transactions/data/transactions_dao.dart';
@@ -47,6 +50,10 @@ class HomeScreen extends ConsumerWidget {
     final List<BudgetProgress> budgets = ref.watch(budgetProgressProvider(month)).valueOrNull ?? const [];
     final BudgetProgress? totalBudget = budgets.where((b) => b.category == null).firstOrNull;
     final bool hasPin = ref.watch(appGateProvider.select((g) => g.hasPin));
+    final List<Bill> dueBills = [
+      for (final b in ref.watch(activeBillsProvider).valueOrNull ?? const <Bill>[])
+        if (billNeedsAttention(b, now)) b,
+    ];
     final bool gradient = ref.watch(themeControllerProvider.select((s) => s.gradientBalanceCard));
 
     return Scaffold(
@@ -62,6 +69,7 @@ class HomeScreen extends ConsumerWidget {
                 const Spacer(),
                 if (kDebugMode)
                   _HeaderButton(icon: Icons.palette_outlined, label: 'Galeri desain', onTap: () => context.push(Routes.gallery)),
+                _HeaderButton(icon: Icons.settings_outlined, label: 'Pengaturan', onTap: () => context.push(Routes.pengaturan)),
                 if (hasPin)
                   _HeaderButton(
                     icon: Icons.lock_outline,
@@ -89,6 +97,15 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpace.block),
             _QuickEntry(onSubmit: (text) => context.push(Uri(path: Routes.catat, queryParameters: {'text': text}).toString())),
+            if (dueBills.isNotEmpty) ...[
+              const SizedBox(height: AppSpace.x24),
+              SectionHeader('Tagihan mendatang', action: 'Semua tagihan', onAction: () => context.push(Routes.tagihan)),
+              for (final b in dueBills.take(3))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpace.x8),
+                  child: BillCard(bill: b, now: now),
+                ),
+            ],
             if (totalBudget != null) ...[
               const SizedBox(height: AppSpace.block),
               _BudgetGlance(progress: totalBudget, now: now, onTap: () => context.go(Routes.budget)),

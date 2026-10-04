@@ -46,7 +46,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   }
 
   Future<void> _useBiometric() async {
-    final notifier = ref.read(biometricPromptActiveProvider.notifier);
+    final notifier = ref.read(autoLockPausedProvider.notifier);
     notifier.state = true;
     final bool ok = await ref.read(biometricServiceProvider).authenticate('Buka HitungIn');
     notifier.state = false;

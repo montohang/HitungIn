@@ -3,14 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/security/secure_store.dart';
 import 'app_gate.dart';
+import 'auto_lock_setting.dart';
 
 /// Mengunci aplikasi bila ditinggal di latar belakang lebih lama dari
-/// [grace]. Dipasang sekali di atas router (lihat app.dart).
+/// jeda pilihan pengguna. Dipasang sekali di atas router (lihat app.dart).
+/// Lama jeda diatur di Pengaturan ([autoLockProvider]).
 class AutoLock extends ConsumerStatefulWidget {
-  const AutoLock({super.key, required this.child, this.grace = const Duration(seconds: 30)});
+  const AutoLock({super.key, required this.child});
 
   final Widget child;
-  final Duration grace;
 
   @override
   ConsumerState<AutoLock> createState() => _AutoLockState();
@@ -27,7 +28,7 @@ class _AutoLockState extends ConsumerState<AutoLock> {
   }
 
   void _onHide() {
-    if (ref.read(biometricPromptActiveProvider)) return;
+    if (ref.read(autoLockPausedProvider)) return;
     _hiddenAt = ref.read(clockProvider)();
   }
 
@@ -35,7 +36,7 @@ class _AutoLockState extends ConsumerState<AutoLock> {
     final DateTime? hiddenAt = _hiddenAt;
     _hiddenAt = null;
     if (hiddenAt == null) return;
-    if (ref.read(clockProvider)().difference(hiddenAt) >= widget.grace) {
+    if (ref.read(clockProvider)().difference(hiddenAt) >= ref.read(autoLockProvider).duration) {
       ref.read(appGateProvider.notifier).lock();
     }
   }

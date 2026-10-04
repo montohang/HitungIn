@@ -4,6 +4,14 @@ import '../../../core/db/app_database.dart';
 
 part 'categories_dao.g.dart';
 
+/// Rapikan isian kata kunci: `"Kopi, nasi ,kopi"` → `"kopi,nasi"`.
+String normalizeCategoryKeywords(String raw) => raw
+    .split(RegExp(r'[,\n]'))
+    .map((k) => k.trim().toLowerCase())
+    .where((k) => k.isNotEmpty)
+    .toSet()
+    .join(',');
+
 @DriftAccessor(tables: [Categories])
 class CategoriesDao extends DatabaseAccessor<AppDatabase> with _$CategoriesDaoMixin {
   CategoriesDao(super.attachedDatabase);
@@ -15,6 +23,32 @@ class CategoriesDao extends DatabaseAccessor<AppDatabase> with _$CategoriesDaoMi
   Stream<List<Category>> watchActive({TxKind? kind}) => _active(kind: kind).watch();
 
   Future<List<Category>> active({TxKind? kind}) => _active(kind: kind).get();
+
+  /// Untuk layar Kelola kategori: termasuk yang diarsipkan (di akhir).
+  Stream<List<Category>> watchAll(TxKind kind) => (select(categories)
+        ..where((c) => c.kind.equalsValue(kind))
+        ..orderBy([
+          (c) => OrderingTerm(expression: c.archived),
+          (c) => OrderingTerm(expression: c.sortOrder),
+          (c) => OrderingTerm(expression: c.id),
+        ]))
+      .watch();
+
+  Future<void> reorder(List<int> idsInOrder) => batch((b) {
+        for (final (int i, int id) in idsInOrder.indexed) {
+          b.update(categories, CategoriesCompanion(sortOrder: Value(i)), where: (c) => c.id.equals(id));
+        }
+      });
+
+  /// Jumlah transaksi yang memakai kategori (untuk peringatan saat diarsipkan).
+  Future<int> usage(int id) async {
+    final Expression<int> count = attachedDatabase.transactions.id.count();
+    return (selectOnly(attachedDatabase.transactions)
+          ..addColumns([count])
+          ..where(attachedDatabase.transactions.categoryId.equals(id)))
+        .map((r) => r.read(count)!)
+        .getSingle();
+  }
 
   Future<int> add({required String name, required TxKind kind, String icon = 'other', String keywords = ''}) async {
     assert(kind != TxKind.transfer, 'Kategori hanya untuk pengeluaran/pemasukan');

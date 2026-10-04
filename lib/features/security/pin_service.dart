@@ -97,6 +97,15 @@ class PinService {
     return PinLockedOut(lockUntil);
   }
 
+  /// Ganti PIN: PIN lama diperiksa dengan aturan percobaan yang sama
+  /// seperti layar kunci. PIN baru hanya disimpan bila hasilnya [PinOk].
+  Future<PinResult> changePin(String oldPin, String newPin) async {
+    if (!isValidFormat(newPin)) throw ArgumentError('PIN harus $pinLength digit angka');
+    final PinResult r = await verify(oldPin);
+    if (r is PinOk) await setPin(newPin);
+    return r;
+  }
+
   Future<bool> biometricEnabled() async => await _store.read(_kBiometric) == 'true';
 
   Future<void> setBiometricEnabled(bool value) => _store.write(_kBiometric, '$value');

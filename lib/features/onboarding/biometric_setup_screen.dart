@@ -26,9 +26,9 @@ class _BiometricSetupScreenState extends ConsumerState<BiometricSetupScreen> {
       _busy = true;
       _error = null;
     });
-    ref.read(biometricPromptActiveProvider.notifier).state = true;
+    ref.read(autoLockPausedProvider.notifier).state = true;
     final bool ok = await ref.read(biometricServiceProvider).authenticate('Konfirmasi sidik jari untuk HitungIn');
-    ref.read(biometricPromptActiveProvider.notifier).state = false;
+    ref.read(autoLockPausedProvider.notifier).state = false;
     if (!mounted) return;
     if (!ok) {
       setState(() {

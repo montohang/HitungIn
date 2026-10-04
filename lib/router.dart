@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/utils/date_format.dart';
+import 'features/backup/backup_screen.dart';
+import 'features/bills/bills_screen.dart';
 import 'features/budget/budget_screen.dart';
+import 'features/categories/categories_screen.dart';
 import 'features/dev/design_gallery_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/onboarding/biometric_setup_screen.dart';
@@ -15,10 +18,14 @@ import 'features/onboarding/welcome_screen.dart';
 import 'features/reports/laporan_screen.dart';
 import 'features/security/app_gate.dart';
 import 'features/security/lock_screen.dart';
+import 'features/security/security_screen.dart';
+import 'features/settings/appearance_screen.dart';
+import 'features/settings/settings_screen.dart';
 import 'features/shell/app_shell.dart';
 import 'features/transactions/catat_screen.dart';
 import 'features/transactions/riwayat_screen.dart';
 import 'features/transactions/tx_detail_screen.dart';
+import 'features/wallets/wallets_screen.dart';
 
 final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -73,6 +80,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootKey,
         builder: (_, state) => TxDetailScreen(id: int.parse(state.pathParameters['id']!)),
       ),
+      for (final (String path, Widget screen) in const [
+        (Routes.pengaturan, SettingsScreen()),
+        (Routes.dompet, WalletsScreen()),
+        (Routes.kategori, CategoriesScreen()),
+        (Routes.tagihan, BillsScreen()),
+        (Routes.keamanan, SecurityScreen()),
+        (Routes.gantiPin, ChangePinScreen()),
+        (Routes.cadangan, BackupScreen()),
+        (Routes.tampilan, AppearanceScreen()),
+      ])
+        GoRoute(path: path, parentNavigatorKey: _rootKey, builder: (_, __) => screen),
       if (kDebugMode) GoRoute(path: Routes.gallery, builder: (_, __) => const DesignGalleryScreen()),
     ],
   );

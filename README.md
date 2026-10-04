@@ -3,9 +3,9 @@
 Pencatat keuangan pribadi **100% offline** — tanpa login, data tidak pernah meninggalkan HP.
 Flutter · Android dulu · tema default **gelap**.
 
-Status: **Tahap 4 — Layar inti** selesai: Beranda, Catat (dengan Catat Cepat), Riwayat + Detail,
-Laporan, dan Budget dalam navigasi 4 tab + tombol Catat di tengah.
-*Design Gallery* bisa dibuka dari ikon palet di beranda (mode debug).
+Status: **Tahap 5 — Pengaturan & sisa MVP** selesai: kelola dompet & kategori, Tagihan (bayar → tercatat
+otomatis), cadangan terenkripsi + pulihkan, ekspor CSV, ganti PIN, sidik jari, kunci otomatis, tema, nama panggilan.
+Pengaturan dibuka dari ikon ⚙️ di beranda. *Design Gallery* ada di ikon palet (mode debug).
 
 ---
 
@@ -82,7 +82,13 @@ lib/
       auto_lock.dart        # kunci setelah 30 dtk di latar belakang
       lock_screen.dart, widgets/pin_pad.dart
     shell/app_shell.dart    # navigasi bawah: Beranda · Riwayat · [Catat] · Laporan · Budget
-    home/home_screen.dart   # sapaan, kartu saldo, Catat cepat, budget, transaksi terbaru, dompet
+    home/home_screen.dart   # sapaan, kartu saldo, Catat cepat, tagihan mendatang, budget, transaksi terbaru
+    settings/               # Pengaturan, Tema & warna, widgets/settings_tile.dart (tile, sheet, dialog)
+    wallets/wallets_screen.dart       # tambah/ubah/urutkan/arsipkan/hapus dompet
+    categories/categories_screen.dart # tambah/ubah ikon & kata kunci/urutkan/arsipkan kategori
+    bills/                  # bills_screen.dart (daftar, bayar, form) · data/bill_due.dart (status jatuh tempo)
+    backup/                 # backup_screen.dart · data/backup_codec.dart · backup_service.dart · csv_export.dart
+    security/security_screen.dart     # sidik jari, kunci otomatis, ganti PIN
     transactions/
       catat_screen.dart     # catat/ubah; kolom Catat cepat mengisi form otomatis
       riwayat_screen.dart   # per bulan, cari, filter jenis/kategori, dikelompokkan per hari
@@ -99,11 +105,23 @@ test/
   security/                 # aturan redirect, PIN & penguncian
   onboarding/flow_test.dart # alur onboarding & layar kunci lewat UI
   features/core_screens_test.dart  # Catat, transfer, detail, riwayat, laporan, budget lewat UI
+  backup/backup_test.dart   # enkripsi cadangan, cadangkan→pulihkan, rollback, CSV
+  settings/settings_logic_test.dart  # jatuh tempo, kunci otomatis, ganti PIN, kelola kategori/dompet
   helpers/fakes.dart        # TestEnv: DB memori, SecureStore memori, jam & biometrik palsu
 ```
 
 Catatan tes widget: query Drift di luar frame wajib lewat `tester.runAsync`, dan DB ditutup
 dengan `tester.runAsync(db.close)` — kalau tidak, tes menggantung di zona fake-async.
+
+## Cadangan
+
+- Berkas `.hitungin`: `HITUNGIN-BAK` · versi · iterasi · garam · nonce · ciphertext · MAC.
+  Isi = JSON seluruh tabel → gzip → **AES-256-GCM**, kunci = **PBKDF2-HMAC-SHA256** (150.000 iterasi) dari kata sandi
+  (min. 8 karakter). Header ikut diautentikasi; berkas yang diubah atau kata sandi salah ditolak.
+- Disimpan/dibuka lewat pemilih berkas sistem (`file_picker`) — tidak ada unggahan otomatis.
+- Pulihkan = **mengganti** semua data dalam satu transaksi (gagal → tidak ada yang berubah).
+  PIN, kunci database, dan status onboarding tidak ikut (milik perangkat).
+- CSV: UTF-8 + BOM, nominal bertanda (pengeluaran negatif), sel yang diawali `= + - @` diberi `'` agar tidak dieksekusi spreadsheet.
 
 ## Rute
 
@@ -113,6 +131,7 @@ dengan `tester.runAsync(db.close)` — kalau tidak, tes menggantung di zona fake
 | `/riwayat?month=2026-10&category=3` | Riwayat terfilter (dipakai dari Laporan) |
 | `/catat?text=kopi%2025rb` · `/catat?id=12` | Catat dengan isian awal · ubah transaksi |
 | `/tx/12` | Detail transaksi |
+| `/pengaturan` (+ `/dompet`, `/kategori`, `/keamanan`, `/keamanan/ganti-pin`, `/cadangan`, `/tampilan`) · `/tagihan` | Pengaturan & sub-layarnya |
 
 ## Grafik
 
@@ -171,4 +190,7 @@ Referensi desain: kanvas "HitungIn — UI Design v1" di Claude.
 2. ~~Lapisan data: Drift + SQLCipher, skema dompet/kategori/transaksi/budget/tagihan, parser "kopi 25rb gopay"~~
 3. ~~Alur pertama kali buka: splash, onboarding, PIN + biometrik, dompet awal, layar kunci~~
 4. ~~Layar inti: Beranda, Catat, Riwayat/Detail, Laporan, Budget~~
-5. Pengaturan & sisa MVP, lalu Premium + iklan
+5. ~~Pengaturan & sisa MVP: dompet, kategori, tagihan, cadangan, CSV, ganti PIN, kunci otomatis, tema~~
+6. Premium + iklan
+7. Tes UI (widget) untuk layar Tahap 5: Pengaturan, Dompet, Kategori, Tagihan, Keamanan/Ganti PIN, Cadangan, Tema
+8. Notifikasi pengingat tagihan (saat ini pengingat hanya tampil di dalam aplikasi)
