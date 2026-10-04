@@ -14,7 +14,8 @@ PurchaseDetails _purchase(PurchaseStatus status, {String product = proProductId,
     PurchaseDetails(
       purchaseID: 'GPA.1234',
       productID: product,
-      verificationData: PurchaseVerificationData(localVerificationData: '{}', serverVerificationData: 'token', source: 'google_play'),
+      verificationData:
+          PurchaseVerificationData(localVerificationData: '{}', serverVerificationData: 'token', source: 'google_play'),
       transactionDate: '0',
       status: status,
     )..pendingCompletePurchase = pendingComplete;
@@ -55,11 +56,12 @@ void main() {
   });
 
   group('aturan iklan', () {
-    test('banner hanya di Beranda, Riwayat, Laporan — dan tidak untuk Pro', () {
-      for (final tab in [0, 1, 2]) {
+    test('banner hanya di Beranda & Laporan — dan tidak untuk Pro', () {
+      for (final tab in [0, 1]) {
         expect(AdPolicy.showBanner(tab: tab, isPro: false, adsReady: true), isTrue);
       }
-      expect(AdPolicy.showBanner(tab: 3, isPro: false, adsReady: true), isFalse, reason: 'Budget');
+      expect(AdPolicy.showBanner(tab: 2, isPro: false, adsReady: true), isFalse, reason: 'Budget');
+      expect(AdPolicy.showBanner(tab: 3, isPro: false, adsReady: true), isFalse, reason: 'Lainnya');
       expect(AdPolicy.showBanner(tab: 0, isPro: true, adsReady: true), isFalse);
       expect(AdPolicy.showBanner(tab: 0, isPro: false, adsReady: false), isFalse, reason: 'belum ada persetujuan');
     });

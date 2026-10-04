@@ -30,12 +30,12 @@ Future<void> _enterPin(WidgetTester tester, String pin) async {
 }
 
 void main() {
-  testWidgets('Pengaturan dari beranda: ubah nama panggilan', (tester) async {
+  testWidgets('Tab Lainnya: ubah nama panggilan', (tester) async {
     final app = AppHarness(tester);
     await app.seed();
     await app.pump(tester);
 
-    await tester.tap(find.bySemanticsLabel('Pengaturan'));
+    await tester.tap(find.text('Lainnya'));
     await tester.pumpAndSettle();
     expect(find.text('Belum diisi'), findsOneWidget);
     await app.tap('Nama panggilan');
@@ -44,8 +44,9 @@ void main() {
 
     expect(find.text('Rina'), findsOneWidget);
     expect(await app.setting(SettingKeys.userName), 'Rina');
-    await app.back(tester);
-    expect(find.textContaining('Selamat pagi, Rina', findRichText: true), findsOneWidget);
+    await tester.tap(find.text('Beranda'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Rina', findRichText: true), findsOneWidget);
     await app.close(tester);
   });
 

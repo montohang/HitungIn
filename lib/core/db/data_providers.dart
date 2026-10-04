@@ -20,6 +20,18 @@ final activeCategoriesProvider = StreamProvider<List<Category>>(
   (ref) => ref.watch(appDatabaseProvider).categoriesDao.watchActive(),
 );
 
+/// Waktu cadangan terakhir (milik perangkat ini).
+final lastBackupProvider = StreamProvider<DateTime?>((ref) => ref
+    .watch(appDatabaseProvider)
+    .settingsDao
+    .watch(SettingKeys.lastBackupAt)
+    .map((v) => v == null ? null : DateTime.tryParse(v)));
+
+/// Tombol mata di Beranda: sembunyikan nominal.
+final hideBalanceProvider = StreamProvider<bool>(
+  (ref) => ref.watch(appDatabaseProvider).settingsDao.watch(SettingKeys.hideBalance).map((v) => v == 'true'),
+);
+
 final userNameProvider = StreamProvider<String?>(
   (ref) => ref.watch(appDatabaseProvider).settingsDao.watch(SettingKeys.userName),
 );

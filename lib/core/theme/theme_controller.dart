@@ -21,7 +21,7 @@ class ThemeSettings {
   const ThemeSettings({
     this.mode = AppThemeMode.gelap,
     this.accent = AccentPreset.indigo,
-    this.gradientBalanceCard = false,
+    this.gradientBalanceCard = true,
   });
 
   /// Default HitungIn: GELAP.
@@ -90,7 +90,8 @@ Future<ThemeSettings> loadThemeSettings(SettingsDao dao) async {
   return ThemeSettings(
     mode: byName(AppThemeMode.values, all[SettingKeys.themeMode]) ?? AppThemeMode.gelap,
     accent: byName(AccentPreset.values, all[SettingKeys.themeAccent]) ?? AccentPreset.indigo,
-    gradientBalanceCard: all[SettingKeys.themeGradientCard] == 'true',
+    // Desain: kartu saldo bergradien secara default.
+    gradientBalanceCard: all[SettingKeys.themeGradientCard] != 'false',
   );
 }
 

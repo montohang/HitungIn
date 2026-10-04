@@ -14,6 +14,8 @@ abstract final class SettingKeys {
   static const String userName = 'user.name';
   static const String autoLock = 'security.autoLock';
   static const String billReminders = 'bills.reminders';
+  static const String lastBackupAt = 'backup.lastAt';
+  static const String hideBalance = 'home.hideBalance';
   static const String billReminderHour = 'bills.reminderHour';
 }
 
@@ -27,8 +29,7 @@ class SettingsDao extends DatabaseAccessor<AppDatabase> with _$SettingsDaoMixin 
   Stream<String?> watch(String key) =>
       (select(settings)..where((s) => s.key.equals(key))).map((s) => s.value).watchSingleOrNull();
 
-  Future<Map<String, String>> readAll() async =>
-      {for (final Setting s in await select(settings).get()) s.key: s.value};
+  Future<Map<String, String>> readAll() async => {for (final Setting s in await select(settings).get()) s.key: s.value};
 
   Future<void> write(String key, String value) =>
       into(settings).insertOnConflictUpdate(SettingsCompanion.insert(key: key, value: value));

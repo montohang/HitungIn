@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +10,14 @@ import '../../core/theme/context_ext.dart';
 import '../../core/theme/theme_controller.dart';
 import '../../core/widgets/app_button.dart';
 import '../security/app_gate.dart';
-import '../security/auto_lock_setting.dart';
+import '../../core/security/secure_store.dart';
+import '../../core/widgets/logo_mark.dart';
+import '../../core/widgets/pressable.dart';
+import '../../core/db/app_database.dart';
+import '../backup/data/backup_age.dart';
+import '../bills/bills_screen.dart' show activeBillsProvider;
+import '../bills/data/bill_due.dart';
+import '../security/pin_service.dart';
 import '../../core/widgets/app_chip.dart';
 import '../ads/ads_service.dart';
 import '../premium/data/pro_limits.dart';
@@ -25,6 +33,11 @@ final _adPrivacyRequiredProvider = FutureProvider.autoDispose<bool>((ref) async 
   return ref.watch(adsServiceProvider).privacyOptionsRequired();
 });
 
+final _biometricOnProvider =
+    FutureProvider.autoDispose<bool>((ref) => ref.watch(pinServiceProvider).biometricEnabled());
+
+/// Tab "Lainnya" (Claude Design › Lainnya): Premium, kelola data, privasi,
+/// tampilan, tentang.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -35,119 +48,189 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final t = context.text;
+    final DateTime now = ref.watch(clockProvider)();
     final String? name = ref.watch(userNameProvider).valueOrNull;
     final ThemeSettings theme = ref.watch(themeControllerProvider);
-    final AutoLockDelay autoLock = ref.watch(autoLockProvider);
     final int wallets = ref.watch(walletBalancesProvider).valueOrNull?.length ?? 0;
+    final int categories = ref.watch(activeCategoriesProvider).valueOrNull?.length ?? 0;
+    final int dueSoon = [
+      for (final b in ref.watch(activeBillsProvider).valueOrNull ?? const <Bill>[])
+        if (billNeedsAttention(b, now)) b,
+    ].length;
     final bool hasPin = ref.watch(appGateProvider.select((g) => g.hasPin));
+    final bool bio = ref.watch(_biometricOnProvider).valueOrNull ?? false;
     final bool isPro = ref.watch(isProProvider);
     final bool adPrivacy = ref.watch(_adPrivacyRequiredProvider).valueOrNull ?? false;
+    final ({String label, bool fresh}) backup = backupAge(ref.watch(lastBackupProvider).valueOrNull, now);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Pengaturan', style: t.screenTitle)),
-      body: ListView(
-        padding: AppSpace.screen.copyWith(top: AppSpace.x8),
-        children: [
-          SettingsGroup(
-            children: [
-              SettingsTile(
-                icon: Icons.workspace_premium_outlined,
-                title: isPro ? 'HitungIn Pro aktif' : 'HitungIn Pro',
-                subtitle: isPro ? 'Terima kasih sudah mendukung!' : 'Tanpa iklan, budget & tagihan tanpa batas',
-                trailing: const AppBadge.pro(),
-                onTap: () => openPremium(context, isPro ? ProReason.umum : ProReason.iklan),
-              ),
-            ],
-          ),
-          SettingsGroup(
-            title: 'Profil',
-            children: [
-              SettingsTile(
-                icon: Icons.person_outline,
-                title: 'Nama panggilan',
-                subtitle: name ?? 'Belum diisi',
-                onTap: () => _editName(context, name),
-              ),
-            ],
-          ),
-          SettingsGroup(
-            title: 'Data',
-            children: [
-              SettingsTile(
-                icon: Icons.account_balance_wallet_outlined,
-                title: 'Dompet',
-                subtitle: '$wallets aktif',
-                onTap: () => context.push(Routes.dompet),
-              ),
-              SettingsTile(icon: Icons.category_outlined, title: 'Kategori', onTap: () => context.push(Routes.kategori)),
-              SettingsTile(icon: Icons.event_repeat_outlined, title: 'Tagihan', onTap: () => context.push(Routes.tagihan)),
-              SettingsTile(
-                icon: Icons.autorenew,
-                title: 'Transaksi berulang',
-                subtitle: 'Gaji & langganan dicatat otomatis',
-                trailing: isPro ? null : const AppBadge.pro(),
-                onTap: () => context.push(Routes.berulang),
-              ),
-            ],
-          ),
-          SettingsGroup(
-            title: 'Tampilan',
-            children: [
-              SettingsTile(
-                icon: Icons.palette_outlined,
-                title: 'Tema & warna',
-                subtitle: '${theme.mode.label} · ${theme.accent.label}',
-                onTap: () => context.push(Routes.tampilan),
-              ),
-            ],
-          ),
-          SettingsGroup(
-            title: 'Keamanan & privasi',
-            children: [
-              SettingsTile(
-                icon: Icons.lock_outline,
-                title: 'PIN & kunci',
-                subtitle: hasPin ? 'Kunci otomatis: ${autoLock.label.toLowerCase()}' : 'PIN belum dibuat',
-                onTap: () => context.push(Routes.keamanan),
-              ),
-              if (!isPro && adPrivacy)
+      body: SafeArea(
+        child: ListView(
+          padding: AppSpace.screen,
+          children: [
+            Text('Lainnya', style: t.pageTitle),
+            const SizedBox(height: AppSpace.block),
+            _PremiumCard(isPro: isPro, onTap: () => openPremium(context, isPro ? ProReason.umum : ProReason.iklan)),
+            const SizedBox(height: AppSpace.x24),
+            SettingsGroup(
+              title: 'Kelola',
+              children: [
                 SettingsTile(
-                  icon: Icons.privacy_tip_outlined,
-                  title: 'Privasi iklan',
-                  subtitle: 'Atur persetujuan iklan Google',
-                  onTap: () => withAutoLockPaused(ref, () => ref.read(adsServiceProvider).showPrivacyOptions()),
+                  icon: Icons.person_outline,
+                  title: 'Nama panggilan',
+                  value: name ?? 'Belum diisi',
+                  onTap: () => _editName(context, name),
                 ),
-              SettingsTile(
-                icon: Icons.backup_outlined,
-                title: 'Cadangan & ekspor',
-                subtitle: 'Berkas terenkripsi, CSV',
-                onTap: () => context.push(Routes.cadangan),
+                SettingsTile(
+                  icon: Icons.account_balance_wallet_outlined,
+                  title: 'Dompet',
+                  value: '$wallets',
+                  onTap: () => context.push(Routes.dompet),
+                ),
+                SettingsTile(
+                  icon: Icons.grid_view_outlined,
+                  title: 'Kategori',
+                  value: '$categories',
+                  onTap: () => context.push(Routes.kategori),
+                ),
+                SettingsTile(
+                  icon: Icons.event_repeat_outlined,
+                  title: 'Tagihan',
+                  badge: dueSoon > 0 ? '$dueSoon segera' : null,
+                  onTap: () => context.push(Routes.tagihan),
+                ),
+                SettingsTile(
+                  icon: Icons.autorenew,
+                  title: 'Transaksi berulang',
+                  badge: isPro ? null : 'PRO',
+                  badgeTone: TileBadgeTone.pro,
+                  onTap: () => context.push(Routes.berulang),
+                ),
+              ],
+            ),
+            SettingsGroup(
+              title: 'Data & privasi',
+              children: [
+                SettingsTile(
+                  icon: Icons.verified_user_outlined,
+                  title: 'Keamanan',
+                  value: !hasPin ? 'Belum ada PIN' : (bio ? 'PIN + sidik jari' : 'PIN'),
+                  onTap: () => context.push(Routes.keamanan),
+                ),
+                SettingsTile(
+                  icon: Icons.download_outlined,
+                  title: 'Backup & pulihkan',
+                  badge: backup.label,
+                  badgeTone: backup.fresh ? TileBadgeTone.good : TileBadgeTone.warn,
+                  onTap: () => context.push(Routes.cadangan),
+                ),
+                SettingsTile(
+                  icon: Icons.upload_outlined,
+                  title: 'Export data',
+                  value: 'CSV',
+                  onTap: () => context.push(Routes.cadangan),
+                ),
+                if (!isPro && adPrivacy)
+                  SettingsTile(
+                    icon: Icons.privacy_tip_outlined,
+                    title: 'Privasi iklan',
+                    onTap: () => withAutoLockPaused(ref, () => ref.read(adsServiceProvider).showPrivacyOptions()),
+                  ),
+              ],
+            ),
+            SettingsGroup(
+              title: 'Tampilan',
+              children: [
+                SettingsTile(
+                  icon: Icons.palette_outlined,
+                  title: 'Tema & warna',
+                  value: theme.accent.label,
+                  onTap: () => context.push(Routes.tampilan),
+                ),
+              ],
+            ),
+            SettingsGroup(
+              title: 'Tentang',
+              children: [
+                SettingsTile(
+                  icon: Icons.description_outlined,
+                  title: 'Lisensi sumber terbuka',
+                  onTap: () =>
+                      showLicensePage(context: context, applicationName: 'HitungIn', applicationVersion: appVersion),
+                ),
+                if (kDebugMode)
+                  SettingsTile(
+                    icon: Icons.palette_outlined,
+                    title: 'Galeri desain',
+                    value: 'debug',
+                    onTap: () => context.push(Routes.gallery),
+                  ),
+              ],
+            ),
+            Text('HitungIn v$appVersion · dibuat di Indonesia',
+                textAlign: TextAlign.center, style: t.label.copyWith(color: c.muted, fontWeight: FontWeight.w500)),
+            const SizedBox(height: AppSpace.x4),
+            Text('Tanpa akun. Tanpa server. Datamu milikmu.',
+                textAlign: TextAlign.center, style: t.label.copyWith(color: c.muted, fontWeight: FontWeight.w500)),
+            if (!isPro) ...[
+              const SizedBox(height: AppSpace.x4),
+              Text(
+                'Versi gratis menampilkan iklan Google AdMob (memakai ID iklan, bukan data keuanganmu).',
+                textAlign: TextAlign.center,
+                style: t.label.copyWith(color: c.muted, fontWeight: FontWeight.w500),
               ),
             ],
+            const SizedBox(height: AppSpace.x16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PremiumCard extends StatelessWidget {
+  const _PremiumCard({required this.isPro, required this.onTap});
+
+  final bool isPro;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    return Pressable.card(
+      onTap: onTap,
+      semanticLabel: isPro ? 'HitungIn Pro aktif' : 'Upgrade ke Premium',
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 80),
+        padding: const EdgeInsets.all(AppSpace.card),
+        decoration: BoxDecoration(
+          borderRadius: AppRadius.lgAll,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [const Color(0xFF1A1733), Color.lerp(const Color(0xFF24203F), c.accent, 0.6)!],
           ),
-          SettingsGroup(
-            title: 'Tentang',
-            children: [
-              const SettingsTile(
-                icon: Icons.info_outline,
-                title: 'HitungIn $appVersion',
-                subtitle: 'Tanpa akun · data keuangan terenkripsi & hanya di HP ini',
+        ),
+        child: Row(
+          children: [
+            LogoMark(size: 48, background: Colors.white.withAlpha(0x22)),
+            const SizedBox(width: AppSpace.x12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(isPro ? 'HitungIn Pro aktif' : 'Upgrade ke Premium',
+                      style: t.title.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: AppSpace.x2),
+                  Text(isPro ? 'Terima kasih sudah mendukung HitungIn!' : 'Sekali bayar, tanpa iklan selamanya',
+                      style: t.caption.copyWith(color: const Color(0xFFD8D5EE))),
+                ],
               ),
-              SettingsTile(
-                icon: Icons.description_outlined,
-                title: 'Lisensi sumber terbuka',
-                onTap: () => showLicensePage(context: context, applicationName: 'HitungIn', applicationVersion: appVersion),
-              ),
-            ],
-          ),
-          Text(
-            'Catatan keuanganmu tidak pernah dikirim ke mana pun — tidak ada server HitungIn. '
-            'Versi gratis menampilkan iklan Google AdMob, yang memakai ID iklan perangkat (bukan data keuanganmu). '
-            'Cadangan hanya dibuat saat kamu memintanya.',
-            style: t.caption.copyWith(color: c.muted),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            ),
+            const AppBadge.pro(),
+          ],
+        ),
       ),
     );
   }

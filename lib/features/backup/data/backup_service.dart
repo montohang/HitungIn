@@ -26,7 +26,7 @@ class BackupService {
   final DateTime Function() _now;
 
   /// Pengaturan yang tidak ikut dipulihkan (status perangkat ini).
-  static const Set<String> _localOnlySettings = {SettingKeys.onboardingDone};
+  static const Set<String> _localOnlySettings = {SettingKeys.onboardingDone, SettingKeys.lastBackupAt};
 
   Future<Map<String, Object?>> snapshot() async {
     List<Map<String, Object?>> rows(List<DataClass> list) => [for (final d in list) d.toJson()];

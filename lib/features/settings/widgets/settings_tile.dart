@@ -5,13 +5,33 @@ import '../../../core/theme/context_ext.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/pressable.dart';
 
-/// Satu baris di daftar pengaturan.
+/// Nada lencana di baris pengaturan (desain Lainnya).
+enum TileBadgeTone { neutral, good, warn, pro }
+
+/// Satu baris di daftar pengaturan (desain Lainnya): ikon 36, judul, nilai
+/// ringkas di kanan, lencana opsional.
 class SettingsTile extends StatelessWidget {
-  const SettingsTile({super.key, required this.icon, required this.title, this.subtitle, this.trailing, this.onTap, this.danger = false});
+  const SettingsTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.value,
+    this.badge,
+    this.badgeTone = TileBadgeTone.neutral,
+    this.trailing,
+    this.onTap,
+    this.danger = false,
+  });
 
   final IconData icon;
   final String title;
   final String? subtitle;
+
+  /// Nilai ringkas di kanan (mis. jumlah dompet, "CSV").
+  final String? value;
+  final String? badge;
+  final TileBadgeTone badgeTone;
   final Widget? trailing;
   final VoidCallback? onTap;
   final bool danger;
@@ -20,13 +40,19 @@ class SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
+    final (Color bbg, Color bfg) = switch (badgeTone) {
+      TileBadgeTone.good => (c.goodSoft, c.goodInk),
+      TileBadgeTone.warn => (c.warnSoft, c.warnInk),
+      TileBadgeTone.pro => (const Color(0xFFF6D27A), const Color(0xFF7A5A06)),
+      TileBadgeTone.neutral => (c.chip, c.sub),
+    };
     final Widget row = Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpace.row),
       child: Row(
         children: [
           IconTile(
             icon: icon,
-            size: 40,
+            size: 36,
             color: danger ? c.danger : null,
             background: danger ? c.dangerSoft : null,
           ),
@@ -40,7 +66,19 @@ class SettingsTile extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) trailing! else if (onTap != null) Icon(Icons.chevron_right, color: c.muted),
+          if (badge != null) ...[
+            const SizedBox(width: AppSpace.x8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpace.x8, vertical: AppSpace.x4),
+              decoration: BoxDecoration(color: bbg, borderRadius: AppRadius.pillAll),
+              child: Text(badge!, style: t.label.copyWith(fontSize: 11, fontWeight: FontWeight.w700, color: bfg)),
+            ),
+          ],
+          if (value != null) ...[
+            const SizedBox(width: AppSpace.x8),
+            Text(value!, style: t.caption.copyWith(color: c.muted)),
+          ],
+          if (trailing != null) ...[const SizedBox(width: AppSpace.x8), trailing!],
         ],
       ),
     );
@@ -66,7 +104,7 @@ class SettingsGroup extends StatelessWidget {
           if (title != null)
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpace.x8),
-              child: Text(title!, style: context.text.label.copyWith(color: c.muted)),
+              child: Text(title!, style: context.text.caption.copyWith(color: c.sub, fontWeight: FontWeight.w700)),
             ),
           AppCard(
             padding: const EdgeInsets.symmetric(horizontal: AppSpace.card, vertical: AppSpace.x4),
@@ -111,7 +149,8 @@ Future<T?> showAppSheet<T>(BuildContext context, {required String title, require
 }
 
 /// Dialog konfirmasi standar. True bila pengguna menekan [confirm].
-Future<bool> confirmDialog(BuildContext context, {required String title, required String body, required String confirm, bool danger = false}) async {
+Future<bool> confirmDialog(BuildContext context,
+    {required String title, required String body, required String confirm, bool danger = false}) async {
   final bool? ok = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(

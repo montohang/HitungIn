@@ -51,18 +51,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       StatefulShellRoute.indexedStack(
         builder: (_, __, shell) => AppShell(shell: shell),
         branches: [
+          // Urutan tab = desain: Beranda · Laporan · [+] · Budget · Lainnya.
           StatefulShellBranch(routes: [GoRoute(path: Routes.home, builder: (_, __) => const HomeScreen())]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.riwayat,
-              builder: (_, state) => RiwayatScreen(
-                initialMonth: DateFmt.parseMonthKey(state.uri.queryParameters['month']),
-                categoryId: int.tryParse(state.uri.queryParameters['category'] ?? ''),
-              ),
-            ),
-          ]),
           StatefulShellBranch(routes: [GoRoute(path: Routes.laporan, builder: (_, __) => const LaporanScreen())]),
           StatefulShellBranch(routes: [GoRoute(path: Routes.budget, builder: (_, __) => const BudgetScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: Routes.lainnya, builder: (_, __) => const SettingsScreen())]),
         ],
       ),
       GoRoute(
@@ -76,6 +69,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ),
       ),
+      // Riwayat bukan tab lagi: dibuka dari "Lihat semua" / Laporan, dengan tombol kembali.
+      GoRoute(
+        path: Routes.riwayat,
+        parentNavigatorKey: _rootKey,
+        builder: (_, state) => RiwayatScreen(
+          initialMonth: DateFmt.parseMonthKey(state.uri.queryParameters['month']),
+          categoryId: int.tryParse(state.uri.queryParameters['category'] ?? ''),
+        ),
+      ),
+      GoRoute(path: Routes.pengaturan, redirect: (_, __) => Routes.lainnya),
       GoRoute(
         path: Routes.premium,
         parentNavigatorKey: _rootKey,
@@ -87,7 +90,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) => TxDetailScreen(id: int.parse(state.pathParameters['id']!)),
       ),
       for (final (String path, Widget screen) in const [
-        (Routes.pengaturan, SettingsScreen()),
         (Routes.dompet, WalletsScreen()),
         (Routes.kategori, CategoriesScreen()),
         (Routes.tagihan, BillsScreen()),

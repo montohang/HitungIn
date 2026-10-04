@@ -10,9 +10,12 @@ void main() {
     await app.seed();
     await app.pump(tester);
 
-    expect(find.text('Belum ada transaksi'), findsOneWidget);
-    await tester.enterText(find.byKey(const Key('home-catat-cepat')), 'kopi 25rb gopay');
-    await tester.testTextInput.receiveAction(TextInputAction.send);
+    // Hari pertama: contoh yang bisa diketuk mengisi form Catat.
+    expect(find.text('Catatan pertamamu dimulai di sini'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('1 dari 4'), 200, scrollable: find.byType(Scrollable).first);
+    expect(find.text('1 dari 4'), findsOneWidget, reason: 'dompet sudah ada; PIN & budget belum');
+    await tester.scrollUntilVisible(find.text('kopi 25rb gopay'), -200, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('kopi 25rb gopay'));
     await tester.pumpAndSettle();
 
     // Form terisi otomatis.
@@ -22,6 +25,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Kopi'), findsOneWidget);
+    expect(find.text('Catatan pertamamu dimulai di sini'), findsNothing);
     final txs = await app.run((db) => db.transactionsDao.watchRecent().first);
     expect(txs.single.tx.amount, 25000);
     expect(txs.single.tx.kind, TxKind.pengeluaran);
@@ -82,7 +86,8 @@ void main() {
   testWidgets('Detail: ubah nominal lalu hapus', (tester) async {
     final app = AppHarness(tester);
     await app.seed();
-    final id = await app.addTx(TxKind.pengeluaran, 30000, app.tunai, DateTime(2026, 10, 2, 7), category: app.food(), note: 'Bakso');
+    final id = await app.addTx(TxKind.pengeluaran, 30000, app.tunai, DateTime(2026, 10, 2, 7),
+        category: app.food(), note: 'Bakso');
     await app.pump(tester);
     await tester.tap(find.text('Bakso'));
     await tester.pumpAndSettle();
@@ -103,7 +108,7 @@ void main() {
     await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Hapus')));
     await tester.pumpAndSettle();
     expect(await app.run((db) => db.transactionsDao.byId(id)), isNull);
-    expect(find.text('Belum ada transaksi'), findsOneWidget);
+    expect(find.text('Catatan pertamamu dimulai di sini'), findsOneWidget);
     await app.close(tester);
   });
 
@@ -111,9 +116,11 @@ void main() {
     final app = AppHarness(tester);
     await app.seed();
     await app.addTx(TxKind.pengeluaran, 25000, app.gopay, DateTime(2026, 10, 2, 8), category: app.food(), note: 'Kopi');
-    await app.addTx(TxKind.pengeluaran, 50000, app.tunai, DateTime(2026, 10, 1, 18), category: app.transport(), note: 'Bensin');
+    await app.addTx(TxKind.pengeluaran, 50000, app.tunai, DateTime(2026, 10, 1, 18),
+        category: app.transport(), note: 'Bensin');
     await app.addTx(TxKind.pemasukan, 9200000, app.bca, DateTime(2026, 10, 1, 9), category: app.cat['Gaji/pemasukan']);
-    await app.addTx(TxKind.pengeluaran, 70000, app.tunai, DateTime(2026, 9, 20), category: app.food(), note: 'Martabak');
+    await app.addTx(TxKind.pengeluaran, 70000, app.tunai, DateTime(2026, 9, 20),
+        category: app.food(), note: 'Martabak');
     await app.pump(tester);
     await app.go(tester, '/riwayat');
 
@@ -148,7 +155,8 @@ void main() {
     final app = AppHarness(tester);
     await app.seed();
     await app.addTx(TxKind.pengeluaran, 300000, app.tunai, DateTime(2026, 10, 1), category: app.food());
-    await app.addTx(TxKind.pengeluaran, 100000, app.tunai, DateTime(2026, 10, 2), category: app.transport(), note: 'Bensin');
+    await app.addTx(TxKind.pengeluaran, 100000, app.tunai, DateTime(2026, 10, 2),
+        category: app.transport(), note: 'Bensin');
     await app.addTx(TxKind.pemasukan, 9200000, app.bca, DateTime(2026, 10, 1), category: app.cat['Gaji/pemasukan']);
     await app.addTx(TxKind.pengeluaran, 200000, app.tunai, DateTime(2026, 9, 10), category: app.food());
     await app.pump(tester);
@@ -206,7 +214,8 @@ void main() {
 
     // Beranda menampilkan ringkasan budget total.
     await app.go(tester, '/home');
-    expect(find.text('Budget bulan ini'), findsOneWidget);
+    expect(find.text('Budget Oktober'), findsOneWidget);
+    expect(find.text('Makan 120%'), findsOneWidget, reason: 'kategori yang paling panas');
     await app.close(tester);
   });
 }

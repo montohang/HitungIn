@@ -91,8 +91,10 @@ void main() {
     expect(find.textContaining('Total saldo'), findsOneWidget);
     expect(find.text('Rp225.000'), findsOneWidget);
     expect(find.textContaining('Rina', findRichText: true), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('GoPay'), 200, scrollable: find.byType(Scrollable).first);
-    expect(find.text('GoPay'), findsOneWidget);
+    expect(find.text('Total saldo · 2 dompet'), findsOneWidget);
+    // Hari pertama: checklist "Siapkan HitungIn" — PIN & dompet sudah beres.
+    await tester.scrollUntilVisible(find.text('2 dari 4'), 200, scrollable: find.byType(Scrollable).first);
+    expect(find.text('2 dari 4'), findsOneWidget);
     expect(await env.db.settingsDao.read(SettingKeys.onboardingDone), 'true');
 
     await _close(tester, env);

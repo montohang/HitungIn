@@ -26,13 +26,23 @@ int txSignedAmount(Txn tx) => switch (tx.kind) {
 
 /// Baris transaksi standar (beranda, riwayat).
 class TxRow extends StatelessWidget {
-  const TxRow({super.key, required this.detail, this.onTap, this.showDate = false});
+  const TxRow({super.key, required this.detail, this.onTap, this.showDate = false, this.masked = false, this.gap = AppSpace.x12, this.now});
 
   final TxDetail detail;
   final VoidCallback? onTap;
 
-  /// Tampilkan tanggal (beranda) atau jam saja (riwayat per hari).
+  /// Beranda: jam untuk hari ini, "Kemarin"/tanggal untuk hari lain.
+  /// Riwayat (dikelompokkan per hari): jam saja.
   final bool showDate;
+
+  /// Saldo disembunyikan (tombol mata di Beranda).
+  final bool masked;
+
+  /// Jarak ikon–teks (desain: 16 di Beranda, 12 di Riwayat).
+  final double gap;
+
+  /// Waktu "sekarang" dari clockProvider (untuk Hari ini/Kemarin).
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
@@ -42,18 +52,29 @@ class TxRow extends StatelessWidget {
     final bool income = tx.kind == TxKind.pemasukan;
     final bool transfer = tx.kind == TxKind.transfer;
 
-    final String when = showDate ? DateFmt.relativeDay(tx.occurredAt) : DateFmt.time(tx.occurredAt);
+    final String day = DateFmt.relativeDay(tx.occurredAt, now: now);
+    final String when = !showDate || day == 'Hari ini'
+        ? DateFmt.time(tx.occurredAt)
+        : day == 'Kemarin'
+            ? day
+            : DateFmt.date(tx.occurredAt, now: now);
+    // Desain: "Makan & Minum · GoPay · 08.42" / "BCA → GoPay · 12.10".
     final String meta = transfer
-        ? '${detail.wallet.name} → ${detail.toWallet?.name ?? '?'}'
+        ? '${detail.wallet.name} → ${detail.toWallet?.name ?? '?'} · $when'
         : [
             if (tx.note.isNotEmpty && detail.category != null) detail.category!.name,
             detail.wallet.name,
+            when,
           ].join(' · ');
-    final String amount = transfer ? Rupiah.format(tx.amount) : Rupiah.format(txSignedAmount(tx), signed: true);
+    final String amount = masked
+        ? '••••'
+        : transfer
+            ? Rupiah.format(tx.amount)
+            : Rupiah.format(txSignedAmount(tx), signed: true);
 
     return Pressable.card(
       onTap: onTap,
-      semanticLabel: '${txTitle(detail)}, $amount, $meta, $when',
+      semanticLabel: '${txTitle(detail)}, ${masked ? 'nominal disembunyikan' : amount}, $meta',
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpace.row),
         child: Row(
@@ -63,7 +84,7 @@ class TxRow extends StatelessWidget {
               color: income ? c.good : (transfer ? c.sub : null),
               background: income ? c.goodSoft : (transfer ? c.chip : null),
             ),
-            const SizedBox(width: AppSpace.x12),
+            SizedBox(width: gap),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,14 +96,7 @@ class TxRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpace.x8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(amount, style: t.number.copyWith(color: income ? c.good : (transfer ? c.sub : c.ink))),
-                const SizedBox(height: AppSpace.x2),
-                Text(when, style: t.caption.copyWith(color: c.muted)),
-              ],
-            ),
+            Text(amount, style: t.number.copyWith(color: income ? c.good : (transfer ? c.sub : c.ink))),
           ],
         ),
       ),

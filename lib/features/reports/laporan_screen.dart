@@ -152,7 +152,7 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
               else
                 _CategoryBreakdown(
                   totals: totals,
-                  onTap: (cat) => context.go(
+                  onTap: (cat) => context.push(
                     Uri(path: Routes.riwayat, queryParameters: {
                       'month': DateFmt.monthKey(_month),
                       'category': '${cat.id}',

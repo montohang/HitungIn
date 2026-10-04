@@ -60,7 +60,8 @@ class AppearanceScreen extends ConsumerWidget {
                           padding: const EdgeInsets.all(AppSpace.x4),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: a == s.accent ? (dark ? a.dark : a.light) : Colors.transparent, width: 2),
+                            border: Border.all(
+                                color: a == s.accent ? (dark ? a.dark : a.light) : Colors.transparent, width: 2),
                           ),
                           child: DecoratedBox(
                             decoration: BoxDecoration(color: dark ? a.dark : a.light, shape: BoxShape.circle),
@@ -89,7 +90,8 @@ class AppearanceScreen extends ConsumerWidget {
                 icon: Icons.gradient,
                 title: 'Kartu saldo bergradien',
                 subtitle: 'Gradien halus dari warna aksen',
-                trailing: Switch.adaptive(value: s.gradientBalanceCard, activeTrackColor: c.accent, onChanged: ctl.setGradientBalanceCard),
+                trailing: Switch.adaptive(
+                    value: s.gradientBalanceCard, activeTrackColor: c.accent, onChanged: ctl.setGradientBalanceCard),
               ),
             ],
           ),
@@ -115,7 +117,8 @@ class _AppIconPicker extends ConsumerWidget {
       await ref.read(appIconServiceProvider).set(v);
       ref.invalidate(currentAppIconProvider);
       messenger.showSnackBar(const SnackBar(
-        content: Text('Ikon diganti. Launcher mungkin butuh beberapa detik; pintasan di layar utama perlu ditambah ulang.'),
+        content:
+            Text('Ikon diganti. Launcher mungkin butuh beberapa detik; pintasan di layar utama perlu ditambah ulang.'),
       ));
     } on Object {
       messenger.showSnackBar(const SnackBar(content: Text('Ikon tidak bisa diganti di perangkat ini.')));

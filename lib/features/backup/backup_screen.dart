@@ -18,6 +18,7 @@ import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
 import '../security/app_gate.dart';
+import '../settings/data/settings_dao.dart';
 import '../settings/widgets/settings_tile.dart';
 import 'data/backup_codec.dart';
 import 'data/backup_service.dart';
@@ -68,7 +69,9 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           dialogTitle: 'Simpan cadangan',
         ),
       );
-      if (saved != null && mounted) _toast('Cadangan tersimpan. Simpan kata sandinya baik-baik.');
+      if (saved == null) return;
+      await db.settingsDao.write(SettingKeys.lastBackupAt, ref.read(clockProvider)().toIso8601String());
+      if (mounted) _toast('Cadangan tersimpan. Simpan kata sandinya baik-baik.');
     });
   }
 

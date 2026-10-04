@@ -94,6 +94,8 @@ abstract final class Routes {
   static const String catat = '/catat';
   static String tx(int id) => '/tx/$id';
 
+  /// Tab "Lainnya" (pengaturan & kelola). `/pengaturan` diarahkan ke sini.
+  static const String lainnya = '/lainnya';
   static const String pengaturan = '/pengaturan';
   static const String dompet = '/pengaturan/dompet';
   static const String kategori = '/pengaturan/kategori';

@@ -97,9 +97,9 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   static const List<(IconData, IconData, String)> _tabs = [
     (Icons.home_outlined, Icons.home_rounded, 'Beranda'),
-    (Icons.receipt_long_outlined, Icons.receipt_long, 'Riwayat'),
-    (Icons.insights_outlined, Icons.insights, 'Laporan'),
-    (Icons.savings_outlined, Icons.savings, 'Budget'),
+    (Icons.pie_chart_outline, Icons.pie_chart, 'Laporan'),
+    (Icons.track_changes_outlined, Icons.track_changes, 'Budget'),
+    (Icons.grid_view_outlined, Icons.grid_view_rounded, 'Lainnya'),
   ];
 
   void _go(int i) => shell.goBranch(i, initialLocation: i == shell.currentIndex);
@@ -132,7 +132,14 @@ class _AppShellState extends ConsumerState<AppShell> {
                 children: [
                   Icon(selected ? active : icon, color: color, size: 24),
                   const SizedBox(height: AppSpace.x2),
-                  Text(label, style: context.text.label.copyWith(color: color, fontSize: 11)),
+                  Text(
+                    label,
+                    style: context.text.label.copyWith(
+                      color: color,
+                      fontSize: 11,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -157,15 +164,28 @@ class _AppShellState extends ConsumerState<AppShell> {
                   children: [
                     tab(0),
                     tab(1),
-                    Pressable(
-                      onTap: () => context.push(Routes.catat),
-                      semanticLabel: 'Catat transaksi',
-                      child: Container(
-                        width: 56,
-                        height: 56,
-                        margin: const EdgeInsets.symmetric(horizontal: AppSpace.x8),
-                        decoration: BoxDecoration(color: c.accent, borderRadius: AppRadius.mdAll),
-                        child: Icon(Icons.add, color: c.onAccent, size: 28),
+                    // Tombol Catat menonjol ke atas (desain: 58 px, naik 28 px, bayangan aksen).
+                    Expanded(
+                      child: Center(
+                        child: Transform.translate(
+                          offset: const Offset(0, -14),
+                          child: Pressable(
+                            onTap: () => context.push(Routes.catat),
+                            semanticLabel: 'Catat transaksi',
+                            child: Container(
+                              width: 58,
+                              height: 58,
+                              decoration: BoxDecoration(
+                                color: c.accent,
+                                borderRadius: AppRadius.mdAll,
+                                boxShadow: [
+                                  BoxShadow(color: c.accent.withAlpha(0x55), blurRadius: 24, offset: const Offset(0, 10)),
+                                ],
+                              ),
+                              child: Icon(Icons.add, color: c.onAccent, size: 28),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     tab(2),
