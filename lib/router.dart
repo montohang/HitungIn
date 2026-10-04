@@ -10,7 +10,6 @@ import 'features/budget/budget_screen.dart';
 import 'features/categories/categories_screen.dart';
 import 'features/dev/design_gallery_screen.dart';
 import 'features/home/home_screen.dart';
-import 'features/onboarding/biometric_setup_screen.dart';
 import 'features/onboarding/first_wallet_screen.dart';
 import 'features/onboarding/pin_setup_screen.dart';
 import 'features/onboarding/splash_screen.dart';
@@ -47,7 +46,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.splash, builder: (_, __) => const SplashScreen()),
       GoRoute(path: Routes.welcome, builder: (_, __) => const WelcomeScreen()),
       GoRoute(path: Routes.setupPin, builder: (_, __) => const PinSetupScreen()),
-      GoRoute(path: Routes.setupBiometric, builder: (_, __) => const BiometricSetupScreen()),
       GoRoute(path: Routes.setupWallet, builder: (_, __) => const FirstWalletScreen()),
       GoRoute(path: Routes.lock, builder: (_, __) => const LockScreen()),
       StatefulShellRoute.indexedStack(

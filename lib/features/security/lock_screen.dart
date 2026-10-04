@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/db/data_providers.dart';
 import '../../core/security/secure_store.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
@@ -135,35 +137,76 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: AppSpace.screen,
-            child: Column(
-              children: [
-                const LogoMark(size: 56),
-                const SizedBox(height: AppSpace.x24),
-                PinEntry(
-                  title: 'Masukkan PIN',
-                  subtitle: 'HitungIn terkunci untuk menjaga datamu.',
-                  error: _error,
-                  busy: _busy,
-                  enabled: _lockedUntil == null,
-                  onCompleted: _onPin,
-                  onBiometric: _biometric ? _useBiometric : null,
+    final t = context.text;
+    final String? name = ref.watch(userNameProvider).valueOrNull;
+    final Color accentLight = Color.lerp(c.accent, Colors.white, 0.45)!;
+    // Layar kunci selalu gelap (desain), apa pun tema aplikasi.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: LockColors.base,
+        body: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: const [0, 0.55, 1],
+              colors: [LockColors.base, LockColors.base, Color.lerp(LockColors.base, c.accent, 0.35)!],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -80,
+                top: -60,
+                child: Container(
+                  width: 280,
+                  height: 280,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.accent.withAlpha(0x38)),
                 ),
-                const SizedBox(height: AppSpace.x16),
-                Pressable(
-                  onTap: _forgot,
-                  semanticLabel: 'Lupa PIN',
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpace.x12),
-                    child: Text('Lupa PIN?', style: context.text.label.copyWith(color: c.accentText, fontSize: 14)),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.x24, AppSpace.screenH, AppSpace.x8),
+                  child: PinField(
+                    style: PinPadStyle.onDark,
+                    error: _error,
+                    busy: _busy,
+                    enabled: _lockedUntil == null,
+                    onCompleted: _onPin,
+                    onBiometric: _biometric ? _useBiometric : null,
+                    header: Column(
+                      children: [
+                        const SizedBox(height: AppSpace.x32),
+                        const LogoMark(size: 64),
+                        const SizedBox(height: AppSpace.x12),
+                        Text(
+                          name == null ? 'Hai lagi' : 'Hai lagi, $name',
+                          textAlign: TextAlign.center,
+                          style: t.screenTitle.copyWith(fontSize: 26, color: Colors.white),
+                        ),
+                        const SizedBox(height: AppSpace.x8),
+                        Text(
+                          _biometric ? 'Masukkan PIN atau pakai sidik jari' : 'Masukkan PIN untuk membuka',
+                          style: t.body.copyWith(fontSize: 14, color: LockColors.hint),
+                        ),
+                      ],
+                    ),
+                    footer: Padding(
+                      padding: const EdgeInsets.only(top: AppSpace.x8),
+                      child: Pressable(
+                        onTap: _forgot,
+                        semanticLabel: 'Lupa PIN',
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpace.x12),
+                          child: Text('Lupa PIN?', style: t.label.copyWith(fontSize: 14, color: accentLight)),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

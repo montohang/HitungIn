@@ -9,7 +9,6 @@ import '../../core/db/providers.dart';
 import '../../core/security/secure_store.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
-import '../../core/theme/theme_controller.dart';
 import '../../core/utils/date_format.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_chip.dart';
@@ -19,11 +18,12 @@ import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
 import '../security/app_gate.dart';
-import '../security/auto_lock_setting.dart';
 import '../settings/widgets/settings_tile.dart';
 import 'data/backup_codec.dart';
 import 'data/backup_service.dart';
 import 'data/csv_export.dart';
+import 'restore_flow.dart';
+import 'widgets/backup_password_form.dart';
 
 /// Cadangan terenkripsi (simpan & pulihkan) dan ekspor CSV.
 /// Berkas disimpan lewat pemilih berkas sistem — HitungIn tidak
@@ -55,7 +55,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 
   Future<void> _createBackup() async {
-    final String? password = await _askPassword(confirm: true);
+    final String? password = await askBackupPassword(context, confirm: true);
     if (password == null) return;
     await _run(() async {
       final AppDatabase db = ref.read(appDatabaseProvider);
@@ -73,53 +73,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 
   Future<void> _restore() async {
-    final PlatformFile? file = await withAutoLockPaused(
-      ref,
-      () => FilePicker.pickFile(dialogTitle: 'Pilih berkas cadangan'),
-    );
-    if (file == null || !mounted) return;
-    final Uint8List bytes = await file.xFile.readAsBytes();
-    if (!mounted) return;
-    final String? password = await _askPassword(confirm: false);
-    if (password == null) return;
-
-    await _run(() async {
-      final Map<String, Object?> data;
-      try {
-        data = await BackupCodec.decrypt(bytes, password);
-      } on BackupPasswordException {
-        if (mounted) _toast('Kata sandi salah atau berkas rusak.');
-        return;
-      } on BackupFormatException catch (e) {
-        if (mounted) _toast(e.message);
-        return;
-      }
-      final AppDatabase db = ref.read(appDatabaseProvider);
-      final BackupService service = BackupService(db);
-      final BackupSummary s;
-      try {
-        s = service.inspect(data);
-      } on FormatException catch (e) {
-        if (mounted) _toast(e.message);
-        return;
-      }
-      if (!mounted) return;
-      final bool ok = await confirmDialog(
-        context,
-        title: 'Ganti semua data?',
-        body: 'Cadangan ${DateFmt.longDate(s.createdAt)} berisi ${s.wallets} dompet, ${s.transactions} transaksi, '
-            '${s.budgets} budget, dan ${s.bills} tagihan.\n\nSemua data di HP ini akan DIGANTI dengan isi cadangan. '
-            'Tidak bisa dibatalkan.',
-        confirm: 'Pulihkan',
-        danger: true,
-      );
-      if (!ok) return;
-      await service.restore(data);
-      // Tema & kunci otomatis ikut dari cadangan.
-      ref.read(themeControllerProvider.notifier).applyLoaded(await loadThemeSettings(db.settingsDao));
-      await ref.read(autoLockProvider.notifier).set(await loadAutoLockDelay(db.settingsDao));
-      if (mounted) _toast('Data dipulihkan.');
-    });
+    setState(() => _busy = true);
+    try {
+      await runRestoreFlow(context, ref);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   /// Versi gratis: tawarkan iklan berhadiah (1× ekspor) atau Pro.
@@ -176,12 +135,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     });
   }
 
-  Future<String?> _askPassword({required bool confirm}) => showAppSheet<String>(
-        context,
-        title: confirm ? 'Kata sandi cadangan' : 'Buka cadangan',
-        builder: (_) => _PasswordForm(confirm: confirm),
-      );
-
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -234,94 +187,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _PasswordForm extends StatefulWidget {
-  const _PasswordForm({required this.confirm});
-
-  final bool confirm;
-
-  @override
-  State<_PasswordForm> createState() => _PasswordFormState();
-}
-
-class _PasswordFormState extends State<_PasswordForm> {
-  final TextEditingController _pw = TextEditingController();
-  final TextEditingController _pw2 = TextEditingController();
-  bool _show = false;
-  String? _error;
-
-  @override
-  void dispose() {
-    _pw.dispose();
-    _pw2.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final String pw = _pw.text;
-    if (widget.confirm) {
-      if (pw.length < BackupCodec.minPasswordLength) {
-        return setState(() => _error = 'Minimal ${BackupCodec.minPasswordLength} karakter.');
-      }
-      if (pw != _pw2.text) return setState(() => _error = 'Kata sandi tidak sama.');
-    } else if (pw.isEmpty) {
-      return setState(() => _error = 'Isi kata sandi.');
-    }
-    Navigator.pop(context, pw);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    InputDecoration deco(String label) => InputDecoration(
-          labelText: label,
-          suffixIcon: IconButton(
-            icon: Icon(_show ? Icons.visibility_off_outlined : Icons.visibility_outlined),
-            tooltip: _show ? 'Sembunyikan' : 'Tampilkan',
-            onPressed: () => setState(() => _show = !_show),
-          ),
-        );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (widget.confirm)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpace.x12),
-            child: Text('Kata sandi ini dibutuhkan untuk memulihkan. Tidak bisa direset.', style: t.caption.copyWith(color: c.muted)),
-          ),
-        TextField(
-          controller: _pw,
-          autofocus: true,
-          obscureText: !_show,
-          enableSuggestions: false,
-          autocorrect: false,
-          style: t.item,
-          decoration: deco('Kata sandi'),
-          onSubmitted: widget.confirm ? null : (_) => _submit(),
-        ),
-        if (widget.confirm) ...[
-          const SizedBox(height: AppSpace.x12),
-          TextField(
-            controller: _pw2,
-            obscureText: !_show,
-            enableSuggestions: false,
-            autocorrect: false,
-            style: t.item,
-            decoration: deco('Ulangi kata sandi'),
-            onSubmitted: (_) => _submit(),
-          ),
-        ],
-        if (_error != null) ...[
-          const SizedBox(height: AppSpace.x12),
-          Text(_error!, style: t.caption.copyWith(color: c.danger)),
-        ],
-        const SizedBox(height: AppSpace.x16),
-        AppButton(label: widget.confirm ? 'Buat cadangan' : 'Buka', large: true, onPressed: _submit),
-      ],
     );
   }
 }

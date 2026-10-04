@@ -9,7 +9,7 @@ void main() {
     final env = TestEnv();
     await tester.pumpWidget(ProviderScope(overrides: env.overrides, child: const HitungInApp()));
     await tester.pumpAndSettle();
-    expect(find.text('Lanjut'), findsOneWidget);
+    expect(find.text('Data keuanganmu tetap di HP-mu'), findsOneWidget);
     await env.db.close();
   });
 }

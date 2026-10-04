@@ -161,17 +161,15 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: AppSpace.screen,
-            child: PinEntry(
-              key: ValueKey(_step),
-              title: title,
-              subtitle: subtitle,
-              error: _error,
-              busy: _busy,
-              onCompleted: _onPin,
-            ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpace.screenH, 0, AppSpace.screenH, AppSpace.x24),
+          child: PinEntry(
+            key: ValueKey(_step),
+            title: title,
+            subtitle: subtitle,
+            error: _error,
+            busy: _busy,
+            onCompleted: _onPin,
           ),
         ),
       ),

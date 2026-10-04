@@ -12,6 +12,7 @@ import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/pressable.dart';
 import '../security/app_gate.dart';
+import 'pin_setup_screen.dart' show StepHeader;
 
 /// Langkah terakhir onboarding: dompet awal beserta saldonya.
 class FirstWalletScreen extends ConsumerStatefulWidget {
@@ -116,8 +117,11 @@ class _FirstWalletScreenState extends ConsumerState<FirstWalletScreen> {
           children: [
             Expanded(
               child: ListView(
-                padding: AppSpace.screen,
+                padding: AppSpace.screen.copyWith(top: AppSpace.x8),
                 children: [
+                  // PIN sudah tersimpan → tidak ada tombol kembali ke langkah 1.
+                  const StepHeader(label: 'Langkah 2 dari 2'),
+                  const SizedBox(height: AppSpace.x16),
                   Text('Uangmu ada di mana saja?', style: t.pageTitle.copyWith(height: 1.15)),
                   const SizedBox(height: AppSpace.x12),
                   Text(

@@ -83,7 +83,6 @@ abstract final class Routes {
   static const String splash = '/splash';
   static const String welcome = '/welcome';
   static const String setupPin = '/setup/pin';
-  static const String setupBiometric = '/setup/biometric';
   static const String setupWallet = '/setup/wallet';
   static const String lock = '/lock';
   static const String home = '/home';
@@ -109,7 +108,7 @@ abstract final class Routes {
   static const String premium = '/premium';
   static const String gallery = '/dev/gallery';
 
-  static const Set<String> setup = {welcome, setupPin, setupBiometric, setupWallet};
+  static const Set<String> setup = {welcome, setupPin, setupWallet};
 }
 
 /// Aturan redirect router, dipisah sebagai fungsi murni supaya mudah dites.

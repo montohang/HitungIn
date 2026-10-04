@@ -26,7 +26,6 @@ void main() {
   test('PIN sudah dibuat tapi onboarding belum selesai → lanjut ke dompet', () {
     expect(go(pinOnly, Routes.home), Routes.setupWallet);
     expect(go(pinOnly, Routes.welcome), Routes.setupWallet);
-    expect(go(pinOnly, Routes.setupBiometric), isNull);
     expect(go(pinOnly, Routes.setupWallet), isNull);
   });
 
