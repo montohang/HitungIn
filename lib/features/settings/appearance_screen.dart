@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/branding/app_icon_service.dart';
+import '../../core/branding/app_icon_variants.dart';
+
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/theme/theme_controller.dart';
+import '../../core/widgets/logo_mark.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/segmented_control.dart';
 import '../premium/data/pro_limits.dart';
@@ -76,6 +80,9 @@ class AppearanceScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpace.x24),
+          const FieldLabel('Ikon aplikasi'),
+          _AppIconPicker(isPro: isPro),
+          const SizedBox(height: AppSpace.x24),
           SettingsGroup(
             children: [
               SettingsTile(
@@ -88,6 +95,76 @@ class AppearanceScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Pilih ikon di layar utama HP. Varian selain Standar khusus Pro.
+class _AppIconPicker extends ConsumerWidget {
+  const _AppIconPicker({required this.isPro});
+
+  final bool isPro;
+
+  Future<void> _choose(BuildContext context, WidgetRef ref, AppIconVariant v) async {
+    if (v.pro && !isPro) {
+      openPremium(context, ProReason.tema);
+      return;
+    }
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(appIconServiceProvider).set(v);
+      ref.invalidate(currentAppIconProvider);
+      messenger.showSnackBar(const SnackBar(
+        content: Text('Ikon diganti. Launcher mungkin butuh beberapa detik; pintasan di layar utama perlu ditambah ulang.'),
+      ));
+    } on Object {
+      messenger.showSnackBar(const SnackBar(content: Text('Ikon tidak bisa diganti di perangkat ini.')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
+    final t = context.text;
+    final AppIconVariant? current = ref.watch(currentAppIconProvider).valueOrNull;
+    return Wrap(
+      spacing: AppSpace.x16,
+      runSpacing: AppSpace.x12,
+      children: [
+        for (final v in AppIconVariant.values)
+          Semantics(
+            selected: v == current,
+            child: Pressable(
+              onTap: () => _choose(context, ref, v),
+              semanticLabel: 'Ikon ${v.label}',
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppSpace.x4),
+                    decoration: BoxDecoration(
+                      borderRadius: AppRadius.mdAll,
+                      border: Border.all(color: v == current ? c.accent : Colors.transparent, width: 2),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        LogoMark(size: 52, background: v.bg, foreground: v.fg, coin: v.coin, ring: v.ring),
+                        if (v.pro && !isPro)
+                          Positioned(
+                            right: 2,
+                            bottom: 2,
+                            child: Icon(Icons.lock, size: 16, color: v == AppIconVariant.terang ? c.sub : Colors.white),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpace.x4),
+                  Text(v.pro ? '${v.label} · Pro' : v.label, style: t.label.copyWith(color: c.sub)),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

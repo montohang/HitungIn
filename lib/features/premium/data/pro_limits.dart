@@ -34,7 +34,7 @@ enum ProReason {
   csv('Ekspor CSV kapan saja'),
   iklan('Tanpa iklan'),
   berulang('Transaksi berulang otomatis'),
-  tema('Aksen warna tambahan');
+  tema('Aksen & ikon aplikasi tambahan');
 
   const ProReason(this.headline);
   final String headline;

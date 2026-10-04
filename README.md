@@ -3,9 +3,9 @@
 Pencatat keuangan pribadi **100% offline** — tanpa login, data tidak pernah meninggalkan HP.
 Flutter · Android dulu · tema default **gelap**.
 
-Status: **Tahap 6b — Fitur Pro** selesai: laporan tren 6/12 bulan + filter per dompet, transaksi berulang
-(dicatat otomatis, termasuk susulan), dan 4 aksen warna Pro. Database naik ke **skema v2** (migrasi teruji).
-Ikon aplikasi alternatif menunggu ikon peluncur resmi (lihat Tahapan).
+Status: **Tahap 6c — Ikon aplikasi** selesai: ikon peluncur resmi (adaptif + monokrom Android 13 + ikon Play Store),
+3 ikon alternatif untuk Pro (Gelap, Emas, Terang), dan splash gelap tanpa kilatan putih.
+Semua fitur yang dijanjikan di layar Pro sudah tersedia.
 
 ---
 
@@ -59,6 +59,7 @@ lib/
       connection.dart       # buka file SQLCipher (PRAGMA key) + cek cipher aktif
       db_key.dart           # kunci 256-bit acak di Android Keystore
       providers.dart        # appDatabaseProvider (Riverpod)
+    branding/               # app_icon_variants.dart · app_icon_service.dart (ganti ikon peluncur)
     utils/rupiah.dart       # format Rp8.450.000, Rp3,12 jt, Rp164rb
     utils/dates.dart        # rentang bulan, jatuh tempo berikutnya
     utils/rupiah_input.dart # format isian nominal 2.500.000 saat mengetik
@@ -112,6 +113,7 @@ test/
   backup/backup_test.dart   # enkripsi cadangan, cadangkan→pulihkan, rollback, CSV
   recurring/recurring_test.dart  # jadwal berulang, susulan, tanggal 31, tren bulanan, filter dompet
   db/migration_test.dart    # v1 → v2 (skema & data lama) — helper di db/generated/ dari drift_dev
+  branding/app_icon_test.dart  # kanal ganti ikon + konsistensi varian Dart ↔ manifest ↔ Kotlin ↔ berkas ikon
   premium/premium_test.dart # batas gratis, aturan iklan, simpan Pro, alur pembelian (Google Play palsu)
   settings/settings_logic_test.dart  # jatuh tempo, kunci otomatis, ganti PIN, kelola kategori/dompet
   helpers/fakes.dart        # TestEnv: DB memori, SecureStore memori, jam & biometrik palsu
@@ -166,6 +168,22 @@ lalu disimpan di Keystore supaya tetap berlaku offline. Pembelian selalu di-*ack
 4. **Play Console → Keamanan data**: nyatakan *ID iklan* dikumpulkan oleh SDK AdMob untuk iklan;
    data keuangan **tidak** dikumpulkan/dibagikan. Centang "Berisi iklan".
 5. Kebijakan privasi (URL) yang menjelaskan hal di atas.
+6. Ikon Play Store: `branding/play_store_icon_512.png`.
+
+## Ikon aplikasi
+
+- Semua ikon dirender dari `LogoPainter` (logo Koin-H di kode), jadi selalu sama dengan logo di aplikasi.
+  Setelah mengubah logo atau `lib/core/branding/app_icon_variants.dart`, jalankan:
+  `flutter test tool/generate_icons_test.dart`
+  → `android/app/src/main/res/mipmap-*` (adaptif 108dp + lama 48dp), `mipmap-anydpi-v26/*.xml`,
+  `values/ic_launcher_colors.xml`, dan `branding/play_store_icon_512.png` (unggah ke Play Console).
+- Ganti ikon (Pro) = mengaktifkan satu komponen peluncur dan mematikan yang lain (`MainActivity.setIcon`, kanal
+  `id.hitungin/app_icon`). Ikon Standar memakai `LauncherActivity` (activity kecil yang meneruskan ke `MainActivity`),
+  bukan alias, supaya bisa dimatikan **dan** `flutter run` tetap menemukan activity peluncur. Ikon lain = `activity-alias`.
+- Menambah varian: tambah di `AppIconVariant`, di `iconComponents` (MainActivity.kt), alias di manifest, lalu jalankan
+  generator. `test/branding/app_icon_test.dart` gagal bila salah satunya terlewat.
+- Catatan perilaku launcher: setelah ganti ikon, ikon bisa hilang sebentar lalu muncul lagi; pintasan di layar utama
+  perlu ditambahkan ulang. Ini sudah dijelaskan ke pengguna lewat snackbar.
 
 ## Rute
 
@@ -245,6 +263,6 @@ Referensi desain: kanvas "HitungIn — UI Design v1" di Claude.
 5. ~~Pengaturan & sisa MVP: dompet, kategori, tagihan, cadangan, CSV, ganti PIN, kunci otomatis, tema~~
 6. ~~Premium + iklan~~
 6b. ~~Fitur Pro: laporan tren 6–12 bulan & filter dompet, transaksi berulang, aksen tambahan~~
-6c. Ikon peluncur resmi HitungIn (sekarang masih ikon bawaan Flutter) + ikon alternatif untuk Pro
+6c. ~~Ikon peluncur resmi + ikon alternatif Pro + splash gelap~~
 7. Tes UI (widget) untuk layar Tahap 5–6b: Pengaturan, Dompet, Kategori, Tagihan, Keamanan/Ganti PIN, Cadangan, Tema, Premium, batas gratis, Transaksi berulang, tren & filter Laporan
 8. Notifikasi pengingat tagihan (saat ini pengingat hanya tampil di dalam aplikasi)

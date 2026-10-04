@@ -23,7 +23,7 @@ const List<(IconData, String, String, bool)> proBenefits = [
   (Icons.trending_up, 'Tren 6–12 bulan & filter dompet', 'Laporan lanjutan', true),
   (Icons.autorenew, 'Transaksi berulang', 'Gaji & langganan tercatat otomatis', true),
   (Icons.palette_outlined, 'Aksen warna tambahan', 'Plum, Laut, Kopi, Arang', true),
-  (Icons.apps, 'Ikon aplikasi alternatif', 'Pilih tampilan ikon di layar utama', false),
+  (Icons.apps, 'Ikon aplikasi alternatif', 'Gelap, Emas, Terang', true),
 ];
 
 class PremiumScreen extends ConsumerStatefulWidget {
@@ -105,9 +105,11 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
               ],
             ),
           ),
-          const SizedBox(height: AppSpace.x8),
-          Text('Fitur bertanda "Segera" otomatis aktif begitu tersedia, tanpa biaya tambahan.',
-              style: t.caption.copyWith(color: c.muted)),
+          if (proBenefits.any((b) => !b.$4)) ...[
+            const SizedBox(height: AppSpace.x8),
+            Text('Fitur bertanda "Segera" otomatis aktif begitu tersedia, tanpa biaya tambahan.',
+                style: t.caption.copyWith(color: c.muted)),
+          ],
         ],
       ),
       bottomNavigationBar: SafeArea(

@@ -52,7 +52,7 @@ class LogoMark extends StatelessWidget {
     final Color bg = background ?? context.colors.accent;
     Widget paint(double drop) => CustomPaint(
           size: Size.square(size),
-          painter: _LogoPainter(
+          painter: LogoPainter(
             bg: bg,
             fg: foreground,
             coin: coin,
@@ -75,8 +75,9 @@ class LogoMark extends StatelessWidget {
   }
 }
 
-class _LogoPainter extends CustomPainter {
-  _LogoPainter({
+/// Dipakai juga oleh tool/generate_icons_test.dart untuk ikon peluncur.
+class LogoPainter extends CustomPainter {
+  LogoPainter({
     required this.bg,
     required this.fg,
     required this.coin,
@@ -128,7 +129,7 @@ class _LogoPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_LogoPainter old) =>
+  bool shouldRepaint(LogoPainter old) =>
       old.bg != bg ||
       old.fg != fg ||
       old.coin != coin ||

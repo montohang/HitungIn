@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dibuat oleh tool/generate_icons_test.dart — jangan diedit manual. -->
+<resources>
+    <color name="ic_launcher_bg">#5B4BDB</color>
+    <color name="ic_launcher_gelap_bg">#1A1733</color>
+    <color name="ic_launcher_emas_bg">#F2C14E</color>
+    <color name="ic_launcher_terang_bg">#FFFFFF</color>
+</resources>
