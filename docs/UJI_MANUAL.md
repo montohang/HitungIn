@@ -30,7 +30,9 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [ ] PIN salah 5× → tunggu 30 dtk (hitung mundur); tutup paksa & buka lagi → masih terkunci sementara.
 - [ ] Ke latar belakang > 30 dtk → terkunci; < 30 dtk → tidak. Ubah ke "Segera" di Pengaturan → langsung terkunci.
 - [ ] Dialog sidik jari / pemilih berkas / persetujuan iklan **tidak** memicu kunci otomatis.
-- [ ] Tombol gembok di Beranda mengunci; setelah buka kunci kembali ke halaman sebelumnya.
+- [ ] Tombol gembok (🔒, pojok kanan atas Beranda, sebelah ⚙️) langsung mengunci aplikasi tanpa menunggu kunci otomatis.
+- [ ] Kembali ke halaman semula setelah buka kunci: buka Riwayat → ketuk satu transaksi (Detail) → tekan Home > 30 dtk
+      (atau set kunci otomatis "Segera") → buka HitungIn → masukkan PIN → yang tampil **Detail transaksi tadi**, bukan Beranda.
 
 ## 3. Catat & data harian
 - [ ] Catat cepat di Beranda: `kopi 25rb gopay`, `gaji 9,2jt bca`, `tf bca ke gopay 100rb`, `bensin 50.000 kemarin`.
