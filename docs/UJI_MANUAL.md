@@ -56,6 +56,11 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [ ] Tagihan: tambah, Bayar → tercatat & jatuh tempo maju; "Tagihan mendatang" di Beranda saat dekat/lewat.
 - [x] Tema: mode gelap/terang/AMOLED/sistem & aksen berubah langsung dan bertahan setelah aplikasi dibuka ulang.
 - [x] Ganti PIN: PIN lama salah ditolak; PIN baru berlaku setelah dikunci ulang.
+- [ ] *(baru)* Dompet: kartu Total saldo + **Pindah saldo** (buka Catat langsung di Pindah Saldo) + bar porsi saldo berwarna; grup **Tunai & bank / E-wallet** dengan inisial berwarna & jumlah transaksi bulan ini; ketuk dompet → ubah warna, **Saldo sekarang** (sesuaikan saldo), **Lihat riwayat** (Riwayat terfilter dompet itu).
+- [ ] *(baru)* Kategori: grid 2 kolom, **tahan & geser** untuk urutkan; form: ikon, **warna**, **sub-kategori** (tambah/hapus), kata kunci. Warna ikut di Beranda/Riwayat/Detail/Budget/donat Laporan.
+- [ ] *(baru)* Sub-kategori: di Catat muncul chip sub setelah pilih kategori; Catat cepat `makan siang 30rb` → Makan & Minum › Makan siang; Detail menampilkan "Makan & Minum › Kopi"; Riwayat bisa dicari dengan nama sub.
+- [ ] *(baru)* Tagihan: kartu **30 hari ke depan**, daftar **Akan datang** (chip jatuh tempo, dompet · ulang, **Tandai lunas**), **Sudah dicatat bulan ini** setelah melunasi; kartu Notifikasi pengingat (PRO) di bawah.
+- [ ] *(baru)* Setelah menyimpan transaksi lalu langsung membuka Catat lagi, tombol Simpan tidak tertutup snackbar.
 
 ## 5. Cadangan & ekspor
 - [ ] Buat cadangan → simpan ke folder / Google Drive lewat pemilih berkas.
