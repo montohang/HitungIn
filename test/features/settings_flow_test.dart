@@ -94,27 +94,39 @@ void main() {
     await app.close(tester);
   });
 
-  testWidgets('Kategori: kata kunci baru langsung dipakai Catat cepat; arsipkan', (tester) async {
+  testWidgets('Kategori: kata kunci, warna & sub-kategori baru langsung dipakai Catat cepat; arsipkan', (tester) async {
     final app = AppHarness(tester);
     await app.seed();
     await app.pump(tester);
     await app.push(tester, '/pengaturan/kategori');
 
-    await app.tap('Tambah kategori');
+    await app.tap('+ Baru');
     await tester.enterText(_field('Nama kategori'), 'Kucing');
     await tester.tap(find.bySemanticsLabel(RegExp('^Ikon fun')));
+    await tester.tap(find.bySemanticsLabel('Warna Teal'));
+    await tester.tap(find.bySemanticsLabel(RegExp('^Tambah sub-kategori')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('sub-baru')), 'vaksin');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
     await tester.enterText(_field('Kata kunci Catat cepat'), 'Whiskas, pasir ,whiskas');
     await _tapSheet(tester, 'Simpan');
     await app.scrollTo(find.text('Kucing'));
     final saved = (await app.run((db) => db.categoriesDao.active())).firstWhere((c) => c.name == 'Kucing');
-    expect((saved.keywords, saved.icon), ('whiskas,pasir', 'fun'));
-    expect(find.text('whiskas, pasir'), findsOneWidget);
+    expect((saved.keywords, saved.icon, saved.color, saved.subs), ('whiskas,pasir', 'fun', 2, 'Vaksin'));
+    expect(find.text('1 sub-kategori'), findsOneWidget);
 
     await app.push(tester, '/catat?text=whiskas%2050rb');
     await app.tap('Simpan · Rp50.000');
     final tx = (await app.run((db) => db.transactionsDao.watchRecent().first)).single;
     expect(tx.category!.name, 'Kucing');
     expect(tx.tx.amount, 50000);
+
+    // Nama sub-kategori dikenali Catat cepat & tersimpan di transaksi.
+    await app.push(tester, '/catat?text=vaksin%20150rb');
+    await app.tap('Simpan · Rp150.000');
+    final tx2 = (await app.run((db) => db.transactionsDao.watchRecent().first)).firstWhere((d) => d.tx.amount == 150000);
+    expect((tx2.category!.name, tx2.tx.sub), ('Kucing', 'Vaksin'));
 
     await app.scrollTo(find.text('Kucing'));
     await app.tap('Kucing');

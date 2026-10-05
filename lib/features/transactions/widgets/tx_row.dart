@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/context_ext.dart';
 import '../../../core/utils/date_format.dart';
@@ -15,6 +16,7 @@ import '../../../core/widgets/hi_icons.dart';
 String txTitle(TxDetail d) {
   if (d.tx.note.isNotEmpty) return d.tx.note;
   if (d.tx.kind == TxKind.transfer) return 'Pindah saldo';
+  if (d.tx.sub.isNotEmpty) return d.tx.sub;
   return d.category?.name ?? d.tx.kind.label;
 }
 
@@ -63,7 +65,7 @@ class TxRow extends StatelessWidget {
     final String meta = transfer
         ? '${detail.wallet.name} → ${detail.toWallet?.name ?? '?'} · $when'
         : [
-            if (tx.note.isNotEmpty && detail.category != null) detail.category!.name,
+            if ((tx.note.isNotEmpty || tx.sub.isNotEmpty) && detail.category != null) detail.category!.name,
             detail.wallet.name,
             when,
           ].join(' · ');
@@ -82,8 +84,8 @@ class TxRow extends StatelessWidget {
           children: [
             IconTile(
               icon: transfer ? HiIcons.swap : AppIcons.of(detail.category?.icon ?? 'other'),
-              color: income ? c.good : (transfer ? c.sub : null),
-              background: income ? c.goodSoft : (transfer ? c.chip : null),
+              color: income ? c.good : (transfer ? c.sub : AppPalette.ink(context, detail.category?.color ?? 0)),
+              background: income ? c.goodSoft : (transfer ? c.chip : AppPalette.soft(context, detail.category?.color ?? 0)),
             ),
             SizedBox(width: gap),
             Expanded(

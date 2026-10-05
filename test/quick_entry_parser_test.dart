@@ -192,4 +192,19 @@ void main() {
     expect(QuickEntryParser.parseNumber('2,5', hasSuffix: true), 2.5);
     expect(QuickEntryParser.parseNumber('1.2.3'), isNull);
   });
+
+  group('sub-kategori', () {
+    test('nama sub dikenali → kategori induk + sub', () {
+      final e = parser.parse('makan siang 30rb', now: DateTime(2026, 10, 19, 12));
+      expect((e.categoryId, e.sub, e.amount), (catId('Makan & Minum', TxKind.pengeluaran), 'Makan siang', 30000));
+      final e2 = parser.parse('bayar internet 350rb bca', now: DateTime(2026, 10, 19, 12));
+      expect((e2.categoryId, e2.sub), (catId('Tagihan', TxKind.pengeluaran), 'Internet'));
+    });
+
+    test('tanpa sub → kosong', () {
+      final e = parser.parse('bakso 20rb', now: DateTime(2026, 10, 19, 12));
+      expect((e.categoryId, e.sub), (catId('Makan & Minum', TxKind.pengeluaran), ''));
+    });
+  });
 }
+

@@ -11,6 +11,7 @@ class QuickEntry {
     this.walletId,
     this.toWalletId,
     this.categoryId,
+    this.sub = '',
   });
 
   final TxKind kind;
@@ -21,6 +22,9 @@ class QuickEntry {
   /// Hanya untuk transfer.
   final int? toWalletId;
   final int? categoryId;
+
+  /// Sub-kategori yang disebut ("kopi" → Makan & Minum › Kopi), kosong bila tidak ada.
+  final String sub;
   final DateTime occurredAt;
 
   /// Cukup untuk langsung disimpan tanpa bertanya lagi.
@@ -175,6 +179,7 @@ class QuickEntryParser {
     // 5. Kategori & jenis.
     TxKind kind = TxKind.pengeluaran;
     int? categoryId;
+    String sub = '';
     if (isTransfer) {
       kind = TxKind.transfer;
     } else {
@@ -183,11 +188,12 @@ class QuickEntryParser {
         '-' || '−' => TxKind.pengeluaran,
         _ => null,
       };
-      final Category? cat = _matchCategory([
+      final (Category? cat, String matchedSub) = _matchCategory([
         for (int i = 0; i < low.length; i++)
           if (!used[i]) _norm(low[i]),
       ], forced);
       categoryId = cat?.id;
+      sub = matchedSub;
       kind = forced ?? cat?.kind ?? TxKind.pengeluaran;
     }
 
@@ -205,6 +211,7 @@ class QuickEntryParser {
       walletId: walletId,
       toWalletId: toWalletId,
       categoryId: categoryId,
+      sub: sub,
       occurredAt: daysAgo == 0 ? at : day,
     );
   }
@@ -263,9 +270,13 @@ class QuickEntryParser {
     return partial.length == 1 ? partial.single : null;
   }
 
-  Category? _matchCategory(List<String> tokens, TxKind? kind) {
+  /// Kategori dengan skor tertinggi + sub-kategori yang disebut. Sub-kategori
+  /// (semua katanya ada di kalimat) bernilai paling tinggi.
+  (Category?, String) _matchCategory(List<String> tokens, TxKind? kind) {
     Category? best;
+    String bestSub = '';
     int bestScore = 0;
+    final Set<String> tokenSet = {...tokens}..remove('');
     for (final Category c in _categories) {
       if (kind != null && c.kind != kind) continue;
       final Set<String> words = {
@@ -281,12 +292,22 @@ class QuickEntryParser {
           score += 1;
         }
       }
+      String sub = '';
+      for (final String name in c.subs.split(',')) {
+        final List<String> words = [for (final w in name.toLowerCase().split(RegExp(r'\s+'))) if (_norm(w).isNotEmpty) _norm(w)];
+        if (words.isNotEmpty && words.every(tokenSet.contains)) {
+          score += 3;
+          sub = name.trim();
+          break;
+        }
+      }
       if (score > bestScore) {
         best = c;
         bestScore = score;
+        bestSub = sub;
       }
     }
-    return best;
+    return (best, bestSub);
   }
 
   static String _norm(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');

@@ -16,6 +16,7 @@ import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/segmented_control.dart';
+import '../categories/data/categories_dao.dart' show subsOf;
 import '../settings/widgets/settings_tile.dart' show showAppSheet;
 import 'widgets/amount_keypad.dart';
 import '../wallets/data/wallets_dao.dart';
@@ -53,6 +54,9 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
 
   /// Kategori dari Catat cepat / transaksi yang diubah tampil paling depan.
   int? _pinnedCategory;
+
+  /// Sub-kategori terpilih (kosong = tidak ada).
+  String _sub = '';
   int? _walletId;
   int? _toWalletId;
   late DateTime _date;
@@ -70,6 +74,10 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
   void initState() {
     super.initState();
     _date = ref.read(clockProvider)();
+    // Snackbar simpanan sebelumnya jangan sampai menutupi tombol Simpan.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ScaffoldMessenger.maybeOf(context)?.hideCurrentSnackBar();
+    });
     _load();
   }
 
@@ -91,6 +99,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
         _amount = editing.amount;
         _categoryId = editing.categoryId;
         _pinnedCategory = editing.categoryId;
+        _sub = editing.sub;
         _walletId = editing.walletId;
         _toWalletId = editing.toWalletId;
         _date = editing.occurredAt;
@@ -102,6 +111,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
         _amount = copy.amount;
         _categoryId = copy.categoryId;
         _pinnedCategory = copy.categoryId;
+        _sub = copy.sub;
         _walletId = copy.walletId;
         _toWalletId = copy.toWalletId;
         _note.text = copy.note;
@@ -124,6 +134,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
       if (e.amount != null) _amount = e.amount!;
       _categoryId = e.categoryId;
       _pinnedCategory = e.categoryId;
+      _sub = e.sub;
       if (e.walletId != null) _walletId = e.walletId;
       _toWalletId = e.toWalletId;
       _date = e.occurredAt;
@@ -135,6 +146,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
         if (kind == _kind) return;
         _kind = kind;
         _categoryId = null;
+        _sub = '';
         _error = null;
         if (kind != TxKind.transfer) _toWalletId = null;
       });
@@ -260,6 +272,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
         walletId: _walletId,
         toWalletId: Value(transfer ? _toWalletId : null),
         categoryId: Value(transfer ? null : _categoryId),
+        sub: transfer ? '' : _sub,
         note: _note.text,
         occurredAt: _date,
       ));
@@ -270,6 +283,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
         walletId: _walletId!,
         toWalletId: transfer ? _toWalletId : null,
         categoryId: transfer ? null : _categoryId,
+        sub: transfer ? '' : _sub,
         note: _note.text,
         occurredAt: _date,
       );
@@ -493,12 +507,33 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                             icon: AppIcons.of(cats[i].icon),
                                             selected: cats[i].id == _categoryId,
                                             onTap: () => setState(() {
+                                              if (_categoryId != cats[i].id) _sub = '';
                                               _categoryId = cats[i].id;
                                               _error = null;
                                             }),
                                           ),
                                         ),
                                       ),
+                                      if (subsOf(_categories.where((x) => x.id == _categoryId).firstOrNull)
+                                          case final List<String> subs when subs.isNotEmpty) ...[
+                                        const SizedBox(height: AppSpace.x8),
+                                        // Sub-kategori (opsional): ketuk lagi untuk melepas.
+                                        SizedBox(
+                                          height: 32,
+                                          child: ListView.separated(
+                                            key: const Key('sub-kategori'),
+                                            scrollDirection: Axis.horizontal,
+                                            clipBehavior: Clip.none,
+                                            itemCount: subs.length,
+                                            separatorBuilder: (_, __) => const SizedBox(width: AppSpace.x8),
+                                            itemBuilder: (_, i) => _SubChip(
+                                              label: subs[i],
+                                              selected: subs[i] == _sub,
+                                              onTap: () => setState(() => _sub = subs[i] == _sub ? '' : subs[i]),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                       const SizedBox(height: AppSpace.x16),
                                       Row(
                                         children: [
@@ -698,6 +733,45 @@ class _SheetOption extends StatelessWidget {
                 Icon(HiIcons.checkCircle, size: 20, color: c.accent),
               ],
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Chip sub-kategori 32 px (lebih kecil dari chip kategori).
+class _SubChip extends StatelessWidget {
+  const _SubChip({required this.label, required this.selected, required this.onTap});
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Semantics(
+      selected: selected,
+      child: Pressable(
+        onTap: onTap,
+        semanticLabel: 'Sub-kategori $label',
+        child: Container(
+          height: 32,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: selected ? c.accentSoft : c.surface,
+            borderRadius: AppRadius.pillAll,
+            border: Border.all(color: selected ? c.accent : c.line),
+          ),
+          child: Text(
+            label,
+            style: context.text.label.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: selected ? c.accentText : c.sub2,
+            ),
           ),
         ),
       ),

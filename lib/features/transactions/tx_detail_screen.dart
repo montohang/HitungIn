@@ -6,6 +6,7 @@ import '../../core/db/app_database.dart';
 import '../../core/db/data_providers.dart';
 import '../../core/db/providers.dart';
 import '../../core/security/secure_store.dart';
+import '../../core/theme/app_palette.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/utils/date_format.dart';
@@ -159,8 +160,16 @@ class TxDetailScreen extends ConsumerWidget {
                                   ? HiIcons.swap
                                   : AppIcons.of(d.category?.icon ?? 'other'),
                               size: 56,
-                              color: income ? c.good : null,
-                              background: income ? c.goodSoft : null,
+                              color: income
+                                  ? c.good
+                                  : d.tx.kind == TxKind.transfer
+                                      ? c.sub
+                                      : AppPalette.ink(context, d.category?.color ?? 0),
+                              background: income
+                                  ? c.goodSoft
+                                  : d.tx.kind == TxKind.transfer
+                                      ? c.chip
+                                      : AppPalette.soft(context, d.category?.color ?? 0),
                             ),
                           ),
                           const SizedBox(height: AppSpace.x8),
@@ -200,7 +209,7 @@ class TxDetailScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: AppSpace.x24),
                           _Rows(rows: [
-                            if (d.category != null) ('Kategori', d.category!.name),
+                            if (d.category != null) ('Kategori', d.tx.sub.isEmpty ? d.category!.name : '${d.category!.name} › ${d.tx.sub}'),
                             if (d.tx.kind == TxKind.transfer) ...[
                               ('Dari', d.wallet.name),
                               ('Ke', d.toWallet?.name ?? '-'),

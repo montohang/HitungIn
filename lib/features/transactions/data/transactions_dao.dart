@@ -29,6 +29,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
     int? toWalletId,
     int? categoryId,
     String note = '',
+    String sub = '',
     required DateTime occurredAt,
     int? billId,
   }) {
@@ -40,6 +41,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
       toWalletId: Value(kind == TxKind.transfer ? toWalletId : null),
       categoryId: Value(kind == TxKind.transfer ? null : categoryId),
       note: Value(note.trim()),
+      sub: Value(kind == TxKind.transfer ? '' : sub.trim()),
       occurredAt: occurredAt,
       billId: Value(billId),
     ));
@@ -81,7 +83,8 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
     if (kind != null) q.where(transactions.kind.equalsValue(kind));
     final String term = search?.trim() ?? '';
     if (term.isNotEmpty) {
-      Expression<bool> match = transactions.note.like('%$term%') | categories.name.like('%$term%');
+      Expression<bool> match =
+          transactions.note.like('%$term%') | categories.name.like('%$term%') | transactions.sub.like('%$term%');
       final ({int? exact, String? digits})? amount = amountSearch(term);
       if (amount?.exact != null) match = match | transactions.amount.equals(amount!.exact!);
       if (amount?.digits != null) match = match | transactions.amount.cast<String>().like('%${amount!.digits}%');

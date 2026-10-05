@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/db/data_providers.dart';
 import '../../core/security/secure_store.dart';
+import '../../core/theme/app_palette.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/utils/date_format.dart';
@@ -314,8 +315,11 @@ class _CategoryRow extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
-              child: Icon(AppIcons.of(budget.category!.icon), size: 20, color: c.accentText),
+              decoration: BoxDecoration(
+                color: AppPalette.soft(context, budget.category!.color),
+                borderRadius: AppRadius.smAll,
+              ),
+              child: Icon(AppIcons.of(budget.category!.icon), size: 20, color: AppPalette.ink(context, budget.category!.color)),
             ),
             const SizedBox(width: AppSpace.x12),
             Expanded(

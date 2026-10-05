@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/context_ext.dart';
 import '../../../core/utils/rupiah.dart';
@@ -38,12 +39,11 @@ List<DonutSlice> donutSlices(List<CategoryTotal> totals, {int maxSlices = 5}) {
   return [for (final (int i, r) in raw.indexed) (name: r.$1, total: r.$2, pct: pct[i], category: r.$3)];
 }
 
-/// Warna kategori di donat (urutan tetap, dari desain); "Lainnya" abu.
-const List<Color> _sliceColors = [Color(0xFFA79EF2), Color(0xFFE0A43A), Color(0xFF2E8F7F), Color(0xFFD26A8C)];
+/// "Lainnya" (gabungan) abu muda; kategori memakai warnanya sendiri.
 const Color _otherColor = Color(0xFFC9C5DA);
 
 Color donutColor(BuildContext context, int index, DonutSlice s) =>
-    s.category == null ? _otherColor : index == 0 ? context.colors.accent : _sliceColors[(index - 1) % _sliceColors.length];
+    s.category == null ? _otherColor : AppPalette.of(context, s.category!.color);
 
 /// Donat + legenda (Claude Design › Laporan). Ketuk legenda kategori → Riwayat.
 class CategoryDonut extends StatelessWidget {

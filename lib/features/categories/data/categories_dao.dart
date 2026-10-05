@@ -12,6 +12,22 @@ String normalizeCategoryKeywords(String raw) => raw
     .toSet()
     .join(',');
 
+/// Sub-kategori dari isian bebas: dipisah koma/baris, dirapikan, tanpa duplikat (tak peka huruf besar).
+String normalizeSubs(String raw) {
+  final Set<String> seen = {};
+  final List<String> out = [];
+  for (final String part in raw.split(RegExp(r'[,\n]'))) {
+    final String s = part.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (s.isEmpty || !seen.add(s.toLowerCase())) continue;
+    out.add(s[0].toUpperCase() + s.substring(1));
+  }
+  return out.join(',');
+}
+
+/// Daftar sub-kategori sebuah kategori.
+List<String> subsOf(Category? c) =>
+    c == null || c.subs.isEmpty ? const [] : [for (final s in c.subs.split(',')) if (s.trim().isNotEmpty) s.trim()];
+
 @DriftAccessor(tables: [Categories])
 class CategoriesDao extends DatabaseAccessor<AppDatabase> with _$CategoriesDaoMixin {
   CategoriesDao(super.attachedDatabase);
@@ -53,7 +69,14 @@ class CategoriesDao extends DatabaseAccessor<AppDatabase> with _$CategoriesDaoMi
         .getSingle();
   }
 
-  Future<int> add({required String name, required TxKind kind, String icon = 'other', String keywords = ''}) async {
+  Future<int> add({
+    required String name,
+    required TxKind kind,
+    String icon = 'other',
+    String keywords = '',
+    int color = 0,
+    String subs = '',
+  }) async {
     assert(kind != TxKind.transfer, 'Kategori hanya untuk pengeluaran/pemasukan');
     final Expression<int> max = categories.sortOrder.max();
     final int? current = await (selectOnly(categories)..addColumns([max])).map((r) => r.read(max)).getSingle();
@@ -62,6 +85,8 @@ class CategoriesDao extends DatabaseAccessor<AppDatabase> with _$CategoriesDaoMi
       kind: kind,
       icon: Value(icon),
       keywords: Value(keywords),
+      color: Value(color),
+      subs: Value(subs),
       sortOrder: Value((current ?? -1) + 1),
     ));
   }
