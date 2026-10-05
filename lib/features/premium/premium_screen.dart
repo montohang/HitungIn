@@ -22,7 +22,7 @@ const List<(IconData, String, String, bool)> proBenefits = [
   (HiIcons.bell, 'Notifikasi pengingat tagihan', 'Diingatkan walau aplikasi tertutup', true),
   (HiIcons.bars, 'Laporan semua bulan', 'Gratis: bulan ini & bulan lalu', true),
   (HiIcons.table, 'Ekspor CSV kapan saja', 'Gratis: sekali per iklan berhadiah', true),
-  (HiIcons.trendUp, 'Tren 6–12 bulan & filter dompet', 'Laporan lanjutan', true),
+  (HiIcons.trendUp, 'Arus kas 12 bulan & filter dompet', 'Gratis: arus kas 6 bulan', true),
   (HiIcons.repeat, 'Transaksi berulang', 'Gaji & langganan tercatat otomatis', true),
   (HiIcons.palette, 'Aksen warna tambahan', 'Plum, Laut, Kopi, Arang', true),
   (HiIcons.grid, 'Ikon aplikasi alternatif', 'Gelap, Emas, Terang', true),
