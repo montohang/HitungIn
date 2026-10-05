@@ -149,54 +149,62 @@ class _AppShellState extends ConsumerState<AppShell> {
       );
     }
 
-    return Scaffold(
-      body: shell,
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (banner) const BannerSlot(),
-          DecoratedBox(
-            decoration: BoxDecoration(color: c.surface, border: Border(top: BorderSide(color: c.line))),
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpace.x8, vertical: AppSpace.x4),
-                child: Row(
-                  children: [
-                    tab(0),
-                    tab(1),
-                    // Tombol Catat menonjol ke atas (desain: 58 px, naik 28 px, bayangan aksen).
-                    Expanded(
-                      child: Center(
-                        child: Transform.translate(
-                          offset: const Offset(0, -14),
-                          child: Pressable(
-                            onTap: () => context.push(Routes.catat),
-                            semanticLabel: 'Catat transaksi',
-                            child: Container(
-                              width: 58,
-                              height: 58,
-                              decoration: BoxDecoration(
-                                color: c.accent,
-                                borderRadius: AppRadius.mdAll,
-                                boxShadow: [
-                                  BoxShadow(color: c.accent.withAlpha(0x55), blurRadius: 24, offset: const Offset(0, 10)),
-                                ],
+    // Tombol kembali HP: dari Laporan/Budget/Lainnya → Beranda; di Beranda → keluar app.
+    return PopScope(
+      canPop: shell.currentIndex == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) shell.goBranch(0);
+      },
+      child: Scaffold(
+        body: shell,
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (banner) const BannerSlot(),
+            DecoratedBox(
+              decoration: BoxDecoration(color: c.surface, border: Border(top: BorderSide(color: c.line))),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpace.x8, vertical: AppSpace.x4),
+                  child: Row(
+                    children: [
+                      tab(0),
+                      tab(1),
+                      // Tombol Catat menonjol ke atas (desain: 58 px, naik 28 px, bayangan aksen).
+                      Expanded(
+                        child: Center(
+                          child: Transform.translate(
+                            offset: const Offset(0, -14),
+                            child: Pressable(
+                              onTap: () => context.push(Routes.catat),
+                              semanticLabel: 'Catat transaksi',
+                              child: Container(
+                                width: 58,
+                                height: 58,
+                                decoration: BoxDecoration(
+                                  color: c.accent,
+                                  borderRadius: AppRadius.mdAll,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: c.accent.withAlpha(0x55), blurRadius: 24, offset: const Offset(0, 10)),
+                                  ],
+                                ),
+                                child: Icon(HiIcons.plus, color: c.onAccent, size: 28),
                               ),
-                              child: Icon(HiIcons.plus, color: c.onAccent, size: 28),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    tab(2),
-                    tab(3),
-                  ],
+                      tab(2),
+                      tab(3),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

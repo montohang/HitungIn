@@ -22,16 +22,30 @@ import 'data/transactions_dao.dart';
 import 'widgets/tx_row.dart';
 import '../../core/widgets/hi_icons.dart';
 
+/// Tautan ke Riwayat dengan filter awal (bulan, kategori, dompet, jenis).
+String riwayatLink({DateTime? month, int? category, int? wallet, TxKind? kind}) => Uri(
+      path: Routes.riwayat,
+      queryParameters: {
+        if (month != null) 'month': DateFmt.monthKey(month),
+        if (category != null) 'category': '$category',
+        if (wallet != null) 'wallet': '$wallet',
+        if (kind != null) 'kind': kind.name,
+      },
+    ).toString();
+
 /// Riwayat per bulan. Bisa dibuka dengan filter dari Laporan:
 /// `/riwayat?month=2026-10&category=3`.
 class RiwayatScreen extends ConsumerStatefulWidget {
-  const RiwayatScreen({super.key, this.initialMonth, this.categoryId, this.walletId});
+  const RiwayatScreen({super.key, this.initialMonth, this.categoryId, this.walletId, this.kind});
 
   final DateTime? initialMonth;
   final int? categoryId;
 
   /// Dari Dompet › Lihat riwayat.
   final int? walletId;
+
+  /// Dari kartu Masuk/Keluar (Beranda, Laporan).
+  final TxKind? kind;
 
   @override
   ConsumerState<RiwayatScreen> createState() => _RiwayatScreenState();
@@ -50,6 +64,7 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
     _month = widget.initialMonth ?? ref.read(currentMonthProvider);
     _categoryId = widget.categoryId;
     _walletId = widget.walletId;
+    _kind = widget.kind;
   }
 
   @override

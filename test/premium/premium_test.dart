@@ -56,11 +56,10 @@ void main() {
   });
 
   group('aturan iklan', () {
-    test('banner hanya di Beranda & Laporan — dan tidak untuk Pro', () {
-      for (final tab in [0, 1]) {
+    test('banner hanya di Beranda, Laporan & Budget — dan tidak untuk Pro', () {
+      for (final tab in [0, 1, 2]) {
         expect(AdPolicy.showBanner(tab: tab, isPro: false, adsReady: true), isTrue);
       }
-      expect(AdPolicy.showBanner(tab: 2, isPro: false, adsReady: true), isFalse, reason: 'Budget');
       expect(AdPolicy.showBanner(tab: 3, isPro: false, adsReady: true), isFalse, reason: 'Lainnya');
       expect(AdPolicy.showBanner(tab: 0, isPro: true, adsReady: true), isFalse);
       expect(AdPolicy.showBanner(tab: 0, isPro: false, adsReady: false), isFalse, reason: 'belum ada persetujuan');

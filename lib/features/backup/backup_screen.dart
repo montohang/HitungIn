@@ -26,6 +26,7 @@ import 'data/backup_service.dart';
 import 'data/csv_export.dart';
 import 'restore_flow.dart';
 import 'widgets/backup_password_form.dart';
+import '../../core/widgets/bottom_note_scroll_view.dart';
 import '../../core/widgets/hi_icons.dart';
 import 'data/backup_age.dart';
 import '../../core/widgets/screen_header.dart';
@@ -169,9 +170,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       body: SafeArea(
         child: AbsorbPointer(
           absorbing: _busy,
-          child: ListView(
-            padding: AppSpace.screen,
-            children: [
+          child: BottomNoteScrollView(
+            items: [
               const ScreenHeader(title: 'Backup', large: true),
               const SizedBox(height: AppSpace.x16),
               _StatusCard(
@@ -223,26 +223,25 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpace.x16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x12),
-                decoration: BoxDecoration(color: c.warnSoft, borderRadius: AppRadius.mdAll),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(HiIcons.lock, size: 18, color: c.warnInk),
-                    const SizedBox(width: AppSpace.x8),
-                    Expanded(
-                      child: Text(
-                        'File backup dikunci (AES-256) dengan password backup-mu. Tanpa password itu, file tidak bisa '
-                        'dibuka siapa pun, termasuk tim HitungIn. PIN tidak ikut dicadangkan. File CSV tidak terenkripsi.',
-                        style: t.label.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: c.sub),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
+            footer: Container(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x12),
+              decoration: BoxDecoration(color: c.warnSoft, borderRadius: AppRadius.mdAll),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(HiIcons.lock, size: 18, color: c.warnInk),
+                  const SizedBox(width: AppSpace.x8),
+                  Expanded(
+                    child: Text(
+                      'File backup dikunci (AES-256) dengan password backup-mu. Tanpa password itu, file tidak bisa '
+                      'dibuka siapa pun, termasuk tim HitungIn. PIN tidak ikut dicadangkan. File CSV tidak terenkripsi.',
+                      style: t.label.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: c.sub),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

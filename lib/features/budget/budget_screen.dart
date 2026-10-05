@@ -18,6 +18,7 @@ import '../../core/widgets/progress_bar.dart';
 import '../security/app_gate.dart';
 import 'data/budget_insights.dart';
 import 'data/budgets_dao.dart';
+import '../transactions/riwayat_screen.dart' show riwayatLink;
 import '../../core/widgets/hi_icons.dart';
 
 String _hex(Color x) => '#${(x.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
@@ -115,7 +116,11 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   child: Text('Per kategori', style: t.section.copyWith(fontSize: 17)),
                 ),
                 for (final (int i, BudgetProgress b) in perCategory.indexed)
-                  _CategoryRow(budget: b, delay: AppMotion.stagger * i, onTap: _atur),
+                  _CategoryRow(
+                    budget: b,
+                    delay: AppMotion.stagger * i,
+                    onTap: () => context.push(riwayatLink(month: _month, category: b.category!.id)),
+                  ),
               ],
             ],
           ],

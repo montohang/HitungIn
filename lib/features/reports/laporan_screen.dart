@@ -27,6 +27,7 @@ import 'widgets/daily_chart.dart';
 import '../budget/data/budget_insights.dart' show shortCategoryName;
 import 'widgets/cash_flow_chart.dart';
 import 'widgets/donut_chart.dart';
+import '../transactions/riwayat_screen.dart' show riwayatLink;
 import '../../core/widgets/hi_icons.dart';
 
 class LaporanScreen extends ConsumerStatefulWidget {
@@ -127,10 +128,17 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
               // Ringkasan bulan (app).
               Row(
                 children: [
-                  Expanded(child: _Stat(label: 'Pemasukan', value: Rupiah.compact(s.income))),
+                  Expanded(
+                    child: _Stat(
+                      label: 'Pemasukan',
+                      value: Rupiah.compact(s.income),
+                      onTap: () => context.push(riwayatLink(month: _month, kind: TxKind.pemasukan, wallet: wallet)),
+                    ),
+                  ),
                   const SizedBox(width: AppSpace.x8),
                   Expanded(
                     child: _Stat(
+                      onTap: () => context.push(riwayatLink(month: _month, kind: TxKind.pengeluaran, wallet: wallet)),
                       label: 'Pengeluaran',
                       value: Rupiah.compact(s.expense),
                       delta: _delta(s.expense, prev.expense, DateFmt.monthsShort[prevMonth.month - 1]),
@@ -243,8 +251,9 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat({required this.label, required this.value, this.delta});
+  const _Stat({required this.label, required this.value, required this.onTap, this.delta});
 
+  final VoidCallback onTap;
   final String label;
   final String value;
   final String? delta;
@@ -254,10 +263,11 @@ class _Stat extends StatelessWidget {
     final c = context.colors;
     final t = context.text;
     return AppCard(
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: t.caption.copyWith(color: c.muted)),
+          Text('$label ›', style: t.caption.copyWith(color: c.muted)),
           const SizedBox(height: AppSpace.x4),
           Text(value, style: t.amountL.copyWith(fontFeatures: const [])),
           const SizedBox(height: AppSpace.x4),

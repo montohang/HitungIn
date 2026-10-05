@@ -26,6 +26,7 @@ import '../security/app_gate.dart';
 import '../settings/data/settings_dao.dart';
 import '../transactions/data/transactions_dao.dart';
 import '../transactions/widgets/tx_row.dart';
+import '../transactions/riwayat_screen.dart' show riwayatLink;
 import '../wallets/data/wallets_dao.dart';
 import '../../core/widgets/hi_icons.dart';
 
@@ -349,6 +350,7 @@ class _BalanceCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: _Mini(
+                            onTap: () => context.push(riwayatLink(kind: TxKind.pemasukan)),
                             label: 'Masuk bulan ini',
                             value: hidden ? '••••' : '+${Rupiah.compact(summary.income)}',
                             color: c.goodInk,
@@ -357,6 +359,7 @@ class _BalanceCard extends StatelessWidget {
                         const SizedBox(width: AppSpace.x12),
                         Expanded(
                           child: _Mini(
+                            onTap: () => context.push(riwayatLink(kind: TxKind.pengeluaran)),
                             label: 'Keluar bulan ini',
                             value: hidden ? '••••' : '${Rupiah.minus}${Rupiah.compact(summary.expense)}',
                             color: c.onCard,
@@ -375,8 +378,9 @@ class _BalanceCard extends StatelessWidget {
 }
 
 class _Mini extends StatelessWidget {
-  const _Mini({required this.label, required this.value, required this.color});
+  const _Mini({required this.label, required this.value, required this.color, required this.onTap});
 
+  final VoidCallback onTap;
   final String label;
   final String value;
   final Color color;
@@ -384,16 +388,20 @@ class _Mini extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x12),
-      decoration: BoxDecoration(color: c.onCard.withAlpha(0x12), borderRadius: AppRadius.mdAll),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: context.text.label.copyWith(color: c.onCardMuted, fontWeight: FontWeight.w500)),
-          const SizedBox(height: AppSpace.x2),
-          Text(value, style: context.text.number.copyWith(fontSize: 16, color: color)),
-        ],
+    return Pressable(
+      onTap: onTap,
+      semanticLabel: '$label, buka riwayat',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x12),
+        decoration: BoxDecoration(color: c.onCard.withAlpha(0x12), borderRadius: AppRadius.mdAll),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: context.text.label.copyWith(color: c.onCardMuted, fontWeight: FontWeight.w500)),
+            const SizedBox(height: AppSpace.x2),
+            Text(value, style: context.text.number.copyWith(fontSize: 16, color: color)),
+          ],
+        ),
       ),
     );
   }

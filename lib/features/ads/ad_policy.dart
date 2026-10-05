@@ -1,9 +1,9 @@
 /// Aturan kapan iklan boleh tampil. Murni, supaya mudah dites.
 abstract final class AdPolicy {
-  /// Tab di AppShell yang memuat banner: Beranda (0) dan Laporan (1).
-  /// Budget (2), Lainnya (3) dan semua layar lain (Catat, Riwayat, kunci,
-  /// onboarding, pengaturan, cadangan) tidak pernah menampilkan iklan.
-  static const Set<int> bannerTabs = {0, 1};
+  /// Tab di AppShell yang memuat banner: Beranda (0), Laporan (1), Budget (2).
+  /// Lainnya (3) dan semua layar lain (Catat, Riwayat, kunci, onboarding,
+  /// pengaturan, cadangan) tidak pernah menampilkan iklan.
+  static const Set<int> bannerTabs = {0, 1, 2};
 
   static bool showBanner({required int tab, required bool isPro, required bool adsReady}) =>
       !isPro && adsReady && bannerTabs.contains(tab);

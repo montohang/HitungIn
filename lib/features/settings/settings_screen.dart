@@ -77,6 +77,11 @@ class SettingsScreen extends ConsumerWidget {
               title: 'Kelola',
               children: [
                 SettingsTile(
+                  icon: HiIcons.history,
+                  title: 'Riwayat transaksi',
+                  onTap: () => context.push(Routes.riwayat),
+                ),
+                SettingsTile(
                   icon: HiIcons.user,
                   title: 'Nama panggilan',
                   value: name ?? 'Belum diisi',

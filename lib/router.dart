@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/db/data_providers.dart';
+import 'core/db/app_database.dart';
 import 'core/utils/date_format.dart';
 import 'features/backup/backup_screen.dart';
 import 'features/bills/bills_screen.dart';
@@ -81,6 +82,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           initialMonth: DateFmt.parseMonthKey(state.uri.queryParameters['month']),
           categoryId: int.tryParse(state.uri.queryParameters['category'] ?? ''),
           walletId: int.tryParse(state.uri.queryParameters['wallet'] ?? ''),
+          kind: TxKind.values.where((k) => k.name == state.uri.queryParameters['kind']).firstOrNull,
         ),
       ),
       GoRoute(path: Routes.pengaturan, redirect: (_, __) => Routes.lainnya),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hitungin/core/db/app_database.dart';
 
@@ -283,6 +284,32 @@ void main() {
     await app.go(tester, '/home');
     expect(find.text('Budget Oktober'), findsOneWidget);
     expect(find.text('Makan 120%'), findsOneWidget, reason: 'kategori yang paling panas');
+    await app.close(tester);
+  });
+
+  testWidgets('Tombol kembali HP: tab lain → Beranda; dari Beranda baru keluar', (tester) async {
+    final app = AppHarness(tester);
+    await app.seed();
+    await app.pump(tester);
+    await app.go(tester, '/laporan');
+    expect(find.text('Laporan'), findsWidgets);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Transaksi terbaru').evaluate().isNotEmpty || find.text('Catatan pertamamu dimulai di sini').evaluate().isNotEmpty,
+        isTrue,
+        reason: 'kembali ke Beranda');
+
+    // Di Beranda, kembali diteruskan ke sistem (keluar aplikasi).
+    final List<MethodCall> calls = [];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      calls.add(call);
+      return null;
+    });
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(calls.map((c) => c.method), contains('SystemNavigator.pop'));
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     await app.close(tester);
   });
 }
