@@ -47,15 +47,15 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] Budget: kartu Terpakai dengan penanda "Hari ini", kartu peringatan kategori yang lebih cepat dari jadwal, baris per kategori (oranye ≥80%, merah >100%); pil bulan untuk melihat bulan lalu.
 - [x] *(baru)* Layar Catat: kolom catatan menempel tepat di atas keypad (tidak ada jarak kosong besar).
 - [x] *(baru)* Budget per bulan: ubah target di bulan ini → bulan lalu (pil bulan ‹) tetap memakai target lamanya; bulan depan ikut target baru.
-- [ ] *(baru)* Ikon di seluruh app sama dengan ikon garis di desain **dan tepat di tengah kotaknya** (navigasi bawah, kategori, dompet, menu Lainnya, tombol header).
+- [x] *(baru)* Ikon di seluruh app sama dengan ikon garis di desain **dan tepat di tengah kotaknya** (navigasi bawah, kategori, dompet, menu Lainnya, tombol header).
 
 ## 4. Lainnya (pengaturan)
-- [ ] Nama panggilan berubah di sapaan Beranda.
-- [ ] Dompet: tambah, urutkan (tahan & geser), arsipkan (hilang dari total), hapus dompet terpakai ditolak.
-- [ ] Kategori: tambah dengan kata kunci → langsung dikenali Catat cepat; arsipkan.
+- [x] Nama panggilan berubah di sapaan Beranda.
+- [x] Dompet: tambah, urutkan (tahan & geser), arsipkan (hilang dari total), hapus dompet terpakai ditolak.
+- [x] Kategori: tambah dengan kata kunci → langsung dikenali Catat cepat; arsipkan.
 - [ ] Tagihan: tambah, Bayar → tercatat & jatuh tempo maju; "Tagihan mendatang" di Beranda saat dekat/lewat.
-- [ ] Tema: mode gelap/terang/AMOLED/sistem & aksen berubah langsung dan bertahan setelah aplikasi dibuka ulang.
-- [ ] Ganti PIN: PIN lama salah ditolak; PIN baru berlaku setelah dikunci ulang.
+- [x] Tema: mode gelap/terang/AMOLED/sistem & aksen berubah langsung dan bertahan setelah aplikasi dibuka ulang.
+- [x] Ganti PIN: PIN lama salah ditolak; PIN baru berlaku setelah dikunci ulang.
 
 ## 5. Cadangan & ekspor
 - [ ] Buat cadangan → simpan ke folder / Google Drive lewat pemilih berkas.
