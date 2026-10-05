@@ -12,6 +12,7 @@ import '../../core/utils/dates.dart';
 import '../../core/utils/rupiah.dart';
 import '../../core/utils/rupiah_input.dart';
 import '../../core/widgets/app_button.dart';
+import '../../core/widgets/bottom_note_scroll_view.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/color_swatches.dart';
@@ -48,7 +49,10 @@ String walletInitials(Wallet w) {
   final List<String> words = w.name.trim().split(RegExp(r'\s+')).where((x) => x.isNotEmpty).toList();
   if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
   final String n = words.isEmpty ? '?' : words.first;
-  final List<String> caps = [for (final ch in n.split('')) if (ch != ch.toLowerCase()) ch];
+  final List<String> caps = [
+    for (final ch in n.split(''))
+      if (ch != ch.toLowerCase()) ch
+  ];
   if (caps.length >= 2) return caps.take(2).join();
   return n.length >= 2 ? n.substring(0, 2).toUpperCase() : n.toUpperCase();
 }
@@ -67,12 +71,30 @@ class WalletsScreen extends ConsumerWidget {
     final t = context.text;
     final List<WalletBalance> all = ref.watch(_allWalletsProvider).valueOrNull ?? const [];
     final Map<int, int> counts = ref.watch(_txCountProvider).valueOrNull ?? const {};
-    final List<WalletBalance> active = [for (final w in all) if (!w.wallet.archived) w];
-    final List<WalletBalance> archived = [for (final w in all) if (w.wallet.archived) w];
+    final List<WalletBalance> active = [
+      for (final w in all)
+        if (!w.wallet.archived) w
+    ];
+    final List<WalletBalance> archived = [
+      for (final w in all)
+        if (w.wallet.archived) w
+    ];
     final int total = active.fold(0, (s, w) => s + w.balance);
     final List<(String, List<WalletBalance>)> groups = [
-      ('Tunai & bank', [for (final w in active) if (!_isEwallet(w.wallet)) w]),
-      ('E-wallet', [for (final w in active) if (_isEwallet(w.wallet)) w]),
+      (
+        'Tunai & bank',
+        [
+          for (final w in active)
+            if (!_isEwallet(w.wallet)) w
+        ]
+      ),
+      (
+        'E-wallet',
+        [
+          for (final w in active)
+            if (_isEwallet(w.wallet)) w
+        ]
+      ),
     ];
 
     void reorder(int group, int from, int to) {
@@ -88,9 +110,8 @@ class WalletsScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: AppSpace.screen,
-          children: [
+        child: BottomNoteScrollView(
+          items: [
             ScreenHeader(
               title: 'Dompet',
               large: true,
@@ -105,7 +126,8 @@ class WalletsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(AppSpace.x4, 0, AppSpace.x4, AppSpace.x8),
                   child: Row(
                     children: [
-                      Expanded(child: Text(title, style: t.caption.copyWith(fontWeight: FontWeight.w700, color: c.sub))),
+                      Expanded(
+                          child: Text(title, style: t.caption.copyWith(fontWeight: FontWeight.w700, color: c.sub))),
                       Text(
                         Rupiah.format(items.fold(0, (s, w) => s + w.balance)),
                         style: t.caption.copyWith(fontWeight: FontWeight.w700, color: c.sub),
@@ -159,26 +181,25 @@ class WalletsScreen extends ConsumerWidget {
                 ),
               ),
             ],
-            const SizedBox(height: AppSpace.x16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x12),
-              decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.mdAll),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(HiIcons.info, size: 18, color: c.sub),
-                  const SizedBox(width: AppSpace.x8),
-                  Expanded(
-                    child: Text(
-                      'Saldo di sini dihitung dari catatanmu, bukan tersambung ke bank. Kalau berbeda, ketuk dompet '
-                      'lalu isi "Saldo sekarang". Tahan & geser untuk mengubah urutan.',
-                      style: t.label.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: c.sub),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
+          footer: Container(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x12),
+            decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.mdAll),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(HiIcons.info, size: 18, color: c.sub),
+                const SizedBox(width: AppSpace.x8),
+                Expanded(
+                  child: Text(
+                    'Saldo di sini dihitung dari catatanmu, bukan tersambung ke bank. Kalau berbeda, ketuk dompet '
+                    'lalu isi "Saldo sekarang". Tahan & geser untuk mengubah urutan.',
+                    style: t.label.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: c.sub),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -242,7 +263,10 @@ class _Summary extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    final List<WalletBalance> positive = [for (final w in wallets) if (w.balance > 0) w];
+    final List<WalletBalance> positive = [
+      for (final w in wallets)
+        if (w.balance > 0) w
+    ];
     final int sum = positive.fold(0, (s, w) => s + w.balance);
     return Container(
       padding: const EdgeInsets.all(AppSpace.card),
@@ -261,7 +285,8 @@ class _Summary extends StatelessWidget {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text(Rupiah.format(total), style: t.amountL.copyWith(fontSize: 28, fontWeight: FontWeight.w800)),
+                      child: Text(Rupiah.format(total),
+                          style: t.amountL.copyWith(fontSize: 28, fontWeight: FontWeight.w800)),
                     ),
                   ],
                 ),

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/db/app_database.dart';
 import '../../core/db/providers.dart';
@@ -26,6 +27,9 @@ import 'data/csv_export.dart';
 import 'restore_flow.dart';
 import 'widgets/backup_password_form.dart';
 import '../../core/widgets/hi_icons.dart';
+import 'data/backup_age.dart';
+import '../../core/widgets/screen_header.dart';
+import '../../core/db/data_providers.dart';
 
 /// Cadangan terenkripsi (simpan & pulihkan) dan ekspor CSV.
 /// Berkas disimpan lewat pemilih berkas sistem — HitungIn tidak
@@ -39,6 +43,12 @@ class BackupScreen extends ConsumerStatefulWidget {
 
 class _BackupScreenState extends ConsumerState<BackupScreen> {
   bool _busy = false;
+
+  /// Cadangan sedang dibuat (bukan pulihkan/CSV) → kartu status menampilkan progres.
+  bool _backingUp = false;
+
+  /// Ukuran cadangan yang baru saja disimpan (kartu "Backup selesai").
+  int? _justSavedBytes;
 
   String _stamp() {
     final DateTime n = ref.read(clockProvider)();
@@ -59,6 +69,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   Future<void> _createBackup() async {
     final String? password = await askBackupPassword(context, confirm: true);
     if (password == null) return;
+    setState(() => _backingUp = true);
     await _run(() async {
       final AppDatabase db = ref.read(appDatabaseProvider);
       final Uint8List bytes = await BackupCodec.encrypt(await BackupService(db).snapshot(), password);
@@ -72,8 +83,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       );
       if (saved == null) return;
       await db.settingsDao.write(SettingKeys.lastBackupAt, ref.read(clockProvider)().toIso8601String());
+      if (mounted) setState(() => _justSavedBytes = bytes.length);
       if (mounted) _toast('Cadangan tersimpan. Simpan kata sandinya baik-baik.');
     });
+    if (mounted) setState(() => _backingUp = false);
   }
 
   Future<void> _restore() async {
@@ -103,10 +116,17 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           ),
           const SizedBox(height: AppSpace.x16),
           if (canAd) ...[
-            AppButton(label: 'Tonton iklan & ekspor', icon: HiIcons.play, large: true, onPressed: () => Navigator.pop(context, 'ad')),
+            AppButton(
+                label: 'Tonton iklan & ekspor',
+                icon: HiIcons.play,
+                large: true,
+                onPressed: () => Navigator.pop(context, 'ad')),
             const SizedBox(height: AppSpace.x8),
           ],
-          AppButton(label: 'Lihat HitungIn Pro', variant: AppButtonVariant.soft, onPressed: () => Navigator.pop(context, 'pro')),
+          AppButton(
+              label: 'Lihat HitungIn Pro',
+              variant: AppButtonVariant.soft,
+              onPressed: () => Navigator.pop(context, 'pro')),
         ],
       ),
     );
@@ -143,53 +163,236 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
+    final DateTime now = ref.watch(clockProvider)();
+    final DateTime? last = ref.watch(lastBackupProvider).valueOrNull;
     return Scaffold(
-      appBar: AppBar(title: Text('Cadangan & ekspor', style: t.screenTitle)),
-      body: AbsorbPointer(
-        absorbing: _busy,
-        child: ListView(
-          padding: AppSpace.screen.copyWith(top: AppSpace.x8),
-          children: [
-            if (_busy) ...[
-              LinearProgressIndicator(color: c.accent, backgroundColor: c.track),
+      body: SafeArea(
+        child: AbsorbPointer(
+          absorbing: _busy,
+          child: ListView(
+            padding: AppSpace.screen,
+            children: [
+              const ScreenHeader(title: 'Backup', large: true),
               const SizedBox(height: AppSpace.x16),
+              _StatusCard(
+                last: last,
+                now: now,
+                running: _backingUp,
+                justSavedBytes: _justSavedBytes,
+                onBackup: _createBackup,
+              ),
+              const SizedBox(height: AppSpace.x16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x4),
+                decoration:
+                    BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
+                child: const Column(
+                  children: [
+                    _InfoRow(
+                        label: 'Password backup',
+                        desc: 'Dipakai untuk membuka file backup',
+                        value: 'Ditanya tiap backup'),
+                    _InfoRow(
+                        label: 'Lokasi',
+                        desc: 'Folder pilihanmu, bisa di Google Drive',
+                        value: 'Dipilih saat menyimpan'),
+                    _InfoRow(
+                      label: 'Backup otomatis',
+                      desc: 'Berjalan diam-diam saat HP mengisi daya',
+                      value: 'Segera',
+                      pro: true,
+                      last: true,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpace.x16),
+              Row(
+                children: [
+                  Expanded(
+                    child:
+                        AppButton(label: 'Pulihkan dari file', variant: AppButtonVariant.outline, onPressed: _restore),
+                  ),
+                  const SizedBox(width: AppSpace.x8),
+                  Expanded(
+                    child: AppButton(
+                      label: 'Export CSV',
+                      variant: AppButtonVariant.outline,
+                      onPressed: _exportCsv,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpace.x16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x12),
+                decoration: BoxDecoration(color: c.warnSoft, borderRadius: AppRadius.mdAll),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(HiIcons.lock, size: 18, color: c.warnInk),
+                    const SizedBox(width: AppSpace.x8),
+                    Expanded(
+                      child: Text(
+                        'File backup dikunci (AES-256) dengan password backup-mu. Tanpa password itu, file tidak bisa '
+                        'dibuka siapa pun, termasuk tim HitungIn. PIN tidak ikut dicadangkan. File CSV tidak terenkripsi.',
+                        style: t.label.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: c.sub),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
-            SettingsGroup(
-              title: 'Cadangan terenkripsi',
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String _hex(Color x) => '#${(x.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
+
+/// Kartu status: ilustrasi + lencana, "Data aman / Belum ada backup", progres, tombol Backup.
+class _StatusCard extends StatelessWidget {
+  const _StatusCard({
+    required this.last,
+    required this.now,
+    required this.running,
+    required this.justSavedBytes,
+    required this.onBackup,
+  });
+
+  final DateTime? last;
+  final DateTime now;
+  final bool running;
+  final int? justSavedBytes;
+  final VoidCallback onBackup;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    final DateTime? lastAt = last;
+    final ({String label, bool fresh}) age = backupAge(lastAt, now);
+    final bool done = justSavedBytes != null && !running;
+    final (String title, String sub) = running
+        ? ('Mencadangkan…', 'Jangan tutup HitungIn dulu')
+        : done
+            ? ('Backup selesai', 'Barusan · ${_size(justSavedBytes!)} · terenkripsi')
+            : lastAt == null
+                ? ('Belum ada backup', 'Simpan cadangan supaya datamu aman kalau HP hilang atau rusak.')
+                : (
+                    age.fresh ? 'Data aman' : 'Sudah lama tidak backup',
+                    'Backup terakhir ${age.label} · ${DateFmt.date(lastAt, now: now)}, ${DateFmt.time(lastAt)}',
+                  );
+    final bool ok = done || (lastAt != null && age.fresh);
+    final Color badge = running ? c.accent : (ok ? c.good : c.warnBar);
+    final IconData badgeIcon = running ? HiIcons.download : (ok ? HiIcons.check : HiIcons.warning);
+    final String art = '<svg width="96" height="96" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">'
+        '<ellipse cx="60" cy="108" rx="40" ry="5" fill="${_hex(c.track)}"/>'
+        '<rect x="30" y="14" width="60" height="86" rx="12" fill="${_hex(c.accentSoft)}" stroke="${_hex(c.accent)}" stroke-width="3"/>'
+        '<rect x="42" y="30" width="36" height="6" rx="3" fill="${_hex(c.accent)}" fill-opacity="0.5"/>'
+        '<rect x="42" y="44" width="28" height="6" rx="3" fill="${_hex(c.accent)}" fill-opacity="0.3"/>'
+        '<path d="M60 56l16 6v10c0 9-7 15-16 17-9-2-16-8-16-17V62z" fill="${_hex(c.surface)}" '
+        'stroke="${_hex(c.accent)}" stroke-width="3" stroke-linejoin="round"/>'
+        '</svg>';
+    return Container(
+      padding: const EdgeInsets.all(AppSpace.x20),
+      decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 96,
+            width: 120,
+            child: Stack(
               children: [
-                SettingsTile(
-                  icon: HiIcons.download,
-                  title: 'Buat cadangan',
-                  subtitle: 'Simpan berkas .hitungin ke penyimpanan atau Drive pilihanmu',
-                  onTap: _createBackup,
-                ),
-                SettingsTile(
-                  icon: HiIcons.restore,
-                  title: 'Pulihkan dari cadangan',
-                  subtitle: 'Mengganti semua data di HP ini',
-                  onTap: _restore,
+                Center(child: ExcludeSemantics(child: SvgPicture.string(art, width: 96, height: 96))),
+                Positioned(
+                  right: 4,
+                  bottom: 4,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: badge,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: c.surface, width: 3),
+                    ),
+                    child: Icon(badgeIcon, size: 18, color: Colors.white),
+                  ),
                 ),
               ],
             ),
-            SettingsGroup(
-              title: 'Ekspor',
-              children: [
-                SettingsTile(
-                  icon: HiIcons.table,
-                  title: 'Ekspor transaksi (CSV)',
-                  subtitle: 'Untuk Excel / Google Sheets — tidak terenkripsi',
-                  trailing: ref.watch(isProProvider) ? null : const AppBadge.pro(),
-                  onTap: _exportCsv,
-                ),
-              ],
-            ),
-            Text(
-              'Cadangan dienkripsi AES-256 dengan kata sandi yang kamu buat. HitungIn tidak menyimpan kata sandi itu — '
-              'kalau lupa, cadangan tidak bisa dibuka. PIN tidak ikut dicadangkan.',
-              style: t.caption.copyWith(color: c.muted),
+          ),
+          const SizedBox(height: AppSpace.x12),
+          Text(title, textAlign: TextAlign.center, style: t.section.copyWith(fontSize: 17)),
+          const SizedBox(height: AppSpace.x4),
+          Text(sub, textAlign: TextAlign.center, style: t.caption.copyWith(color: c.muted)),
+          if (running) ...[
+            const SizedBox(height: AppSpace.x12),
+            ClipRRect(
+              borderRadius: AppRadius.pillAll,
+              child: LinearProgressIndicator(minHeight: 8, color: c.accent, backgroundColor: c.track),
             ),
           ],
-        ),
+          const SizedBox(height: AppSpace.x16),
+          AppButton(
+            label: running
+                ? 'Sedang berjalan…'
+                : done || lastAt != null
+                    ? 'Backup lagi'
+                    : 'Backup sekarang',
+            onPressed: running ? null : onBackup,
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _size(int bytes) => bytes >= 1024 * 1024
+      ? '${(bytes / 1024 / 1024).toStringAsFixed(1).replaceAll('.', ',')} MB'
+      : '${(bytes / 1024).ceil()} KB';
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.desc, required this.value, this.pro = false, this.last = false});
+
+  final String label;
+  final String desc;
+  final String value;
+  final bool pro;
+  final bool last;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.x12),
+      decoration: BoxDecoration(border: last ? null : Border(bottom: BorderSide(color: c.line))),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(label,
+                          style: t.caption.copyWith(fontSize: 14, fontWeight: FontWeight.w600, color: c.ink)),
+                    ),
+                    if (pro) ...[const SizedBox(width: AppSpace.x8), const AppBadge.pro()],
+                  ],
+                ),
+                const SizedBox(height: AppSpace.x2),
+                Text(desc, style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted)),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpace.x8),
+          Text(value, style: t.caption.copyWith(color: pro ? c.muted : c.sub)),
+        ],
       ),
     );
   }

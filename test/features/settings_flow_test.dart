@@ -210,7 +210,8 @@ void main() {
     await app.pump(tester);
     await app.push(tester, '/pengaturan/cadangan');
 
-    await app.tap('Buat cadangan');
+    expect(find.text('Belum ada backup'), findsOneWidget);
+    await app.tap('Backup sekarang');
     await tester.enterText(_field('Kata sandi'), 'pendek');
     await tester.enterText(_field('Ulangi kata sandi'), 'pendek');
     await tester.tap(_inSheet(find.text('Buat cadangan')));
@@ -224,7 +225,7 @@ void main() {
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
 
-    await app.tap('Ekspor transaksi (CSV)');
+    await app.tap('Export CSV');
     expect(find.textContaining('Iklan sedang tidak tersedia'), findsOneWidget);
     await tester.tap(_inSheet(find.text('Lihat HitungIn Pro')));
     await tester.pumpAndSettle();

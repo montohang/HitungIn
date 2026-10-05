@@ -10,6 +10,7 @@ import '../../core/widgets/color_swatches.dart';
 import '../../core/widgets/hi_icons.dart';
 import '../../core/widgets/screen_header.dart';
 import '../../core/widgets/app_button.dart';
+import '../../core/widgets/bottom_note_scroll_view.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/segmented_control.dart';
@@ -82,9 +83,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: AppSpace.screen,
-          children: [
+        child: BottomNoteScrollView(
+          items: [
             ScreenHeader(
               title: 'Kategori',
               large: true,
@@ -117,17 +117,16 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               ),
               Opacity(opacity: 0.6, child: grid(archived, draggable: false)),
             ],
-            const SizedBox(height: AppSpace.x16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16),
-              child: Text(
-                'Ketuk kategori untuk mengganti nama, ikon, warna, sub-kategori, atau kata kunci Catat cepat. '
-                'Tahan & geser untuk mengubah urutan.',
-                textAlign: TextAlign.center,
-                style: t.label.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: c.muted),
-              ),
-            ),
           ],
+          footer: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16),
+            child: Text(
+              'Ketuk kategori untuk mengganti nama, ikon, warna, sub-kategori, atau kata kunci Catat cepat. '
+              'Tahan & geser untuk mengubah urutan.',
+              textAlign: TextAlign.center,
+              style: t.label.copyWith(fontWeight: FontWeight.w500, height: 1.5, color: c.muted),
+            ),
+          ),
         ),
       ),
     );

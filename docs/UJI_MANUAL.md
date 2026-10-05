@@ -53,22 +53,24 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] Nama panggilan berubah di sapaan Beranda.
 - [x] Dompet: tambah, urutkan (tahan & geser), arsipkan (hilang dari total), hapus dompet terpakai ditolak.
 - [x] Kategori: tambah dengan kata kunci → langsung dikenali Catat cepat; arsipkan.
-- [ ] Tagihan: tambah, Bayar → tercatat & jatuh tempo maju; "Tagihan mendatang" di Beranda saat dekat/lewat.
+- [x] Tagihan: tambah, Bayar → tercatat & jatuh tempo maju; "Tagihan mendatang" di Beranda saat dekat/lewat.
 - [x] Tema: mode gelap/terang/AMOLED/sistem & aksen berubah langsung dan bertahan setelah aplikasi dibuka ulang.
 - [x] Ganti PIN: PIN lama salah ditolak; PIN baru berlaku setelah dikunci ulang.
-- [ ] *(baru)* Dompet: kartu Total saldo + **Pindah saldo** (buka Catat langsung di Pindah Saldo) + bar porsi saldo berwarna; grup **Tunai & bank / E-wallet** dengan inisial berwarna & jumlah transaksi bulan ini; ketuk dompet → ubah warna, **Saldo sekarang** (sesuaikan saldo), **Lihat riwayat** (Riwayat terfilter dompet itu).
-- [ ] *(baru)* Kategori: grid 2 kolom, **tahan & geser** untuk urutkan; form: ikon, **warna**, **sub-kategori** (tambah/hapus), kata kunci. Warna ikut di Beranda/Riwayat/Detail/Budget/donat Laporan.
-- [ ] *(baru)* Sub-kategori: di Catat muncul chip sub setelah pilih kategori; Catat cepat `makan siang 30rb` → Makan & Minum › Makan siang; Detail menampilkan "Makan & Minum › Kopi"; Riwayat bisa dicari dengan nama sub.
-- [ ] *(baru)* Tagihan: kartu **30 hari ke depan**, daftar **Akan datang** (chip jatuh tempo, dompet · ulang, **Tandai lunas**), **Sudah dicatat bulan ini** setelah melunasi; kartu Notifikasi pengingat (PRO) di bawah.
-- [ ] *(baru)* Setelah menyimpan transaksi lalu langsung membuka Catat lagi, tombol Simpan tidak tertutup snackbar.
+- [x] *(baru)* Dompet: kartu Total saldo + **Pindah saldo** (buka Catat langsung di Pindah Saldo) + bar porsi saldo berwarna; grup **Tunai & bank / E-wallet** dengan inisial berwarna & jumlah transaksi bulan ini; ketuk dompet → ubah warna, **Saldo sekarang** (sesuaikan saldo), **Lihat riwayat** (Riwayat terfilter dompet itu).
+- [x] *(baru)* Kategori: grid 2 kolom, **tahan & geser** untuk urutkan; form: ikon, **warna**, **sub-kategori** (tambah/hapus), kata kunci. Warna ikut di Beranda/Riwayat/Detail/Budget/donat Laporan.
+- [x] *(baru)* Sub-kategori: di Catat muncul chip sub setelah pilih kategori; Catat cepat `makan siang 30rb` → Makan & Minum › Makan siang; Detail menampilkan "Makan & Minum › Kopi"; Riwayat bisa dicari dengan nama sub.
+- [x] *(baru)* Tagihan: kartu **30 hari ke depan**, daftar **Akan datang** (chip jatuh tempo, dompet · ulang, **Tandai lunas**), **Sudah dicatat bulan ini** setelah melunasi; kartu Notifikasi pengingat (PRO) di bawah.
+- [x] *(baru)* Setelah menyimpan transaksi lalu langsung membuka Catat lagi, tombol Simpan tidak tertutup snackbar.
 
 ## 5. Cadangan & ekspor
-- [ ] Buat cadangan → simpan ke folder / Google Drive lewat pemilih berkas.
-- [ ] Hapus data aplikasi (Pengaturan Android) → onboarding lagi → Pulihkan dari cadangan: kata sandi salah ditolak;
+- [x] Buat cadangan → simpan ke folder / Google Drive lewat pemilih berkas.
+- [x] Hapus data aplikasi (Pengaturan Android) → onboarding lagi → Pulihkan dari cadangan: kata sandi salah ditolak;
       benar → ringkasan isi → semua data kembali (dompet, transaksi, budget, tagihan, jadwal berulang, tema).
-- [ ] Pulihkan di HP lain (pindah HP) bila memungkinkan.
-- [ ] CSV (gratis): tawaran iklan berhadiah → tonton sampai selesai → berkas tersimpan; buka di Excel/Sheets:
+- [x] Pulihkan di HP lain (pindah HP) bila memungkinkan.
+- [x] CSV (gratis): tawaran iklan berhadiah → tonton sampai selesai → berkas tersimpan; buka di Excel/Sheets:
       huruf & nominal benar, catatan berisi `=` tidak dieksekusi.
+- [ ] *(baru)* Backup: kartu status (Belum ada backup / Data aman / Sudah lama tidak backup, kapan terakhir), progres saat mencadangkan, "Backup selesai · ukuran" lalu "Backup lagi"; baris Password (ditanya tiap backup), Lokasi, Backup otomatis (PRO · segera); tombol Pulihkan dari file & Export CSV; kotak peringatan kata sandi.
+- [ ] *(baru)* Dompet & Kategori: keterangan kecil menempel di bawah layar (bukan menempel ke kartu terakhir).
 
 ## 6. Iklan (versi gratis)
 - [ ] Persetujuan iklan muncul sekali setelah onboarding (wajib di EEA; di Indonesia bisa tidak muncul).
