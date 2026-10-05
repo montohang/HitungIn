@@ -69,24 +69,24 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] Pulihkan di HP lain (pindah HP) bila memungkinkan.
 - [x] CSV (gratis): tawaran iklan berhadiah → tonton sampai selesai → berkas tersimpan; buka di Excel/Sheets:
       huruf & nominal benar, catatan berisi `=` tidak dieksekusi.
-- [ ] *(baru)* Backup: kartu status (Belum ada backup / Data aman / Sudah lama tidak backup, kapan terakhir), progres saat mencadangkan, "Backup selesai · ukuran" lalu "Backup lagi"; baris Password (ditanya tiap backup), Lokasi, Backup otomatis (PRO · segera); tombol Pulihkan dari file & Export CSV; kotak peringatan kata sandi.
-- [ ] *(baru)* Dompet & Kategori: keterangan kecil menempel di bawah layar (bukan menempel ke kartu terakhir).
+- [x] *(baru)* Backup: kartu status (Belum ada backup / Data aman / Sudah lama tidak backup, kapan terakhir), progres saat mencadangkan, "Backup selesai · ukuran" lalu "Backup lagi"; baris Password (ditanya tiap backup), Lokasi, Backup otomatis (PRO · segera); tombol Pulihkan dari file & Export CSV; kotak peringatan kata sandi.
+- [x] *(baru)* Dompet & Kategori: keterangan kecil menempel di bawah layar (bukan menempel ke kartu terakhir).
 
 ## 6. Iklan (versi gratis)
 - [x] Persetujuan iklan (UMP): **di Indonesia memang tidak muncul** — Google hanya menampilkannya di wilayah yang
       mewajibkan (EEA/UK/Swiss). Tidak muncul = normal; iklan tetap jalan (non-personal bila belum ada persetujuan).
       Menu "Privasi iklan" di Lainnya hanya tampil bila wilayahmu mewajibkannya.
-- [ ] *(ubah)* Banner hanya di **Beranda, Laporan, Budget** — **tidak** di Riwayat, Catat, kunci, Lainnya, Cadangan.
+- [x] *(ubah)* Banner hanya di **Beranda, Laporan, Budget** — **tidak** di Riwayat, Catat, kunci, Lainnya, Cadangan.
 - [x] Banner tidak menutupi navigasi bawah & tidak ada kotak kosong saat iklan gagal dimuat (mode pesawat).
 - [x] Mode pesawat: aplikasi tetap berfungsi penuh tanpa internet.
 
 ## 6b. Navigasi (baru)
-- [ ] Tombol kembali HP di Laporan / Budget / Lainnya → pindah ke Beranda; di Beranda → keluar aplikasi.
+- [x] Tombol kembali HP di Laporan / Budget / Lainnya → pindah ke Beranda; di Beranda → keluar aplikasi.
       Di layar yang dibuka di atasnya (Riwayat, Detail, Dompet, dll.) kembali seperti biasa ke layar sebelumnya.
-- [ ] Riwayat bisa dibuka dari: "Lihat semua" (Beranda), kartu **Masuk/Keluar bulan ini** di Beranda (terfilter jenis),
+- [x] Riwayat bisa dibuka dari: "Lihat semua" (Beranda), kartu **Masuk/Keluar bulan ini** di Beranda (terfilter jenis),
       kartu **Pemasukan/Pengeluaran** di Laporan (bulan & jenis), legenda donat Laporan (kategori), baris kategori di
       **Budget** (kategori & bulan), **Dompet › Lihat riwayat**, dan menu **Lainnya › Riwayat transaksi**.
-- [ ] Backup: kotak peringatan kata sandi menempel di dasar layar.
+- [x] Backup: kotak peringatan kata sandi menempel di dasar layar.
 
 ## 7. Pro (setelah persiapan butir 0)
 - [ ] Beli Pro → dialog Google Play → sukses → banner hilang, batas gratis hilang, "HitungIn Pro aktif".
@@ -112,8 +112,8 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [ ] Matikan izin notifikasi dari pengaturan HP → kartu Tagihan menampilkan peringatan + tombol Izinkan.
 
 ## 9. Umum
-- [ ] Ukuran huruf sistem besar (Pengaturan → Tampilan) → tidak ada teks terpotong parah / tombol tertutup.
-- [ ] TalkBack: tombol keypad PIN, tab bawah, dan baris transaksi terbaca dengan jelas.
-- [ ] "Kurangi animasi" aktif → animasi (splash, angka, progress) mati.
-- [ ] Rotasi: tetap potret.
-- [ ] Gestur kembali Android (predictive back) wajar di semua layar.
+- [x] Ukuran huruf sistem besar (Pengaturan → Tampilan) → tidak ada teks terpotong parah / tombol tertutup.
+- [x] TalkBack: tombol keypad PIN, tab bawah, dan baris transaksi terbaca dengan jelas.
+- [x] "Kurangi animasi" aktif → animasi (splash, angka, progress) mati.
+- [x] Rotasi: tetap potret.
+- [x] Gestur kembali Android (predictive back) wajar di semua layar.
