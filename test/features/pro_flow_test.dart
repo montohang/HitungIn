@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hitungin/core/db/app_database.dart';
-import 'package:hitungin/core/widgets/app_card.dart';
 import 'package:hitungin/core/widgets/app_chip.dart';
 import 'package:hitungin/features/premium/data/billing.dart';
 import 'package:hitungin/features/premium/data/pro_limits.dart';
@@ -104,15 +103,16 @@ void main() {
     expect(find.text('Notifikasi pengingat'), findsOneWidget);
     expect(find.text('PRO'), findsOneWidget);
 
-    await app.tap('Tambah tagihan');
+    expect(find.text('30 hari ke depan'), findsOneWidget);
+    expect(find.text('2 tagihan belum dibayar'), findsOneWidget);
+    await app.tap('+ Tambah');
     await tester.enterText(_field('Nama tagihan'), 'Internet');
     await tester.enterText(_field('Nominal'), '350000');
     await _tapSheet(tester, 'Simpan');
     expect(find.text('Internet'), findsOneWidget);
 
     // Bayar Kos (dompet BCA sudah terpilih dari tagihan).
-    final Finder kosCard = find.ancestor(of: find.text('Kos'), matching: find.byType(AppCard));
-    await tester.tap(find.descendant(of: kosCard, matching: find.text('Bayar')));
+    await tester.tap(find.bySemanticsLabel(RegExp('^Tandai lunas Kos')));
     await tester.pumpAndSettle();
     expect(find.text('Bayar Kos'), findsOneWidget);
     await _tapSheet(tester, 'Tandai lunas');
@@ -120,9 +120,13 @@ void main() {
     final kos = (await app.run((db) => db.billsDao.watchActive().first)).firstWhere((b) => b.name == 'Kos');
     expect(kos.nextDue, DateTime(2026, 11, 5));
     expect((await app.balances())['BCA'], 1000000 - 1500000);
+    await app.scrollTo(find.text('Sudah dicatat bulan ini'));
+    expect(find.text('Lunas 2 Okt · BCA'), findsOneWidget);
 
     // 3 tagihan aktif → tambah lagi = layar Pro.
-    await app.tap('Tambah tagihan');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
+    await tester.pumpAndSettle();
+    await app.tap('+ Tambah');
     expect(find.text(ProReason.tagihan.headline), findsWidgets);
     await app.back(tester);
 

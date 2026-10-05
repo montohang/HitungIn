@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/db/app_database.dart';
 import '../../core/db/data_providers.dart';
@@ -13,7 +14,6 @@ import '../../core/utils/rupiah.dart';
 import '../../core/utils/rupiah_input.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_card.dart';
-import '../../core/widgets/app_fab.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/empty_state.dart';
@@ -27,9 +27,34 @@ import 'data/bill_due.dart';
 import 'data/bill_reminders.dart';
 import 'reminder_scheduler.dart';
 import '../../core/widgets/hi_icons.dart';
+import '../transactions/widgets/tx_row.dart';
+import '../transactions/data/transactions_dao.dart';
+import '../../core/widgets/screen_header.dart';
+import '../../core/widgets/pressable.dart';
+import '../../core/utils/dates.dart';
+import '../../core/theme/app_palette.dart';
 
 final activeBillsProvider = StreamProvider<List<Bill>>((ref) => ref.watch(appDatabaseProvider).billsDao.watchActive());
 
+/// Pembayaran tagihan bulan ini ("Sudah dicatat bulan ini").
+final _billPaymentsProvider = StreamProvider.autoDispose<List<TxDetail>>((ref) {
+  final DateTime now = ref.watch(clockProvider)();
+  final (DateTime from, DateTime to) = Dates.monthRange(DateTime(now.year, now.month));
+  return ref.watch(appDatabaseProvider).transactionsDao.watchBillPayments(from, to);
+});
+
+/// Total & jumlah tagihan yang jatuh tempo ≤ 30 hari lagi (termasuk yang terlambat).
+({int total, int count}) upcomingBills(List<Bill> bills, DateTime now) {
+  final DateTime limit = DateTime(now.year, now.month, now.day + 30);
+  final List<Bill> soon = [
+    for (final b in bills)
+      if (!b.nextDue.isAfter(limit)) b
+  ];
+  return (total: soon.fold(0, (s, b) => s + b.amount), count: soon.length);
+}
+
+/// Tagihan (Claude Design › Tagihan & rutin): ringkasan 30 hari, daftar
+/// "Akan datang" dengan Tandai lunas, dan "Sudah dicatat bulan ini".
 class BillsScreen extends ConsumerWidget {
   const BillsScreen({super.key});
 
@@ -39,42 +64,272 @@ class BillsScreen extends ConsumerWidget {
     final t = context.text;
     final DateTime now = ref.watch(clockProvider)();
     final AsyncValue<List<Bill>> async = ref.watch(activeBillsProvider);
-    final List<Bill> bills = async.valueOrNull ?? const [];
-    final int monthTotal =
-        bills.where((b) => b.nextDue.year == now.year && b.nextDue.month == now.month).fold(0, (s, b) => s + b.amount);
+    final List<Bill> bills = [...async.valueOrNull ?? const <Bill>[]]..sort((a, b) => a.nextDue.compareTo(b.nextDue));
+    final List<TxDetail> paid = ref.watch(_billPaymentsProvider).valueOrNull ?? const [];
+    final ({int total, int count}) soon = upcomingBills(bills, now);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Tagihan', style: t.screenTitle)),
-      floatingActionButton: AppFab(label: 'Tambah tagihan', onPressed: () => addBill(context, ref, bills.length)),
-      body: ListView(
-        padding: AppSpace.screen.copyWith(top: AppSpace.x8, bottom: 96),
-        children: [
-          const _ReminderCard(),
-          const SizedBox(height: AppSpace.x12),
-          if (async.hasValue && bills.isEmpty)
-            AppCard(
-              child: EmptyState(
-                icon: HiIcons.calendar,
-                title: 'Belum ada tagihan',
-                body: 'Catat kos, listrik, cicilan, atau langganan — HitungIn menandai yang sudah dekat jatuh tempo.',
-                action: 'Tambah tagihan',
-                onAction: () => addBill(context, ref, bills.length),
+      body: SafeArea(
+        child: ListView(
+          padding: AppSpace.screen,
+          children: [
+            ScreenHeader(
+              title: 'Tagihan',
+              large: true,
+              trailing: Pressable(
+                onTap: () => addBill(context, ref, bills.length),
+                semanticLabel: 'Tambah tagihan',
+                child: Container(
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
+                  child: Text('+ Tambah', style: t.title.copyWith(fontSize: 14, color: c.accentText)),
+                ),
               ),
-            )
-          else ...[
-            if (monthTotal > 0)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpace.x12),
-                child: Text('Jatuh tempo bulan ini: ${Rupiah.format(monthTotal)}',
-                    style: t.caption.copyWith(color: c.muted)),
+            ),
+            const SizedBox(height: AppSpace.x16),
+            if (async.hasValue && bills.isEmpty && paid.isEmpty)
+              AppCard(
+                child: EmptyState(
+                  icon: HiIcons.calendar,
+                  title: 'Belum ada tagihan',
+                  body: 'Catat kos, listrik, cicilan, atau langganan — HitungIn menandai yang sudah dekat jatuh tempo.',
+                  action: 'Tambah tagihan',
+                  onAction: () => addBill(context, ref, bills.length),
+                ),
+              )
+            else ...[
+              Container(
+                padding: const EdgeInsets.all(AppSpace.card),
+                decoration:
+                    BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('30 hari ke depan', style: t.caption.copyWith(color: c.muted)),
+                          const SizedBox(height: AppSpace.x2),
+                          Text(Rupiah.format(soon.total),
+                              style: t.amountL.copyWith(fontSize: 26, fontWeight: FontWeight.w800)),
+                          const SizedBox(height: AppSpace.x2),
+                          Text(
+                            soon.count == 0 ? 'Tidak ada tagihan tertunda' : '${soon.count} tagihan belum dibayar',
+                            style: t.caption.copyWith(color: c.muted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const IconTile(icon: HiIcons.calendar, size: 56),
+                  ],
+                ),
               ),
-            for (final b in bills)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpace.x8),
-                child: BillCard(bill: b, now: now),
-              ),
+              if (bills.isNotEmpty) ...[
+                const _SectionLabel('Akan datang'),
+                _ListCard(
+                  children: [
+                    for (final (int i, Bill b) in bills.indexed)
+                      _BillRow(bill: b, now: now, last: i == bills.length - 1),
+                  ],
+                ),
+              ],
+              if (paid.isNotEmpty) ...[
+                const _SectionLabel('Sudah dicatat bulan ini'),
+                _ListCard(
+                  children: [
+                    for (final (int i, TxDetail d) in paid.indexed)
+                      _PaidRow(detail: d, now: now, last: i == paid.length - 1),
+                  ],
+                ),
+              ],
+            ],
+            const SizedBox(height: AppSpace.x16),
+            const _ReminderCard(),
           ],
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpace.x4, AppSpace.x16, AppSpace.x4, AppSpace.x8),
+        child: Text(text, style: context.text.caption.copyWith(fontWeight: FontWeight.w700, color: context.colors.sub)),
+      );
+}
+
+class _ListCard extends StatelessWidget {
+  const _ListCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x4),
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: AppRadius.lgAll,
+          border: Border.all(color: context.colors.line),
+        ),
+        child: Column(children: children),
+      );
+}
+
+/// Baris "Akan datang": ikon, nama + nominal, chip jatuh tempo, dompet, Tandai lunas.
+class _BillRow extends ConsumerWidget {
+  const _BillRow({required this.bill, required this.now, required this.last});
+
+  final Bill bill;
+  final DateTime now;
+  final bool last;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
+    final t = context.text;
+    final BillDue due = billDue(bill, now);
+    final Category? category = (ref.watch(activeCategoriesProvider).valueOrNull ?? const <Category>[])
+        .where((cat) => cat.id == bill.categoryId)
+        .firstOrNull;
+    final String? wallet = (ref.watch(walletBalancesProvider).valueOrNull ?? const [])
+        .where((w) => w.wallet.id == bill.walletId)
+        .firstOrNull
+        ?.wallet
+        .name;
+    final (Color bg, Color fg) = switch (due.state) {
+      BillDueState.terlambat => (c.dangerSoft, c.danger),
+      BillDueState.hariIni || BillDueState.segera => (c.warnSoft, c.warnInk),
+      BillDueState.nanti => (c.chip, c.sub),
+    };
+    return Pressable.card(
+      onTap: () => openBillForm(context, bill),
+      semanticLabel: '${bill.name}, ${Rupiah.format(bill.amount)}, ${billDueLabel(due)}',
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSpace.x12),
+        decoration: BoxDecoration(color: c.surface, border: last ? null : Border(bottom: BorderSide(color: c.line))),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppPalette.soft(context, category?.color ?? 0),
+                borderRadius: AppRadius.smAll,
+              ),
+              child: Icon(AppIcons.of(category?.icon ?? 'bills'),
+                  size: 22, color: AppPalette.ink(context, category?.color ?? 0)),
+            ),
+            const SizedBox(width: AppSpace.x12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: Text(bill.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: t.item)),
+                      const SizedBox(width: AppSpace.x8),
+                      Text(Rupiah.format(bill.amount), style: t.number),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpace.x8),
+                  Row(
+                    children: [
+                      // Chip & keterangan boleh turun baris di layar sempit / huruf besar.
+                      Expanded(
+                        child: Wrap(
+                          spacing: AppSpace.x8,
+                          runSpacing: AppSpace.x4,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            AppBadge(billDueLabel(due), background: bg, foreground: fg),
+                            Text(
+                              [if (wallet != null) wallet, bill.repeat.label.toLowerCase()].join(' · '),
+                              style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: AppSpace.x8),
+                      Pressable(
+                        onTap: () => showAppSheet<void>(context,
+                            title: 'Bayar ${bill.name}', builder: (_) => _PaySheet(bill: bill)),
+                        semanticLabel: 'Tandai lunas ${bill.name}',
+                        child: Container(
+                          height: 32,
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: c.surface,
+                            borderRadius: AppRadius.smAll,
+                            border: Border.all(color: c.line),
+                          ),
+                          child: Text('Tandai lunas', style: t.label.copyWith(color: c.ink)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Baris "Sudah dicatat bulan ini".
+class _PaidRow extends StatelessWidget {
+  const _PaidRow({required this.detail, required this.now, required this.last});
+
+  final TxDetail detail;
+  final DateTime now;
+  final bool last;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    return Pressable.card(
+      onTap: () => context.push(Routes.tx(detail.tx.id)),
+      semanticLabel: '${txTitle(detail)}, lunas',
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSpace.x12),
+        decoration: BoxDecoration(color: c.surface, border: last ? null : Border(bottom: BorderSide(color: c.line))),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(color: c.goodSoft, borderRadius: AppRadius.smAll),
+              child: Icon(HiIcons.check, size: 22, color: c.good),
+            ),
+            const SizedBox(width: AppSpace.x12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(txTitle(detail), maxLines: 1, overflow: TextOverflow.ellipsis, style: t.item),
+                  const SizedBox(height: AppSpace.x2),
+                  Text(
+                    'Lunas ${DateFmt.date(detail.tx.occurredAt, now: now)} · ${detail.wallet.name}',
+                    style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted),
+                  ),
+                ],
+              ),
+            ),
+            Text(Rupiah.format(-detail.tx.amount, signed: true), style: t.number.copyWith(fontSize: 14)),
+          ],
+        ),
       ),
     );
   }

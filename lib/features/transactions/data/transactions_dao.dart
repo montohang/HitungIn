@@ -93,6 +93,14 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
     return q.watch().map(_mapDetails);
   }
 
+  /// Pembayaran tagihan (transaksi dari "Tandai lunas") dalam rentang, terbaru dulu.
+  Stream<List<TxDetail>> watchBillPayments(DateTime from, DateTime to) => (_detailQuery()
+        ..where(transactions.billId.isNotNull() &
+            transactions.occurredAt.isBiggerOrEqualValue(from) &
+            transactions.occurredAt.isSmallerThanValue(to)))
+      .watch()
+      .map(_mapDetails);
+
   /// Semua transaksi (terbaru dulu), untuk ekspor.
   Future<List<TxDetail>> allDetails() => _detailQuery().get().then(_mapDetails);
 
