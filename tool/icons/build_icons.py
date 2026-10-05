@@ -137,7 +137,9 @@ fb = FontBuilder(UPM, isTTF=True)
 fb.setupGlyphOrder(order)
 fb.setupCharacterMap(cmap)
 fb.setupGlyf(glyphs)
-fb.setupHorizontalMetrics({n: (UPM, 0) for n in order})
+# lsb harus = xMin glyph; kalau 0, renderer menggeser ikon ke kiri (tidak di tengah).
+glyf = fb.font['glyf']
+fb.setupHorizontalMetrics({n: (UPM, getattr(glyf[n], 'xMin', 0)) for n in order})
 fb.setupHorizontalHeader(ascent=int(UPM * 0.84), descent=-int(UPM * 0.16))
 fb.setupNameTable({'familyName': 'HitungInIcons', 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=int(UPM * 0.84), sTypoDescender=-int(UPM * 0.16), usWinAscent=int(UPM * 0.84), usWinDescent=int(UPM * 0.16))
