@@ -20,7 +20,7 @@ void main() {
   });
 
   group('AndroidAppIconService', () {
-    const channel = MethodChannel('id.hitungin/app_icon');
+    const channel = MethodChannel('com.capt.hitungin/app_icon');
     final calls = <MethodCall>[];
 
     setUp(() {
@@ -48,7 +48,7 @@ void main() {
 
   group('konsistensi Dart ↔ Android', () {
     final String manifest = File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
-    final String kotlin = File('android/app/src/main/kotlin/id/hitungin/hitungin/MainActivity.kt').readAsStringSync();
+    final String kotlin = File('android/app/src/main/kotlin/com/capt/hitungin/MainActivity.kt').readAsStringSync();
     const String res = 'android/app/src/main/res';
 
     String component(AppIconVariant v) =>
@@ -57,7 +57,7 @@ void main() {
     test('setiap varian punya komponen peluncur & kunci di MainActivity', () {
       for (final v in AppIconVariant.values) {
         expect(manifest, contains('android:name=".${component(v)}"'), reason: v.key);
-        expect(kotlin, contains('"${v.key}" to "id.hitungin.hitungin.${component(v)}"'), reason: v.key);
+        expect(kotlin, contains('"${v.key}" to "com.capt.hitungin.${component(v)}"'), reason: v.key);
       }
       expect(RegExp('android.intent.category.LAUNCHER').allMatches(manifest).length, AppIconVariant.values.length,
           reason: 'MainActivity sendiri tidak boleh punya LAUNCHER (ikon dobel)');

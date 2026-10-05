@@ -1,4 +1,4 @@
-package id.hitungin.hitungin
+package com.capt.hitungin
 
 import android.app.Activity
 import android.content.Intent

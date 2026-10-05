@@ -1,4 +1,4 @@
-package id.hitungin.hitungin
+package com.capt.hitungin
 
 import android.content.ComponentName
 import android.content.pm.PackageManager
@@ -11,15 +11,15 @@ class MainActivity : FlutterFragmentActivity() {
 
     /** Kunci varian (sama dengan AppIconVariant.key di Dart) → komponen peluncur. */
     private val iconComponents = linkedMapOf(
-        "standar" to "id.hitungin.hitungin.LauncherActivity",
-        "gelap" to "id.hitungin.hitungin.IconGelap",
-        "emas" to "id.hitungin.hitungin.IconEmas",
-        "terang" to "id.hitungin.hitungin.IconTerang",
+        "standar" to "com.capt.hitungin.LauncherActivity",
+        "gelap" to "com.capt.hitungin.IconGelap",
+        "emas" to "com.capt.hitungin.IconEmas",
+        "terang" to "com.capt.hitungin.IconTerang",
     )
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "id.hitungin/app_icon").setMethodCallHandler { call, result ->
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.capt.hitungin/app_icon").setMethodCallHandler { call, result ->
             when (call.method) {
                 "get" -> result.success(currentIcon())
                 "set" -> {

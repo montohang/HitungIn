@@ -10,7 +10,7 @@ abstract interface class AppIconService {
 }
 
 class AndroidAppIconService implements AppIconService {
-  const AndroidAppIconService([this._channel = const MethodChannel('id.hitungin/app_icon')]);
+  const AndroidAppIconService([this._channel = const MethodChannel('com.capt.hitungin/app_icon')]);
 
   final MethodChannel _channel;
 

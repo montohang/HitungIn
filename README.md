@@ -20,6 +20,7 @@ Bricolage Grotesque Bold dan Plus Jakarta Sans 400–800.
 ### 2. Folder Android
 
 Sudah dibuat (`flutter create --platforms=android --org id.hitungin --project-name hitungin .`) dengan penyesuaian:
+- Application ID / package: **`com.capt.hitungin`** (permanen setelah unggahan pertama ke Play Console).
 - `MainActivity` memakai `FlutterFragmentActivity` (wajib untuk dialog sidik jari).
 - Izin `USE_BIOMETRIC`.
 - `allowBackup="false"` + `data_extraction_rules.xml`: database **tidak** ikut dicadangkan ke Google Drive.
@@ -201,7 +202,7 @@ lalu disimpan di Keystore supaya tetap berlaku offline. Pembelian selalu di-*ack
   → `android/app/src/main/res/mipmap-*` (adaptif 108dp + lama 48dp), `mipmap-anydpi-v26/*.xml`,
   `values/ic_launcher_colors.xml`, dan `branding/play_store_icon_512.png` (unggah ke Play Console).
 - Ganti ikon (Pro) = mengaktifkan satu komponen peluncur dan mematikan yang lain (`MainActivity.setIcon`, kanal
-  `id.hitungin/app_icon`). Ikon Standar memakai `LauncherActivity` (activity kecil yang meneruskan ke `MainActivity`),
+  `com.capt.hitungin/app_icon`). Ikon Standar memakai `LauncherActivity` (activity kecil yang meneruskan ke `MainActivity`),
   bukan alias, supaya bisa dimatikan **dan** `flutter run` tetap menemukan activity peluncur. Ikon lain = `activity-alias`.
 - Menambah varian: tambah di `AppIconVariant`, di `iconComponents` (MainActivity.kt), alias di manifest, lalu jalankan
   generator. `test/branding/app_icon_test.dart` gagal bila salah satunya terlewat.
