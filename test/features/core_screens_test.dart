@@ -224,7 +224,7 @@ void main() {
     await app.go(tester, '/laporan');
 
     expect(find.text('Rp9,2 jt'), findsOneWidget);
-    expect(find.text('Rp400rb'), findsOneWidget);
+    expect(find.text('Rp400rb'), findsNWidgets(2), reason: 'kartu Pengeluaran + tengah donat');
     expect(find.text('▲ 100% vs Sep'), findsOneWidget);
     expect(find.text('+Rp8.800.000'), findsOneWidget);
     expect(find.text('Tertinggi 1 Okt · Rp300.000'), findsOneWidget);

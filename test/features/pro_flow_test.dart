@@ -162,24 +162,33 @@ void main() {
     final app = AppHarness(tester);
     await app.seed();
     await app.addTx(TxKind.pengeluaran, 50000, app.gopay, DateTime(2026, 10, 1), category: app.food());
+    await app.addTx(TxKind.pengeluaran, 20000, app.tunai, DateTime(2026, 10, 1), category: app.food());
+    await app.addTx(TxKind.pengeluaran, 30000, app.tunai, DateTime(2026, 9, 3), category: app.food());
     await app.pump(tester);
     await app.go(tester, '/laporan');
 
-    await app.scrollTo(find.text('Tren'));
-    expect(find.text(ProReason.laporan.headline), findsOneWidget, reason: 'teaser tren');
+    // Arus kas 6 bulan gratis; 12 bulan mengarah ke Pro.
+    await app.scrollTo(find.text('Arus kas 6 bulan'));
+    await app.tap('12 bulan · PRO');
+    expect(find.text(ProReason.laporan.headline), findsWidgets, reason: 'layar Pro');
+    await app.back(tester);
 
     await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('Bulan sebelumnya'));
     await tester.pumpAndSettle();
-    expect(find.text('September 2026'), findsOneWidget);
+    expect(find.text('Sep 2026'), findsOneWidget);
     expect(find.text('Selisih bulan ini'), findsOneWidget, reason: 'bulan lalu masih gratis');
+
+    await app.tap('GoPay');
+    expect(find.text(ProReason.laporan.headline), findsWidgets, reason: 'filter dompet = Pro');
+    await app.back(tester);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.bySemanticsLabel('Bulan sebelumnya'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Versi gratis menampilkan laporan bulan ini dan bulan lalu'), findsOneWidget);
-
-    await app.tap('GoPay');
-    expect(find.text(ProReason.laporan.headline), findsWidgets);
     await app.close(tester);
   });
 
@@ -192,17 +201,17 @@ void main() {
     await app.pump(tester);
     await app.go(tester, '/laporan');
 
-    expect(find.text('Rp750rb'), findsOneWidget);
+    expect(find.text('Rp750rb'), findsNWidgets(2), reason: 'kartu Pengeluaran + tengah donat');
     await app.tap('GoPay');
     expect(find.text('Rp50rb'), findsWidgets);
     expect(find.text('Rp750rb'), findsNothing);
 
     await app.tap('Semua dompet');
-    await app.scrollTo(find.text('Tren 6 bulan'));
+    await app.scrollTo(find.text('Arus kas 6 bulan'));
     await app.scrollTo(find.text('Agustus 2026'));
-    expect(find.text('Agustus 2026'), findsOneWidget);
+    expect(find.text('Agustus 2026'), findsOneWidget, reason: 'tabel arus kas (Pro)');
     await app.tap('12 bulan');
-    expect(find.text('Tren 12 bulan'), findsOneWidget);
+    expect(find.text('Arus kas 12 bulan'), findsOneWidget);
     await app.close(tester);
   });
 
