@@ -2588,15 +2588,23 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'UNIQUE REFERENCES categories (id) ON DELETE CASCADE'));
+          'REFERENCES categories (id) ON DELETE CASCADE'));
   static const VerificationMeta _limitAmountMeta =
       const VerificationMeta('limitAmount');
   @override
   late final GeneratedColumn<int> limitAmount = GeneratedColumn<int>(
       'limit_amount', aliasedName, false,
-      check: () => ComparableExpr(limitAmount).isBiggerThanValue(0),
+      check: () => ComparableExpr(limitAmount).isBiggerOrEqualValue(0),
       type: DriftSqlType.int,
       requiredDuringInsert: true);
+  static const VerificationMeta _fromMonthMeta =
+      const VerificationMeta('fromMonth');
+  @override
+  late final GeneratedColumn<DateTime> fromMonth = GeneratedColumn<DateTime>(
+      'from_month', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: Constant(DateTime(2000)));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -2607,7 +2615,7 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
       defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, categoryId, limitAmount, createdAt];
+      [id, categoryId, limitAmount, fromMonth, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2635,6 +2643,10 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
     } else if (isInserting) {
       context.missing(_limitAmountMeta);
     }
+    if (data.containsKey('from_month')) {
+      context.handle(_fromMonthMeta,
+          fromMonth.isAcceptableOrUnknown(data['from_month']!, _fromMonthMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -2645,6 +2657,10 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {categoryId, fromMonth},
+      ];
+  @override
   Budget map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Budget(
@@ -2654,6 +2670,8 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
           .read(DriftSqlType.int, data['${effectivePrefix}category_id']),
       limitAmount: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}limit_amount'])!,
+      fromMonth: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}from_month'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -2668,12 +2686,19 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
 class Budget extends DataClass implements Insertable<Budget> {
   final int id;
   final int? categoryId;
+
+  /// 0 = "tanpa budget mulai [fromMonth]" (menghapus target lama untuk bulan itu dst.).
   final int limitAmount;
+
+  /// Bulan (tanggal 1) target ini mulai berlaku (v3). Target bulan M = baris
+  /// dengan [fromMonth] terbesar yang ≤ M. Data lama = berlaku sejak awal.
+  final DateTime fromMonth;
   final DateTime createdAt;
   const Budget(
       {required this.id,
       this.categoryId,
       required this.limitAmount,
+      required this.fromMonth,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2683,6 +2708,7 @@ class Budget extends DataClass implements Insertable<Budget> {
       map['category_id'] = Variable<int>(categoryId);
     }
     map['limit_amount'] = Variable<int>(limitAmount);
+    map['from_month'] = Variable<DateTime>(fromMonth);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -2694,6 +2720,7 @@ class Budget extends DataClass implements Insertable<Budget> {
           ? const Value.absent()
           : Value(categoryId),
       limitAmount: Value(limitAmount),
+      fromMonth: Value(fromMonth),
       createdAt: Value(createdAt),
     );
   }
@@ -2705,6 +2732,7 @@ class Budget extends DataClass implements Insertable<Budget> {
       id: serializer.fromJson<int>(json['id']),
       categoryId: serializer.fromJson<int?>(json['categoryId']),
       limitAmount: serializer.fromJson<int>(json['limitAmount']),
+      fromMonth: serializer.fromJson<DateTime>(json['fromMonth']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -2715,6 +2743,7 @@ class Budget extends DataClass implements Insertable<Budget> {
       'id': serializer.toJson<int>(id),
       'categoryId': serializer.toJson<int?>(categoryId),
       'limitAmount': serializer.toJson<int>(limitAmount),
+      'fromMonth': serializer.toJson<DateTime>(fromMonth),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -2723,11 +2752,13 @@ class Budget extends DataClass implements Insertable<Budget> {
           {int? id,
           Value<int?> categoryId = const Value.absent(),
           int? limitAmount,
+          DateTime? fromMonth,
           DateTime? createdAt}) =>
       Budget(
         id: id ?? this.id,
         categoryId: categoryId.present ? categoryId.value : this.categoryId,
         limitAmount: limitAmount ?? this.limitAmount,
+        fromMonth: fromMonth ?? this.fromMonth,
         createdAt: createdAt ?? this.createdAt,
       );
   Budget copyWithCompanion(BudgetsCompanion data) {
@@ -2737,6 +2768,7 @@ class Budget extends DataClass implements Insertable<Budget> {
           data.categoryId.present ? data.categoryId.value : this.categoryId,
       limitAmount:
           data.limitAmount.present ? data.limitAmount.value : this.limitAmount,
+      fromMonth: data.fromMonth.present ? data.fromMonth.value : this.fromMonth,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -2747,13 +2779,15 @@ class Budget extends DataClass implements Insertable<Budget> {
           ..write('id: $id, ')
           ..write('categoryId: $categoryId, ')
           ..write('limitAmount: $limitAmount, ')
+          ..write('fromMonth: $fromMonth, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, categoryId, limitAmount, createdAt);
+  int get hashCode =>
+      Object.hash(id, categoryId, limitAmount, fromMonth, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2761,6 +2795,7 @@ class Budget extends DataClass implements Insertable<Budget> {
           other.id == this.id &&
           other.categoryId == this.categoryId &&
           other.limitAmount == this.limitAmount &&
+          other.fromMonth == this.fromMonth &&
           other.createdAt == this.createdAt);
 }
 
@@ -2768,29 +2803,34 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
   final Value<int> id;
   final Value<int?> categoryId;
   final Value<int> limitAmount;
+  final Value<DateTime> fromMonth;
   final Value<DateTime> createdAt;
   const BudgetsCompanion({
     this.id = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.limitAmount = const Value.absent(),
+    this.fromMonth = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   BudgetsCompanion.insert({
     this.id = const Value.absent(),
     this.categoryId = const Value.absent(),
     required int limitAmount,
+    this.fromMonth = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : limitAmount = Value(limitAmount);
   static Insertable<Budget> custom({
     Expression<int>? id,
     Expression<int>? categoryId,
     Expression<int>? limitAmount,
+    Expression<DateTime>? fromMonth,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (categoryId != null) 'category_id': categoryId,
       if (limitAmount != null) 'limit_amount': limitAmount,
+      if (fromMonth != null) 'from_month': fromMonth,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -2799,11 +2839,13 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
       {Value<int>? id,
       Value<int?>? categoryId,
       Value<int>? limitAmount,
+      Value<DateTime>? fromMonth,
       Value<DateTime>? createdAt}) {
     return BudgetsCompanion(
       id: id ?? this.id,
       categoryId: categoryId ?? this.categoryId,
       limitAmount: limitAmount ?? this.limitAmount,
+      fromMonth: fromMonth ?? this.fromMonth,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -2820,6 +2862,9 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
     if (limitAmount.present) {
       map['limit_amount'] = Variable<int>(limitAmount.value);
     }
+    if (fromMonth.present) {
+      map['from_month'] = Variable<DateTime>(fromMonth.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2832,6 +2877,7 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
           ..write('id: $id, ')
           ..write('categoryId: $categoryId, ')
           ..write('limitAmount: $limitAmount, ')
+          ..write('fromMonth: $fromMonth, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -6016,12 +6062,14 @@ typedef $$BudgetsTableCreateCompanionBuilder = BudgetsCompanion Function({
   Value<int> id,
   Value<int?> categoryId,
   required int limitAmount,
+  Value<DateTime> fromMonth,
   Value<DateTime> createdAt,
 });
 typedef $$BudgetsTableUpdateCompanionBuilder = BudgetsCompanion Function({
   Value<int> id,
   Value<int?> categoryId,
   Value<int> limitAmount,
+  Value<DateTime> fromMonth,
   Value<DateTime> createdAt,
 });
 
@@ -6058,6 +6106,9 @@ class $$BudgetsTableFilterComposer
 
   ColumnFilters<int> get limitAmount => $composableBuilder(
       column: $table.limitAmount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get fromMonth => $composableBuilder(
+      column: $table.fromMonth, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -6098,6 +6149,9 @@ class $$BudgetsTableOrderingComposer
   ColumnOrderings<int> get limitAmount => $composableBuilder(
       column: $table.limitAmount, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get fromMonth => $composableBuilder(
+      column: $table.fromMonth, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -6136,6 +6190,9 @@ class $$BudgetsTableAnnotationComposer
 
   GeneratedColumn<int> get limitAmount => $composableBuilder(
       column: $table.limitAmount, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fromMonth =>
+      $composableBuilder(column: $table.fromMonth, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -6187,24 +6244,28 @@ class $$BudgetsTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<int?> categoryId = const Value.absent(),
             Value<int> limitAmount = const Value.absent(),
+            Value<DateTime> fromMonth = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               BudgetsCompanion(
             id: id,
             categoryId: categoryId,
             limitAmount: limitAmount,
+            fromMonth: fromMonth,
             createdAt: createdAt,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<int?> categoryId = const Value.absent(),
             required int limitAmount,
+            Value<DateTime> fromMonth = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               BudgetsCompanion.insert(
             id: id,
             categoryId: categoryId,
             limitAmount: limitAmount,
+            fromMonth: fromMonth,
             createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0

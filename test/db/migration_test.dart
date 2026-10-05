@@ -11,10 +11,11 @@ void main() {
 
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  test('v1 → v2: skema hasil migrasi sama dengan skema baru', () async {
+  // AppDatabase selalu bermigrasi ke versi terbaru, jadi validasi ke v3.
+  test('v1 → v3: skema hasil migrasi sama dengan skema baru', () async {
     final schema = await verifier.schemaAt(1);
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 2);
+    await verifier.migrateAndValidate(db, 3);
     await db.close();
   });
 
@@ -45,6 +46,29 @@ void main() {
       firstRun: DateTime(2026, 10, 25),
     );
     expect(await db.recurringDao.runDue(DateTime(2026, 10, 25, 9)), 1);
+    await db.close();
+  });
+
+  test('v2 → v3: skema hasil migrasi sama dengan skema baru', () async {
+    final schema = await verifier.schemaAt(2);
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 3);
+    await db.close();
+  });
+
+  test('v2 → v3: budget lama tetap berlaku untuk semua bulan', () async {
+    final schema = await verifier.schemaAt(2);
+    schema.rawDatabase
+      ..execute("INSERT INTO categories (id, name, kind, icon, keywords, sort_order, archived) "
+          "VALUES (1, 'Makan', 'pengeluaran', 'food', 'makan', 0, 0)")
+      ..execute('INSERT INTO budgets (category_id, limit_amount, created_at) VALUES (NULL, 3000000, 1759000000)')
+      ..execute('INSERT INTO budgets (category_id, limit_amount, created_at) VALUES (1, 500000, 1759000000)');
+
+    final db = AppDatabase(schema.newConnection());
+    for (final month in [DateTime(2024, 1), DateTime(2026, 10)]) {
+      final b = await db.budgetsDao.effective(month);
+      expect({for (final x in b) x.categoryId: x.limitAmount}, {null: 3000000, 1: 500000});
+    }
     await db.close();
   });
 }

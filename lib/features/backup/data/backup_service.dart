@@ -90,7 +90,11 @@ class BackupService {
         // Cadangan v1 tidak punya 'recurring' → kosong.
         b.insertAll(db.recurringTxs, [for (final r in rows('recurring')) RecurringTx.fromJson(r)]);
         b.insertAll(db.transactions, [for (final r in rows('transactions')) Txn.fromJson(r)]);
-        b.insertAll(db.budgets, [for (final r in rows('budgets')) Budget.fromJson(r)]);
+        // Cadangan sebelum v3 tidak punya fromMonth → berlaku sejak awal.
+        b.insertAll(db.budgets, [
+          for (final r in rows('budgets'))
+            Budget.fromJson({'fromMonth': DateTime(2000).millisecondsSinceEpoch, ...r}),
+        ]);
         b.insertAll(
           db.settings,
           [for (final r in rows('settings')) Setting.fromJson(r)].where((s) => !_localOnlySettings.contains(s.key)),

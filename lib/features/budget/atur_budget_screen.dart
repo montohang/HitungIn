@@ -27,8 +27,10 @@ import 'data/budget_insights.dart';
 /// −/+ per kategori dengan rata-rata 3 bulan, peringatan 80%.
 /// [suggest] = isi awal dari kebiasaan (rata-rata 3 bulan).
 class AturBudgetScreen extends ConsumerStatefulWidget {
-  const AturBudgetScreen({super.key, this.suggest = false});
+  const AturBudgetScreen({super.key, required this.month, this.suggest = false});
 
+  /// Bulan (tanggal 1) yang diatur; target berlaku mulai bulan ini dan sesudahnya.
+  final DateTime month;
   final bool suggest;
 
   @override
@@ -53,10 +55,9 @@ class _AturBudgetScreenState extends ConsumerState<AturBudgetScreen> {
 
   Future<void> _load() async {
     final AppDatabase db = ref.read(appDatabaseProvider);
-    final DateTime now = ref.read(clockProvider)();
     final List<Category> cats = await db.categoriesDao.active(kind: TxKind.pengeluaran);
-    final List<Budget> budgets = await db.budgetsDao.all();
-    final Map<int, int> avg = await db.transactionsDao.categoryAverages(DateTime(now.year, now.month));
+    final List<Budget> budgets = await db.budgetsDao.effective(widget.month);
+    final Map<int, int> avg = await db.transactionsDao.categoryAverages(widget.month);
     final String? warn = await db.settingsDao.read(SettingKeys.budgetWarn80);
     if (!mounted) return;
     setState(() {
@@ -121,7 +122,7 @@ class _AturBudgetScreenState extends ConsumerState<AturBudgetScreen> {
   Future<void> _save() async {
     setState(() => _saving = true);
     final AppDatabase db = ref.read(appDatabaseProvider);
-    await db.budgetsDao.saveAll(total: _total, perCategory: {
+    await db.budgetsDao.saveAll(month: widget.month, total: _total, perCategory: {
       for (final Category c in _categories) c.id: _amounts[c.id] ?? 0,
     });
     await db.settingsDao.write(SettingKeys.budgetWarn80, '$_warn');
@@ -135,6 +136,7 @@ class _AturBudgetScreenState extends ConsumerState<AturBudgetScreen> {
     final c = context.colors;
     final t = context.text;
     final DateTime now = ref.watch(clockProvider)();
+    final bool thisMonth = widget.month == DateTime(now.year, now.month);
     final int allocated = _allocated;
     final bool over = _total > 0 && allocated > _total;
 
@@ -144,7 +146,11 @@ class _AturBudgetScreenState extends ConsumerState<AturBudgetScreen> {
           padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.x16, AppSpace.screenH, AppSpace.x16),
           child: Column(
             children: [
-              ScreenHeader(title: 'Atur budget ${DateFmt.months[now.month - 1]}'),
+              ScreenHeader(
+                title: thisMonth
+                    ? 'Atur budget ${DateFmt.months[widget.month.month - 1]}'
+                    : 'Atur budget ${DateFmt.monthsShort[widget.month.month - 1]} ${widget.month.year}',
+              ),
               const SizedBox(height: AppSpace.x16),
               Expanded(
                 child: !_loaded
@@ -152,6 +158,14 @@ class _AturBudgetScreenState extends ConsumerState<AturBudgetScreen> {
                     : ListView(
                         padding: EdgeInsets.zero,
                         children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpace.x12),
+                            child: Text(
+                              'Berlaku mulai ${DateFmt.month(widget.month)} dan bulan-bulan berikutnya. '
+                              'Bulan sebelumnya tetap memakai target lamanya.',
+                              style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted),
+                            ),
+                          ),
                           if (_note != null) ...[
                             Container(
                               padding: const EdgeInsets.all(AppSpace.x12),

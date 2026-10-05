@@ -31,8 +31,10 @@ class BudgetScreen extends ConsumerStatefulWidget {
 class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   late DateTime _month = ref.read(currentMonthProvider);
 
-  void _atur({bool saran = false}) =>
-      context.push(saran ? Uri(path: Routes.aturBudget, queryParameters: {'saran': '1'}).toString() : Routes.aturBudget);
+  void _atur({bool saran = false}) => context.push(Uri(path: Routes.aturBudget, queryParameters: {
+        'month': DateFmt.monthKey(_month),
+        if (saran) 'saran': '1',
+      }).toString());
 
   @override
   Widget build(BuildContext context) {

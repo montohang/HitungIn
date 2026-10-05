@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/db/data_providers.dart';
 import 'core/utils/date_format.dart';
 import 'features/backup/backup_screen.dart';
 import 'features/bills/bills_screen.dart';
@@ -84,7 +85,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.aturBudget,
         parentNavigatorKey: _rootKey,
-        builder: (_, state) => AturBudgetScreen(suggest: state.uri.queryParameters['saran'] == '1'),
+        builder: (context, state) => AturBudgetScreen(
+          month: DateFmt.parseMonthKey(state.uri.queryParameters['month']) ??
+              ProviderScope.containerOf(context).read(currentMonthProvider),
+          suggest: state.uri.queryParameters['saran'] == '1',
+        ),
       ),
       GoRoute(
         path: Routes.premium,

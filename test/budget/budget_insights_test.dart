@@ -6,7 +6,7 @@ import 'package:hitungin/features/budget/data/budgets_dao.dart';
 import 'package:hitungin/features/transactions/data/transactions_dao.dart' show monthlyAverages;
 
 BudgetProgress _b(int limit, int spent, {String? category}) => (
-      budget: Budget(id: 1, categoryId: category == null ? null : 1, limitAmount: limit, createdAt: DateTime(2026)),
+      budget: Budget(id: 1, categoryId: category == null ? null : 1, limitAmount: limit, fromMonth: DateTime(2000), createdAt: DateTime(2026)),
       category: category == null
           ? null
           : Category(

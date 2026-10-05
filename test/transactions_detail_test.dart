@@ -21,7 +21,7 @@ Txn _tx({TxKind kind = TxKind.pengeluaran, int? categoryId = 1, int? billId, int
     );
 
 BudgetProgress _b(int? categoryId) => (
-      budget: Budget(id: categoryId ?? 0, categoryId: categoryId, limitAmount: 500000, createdAt: DateTime(2026)),
+      budget: Budget(id: categoryId ?? 0, categoryId: categoryId, limitAmount: 500000, fromMonth: DateTime(2000), createdAt: DateTime(2026)),
       category: categoryId == null
           ? null
           : Category(

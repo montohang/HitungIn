@@ -85,7 +85,7 @@ void main() {
     await app.back(tester);
 
     await app.tap('Simpan budget');
-    final budgets = await app.run((db) => db.budgetsDao.all());
+    final budgets = await app.run((db) => db.budgetsDao.effective(DateTime(2026, 10)));
     expect(budgets.where((b) => b.categoryId == null).single.limitAmount, 4000000);
     expect(budgets, hasLength(3));
     await app.close(tester);

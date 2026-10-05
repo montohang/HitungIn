@@ -116,9 +116,20 @@ class Transactions extends Table {
 @DataClassName('Budget')
 class Budgets extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get categoryId => integer().nullable().unique().references(Categories, #id, onDelete: KeyAction.cascade)();
-  IntColumn get limitAmount => integer().check(limitAmount.isBiggerThanValue(0))();
+  IntColumn get categoryId => integer().nullable().references(Categories, #id, onDelete: KeyAction.cascade)();
+
+  /// 0 = "tanpa budget mulai [fromMonth]" (menghapus target lama untuk bulan itu dst.).
+  IntColumn get limitAmount => integer().check(limitAmount.isBiggerOrEqualValue(0))();
+
+  /// Bulan (tanggal 1) target ini mulai berlaku (v3). Target bulan M = baris
+  /// dengan [fromMonth] terbesar yang ≤ M. Data lama = berlaku sejak awal.
+  DateTimeColumn get fromMonth => dateTime().withDefault(Constant(DateTime(2000)))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {categoryId, fromMonth},
+      ];
 }
 
 @DataClassName('Bill')

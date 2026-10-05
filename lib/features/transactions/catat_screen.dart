@@ -111,8 +111,8 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
   }
 
   void _applyQuick(String text) {
-    final QuickEntry e = QuickEntryParser(wallets: _wallets, categories: _categories)
-        .parse(text, now: ref.read(clockProvider)());
+    final QuickEntry e =
+        QuickEntryParser(wallets: _wallets, categories: _categories).parse(text, now: ref.read(clockProvider)());
     setState(() {
       _error = null;
       _kind = e.kind;
@@ -143,7 +143,12 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
     final Map<int, int> balances = {
       for (final WalletBalance w in ref.read(walletBalancesProvider).valueOrNull ?? const []) w.wallet.id: w.balance,
     };
-    final List<Wallet> options = to ? [for (final w in _wallets) if (w.id != _walletId) w] : _wallets;
+    final List<Wallet> options = to
+        ? [
+            for (final w in _wallets)
+              if (w.id != _walletId) w
+          ]
+        : _wallets;
     final int? picked = await showAppSheet<int>(
       context,
       title: to ? 'Ke dompet' : (_kind == TxKind.transfer ? 'Dari dompet' : 'Pilih dompet'),
@@ -332,175 +337,205 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
               Expanded(
                 child: _wallets.isEmpty
                     ? Center(child: Text('Belum ada dompet aktif.', style: t.body.copyWith(color: c.sub)))
-                    : ListView(
-                        padding: EdgeInsets.zero,
-                        children: [
-                          if (!_isEdit) ...[
-                            _QuickField(
-                              controller: _quick,
-                              autofocus: false,
-                              onChanged: _applyQuick,
-                            ),
-                            const SizedBox(height: AppSpace.x16),
-                          ],
-                          AppSegmentedControl<TxKind>(
-                            options: TxKind.values,
-                            selected: _kind,
-                            onSurface: true,
-                            labelOf: (k) => k == TxKind.transfer ? 'Pindah Saldo' : k.label,
-                            onChanged: _setKind,
-                          ),
-                          const SizedBox(height: AppSpace.x16),
-                          Center(child: Text('Nominal', style: t.caption.copyWith(color: c.muted))),
-                          const SizedBox(height: AppSpace.x8),
-                          Center(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                Rupiah.format(_amount),
-                                key: const Key('nominal'),
-                                style: t.amountXL.copyWith(
-                                  fontSize: 44,
-                                  fontWeight: FontWeight.w800,
-                                  color: _amount == 0
-                                      ? c.muted
-                                      : _kind == TxKind.pemasukan
-                                          ? c.good
-                                          : c.ink,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpace.x16),
-                          if (transfer) ...[
-                            Row(
+                    // Ruang sisa dibagi di atas & bawah nominal; isian (kategori, dompet,
+                    // catatan) menempel ke keypad seperti desain. Layar pendek → bisa digulir.
+                    : LayoutBuilder(
+                        builder: (context, box) => SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(minHeight: box.maxHeight),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Expanded(
-                                  child: _PickTile(
-                                    label: 'Dari',
-                                    value: walletName(_walletId),
-                                    onTap: () => _pickWallet(to: false),
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpace.x8),
-                                Container(
-                                  width: 36,
-                                  height: 36,
-                                  decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
-                                  child: Icon(Icons.arrow_forward, size: 18, color: c.accentText),
-                                ),
-                                const SizedBox(width: AppSpace.x8),
-                                Expanded(
-                                  child: _PickTile(
-                                    label: 'Ke',
-                                    value: _toWalletId == null ? 'Pilih' : walletName(_toWalletId),
-                                    onTap: () => _pickWallet(to: true),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppSpace.x12),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x12),
-                              decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.mdAll),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(Icons.info_outline, size: 18, color: c.sub),
-                                  const SizedBox(width: AppSpace.x12),
-                                  Expanded(
-                                    child: Text(
-                                      'Hanya memindahkan saldo antar dompetmu, mis. top up GoPay dari BCA. '
-                                      'Tidak dihitung sebagai pengeluaran.',
-                                      style: t.caption.copyWith(height: 1.5, color: c.sub),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    if (!_isEdit) ...[
+                                      _QuickField(
+                                        controller: _quick,
+                                        autofocus: false,
+                                        onChanged: _applyQuick,
+                                      ),
+                                      const SizedBox(height: AppSpace.x16),
+                                    ],
+                                    AppSegmentedControl<TxKind>(
+                                      options: TxKind.values,
+                                      selected: _kind,
+                                      onSurface: true,
+                                      labelOf: (k) => k == TxKind.transfer ? 'Pindah Saldo' : k.label,
+                                      onChanged: _setKind,
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: AppSpace.x8),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Pressable(
-                                onTap: _pickDate,
-                                semanticLabel: 'Tanggal: ${DateFmt.dayLabel(_date, now: now)}',
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpace.x4, vertical: AppSpace.x8),
-                                  child: Text.rich(
-                                    TextSpan(
-                                      text: 'Tanggal: ',
-                                      children: [
-                                        TextSpan(
-                                          text: '${DateFmt.dayLabel(_date, now: now)} ›',
-                                          style: TextStyle(fontWeight: FontWeight.w600, color: c.ink),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: AppSpace.x16),
+                                  child: Column(
+                                    children: [
+                                      Center(child: Text('Nominal', style: t.caption.copyWith(color: c.muted))),
+                                      const SizedBox(height: AppSpace.x8),
+                                      Center(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            Rupiah.format(_amount),
+                                            key: const Key('nominal'),
+                                            style: t.amountXL.copyWith(
+                                              fontSize: 44,
+                                              fontWeight: FontWeight.w800,
+                                              color: _amount == 0
+                                                  ? c.muted
+                                                  : _kind == TxKind.pemasukan
+                                                      ? c.good
+                                                      : c.ink,
+                                            ),
+                                          ),
                                         ),
-                                      ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    if (transfer) ...[
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _PickTile(
+                                              label: 'Dari',
+                                              value: walletName(_walletId),
+                                              onTap: () => _pickWallet(to: false),
+                                            ),
+                                          ),
+                                          const SizedBox(width: AppSpace.x8),
+                                          Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration:
+                                                BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
+                                            child: Icon(Icons.arrow_forward, size: 18, color: c.accentText),
+                                          ),
+                                          const SizedBox(width: AppSpace.x8),
+                                          Expanded(
+                                            child: _PickTile(
+                                              label: 'Ke',
+                                              value: _toWalletId == null ? 'Pilih' : walletName(_toWalletId),
+                                              onTap: () => _pickWallet(to: true),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: AppSpace.x12),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: AppSpace.x16, vertical: AppSpace.x12),
+                                        decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.mdAll),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(Icons.info_outline, size: 18, color: c.sub),
+                                            const SizedBox(width: AppSpace.x12),
+                                            Expanded(
+                                              child: Text(
+                                                'Hanya memindahkan saldo antar dompetmu, mis. top up GoPay dari BCA. '
+                                                'Tidak dihitung sebagai pengeluaran.',
+                                                style: t.caption.copyWith(height: 1.5, color: c.sub),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpace.x8),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Pressable(
+                                          onTap: _pickDate,
+                                          semanticLabel: 'Tanggal: ${DateFmt.dayLabel(_date, now: now)}',
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: AppSpace.x4, vertical: AppSpace.x8),
+                                            child: Text.rich(
+                                              TextSpan(
+                                                text: 'Tanggal: ',
+                                                children: [
+                                                  TextSpan(
+                                                    text: '${DateFmt.dayLabel(_date, now: now)} ›',
+                                                    style: TextStyle(fontWeight: FontWeight.w600, color: c.ink),
+                                                  ),
+                                                ],
+                                              ),
+                                              style: t.caption.copyWith(color: c.muted),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ] else ...[
+                                      Text('Kategori',
+                                          style: t.caption.copyWith(fontWeight: FontWeight.w600, color: c.sub)),
+                                      const SizedBox(height: AppSpace.x8),
+                                      // Satu baris geser: dompet & tanggal tetap terlihat di atas keypad.
+                                      SizedBox(
+                                        height: 38,
+                                        child: ListView.separated(
+                                          key: const Key('kategori'),
+                                          scrollDirection: Axis.horizontal,
+                                          clipBehavior: Clip.none,
+                                          itemCount: cats.length,
+                                          separatorBuilder: (_, __) => const SizedBox(width: AppSpace.x8),
+                                          itemBuilder: (_, i) => AppChip(
+                                            label: cats[i].name,
+                                            icon: AppIcons.of(cats[i].icon),
+                                            selected: cats[i].id == _categoryId,
+                                            onTap: () => setState(() {
+                                              _categoryId = cats[i].id;
+                                              _error = null;
+                                            }),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpace.x16),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _PickTile(
+                                              label: _kind == TxKind.pemasukan ? 'Ke dompet' : 'Dari dompet',
+                                              value: walletName(_walletId),
+                                              onTap: () => _pickWallet(to: false),
+                                            ),
+                                          ),
+                                          const SizedBox(width: AppSpace.x12),
+                                          Expanded(
+                                            child: _PickTile(
+                                              label: 'Tanggal',
+                                              value: DateFmt.dayLabel(_date, now: now),
+                                              onTap: _pickDate,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                    const SizedBox(height: AppSpace.x16),
+                                    Container(
+                                      height: 50,
+                                      padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16),
+                                      decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.mdAll),
+                                      alignment: Alignment.centerLeft,
+                                      child: TextField(
+                                        key: const Key('catatan'),
+                                        controller: _note,
+                                        style: t.item.copyWith(fontWeight: FontWeight.w500),
+                                        maxLength: 80,
+                                        textCapitalization: TextCapitalization.sentences,
+                                        decoration: _bare('Catatan (opsional)'),
+                                      ),
                                     ),
-                                    style: t.caption.copyWith(color: c.muted),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ] else ...[
-                            Text('Kategori', style: t.caption.copyWith(fontWeight: FontWeight.w600, color: c.sub)),
-                            const SizedBox(height: AppSpace.x8),
-                            // Satu baris geser: dompet & tanggal tetap terlihat di atas keypad.
-                            SizedBox(
-                              height: 38,
-                              child: ListView.separated(
-                                key: const Key('kategori'),
-                                scrollDirection: Axis.horizontal,
-                                clipBehavior: Clip.none,
-                                itemCount: cats.length,
-                                separatorBuilder: (_, __) => const SizedBox(width: AppSpace.x8),
-                                itemBuilder: (_, i) => AppChip(
-                                  label: cats[i].name,
-                                  icon: AppIcons.of(cats[i].icon),
-                                  selected: cats[i].id == _categoryId,
-                                  onTap: () => setState(() {
-                                    _categoryId = cats[i].id;
-                                    _error = null;
-                                  }),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: AppSpace.x16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _PickTile(
-                                    label: _kind == TxKind.pemasukan ? 'Ke dompet' : 'Dari dompet',
-                                    value: walletName(_walletId),
-                                    onTap: () => _pickWallet(to: false),
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpace.x12),
-                                Expanded(
-                                  child: _PickTile(
-                                    label: 'Tanggal',
-                                    value: DateFmt.dayLabel(_date, now: now),
-                                    onTap: _pickDate,
-                                  ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                          const SizedBox(height: AppSpace.x16),
-                          Container(
-                            height: 50,
-                            padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16),
-                            decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.mdAll),
-                            alignment: Alignment.centerLeft,
-                            child: TextField(
-                              key: const Key('catatan'),
-                              controller: _note,
-                              style: t.item.copyWith(fontWeight: FontWeight.w500),
-                              maxLength: 80,
-                              textCapitalization: TextCapitalization.sentences,
-                              decoration: _bare('Catatan (opsional)'),
-                            ),
                           ),
-                        ],
+                        ),
                       ),
               ),
               if (_wallets.isNotEmpty) ...[
@@ -617,7 +652,8 @@ class _PickTile extends StatelessWidget {
 
 /// Satu baris pilihan di lembar bawah dompet / tanggal.
 class _SheetOption extends StatelessWidget {
-  const _SheetOption({required this.icon, required this.label, required this.selected, required this.onTap, this.value});
+  const _SheetOption(
+      {required this.icon, required this.label, required this.selected, required this.onTap, this.value});
 
   final IconData icon;
   final String label;
