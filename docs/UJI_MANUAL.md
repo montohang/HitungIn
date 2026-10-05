@@ -45,9 +45,9 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] Laporan: < 3 transaksi → "Laporan muncul setelah 3 transaksi" (cincin n/3). Selain itu: pil bulan, ringkasan, donat per kategori (ketuk legenda → Riwayat terfilter), grafik harian, Arus kas 6 bulan (12 bulan = Pro), kartu Rata-rata per hari & Kategori terbesar.
 - [x] Budget: kosong → "Atur manual" / "Saran dari kebiasaanmu". Atur budget: Ubah total, −/+ per kategori (50rb), ketuk angka untuk mengetik, rata-rata 3 bulan, kategori ke-3 versi gratis → Pro, sakelar "Peringatan di 80%", Simpan budget.
 - [x] Budget: kartu Terpakai dengan penanda "Hari ini", kartu peringatan kategori yang lebih cepat dari jadwal, baris per kategori (oranye ≥80%, merah >100%); pil bulan untuk melihat bulan lalu.
-- [ ] *(baru)* Layar Catat: kolom catatan menempel tepat di atas keypad (tidak ada jarak kosong besar).
-- [ ] *(baru)* Budget per bulan: ubah target di bulan ini → bulan lalu (pil bulan ‹) tetap memakai target lamanya; bulan depan ikut target baru.
-- [ ] *(baru)* Ikon di seluruh app sama dengan ikon garis di desain (navigasi bawah, kategori, dompet, menu Lainnya).
+- [x] *(baru)* Layar Catat: kolom catatan menempel tepat di atas keypad (tidak ada jarak kosong besar).
+- [x] *(baru)* Budget per bulan: ubah target di bulan ini → bulan lalu (pil bulan ‹) tetap memakai target lamanya; bulan depan ikut target baru.
+- [ ] *(baru)* Ikon di seluruh app sama dengan ikon garis di desain **dan tepat di tengah kotaknya** (navigasi bawah, kategori, dompet, menu Lainnya, tombol header).
 
 ## 4. Lainnya (pengaturan)
 - [ ] Nama panggilan berubah di sapaan Beranda.
