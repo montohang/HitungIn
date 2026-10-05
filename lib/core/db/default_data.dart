@@ -29,9 +29,33 @@ const List<(String name, TxKind kind, String icon, String keywords)> defaultCate
   ('Lainnya', TxKind.pemasukan, 'other', 'refund,cashback,kembalian'),
 ];
 
+/// Warna (indeks `AppPalette`) & sub-kategori bawaan, per (nama, jenis). v4.
+const Map<(String, TxKind), (int color, String subs)> defaultCategoryStyle = {
+  ('Makan & Minum', TxKind.pengeluaran): (0, 'Kopi,Makan siang,Jajan'),
+  ('Transportasi', TxKind.pengeluaran): (3, 'Ojol,Bensin,Parkir'),
+  ('Belanja', TxKind.pengeluaran): (4, 'Bulanan,Online'),
+  ('Tagihan', TxKind.pengeluaran): (1, 'Listrik,Internet,Pulsa,BPJS'),
+  ('Rumah', TxKind.pengeluaran): (2, ''),
+  ('Hiburan', TxKind.pengeluaran): (6, 'Streaming,Nonton'),
+  ('Kesehatan', TxKind.pengeluaran): (5, ''),
+  ('Pendidikan', TxKind.pengeluaran): (3, ''),
+  ('Sosial', TxKind.pengeluaran): (4, ''),
+  ('Lainnya', TxKind.pengeluaran): (7, ''),
+  ('Gaji', TxKind.pemasukan): (5, ''),
+  ('Bonus', TxKind.pemasukan): (1, ''),
+  ('Usaha', TxKind.pemasukan): (2, ''),
+  ('Hadiah', TxKind.pemasukan): (4, ''),
+  ('Investasi', TxKind.pemasukan): (3, ''),
+  ('Lainnya', TxKind.pemasukan): (7, ''),
+};
+
+/// Warna dompet bawaan menurut urutan (aksen, teal, amber, lavender, …).
+const List<int> walletColorCycle = [0, 2, 1, 6, 3, 4, 5, 7];
+
 Future<void> seedDefaults(AppDatabase db) async {
   await db.batch((b) {
     for (final (int i, (String name, TxKind kind, String icon, String keywords)) in defaultCategories.indexed) {
+      final (int color, String subs) = defaultCategoryStyle[(name, kind)] ?? (0, '');
       b.insert(
         db.categories,
         CategoriesCompanion.insert(
@@ -39,9 +63,25 @@ Future<void> seedDefaults(AppDatabase db) async {
           kind: kind,
           icon: Value(icon),
           keywords: Value(keywords),
+          color: Value(color),
+          subs: Value(subs),
           sortOrder: Value(i),
         ),
       );
     }
   });
+}
+
+/// v3 → v4: warna & sub-kategori untuk kategori bawaan yang masih ada,
+/// warna dompet menurut urutan.
+Future<void> applyDefaultStyles(AppDatabase db) async {
+  for (final MapEntry<(String, TxKind), (int, String)> e in defaultCategoryStyle.entries) {
+    await (db.update(db.categories)..where((c) => c.name.equals(e.key.$1) & c.kind.equalsValue(e.key.$2)))
+        .write(CategoriesCompanion(color: Value(e.value.$1), subs: Value(e.value.$2)));
+  }
+  final List<Wallet> wallets = await (db.select(db.wallets)..orderBy([(w) => OrderingTerm(expression: w.sortOrder)])).get();
+  for (final (int i, Wallet w) in wallets.indexed) {
+    await (db.update(db.wallets)..where((x) => x.id.equals(w.id)))
+        .write(WalletsCompanion(color: Value(walletColorCycle[i % walletColorCycle.length])));
+  }
 }

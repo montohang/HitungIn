@@ -9,6 +9,7 @@ Wallet _w(int id, String name, WalletType type) => Wallet(
       type: type,
       initialBalance: 0,
       icon: 'wallet',
+      color: 0,
       sortOrder: id,
       archived: false,
       createdAt: DateTime(2026),
@@ -23,7 +24,7 @@ void main() {
   ];
   final categories = [
     for (final (int i, (String name, TxKind kind, String icon, String keywords)) in defaultCategories.indexed)
-      Category(id: i + 1, name: name, kind: kind, icon: icon, keywords: keywords, sortOrder: i, archived: false),
+      Category(id: i + 1, name: name, kind: kind, icon: icon, keywords: keywords, color: 0, subs: defaultCategoryStyle[(name, kind)]?.$2 ?? '', sortOrder: i, archived: false),
   ];
   int catId(String name, TxKind kind) => categories.firstWhere((c) => c.name == name && c.kind == kind).id;
 

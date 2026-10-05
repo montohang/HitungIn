@@ -13,6 +13,7 @@ Txn _tx({TxKind kind = TxKind.pengeluaran, int? categoryId = 1, int? billId, int
       walletId: 1,
       categoryId: categoryId,
       note: '',
+      sub: '',
       billId: billId,
       recurringId: recurringId,
       occurredAt: DateTime(2026, 10, 19),
@@ -25,7 +26,7 @@ BudgetProgress _b(int? categoryId) => (
       category: categoryId == null
           ? null
           : Category(
-              id: categoryId, name: 'K$categoryId', kind: TxKind.pengeluaran, icon: 'x', keywords: '', sortOrder: 0, archived: false),
+              id: categoryId, name: 'K$categoryId', kind: TxKind.pengeluaran, icon: 'x', keywords: '', color: 0, subs: '', sortOrder: 0, archived: false),
       spent: 100000,
     );
 

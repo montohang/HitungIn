@@ -57,16 +57,23 @@ void main() {
     await app.pump(tester);
     await app.push(tester, '/pengaturan/dompet');
 
-    await app.tap('Tambah dompet');
+    await app.tap('+ Tambah');
     await tester.enterText(_field('Nama dompet'), 'OVO');
     await tester.tap(_inSheet(find.text('E-wallet')));
     await tester.enterText(_field('Saldo awal'), '25000');
     await _tapSheet(tester, 'Simpan');
     expect(find.text('OVO'), findsOneWidget);
     expect(find.text('Rp25.000'), findsOneWidget);
+    expect(find.text('E-wallet'), findsOneWidget, reason: 'grup E-wallet');
+
+    // Sesuaikan saldo: isi saldo sekarang → saldo awal ikut menyesuaikan.
+    await app.tap('OVO');
+    await tester.enterText(_field('Saldo sekarang'), '30000');
+    await _tapSheet(tester, 'Simpan');
+    expect((await app.balances())['OVO'], 30000);
 
     // Nama kembar ditolak.
-    await app.tap('Tambah dompet');
+    await app.tap('+ Tambah');
     await tester.enterText(_field('Nama dompet'), 'ovo');
     await _tapSheet(tester, 'Simpan');
     expect(find.text('Nama dompet sudah dipakai.'), findsOneWidget);

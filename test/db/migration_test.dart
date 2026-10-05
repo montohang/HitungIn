@@ -12,10 +12,10 @@ void main() {
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
   // AppDatabase selalu bermigrasi ke versi terbaru, jadi validasi ke v3.
-  test('v1 → v3: skema hasil migrasi sama dengan skema baru', () async {
+  test('v1 → v4: skema hasil migrasi sama dengan skema baru', () async {
     final schema = await verifier.schemaAt(1);
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 3);
+    await verifier.migrateAndValidate(db, 4);
     await db.close();
   });
 
@@ -49,10 +49,10 @@ void main() {
     await db.close();
   });
 
-  test('v2 → v3: skema hasil migrasi sama dengan skema baru', () async {
+  test('v2 → v4: skema hasil migrasi sama dengan skema baru', () async {
     final schema = await verifier.schemaAt(2);
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 3);
+    await verifier.migrateAndValidate(db, 4);
     await db.close();
   });
 
@@ -69,6 +69,23 @@ void main() {
       final b = await db.budgetsDao.effective(month);
       expect({for (final x in b) x.categoryId: x.limitAmount}, {null: 3000000, 1: 500000});
     }
+    await db.close();
+  });
+
+  test('v3 → v4: kategori bawaan dapat warna & sub-kategori, dompet dapat warna', () async {
+    final schema = await verifier.schemaAt(3);
+    schema.rawDatabase
+      ..execute("INSERT INTO wallets (id, name, type, initial_balance, icon, sort_order, archived, created_at) "
+          "VALUES (1, 'BCA', 'bank', 0, 'bank', 0, 0, 1759000000), (2, 'GoPay', 'ewallet', 0, 'ewallet', 1, 0, 1759000000)")
+      ..execute("INSERT INTO categories (id, name, kind, icon, keywords, sort_order, archived) "
+          "VALUES (1, 'Makan & Minum', 'pengeluaran', 'food', 'makan', 0, 0), (2, 'Kucing', 'pengeluaran', 'fun', '', 1, 0)");
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 4);
+    final cats = {for (final c in await db.select(db.categories).get()) c.name: c};
+    expect((cats['Makan & Minum']!.color, cats['Makan & Minum']!.subs), (0, 'Kopi,Makan siang,Jajan'));
+    expect((cats['Kucing']!.color, cats['Kucing']!.subs), (0, ''));
+    final wallets = await (db.select(db.wallets)..orderBy([(w) => OrderingTerm(expression: w.sortOrder)])).get();
+    expect([for (final w in wallets) w.color], [0, 2]);
     await db.close();
   });
 }

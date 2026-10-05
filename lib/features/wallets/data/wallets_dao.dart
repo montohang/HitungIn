@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../../core/db/default_data.dart' show walletColorCycle;
 
 part 'wallets_dao.g.dart';
 
@@ -40,15 +41,31 @@ class WalletsDao extends DatabaseAccessor<AppDatabase> with _$WalletsDaoMixin {
   /// Semua dompet termasuk yang diarsipkan (cek nama kembar).
   Future<List<Wallet>> all() => select(wallets).get();
 
-  Future<int> add({required String name, required WalletType type, int initialBalance = 0, String? icon}) async {
+  Future<int> add({required String name, required WalletType type, int initialBalance = 0, String? icon, int? color}) async {
     final int order = await _nextSortOrder();
     return into(wallets).insert(WalletsCompanion.insert(
       name: name.trim(),
       type: type,
       initialBalance: Value(initialBalance),
       icon: Value(icon ?? _defaultIcon(type)),
+      // Bawaan: warna berikutnya dalam urutan, supaya bar porsi saldo mudah dibedakan.
+      color: Value(color ?? walletColorCycle[order % walletColorCycle.length]),
       sortOrder: Value(order),
     ));
+  }
+
+  /// Hitung jumlah transaksi tiap dompet dalam rentang (keluar/masuk/transfer).
+  Future<Map<int, int>> txCounts(DateTime from, DateTime to) async {
+    final rows = await customSelect(
+      '''
+      SELECT w.id AS id, (SELECT COUNT(*) FROM transactions t
+        WHERE (t.wallet_id = w.id OR t.to_wallet_id = w.id) AND t.occurred_at >= ?1 AND t.occurred_at < ?2) AS n
+      FROM wallets w
+      ''',
+      variables: [Variable.withDateTime(from), Variable.withDateTime(to)],
+      readsFrom: {wallets, transactions},
+    ).get();
+    return {for (final r in rows) r.read<int>('id'): r.read<int>('n')};
   }
 
   Future<void> edit(Wallet wallet) => update(wallets).replace(wallet);

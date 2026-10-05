@@ -84,12 +84,13 @@ class BackupService {
       await (db.delete(db.settings)..where((s) => s.key.isNotIn(_localOnlySettings))).go();
 
       await db.batch((b) {
-        b.insertAll(db.wallets, [for (final r in rows('wallets')) Wallet.fromJson(r)]);
-        b.insertAll(db.categories, [for (final r in rows('categories')) Category.fromJson(r)]);
+        // Cadangan sebelum v4 tidak punya warna/sub-kategori → nilai bawaan.
+        b.insertAll(db.wallets, [for (final r in rows('wallets')) Wallet.fromJson({'color': 0, ...r})]);
+        b.insertAll(db.categories, [for (final r in rows('categories')) Category.fromJson({'color': 0, 'subs': '', ...r})]);
         b.insertAll(db.bills, [for (final r in rows('bills')) Bill.fromJson(r)]);
         // Cadangan v1 tidak punya 'recurring' → kosong.
         b.insertAll(db.recurringTxs, [for (final r in rows('recurring')) RecurringTx.fromJson(r)]);
-        b.insertAll(db.transactions, [for (final r in rows('transactions')) Txn.fromJson(r)]);
+        b.insertAll(db.transactions, [for (final r in rows('transactions')) Txn.fromJson({'sub': '', ...r})]);
         // Cadangan sebelum v3 tidak punya fromMonth → berlaku sejak awal.
         b.insertAll(db.budgets, [
           for (final r in rows('budgets'))

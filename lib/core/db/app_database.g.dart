@@ -45,6 +45,13 @@ class $WalletsTable extends Wallets with TableInfo<$WalletsTable, Wallet> {
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('wallet'));
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<int> color = GeneratedColumn<int>(
+      'color', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   static const VerificationMeta _sortOrderMeta =
       const VerificationMeta('sortOrder');
   @override
@@ -72,8 +79,17 @@ class $WalletsTable extends Wallets with TableInfo<$WalletsTable, Wallet> {
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, type, initialBalance, icon, sortOrder, archived, createdAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        type,
+        initialBalance,
+        icon,
+        color,
+        sortOrder,
+        archived,
+        createdAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -102,6 +118,10 @@ class $WalletsTable extends Wallets with TableInfo<$WalletsTable, Wallet> {
     if (data.containsKey('icon')) {
       context.handle(
           _iconMeta, icon.isAcceptableOrUnknown(data['icon']!, _iconMeta));
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+          _colorMeta, color.isAcceptableOrUnknown(data['color']!, _colorMeta));
     }
     if (data.containsKey('sort_order')) {
       context.handle(_sortOrderMeta,
@@ -134,6 +154,8 @@ class $WalletsTable extends Wallets with TableInfo<$WalletsTable, Wallet> {
           .read(DriftSqlType.int, data['${effectivePrefix}initial_balance'])!,
       icon: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}icon'])!,
+      color: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}color'])!,
       sortOrder: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
       archived: attachedDatabase.typeMapping
@@ -163,6 +185,9 @@ class Wallet extends DataClass implements Insertable<Wallet> {
   /// Kunci ikon (lihat `AppIcons`), bukan IconData, supaya lapisan data
   /// tidak bergantung pada Flutter.
   final String icon;
+
+  /// Indeks warna di `AppPalette` (v4).
+  final int color;
   final int sortOrder;
   final bool archived;
   final DateTime createdAt;
@@ -172,6 +197,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
       required this.type,
       required this.initialBalance,
       required this.icon,
+      required this.color,
       required this.sortOrder,
       required this.archived,
       required this.createdAt});
@@ -185,6 +211,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
     }
     map['initial_balance'] = Variable<int>(initialBalance);
     map['icon'] = Variable<String>(icon);
+    map['color'] = Variable<int>(color);
     map['sort_order'] = Variable<int>(sortOrder);
     map['archived'] = Variable<bool>(archived);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -198,6 +225,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
       type: Value(type),
       initialBalance: Value(initialBalance),
       icon: Value(icon),
+      color: Value(color),
       sortOrder: Value(sortOrder),
       archived: Value(archived),
       createdAt: Value(createdAt),
@@ -214,6 +242,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
           .fromJson(serializer.fromJson<String>(json['type'])),
       initialBalance: serializer.fromJson<int>(json['initialBalance']),
       icon: serializer.fromJson<String>(json['icon']),
+      color: serializer.fromJson<int>(json['color']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
       archived: serializer.fromJson<bool>(json['archived']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -229,6 +258,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
           serializer.toJson<String>($WalletsTable.$convertertype.toJson(type)),
       'initialBalance': serializer.toJson<int>(initialBalance),
       'icon': serializer.toJson<String>(icon),
+      'color': serializer.toJson<int>(color),
       'sortOrder': serializer.toJson<int>(sortOrder),
       'archived': serializer.toJson<bool>(archived),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -241,6 +271,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
           WalletType? type,
           int? initialBalance,
           String? icon,
+          int? color,
           int? sortOrder,
           bool? archived,
           DateTime? createdAt}) =>
@@ -250,6 +281,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
         type: type ?? this.type,
         initialBalance: initialBalance ?? this.initialBalance,
         icon: icon ?? this.icon,
+        color: color ?? this.color,
         sortOrder: sortOrder ?? this.sortOrder,
         archived: archived ?? this.archived,
         createdAt: createdAt ?? this.createdAt,
@@ -263,6 +295,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
           ? data.initialBalance.value
           : this.initialBalance,
       icon: data.icon.present ? data.icon.value : this.icon,
+      color: data.color.present ? data.color.value : this.color,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       archived: data.archived.present ? data.archived.value : this.archived,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -277,6 +310,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
           ..write('type: $type, ')
           ..write('initialBalance: $initialBalance, ')
           ..write('icon: $icon, ')
+          ..write('color: $color, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('archived: $archived, ')
           ..write('createdAt: $createdAt')
@@ -285,8 +319,8 @@ class Wallet extends DataClass implements Insertable<Wallet> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, type, initialBalance, icon, sortOrder, archived, createdAt);
+  int get hashCode => Object.hash(id, name, type, initialBalance, icon, color,
+      sortOrder, archived, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -296,6 +330,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
           other.type == this.type &&
           other.initialBalance == this.initialBalance &&
           other.icon == this.icon &&
+          other.color == this.color &&
           other.sortOrder == this.sortOrder &&
           other.archived == this.archived &&
           other.createdAt == this.createdAt);
@@ -307,6 +342,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
   final Value<WalletType> type;
   final Value<int> initialBalance;
   final Value<String> icon;
+  final Value<int> color;
   final Value<int> sortOrder;
   final Value<bool> archived;
   final Value<DateTime> createdAt;
@@ -316,6 +352,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
     this.type = const Value.absent(),
     this.initialBalance = const Value.absent(),
     this.icon = const Value.absent(),
+    this.color = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.archived = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -326,6 +363,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
     required WalletType type,
     this.initialBalance = const Value.absent(),
     this.icon = const Value.absent(),
+    this.color = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.archived = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -337,6 +375,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
     Expression<String>? type,
     Expression<int>? initialBalance,
     Expression<String>? icon,
+    Expression<int>? color,
     Expression<int>? sortOrder,
     Expression<bool>? archived,
     Expression<DateTime>? createdAt,
@@ -347,6 +386,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
       if (type != null) 'type': type,
       if (initialBalance != null) 'initial_balance': initialBalance,
       if (icon != null) 'icon': icon,
+      if (color != null) 'color': color,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (archived != null) 'archived': archived,
       if (createdAt != null) 'created_at': createdAt,
@@ -359,6 +399,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
       Value<WalletType>? type,
       Value<int>? initialBalance,
       Value<String>? icon,
+      Value<int>? color,
       Value<int>? sortOrder,
       Value<bool>? archived,
       Value<DateTime>? createdAt}) {
@@ -368,6 +409,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
       type: type ?? this.type,
       initialBalance: initialBalance ?? this.initialBalance,
       icon: icon ?? this.icon,
+      color: color ?? this.color,
       sortOrder: sortOrder ?? this.sortOrder,
       archived: archived ?? this.archived,
       createdAt: createdAt ?? this.createdAt,
@@ -393,6 +435,9 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
     if (icon.present) {
       map['icon'] = Variable<String>(icon.value);
     }
+    if (color.present) {
+      map['color'] = Variable<int>(color.value);
+    }
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
@@ -413,6 +458,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
           ..write('type: $type, ')
           ..write('initialBalance: $initialBalance, ')
           ..write('icon: $icon, ')
+          ..write('color: $color, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('archived: $archived, ')
           ..write('createdAt: $createdAt')
@@ -464,6 +510,20 @@ class $CategoriesTable extends Categories
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant(''));
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<int> color = GeneratedColumn<int>(
+      'color', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _subsMeta = const VerificationMeta('subs');
+  @override
+  late final GeneratedColumn<String> subs = GeneratedColumn<String>(
+      'subs', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
   static const VerificationMeta _sortOrderMeta =
       const VerificationMeta('sortOrder');
   @override
@@ -484,7 +544,7 @@ class $CategoriesTable extends Categories
       defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, kind, icon, keywords, sortOrder, archived];
+      [id, name, kind, icon, keywords, color, subs, sortOrder, archived];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -511,6 +571,14 @@ class $CategoriesTable extends Categories
     if (data.containsKey('keywords')) {
       context.handle(_keywordsMeta,
           keywords.isAcceptableOrUnknown(data['keywords']!, _keywordsMeta));
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+          _colorMeta, color.isAcceptableOrUnknown(data['color']!, _colorMeta));
+    }
+    if (data.containsKey('subs')) {
+      context.handle(
+          _subsMeta, subs.isAcceptableOrUnknown(data['subs']!, _subsMeta));
     }
     if (data.containsKey('sort_order')) {
       context.handle(_sortOrderMeta,
@@ -539,6 +607,10 @@ class $CategoriesTable extends Categories
           .read(DriftSqlType.string, data['${effectivePrefix}icon'])!,
       keywords: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}keywords'])!,
+      color: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}color'])!,
+      subs: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}subs'])!,
       sortOrder: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
       archived: attachedDatabase.typeMapping
@@ -565,6 +637,12 @@ class Category extends DataClass implements Insertable<Category> {
 
   /// Kata kunci untuk Catat Cepat, dipisah koma: `kopi,makan,nasi`.
   final String keywords;
+
+  /// Indeks warna di `AppPalette` (v4).
+  final int color;
+
+  /// Sub-kategori, dipisah koma: `Kopi,Makan siang,Jajan` (v4). Juga dikenali Catat cepat.
+  final String subs;
   final int sortOrder;
   final bool archived;
   const Category(
@@ -573,6 +651,8 @@ class Category extends DataClass implements Insertable<Category> {
       required this.kind,
       required this.icon,
       required this.keywords,
+      required this.color,
+      required this.subs,
       required this.sortOrder,
       required this.archived});
   @override
@@ -586,6 +666,8 @@ class Category extends DataClass implements Insertable<Category> {
     }
     map['icon'] = Variable<String>(icon);
     map['keywords'] = Variable<String>(keywords);
+    map['color'] = Variable<int>(color);
+    map['subs'] = Variable<String>(subs);
     map['sort_order'] = Variable<int>(sortOrder);
     map['archived'] = Variable<bool>(archived);
     return map;
@@ -598,6 +680,8 @@ class Category extends DataClass implements Insertable<Category> {
       kind: Value(kind),
       icon: Value(icon),
       keywords: Value(keywords),
+      color: Value(color),
+      subs: Value(subs),
       sortOrder: Value(sortOrder),
       archived: Value(archived),
     );
@@ -613,6 +697,8 @@ class Category extends DataClass implements Insertable<Category> {
           .fromJson(serializer.fromJson<String>(json['kind'])),
       icon: serializer.fromJson<String>(json['icon']),
       keywords: serializer.fromJson<String>(json['keywords']),
+      color: serializer.fromJson<int>(json['color']),
+      subs: serializer.fromJson<String>(json['subs']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
       archived: serializer.fromJson<bool>(json['archived']),
     );
@@ -627,6 +713,8 @@ class Category extends DataClass implements Insertable<Category> {
           .toJson<String>($CategoriesTable.$converterkind.toJson(kind)),
       'icon': serializer.toJson<String>(icon),
       'keywords': serializer.toJson<String>(keywords),
+      'color': serializer.toJson<int>(color),
+      'subs': serializer.toJson<String>(subs),
       'sortOrder': serializer.toJson<int>(sortOrder),
       'archived': serializer.toJson<bool>(archived),
     };
@@ -638,6 +726,8 @@ class Category extends DataClass implements Insertable<Category> {
           TxKind? kind,
           String? icon,
           String? keywords,
+          int? color,
+          String? subs,
           int? sortOrder,
           bool? archived}) =>
       Category(
@@ -646,6 +736,8 @@ class Category extends DataClass implements Insertable<Category> {
         kind: kind ?? this.kind,
         icon: icon ?? this.icon,
         keywords: keywords ?? this.keywords,
+        color: color ?? this.color,
+        subs: subs ?? this.subs,
         sortOrder: sortOrder ?? this.sortOrder,
         archived: archived ?? this.archived,
       );
@@ -656,6 +748,8 @@ class Category extends DataClass implements Insertable<Category> {
       kind: data.kind.present ? data.kind.value : this.kind,
       icon: data.icon.present ? data.icon.value : this.icon,
       keywords: data.keywords.present ? data.keywords.value : this.keywords,
+      color: data.color.present ? data.color.value : this.color,
+      subs: data.subs.present ? data.subs.value : this.subs,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       archived: data.archived.present ? data.archived.value : this.archived,
     );
@@ -669,6 +763,8 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('kind: $kind, ')
           ..write('icon: $icon, ')
           ..write('keywords: $keywords, ')
+          ..write('color: $color, ')
+          ..write('subs: $subs, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('archived: $archived')
           ..write(')'))
@@ -676,8 +772,8 @@ class Category extends DataClass implements Insertable<Category> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, kind, icon, keywords, sortOrder, archived);
+  int get hashCode => Object.hash(
+      id, name, kind, icon, keywords, color, subs, sortOrder, archived);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -687,6 +783,8 @@ class Category extends DataClass implements Insertable<Category> {
           other.kind == this.kind &&
           other.icon == this.icon &&
           other.keywords == this.keywords &&
+          other.color == this.color &&
+          other.subs == this.subs &&
           other.sortOrder == this.sortOrder &&
           other.archived == this.archived);
 }
@@ -697,6 +795,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<TxKind> kind;
   final Value<String> icon;
   final Value<String> keywords;
+  final Value<int> color;
+  final Value<String> subs;
   final Value<int> sortOrder;
   final Value<bool> archived;
   const CategoriesCompanion({
@@ -705,6 +805,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.kind = const Value.absent(),
     this.icon = const Value.absent(),
     this.keywords = const Value.absent(),
+    this.color = const Value.absent(),
+    this.subs = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.archived = const Value.absent(),
   });
@@ -714,6 +816,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     required TxKind kind,
     this.icon = const Value.absent(),
     this.keywords = const Value.absent(),
+    this.color = const Value.absent(),
+    this.subs = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.archived = const Value.absent(),
   })  : name = Value(name),
@@ -724,6 +828,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<String>? kind,
     Expression<String>? icon,
     Expression<String>? keywords,
+    Expression<int>? color,
+    Expression<String>? subs,
     Expression<int>? sortOrder,
     Expression<bool>? archived,
   }) {
@@ -733,6 +839,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (kind != null) 'kind': kind,
       if (icon != null) 'icon': icon,
       if (keywords != null) 'keywords': keywords,
+      if (color != null) 'color': color,
+      if (subs != null) 'subs': subs,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (archived != null) 'archived': archived,
     });
@@ -744,6 +852,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       Value<TxKind>? kind,
       Value<String>? icon,
       Value<String>? keywords,
+      Value<int>? color,
+      Value<String>? subs,
       Value<int>? sortOrder,
       Value<bool>? archived}) {
     return CategoriesCompanion(
@@ -752,6 +862,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       kind: kind ?? this.kind,
       icon: icon ?? this.icon,
       keywords: keywords ?? this.keywords,
+      color: color ?? this.color,
+      subs: subs ?? this.subs,
       sortOrder: sortOrder ?? this.sortOrder,
       archived: archived ?? this.archived,
     );
@@ -776,6 +888,12 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (keywords.present) {
       map['keywords'] = Variable<String>(keywords.value);
     }
+    if (color.present) {
+      map['color'] = Variable<int>(color.value);
+    }
+    if (subs.present) {
+      map['subs'] = Variable<String>(subs.value);
+    }
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
@@ -793,6 +911,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('kind: $kind, ')
           ..write('icon: $icon, ')
           ..write('keywords: $keywords, ')
+          ..write('color: $color, ')
+          ..write('subs: $subs, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('archived: $archived')
           ..write(')'))
@@ -2015,6 +2135,13 @@ class $TransactionsTable extends Transactions
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant(''));
+  static const VerificationMeta _subMeta = const VerificationMeta('sub');
+  @override
+  late final GeneratedColumn<String> sub = GeneratedColumn<String>(
+      'sub', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
   static const VerificationMeta _billIdMeta = const VerificationMeta('billId');
   @override
   late final GeneratedColumn<int> billId = GeneratedColumn<int>(
@@ -2063,6 +2190,7 @@ class $TransactionsTable extends Transactions
         toWalletId,
         categoryId,
         note,
+        sub,
         billId,
         recurringId,
         occurredAt,
@@ -2109,6 +2237,10 @@ class $TransactionsTable extends Transactions
     if (data.containsKey('note')) {
       context.handle(
           _noteMeta, note.isAcceptableOrUnknown(data['note']!, _noteMeta));
+    }
+    if (data.containsKey('sub')) {
+      context.handle(
+          _subMeta, sub.isAcceptableOrUnknown(data['sub']!, _subMeta));
     }
     if (data.containsKey('bill_id')) {
       context.handle(_billIdMeta,
@@ -2160,6 +2292,8 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.int, data['${effectivePrefix}category_id']),
       note: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}note'])!,
+      sub: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sub'])!,
       billId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}bill_id']),
       recurringId: attachedDatabase.typeMapping
@@ -2199,6 +2333,9 @@ class Txn extends DataClass implements Insertable<Txn> {
   final int? categoryId;
   final String note;
 
+  /// Sub-kategori terpilih (salah satu dari `Categories.subs`), kosong = tidak ada (v4).
+  final String sub;
+
   /// Tagihan asal, bila transaksi dibuat dari "Bayar tagihan".
   final int? billId;
 
@@ -2215,6 +2352,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       this.toWalletId,
       this.categoryId,
       required this.note,
+      required this.sub,
       this.billId,
       this.recurringId,
       required this.occurredAt,
@@ -2237,6 +2375,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       map['category_id'] = Variable<int>(categoryId);
     }
     map['note'] = Variable<String>(note);
+    map['sub'] = Variable<String>(sub);
     if (!nullToAbsent || billId != null) {
       map['bill_id'] = Variable<int>(billId);
     }
@@ -2262,6 +2401,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           ? const Value.absent()
           : Value(categoryId),
       note: Value(note),
+      sub: Value(sub),
       billId:
           billId == null && nullToAbsent ? const Value.absent() : Value(billId),
       recurringId: recurringId == null && nullToAbsent
@@ -2285,6 +2425,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       toWalletId: serializer.fromJson<int?>(json['toWalletId']),
       categoryId: serializer.fromJson<int?>(json['categoryId']),
       note: serializer.fromJson<String>(json['note']),
+      sub: serializer.fromJson<String>(json['sub']),
       billId: serializer.fromJson<int?>(json['billId']),
       recurringId: serializer.fromJson<int?>(json['recurringId']),
       occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
@@ -2304,6 +2445,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       'toWalletId': serializer.toJson<int?>(toWalletId),
       'categoryId': serializer.toJson<int?>(categoryId),
       'note': serializer.toJson<String>(note),
+      'sub': serializer.toJson<String>(sub),
       'billId': serializer.toJson<int?>(billId),
       'recurringId': serializer.toJson<int?>(recurringId),
       'occurredAt': serializer.toJson<DateTime>(occurredAt),
@@ -2320,6 +2462,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           Value<int?> toWalletId = const Value.absent(),
           Value<int?> categoryId = const Value.absent(),
           String? note,
+          String? sub,
           Value<int?> billId = const Value.absent(),
           Value<int?> recurringId = const Value.absent(),
           DateTime? occurredAt,
@@ -2333,6 +2476,7 @@ class Txn extends DataClass implements Insertable<Txn> {
         toWalletId: toWalletId.present ? toWalletId.value : this.toWalletId,
         categoryId: categoryId.present ? categoryId.value : this.categoryId,
         note: note ?? this.note,
+        sub: sub ?? this.sub,
         billId: billId.present ? billId.value : this.billId,
         recurringId: recurringId.present ? recurringId.value : this.recurringId,
         occurredAt: occurredAt ?? this.occurredAt,
@@ -2350,6 +2494,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       categoryId:
           data.categoryId.present ? data.categoryId.value : this.categoryId,
       note: data.note.present ? data.note.value : this.note,
+      sub: data.sub.present ? data.sub.value : this.sub,
       billId: data.billId.present ? data.billId.value : this.billId,
       recurringId:
           data.recurringId.present ? data.recurringId.value : this.recurringId,
@@ -2370,6 +2515,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           ..write('toWalletId: $toWalletId, ')
           ..write('categoryId: $categoryId, ')
           ..write('note: $note, ')
+          ..write('sub: $sub, ')
           ..write('billId: $billId, ')
           ..write('recurringId: $recurringId, ')
           ..write('occurredAt: $occurredAt, ')
@@ -2380,8 +2526,20 @@ class Txn extends DataClass implements Insertable<Txn> {
   }
 
   @override
-  int get hashCode => Object.hash(id, kind, amount, walletId, toWalletId,
-      categoryId, note, billId, recurringId, occurredAt, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      id,
+      kind,
+      amount,
+      walletId,
+      toWalletId,
+      categoryId,
+      note,
+      sub,
+      billId,
+      recurringId,
+      occurredAt,
+      createdAt,
+      updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2393,6 +2551,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           other.toWalletId == this.toWalletId &&
           other.categoryId == this.categoryId &&
           other.note == this.note &&
+          other.sub == this.sub &&
           other.billId == this.billId &&
           other.recurringId == this.recurringId &&
           other.occurredAt == this.occurredAt &&
@@ -2408,6 +2567,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
   final Value<int?> toWalletId;
   final Value<int?> categoryId;
   final Value<String> note;
+  final Value<String> sub;
   final Value<int?> billId;
   final Value<int?> recurringId;
   final Value<DateTime> occurredAt;
@@ -2421,6 +2581,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     this.toWalletId = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.note = const Value.absent(),
+    this.sub = const Value.absent(),
     this.billId = const Value.absent(),
     this.recurringId = const Value.absent(),
     this.occurredAt = const Value.absent(),
@@ -2435,6 +2596,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     this.toWalletId = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.note = const Value.absent(),
+    this.sub = const Value.absent(),
     this.billId = const Value.absent(),
     this.recurringId = const Value.absent(),
     required DateTime occurredAt,
@@ -2452,6 +2614,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     Expression<int>? toWalletId,
     Expression<int>? categoryId,
     Expression<String>? note,
+    Expression<String>? sub,
     Expression<int>? billId,
     Expression<int>? recurringId,
     Expression<DateTime>? occurredAt,
@@ -2466,6 +2629,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       if (toWalletId != null) 'to_wallet_id': toWalletId,
       if (categoryId != null) 'category_id': categoryId,
       if (note != null) 'note': note,
+      if (sub != null) 'sub': sub,
       if (billId != null) 'bill_id': billId,
       if (recurringId != null) 'recurring_id': recurringId,
       if (occurredAt != null) 'occurred_at': occurredAt,
@@ -2482,6 +2646,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       Value<int?>? toWalletId,
       Value<int?>? categoryId,
       Value<String>? note,
+      Value<String>? sub,
       Value<int?>? billId,
       Value<int?>? recurringId,
       Value<DateTime>? occurredAt,
@@ -2495,6 +2660,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       toWalletId: toWalletId ?? this.toWalletId,
       categoryId: categoryId ?? this.categoryId,
       note: note ?? this.note,
+      sub: sub ?? this.sub,
       billId: billId ?? this.billId,
       recurringId: recurringId ?? this.recurringId,
       occurredAt: occurredAt ?? this.occurredAt,
@@ -2528,6 +2694,9 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
+    if (sub.present) {
+      map['sub'] = Variable<String>(sub.value);
+    }
     if (billId.present) {
       map['bill_id'] = Variable<int>(billId.value);
     }
@@ -2556,6 +2725,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
           ..write('toWalletId: $toWalletId, ')
           ..write('categoryId: $categoryId, ')
           ..write('note: $note, ')
+          ..write('sub: $sub, ')
           ..write('billId: $billId, ')
           ..write('recurringId: $recurringId, ')
           ..write('occurredAt: $occurredAt, ')
@@ -3173,6 +3343,7 @@ typedef $$WalletsTableCreateCompanionBuilder = WalletsCompanion Function({
   required WalletType type,
   Value<int> initialBalance,
   Value<String> icon,
+  Value<int> color,
   Value<int> sortOrder,
   Value<bool> archived,
   Value<DateTime> createdAt,
@@ -3183,6 +3354,7 @@ typedef $$WalletsTableUpdateCompanionBuilder = WalletsCompanion Function({
   Value<WalletType> type,
   Value<int> initialBalance,
   Value<String> icon,
+  Value<int> color,
   Value<int> sortOrder,
   Value<bool> archived,
   Value<DateTime> createdAt,
@@ -3289,6 +3461,9 @@ class $$WalletsTableFilterComposer
 
   ColumnFilters<String> get icon => $composableBuilder(
       column: $table.icon, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get color => $composableBuilder(
+      column: $table.color, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get sortOrder => $composableBuilder(
       column: $table.sortOrder, builder: (column) => ColumnFilters(column));
@@ -3430,6 +3605,9 @@ class $$WalletsTableOrderingComposer
   ColumnOrderings<String> get icon => $composableBuilder(
       column: $table.icon, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get color => $composableBuilder(
+      column: $table.color, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get sortOrder => $composableBuilder(
       column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
 
@@ -3463,6 +3641,9 @@ class $$WalletsTableAnnotationComposer
 
   GeneratedColumn<String> get icon =>
       $composableBuilder(column: $table.icon, builder: (column) => column);
+
+  GeneratedColumn<int> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
@@ -3612,6 +3793,7 @@ class $$WalletsTableTableManager extends RootTableManager<
             Value<WalletType> type = const Value.absent(),
             Value<int> initialBalance = const Value.absent(),
             Value<String> icon = const Value.absent(),
+            Value<int> color = const Value.absent(),
             Value<int> sortOrder = const Value.absent(),
             Value<bool> archived = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -3622,6 +3804,7 @@ class $$WalletsTableTableManager extends RootTableManager<
             type: type,
             initialBalance: initialBalance,
             icon: icon,
+            color: color,
             sortOrder: sortOrder,
             archived: archived,
             createdAt: createdAt,
@@ -3632,6 +3815,7 @@ class $$WalletsTableTableManager extends RootTableManager<
             required WalletType type,
             Value<int> initialBalance = const Value.absent(),
             Value<String> icon = const Value.absent(),
+            Value<int> color = const Value.absent(),
             Value<int> sortOrder = const Value.absent(),
             Value<bool> archived = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -3642,6 +3826,7 @@ class $$WalletsTableTableManager extends RootTableManager<
             type: type,
             initialBalance: initialBalance,
             icon: icon,
+            color: color,
             sortOrder: sortOrder,
             archived: archived,
             createdAt: createdAt,
@@ -3759,6 +3944,8 @@ typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
   required TxKind kind,
   Value<String> icon,
   Value<String> keywords,
+  Value<int> color,
+  Value<String> subs,
   Value<int> sortOrder,
   Value<bool> archived,
 });
@@ -3768,6 +3955,8 @@ typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
   Value<TxKind> kind,
   Value<String> icon,
   Value<String> keywords,
+  Value<int> color,
+  Value<String> subs,
   Value<int> sortOrder,
   Value<bool> archived,
 });
@@ -3858,6 +4047,12 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<String> get keywords => $composableBuilder(
       column: $table.keywords, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get color => $composableBuilder(
+      column: $table.color, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get subs => $composableBuilder(
+      column: $table.subs, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get sortOrder => $composableBuilder(
       column: $table.sortOrder, builder: (column) => ColumnFilters(column));
@@ -3974,6 +4169,12 @@ class $$CategoriesTableOrderingComposer
   ColumnOrderings<String> get keywords => $composableBuilder(
       column: $table.keywords, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get color => $composableBuilder(
+      column: $table.color, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get subs => $composableBuilder(
+      column: $table.subs, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get sortOrder => $composableBuilder(
       column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
 
@@ -4004,6 +4205,12 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<String> get keywords =>
       $composableBuilder(column: $table.keywords, builder: (column) => column);
+
+  GeneratedColumn<int> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<String> get subs =>
+      $composableBuilder(column: $table.subs, builder: (column) => column);
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
@@ -4128,6 +4335,8 @@ class $$CategoriesTableTableManager extends RootTableManager<
             Value<TxKind> kind = const Value.absent(),
             Value<String> icon = const Value.absent(),
             Value<String> keywords = const Value.absent(),
+            Value<int> color = const Value.absent(),
+            Value<String> subs = const Value.absent(),
             Value<int> sortOrder = const Value.absent(),
             Value<bool> archived = const Value.absent(),
           }) =>
@@ -4137,6 +4346,8 @@ class $$CategoriesTableTableManager extends RootTableManager<
             kind: kind,
             icon: icon,
             keywords: keywords,
+            color: color,
+            subs: subs,
             sortOrder: sortOrder,
             archived: archived,
           ),
@@ -4146,6 +4357,8 @@ class $$CategoriesTableTableManager extends RootTableManager<
             required TxKind kind,
             Value<String> icon = const Value.absent(),
             Value<String> keywords = const Value.absent(),
+            Value<int> color = const Value.absent(),
+            Value<String> subs = const Value.absent(),
             Value<int> sortOrder = const Value.absent(),
             Value<bool> archived = const Value.absent(),
           }) =>
@@ -4155,6 +4368,8 @@ class $$CategoriesTableTableManager extends RootTableManager<
             kind: kind,
             icon: icon,
             keywords: keywords,
+            color: color,
+            subs: subs,
             sortOrder: sortOrder,
             archived: archived,
           ),
@@ -5376,6 +5591,7 @@ typedef $$TransactionsTableCreateCompanionBuilder = TransactionsCompanion
   Value<int?> toWalletId,
   Value<int?> categoryId,
   Value<String> note,
+  Value<String> sub,
   Value<int?> billId,
   Value<int?> recurringId,
   required DateTime occurredAt,
@@ -5391,6 +5607,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
   Value<int?> toWalletId,
   Value<int?> categoryId,
   Value<String> note,
+  Value<String> sub,
   Value<int?> billId,
   Value<int?> recurringId,
   Value<DateTime> occurredAt,
@@ -5496,6 +5713,9 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<String> get note => $composableBuilder(
       column: $table.note, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sub => $composableBuilder(
+      column: $table.sub, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get occurredAt => $composableBuilder(
       column: $table.occurredAt, builder: (column) => ColumnFilters(column));
@@ -5628,6 +5848,9 @@ class $$TransactionsTableOrderingComposer
   ColumnOrderings<String> get note => $composableBuilder(
       column: $table.note, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get sub => $composableBuilder(
+      column: $table.sub, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get occurredAt => $composableBuilder(
       column: $table.occurredAt, builder: (column) => ColumnOrderings(column));
 
@@ -5758,6 +5981,9 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get sub =>
+      $composableBuilder(column: $table.sub, builder: (column) => column);
 
   GeneratedColumn<DateTime> get occurredAt => $composableBuilder(
       column: $table.occurredAt, builder: (column) => column);
@@ -5904,6 +6130,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<int?> toWalletId = const Value.absent(),
             Value<int?> categoryId = const Value.absent(),
             Value<String> note = const Value.absent(),
+            Value<String> sub = const Value.absent(),
             Value<int?> billId = const Value.absent(),
             Value<int?> recurringId = const Value.absent(),
             Value<DateTime> occurredAt = const Value.absent(),
@@ -5918,6 +6145,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             toWalletId: toWalletId,
             categoryId: categoryId,
             note: note,
+            sub: sub,
             billId: billId,
             recurringId: recurringId,
             occurredAt: occurredAt,
@@ -5932,6 +6160,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<int?> toWalletId = const Value.absent(),
             Value<int?> categoryId = const Value.absent(),
             Value<String> note = const Value.absent(),
+            Value<String> sub = const Value.absent(),
             Value<int?> billId = const Value.absent(),
             Value<int?> recurringId = const Value.absent(),
             required DateTime occurredAt,
@@ -5946,6 +6175,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             toWalletId: toWalletId,
             categoryId: categoryId,
             note: note,
+            sub: sub,
             billId: billId,
             recurringId: recurringId,
             occurredAt: occurredAt,

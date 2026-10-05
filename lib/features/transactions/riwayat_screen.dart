@@ -25,10 +25,13 @@ import '../../core/widgets/hi_icons.dart';
 /// Riwayat per bulan. Bisa dibuka dengan filter dari Laporan:
 /// `/riwayat?month=2026-10&category=3`.
 class RiwayatScreen extends ConsumerStatefulWidget {
-  const RiwayatScreen({super.key, this.initialMonth, this.categoryId});
+  const RiwayatScreen({super.key, this.initialMonth, this.categoryId, this.walletId});
 
   final DateTime? initialMonth;
   final int? categoryId;
+
+  /// Dari Dompet › Lihat riwayat.
+  final int? walletId;
 
   @override
   ConsumerState<RiwayatScreen> createState() => _RiwayatScreenState();
@@ -39,12 +42,14 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
   late DateTime _month;
   TxKind? _kind;
   int? _categoryId;
+  int? _walletId;
 
   @override
   void initState() {
     super.initState();
     _month = widget.initialMonth ?? ref.read(currentMonthProvider);
     _categoryId = widget.categoryId;
+    _walletId = widget.walletId;
   }
 
   @override
@@ -131,14 +136,22 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
     final c = context.colors;
     final t = context.text;
     final DateTime now = ref.watch(clockProvider)();
-    final TxQuery query = (month: _month, kind: _kind, categoryId: _categoryId, search: _search.text.trim());
+    final TxQuery query =
+        (month: _month, kind: _kind, categoryId: _categoryId, walletId: _walletId, search: _search.text.trim());
     final AsyncValue<List<TxDetail>> async = ref.watch(txListProvider(query));
     final List<TxDetail> items = async.valueOrNull ?? const [];
     final Category? category = _categoryId == null
         ? null
         : (ref.watch(activeCategoriesProvider).valueOrNull ?? const []).where((c) => c.id == _categoryId).firstOrNull;
     final bool thisMonth = _month == DateTime(now.year, now.month);
-    final bool anyFilter = query.search.isNotEmpty || _kind != null || _categoryId != null;
+    final bool anyFilter = query.search.isNotEmpty || _kind != null || _categoryId != null || _walletId != null;
+    final String? walletName = _walletId == null
+        ? null
+        : (ref.watch(walletBalancesProvider).valueOrNull ?? const [])
+            .where((w) => w.wallet.id == _walletId)
+            .firstOrNull
+            ?.wallet
+            .name;
 
     // Kelompokkan per hari (daftar sudah terurut terbaru dulu).
     final List<(DateTime, List<TxDetail>)> groups = [];
@@ -242,6 +255,15 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
                             icon: HiIcons.close,
                             selected: true,
                             onTap: () => setState(() => _month = DateTime(now.year, now.month)),
+                          ),
+                          const SizedBox(width: AppSpace.x8),
+                        ],
+                        if (walletName != null) ...[
+                          AppChip(
+                            label: walletName,
+                            icon: HiIcons.close,
+                            selected: true,
+                            onTap: () => setState(() => _walletId = null),
                           ),
                           const SizedBox(width: AppSpace.x8),
                         ],

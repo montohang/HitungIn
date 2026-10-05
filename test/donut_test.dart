@@ -4,7 +4,7 @@ import 'package:hitungin/features/reports/widgets/donut_chart.dart';
 import 'package:hitungin/features/transactions/data/transactions_dao.dart';
 
 CategoryTotal _t(int id, int total) => (
-      category: Category(id: id, name: 'K$id', kind: TxKind.pengeluaran, icon: 'x', keywords: '', sortOrder: 0, archived: false),
+      category: Category(id: id, name: 'K$id', kind: TxKind.pengeluaran, icon: 'x', keywords: '', color: 0, subs: '', sortOrder: 0, archived: false),
       total: total,
     );
 

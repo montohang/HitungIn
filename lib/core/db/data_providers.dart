@@ -85,7 +85,7 @@ final budgetProgressProvider = StreamProvider.family<List<BudgetProgress>, DateT
 );
 
 /// Filter riwayat. Record → kesetaraan otomatis untuk kunci family.
-typedef TxQuery = ({DateTime month, TxKind? kind, int? categoryId, String search});
+typedef TxQuery = ({DateTime month, TxKind? kind, int? categoryId, int? walletId, String search});
 
 final txListProvider = StreamProvider.family<List<TxDetail>, TxQuery>((ref, q) {
   final (DateTime from, DateTime to) = Dates.monthRange(q.month);
@@ -94,6 +94,7 @@ final txListProvider = StreamProvider.family<List<TxDetail>, TxQuery>((ref, q) {
         to,
         kind: q.kind,
         categoryId: q.categoryId,
+        walletId: q.walletId,
         search: q.search,
       );
 });

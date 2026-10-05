@@ -69,6 +69,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             initialText: state.uri.queryParameters['text'],
             editId: int.tryParse(state.uri.queryParameters['id'] ?? ''),
             copyId: int.tryParse(state.uri.queryParameters['copy'] ?? ''),
+            transfer: state.uri.queryParameters['kind'] == 'transfer',
           ),
         ),
       ),
@@ -79,6 +80,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) => RiwayatScreen(
           initialMonth: DateFmt.parseMonthKey(state.uri.queryParameters['month']),
           categoryId: int.tryParse(state.uri.queryParameters['category'] ?? ''),
+          walletId: int.tryParse(state.uri.queryParameters['wallet'] ?? ''),
         ),
       ),
       GoRoute(path: Routes.pengaturan, redirect: (_, __) => Routes.lainnya),

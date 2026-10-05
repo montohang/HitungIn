@@ -26,8 +26,9 @@ class AppDatabase extends _$AppDatabase {
   @override
   /// v1: skema awal. v2: transaksi berulang (tabel recurring_txs +
   /// transactions.recurring_id). v3: budget per bulan (budgets.from_month,
-  /// batas 0 = dihapus mulai bulan itu).
-  int get schemaVersion => 3;
+  /// batas 0 = dihapus mulai bulan itu). v4: warna dompet & kategori,
+  /// sub-kategori (categories.subs, transactions.sub).
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -43,6 +44,13 @@ class AppDatabase extends _$AppDatabase {
           if (from < 3) {
             // Tabel dibuat ulang: unik (kategori, bulan) menggantikan unik kategori.
             await m.alterTable(TableMigration(budgets, newColumns: [budgets.fromMonth]));
+          }
+          if (from < 4) {
+            await m.addColumn(wallets, wallets.color);
+            await m.addColumn(categories, categories.color);
+            await m.addColumn(categories, categories.subs);
+            await m.addColumn(transactions, transactions.sub);
+            await applyDefaultStyles(this);
           }
           // Pastikan relasi data tetap utuh sesudah migrasi.
           final List<QueryRow> broken = await customSelect('PRAGMA foreign_key_check').get();

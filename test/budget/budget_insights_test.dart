@@ -10,7 +10,7 @@ BudgetProgress _b(int limit, int spent, {String? category}) => (
       category: category == null
           ? null
           : Category(
-              id: 1, name: category, kind: TxKind.pengeluaran, icon: 'x', keywords: '', sortOrder: 0, archived: false),
+              id: 1, name: category, kind: TxKind.pengeluaran, icon: 'x', keywords: '', color: 0, subs: '', sortOrder: 0, archived: false),
       spent: spent,
     );
 

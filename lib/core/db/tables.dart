@@ -52,6 +52,9 @@ class Wallets extends Table {
   /// Kunci ikon (lihat `AppIcons`), bukan IconData, supaya lapisan data
   /// tidak bergantung pada Flutter.
   TextColumn get icon => text().withDefault(const Constant('wallet'))();
+
+  /// Indeks warna di `AppPalette` (v4).
+  IntColumn get color => integer().withDefault(const Constant(0))();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
@@ -68,6 +71,12 @@ class Categories extends Table {
 
   /// Kata kunci untuk Catat Cepat, dipisah koma: `kopi,makan,nasi`.
   TextColumn get keywords => text().withDefault(const Constant(''))();
+
+  /// Indeks warna di `AppPalette` (v4).
+  IntColumn get color => integer().withDefault(const Constant(0))();
+
+  /// Sub-kategori, dipisah koma: `Kopi,Makan siang,Jajan` (v4). Juga dikenali Catat cepat.
+  TextColumn get subs => text().withDefault(const Constant(''))();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
 }
@@ -94,6 +103,9 @@ class Transactions extends Table {
   /// Kosong untuk transfer.
   IntColumn get categoryId => integer().nullable().references(Categories, #id, onDelete: KeyAction.setNull)();
   TextColumn get note => text().withDefault(const Constant(''))();
+
+  /// Sub-kategori terpilih (salah satu dari `Categories.subs`), kosong = tidak ada (v4).
+  TextColumn get sub => text().withDefault(const Constant(''))();
 
   /// Tagihan asal, bila transaksi dibuat dari "Bayar tagihan".
   IntColumn get billId => integer().nullable().references(Bills, #id, onDelete: KeyAction.setNull)();
