@@ -112,10 +112,11 @@ void main() {
     await app.pump(tester);
     await tester.tap(find.text('Bakso'));
     await tester.pumpAndSettle();
-    expect(find.text('Detail'), findsOneWidget);
+    expect(find.text('Detail transaksi'), findsOneWidget);
     expect(find.text('−Rp30.000'), findsOneWidget);
+    expect(find.text('Pengeluaran · dicatat manual'), findsOneWidget);
 
-    await tester.tap(find.text('Ubah'));
+    await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
     expect(find.text('Ubah transaksi'), findsOneWidget);
     await _typeAmount(tester, '35000');
@@ -124,12 +125,31 @@ void main() {
     expect(find.text('−Rp35.000'), findsOneWidget);
     expect((await app.run((db) => db.transactionsDao.byId(id)))!.amount, 35000);
 
+    // Duplikat → form Catat terisi, disimpan sebagai transaksi baru.
+    await tester.pump(const Duration(seconds: 5)); // tunggu snackbar "Perubahan disimpan" hilang
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Duplikat'));
+    await tester.pumpAndSettle();
+    expect(find.text('Catat transaksi'), findsOneWidget);
+    await tester.tap(find.text('Simpan · Rp35.000'));
+    await tester.pumpAndSettle();
+    expect(await app.run((db) => db.select(db.transactions).get()), hasLength(2));
+
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Hapus'));
     await tester.pumpAndSettle();
-    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Hapus')));
+    expect(find.text('Hapus transaksi ini?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('konfirmasi-hapus')));
     await tester.pumpAndSettle();
     expect(await app.run((db) => db.transactionsDao.byId(id)), isNull);
-    expect(find.text('Catatan pertamamu dimulai di sini'), findsOneWidget);
+    expect(find.text('Transaksi dihapus'), findsOneWidget);
+
+    // Urungkan mengembalikan transaksi yang sama.
+    await tester.tap(find.text('Urungkan'));
+    await tester.pumpAndSettle();
+    final restored = await app.run((db) => db.transactionsDao.byId(id));
+    expect((restored!.amount, restored.note), (35000, 'Bakso'));
     await app.close(tester);
   });
 

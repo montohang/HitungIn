@@ -50,6 +50,14 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
     return update(transactions).replace(tx.copyWith(note: tx.note.trim(), updatedAt: DateTime.now()));
   }
 
+  /// Kembalikan transaksi yang baru dihapus ("Urungkan"). Memakai id lama
+  /// bila masih kosong, selain itu id baru.
+  Future<int> restore(Txn tx) async {
+    final bool taken = await byId(tx.id) != null;
+    final TransactionsCompanion row = tx.toCompanion(true);
+    return into(transactions).insert(taken ? row.copyWith(id: const Value.absent()) : row);
+  }
+
   Future<void> remove(int id) => (delete(transactions)..where((t) => t.id.equals(id))).go();
 
   Future<Txn?> byId(int id) => (select(transactions)..where((t) => t.id.equals(id))).getSingleOrNull();

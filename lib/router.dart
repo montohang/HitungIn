@@ -66,6 +66,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           child: CatatScreen(
             initialText: state.uri.queryParameters['text'],
             editId: int.tryParse(state.uri.queryParameters['id'] ?? ''),
+            copyId: int.tryParse(state.uri.queryParameters['copy'] ?? ''),
           ),
         ),
       ),

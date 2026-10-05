@@ -25,12 +25,15 @@ import 'quick_entry_parser.dart';
 /// Catat atau ubah transaksi. Kolom "Catat cepat" di atas membaca kalimat
 /// bebas ("kopi 25rb gopay") dan mengisi form di bawahnya.
 class CatatScreen extends ConsumerStatefulWidget {
-  const CatatScreen({super.key, this.initialText, this.editId});
+  const CatatScreen({super.key, this.initialText, this.editId, this.copyId});
 
   final String? initialText;
 
   /// Ubah transaksi yang sudah ada.
   final int? editId;
+
+  /// Duplikat: isi form dari transaksi ini, disimpan sebagai transaksi baru hari ini.
+  final int? copyId;
 
   @override
   ConsumerState<CatatScreen> createState() => _CatatScreenState();
@@ -72,6 +75,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
     final List<Category> categories = await db.categoriesDao.active();
     Txn? editing;
     if (_isEdit) editing = await db.transactionsDao.byId(widget.editId!);
+    final Txn? copy = widget.copyId == null ? null : await db.transactionsDao.byId(widget.copyId!);
     if (!mounted) return;
     setState(() {
       _wallets = wallets;
@@ -87,6 +91,15 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
         _toWalletId = editing.toWalletId;
         _date = editing.occurredAt;
         _note.text = editing.note;
+      }
+      if (copy != null) {
+        _kind = copy.kind;
+        _amount = copy.amount;
+        _categoryId = copy.categoryId;
+        _pinnedCategory = copy.categoryId;
+        _walletId = copy.walletId;
+        _toWalletId = copy.toWalletId;
+        _note.text = copy.note;
       }
       _loaded = true;
     });

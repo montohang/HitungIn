@@ -16,6 +16,9 @@ enum AppButtonVariant {
 
   /// Aksi berbahaya — Hapus.
   danger,
+
+  /// Konfirmasi berbahaya — latar merah penuh (lembar "Hapus transaksi ini?").
+  dangerSolid,
 }
 
 /// Tombol standar HitungIn: tinggi 52 (atau 56 untuk [large]), radius 16.
@@ -44,7 +47,8 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.primary => (c.accent, c.onAccent, null),
       AppButtonVariant.soft => (c.accentSoft, c.accentText, null),
       AppButtonVariant.outline => (c.surface, c.ink, c.line),
-      AppButtonVariant.danger => (c.dangerSoft, c.danger, null),
+      AppButtonVariant.danger => (c.dangerSoft, c.danger, Color.lerp(c.dangerSoft, c.danger, 0.2)),
+      AppButtonVariant.dangerSolid => (c.dangerBar, Colors.white, null),
     };
     final bool disabled = onPressed == null;
 
