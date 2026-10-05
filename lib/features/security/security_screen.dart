@@ -11,6 +11,7 @@ import 'auto_lock_setting.dart';
 import 'biometric_service.dart';
 import 'pin_service.dart';
 import 'widgets/pin_pad.dart';
+import '../../core/widgets/hi_icons.dart';
 
 final _biometricStateProvider = FutureProvider.autoDispose<({bool available, bool enabled})>((ref) async => (
       available: await ref.watch(biometricServiceProvider).isAvailable(),
@@ -46,9 +47,9 @@ class SecurityScreen extends ConsumerWidget {
         children: [
           SettingsGroup(
             children: [
-              SettingsTile(icon: Icons.pin_outlined, title: 'Ganti PIN', onTap: () => context.push(Routes.gantiPin)),
+              SettingsTile(icon: HiIcons.pin, title: 'Ganti PIN', onTap: () => context.push(Routes.gantiPin)),
               SettingsTile(
-                icon: Icons.fingerprint,
+                icon: HiIcons.fingerprint,
                 title: 'Buka dengan sidik jari',
                 subtitle: bio == null || bio.available ? null : 'Tidak tersedia di HP ini',
                 trailing: Switch.adaptive(

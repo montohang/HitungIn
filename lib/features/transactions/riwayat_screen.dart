@@ -20,6 +20,7 @@ import '../settings/widgets/settings_tile.dart' show FieldLabel, showAppSheet;
 import '../security/app_gate.dart';
 import 'data/transactions_dao.dart';
 import 'widgets/tx_row.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Riwayat per bulan. Bisa dibuka dengan filter dari Laporan:
 /// `/riwayat?month=2026-10&category=3`.
@@ -175,7 +176,7 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
                     trailing: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        SquareIconButton(icon: Icons.tune, label: 'Filter lanjutan', onTap: _openFilter),
+                        SquareIconButton(icon: HiIcons.filter, label: 'Filter lanjutan', onTap: _openFilter),
                         if (_filtered)
                           Positioned(
                             right: 8,
@@ -200,7 +201,7 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.search, size: 18, color: c.muted),
+                        Icon(HiIcons.search, size: 18, color: c.muted),
                         const SizedBox(width: AppSpace.x12),
                         Expanded(
                           child: TextField(
@@ -222,7 +223,7 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
                         ),
                         if (_search.text.isNotEmpty)
                           IconButton(
-                            icon: Icon(Icons.close, size: 18, color: c.muted),
+                            icon: Icon(HiIcons.close, size: 18, color: c.muted),
                             tooltip: 'Hapus pencarian',
                             onPressed: () => setState(_search.clear),
                           ),
@@ -238,7 +239,7 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
                         if (!thisMonth) ...[
                           AppChip(
                             label: DateFmt.month(_month),
-                            icon: Icons.close,
+                            icon: HiIcons.close,
                             selected: true,
                             onTap: () => setState(() => _month = DateTime(now.year, now.month)),
                           ),
@@ -247,7 +248,7 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
                         if (category != null) ...[
                           AppChip(
                             label: category.name,
-                            icon: Icons.close,
+                            icon: HiIcons.close,
                             selected: true,
                             onTap: () => setState(() => _categoryId = null),
                           ),
@@ -287,12 +288,12 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
               SliverToBoxAdapter(
                 child: anyFilter
                     ? const EmptyState(
-                        icon: Icons.search_off,
+                        icon: HiIcons.search,
                         title: 'Tidak ada transaksi yang cocok',
                         body: 'Coba kata lain atau ubah filter.',
                       )
                     : EmptyState(
-                        icon: Icons.receipt_long_outlined,
+                        icon: HiIcons.receipt,
                         title: 'Belum ada transaksi di ${DateFmt.month(_month)}',
                         action: 'Catat transaksi',
                         onAction: () => context.push(Routes.catat),

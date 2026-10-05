@@ -27,6 +27,7 @@ import 'widgets/daily_chart.dart';
 import '../budget/data/budget_insights.dart' show shortCategoryName;
 import 'widgets/cash_flow_chart.dart';
 import 'widgets/donut_chart.dart';
+import '../../core/widgets/hi_icons.dart';
 
 class LaporanScreen extends ConsumerStatefulWidget {
   const LaporanScreen({super.key});
@@ -164,7 +165,7 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
                   ),
                   if (slices.isEmpty)
                     EmptyState(
-                      icon: Icons.insights_outlined,
+                      icon: HiIcons.bars,
                       title: 'Belum ada ${_kind.label.toLowerCase()}',
                       body: 'di ${DateFmt.month(_month)}',
                     )
@@ -286,7 +287,7 @@ class _WalletFilter extends StatelessWidget {
             const SizedBox(width: AppSpace.x8),
             AppChip(
               label: w.wallet.name,
-              icon: isPro ? AppIcons.of(w.wallet.icon) : Icons.lock_outline,
+              icon: isPro ? AppIcons.of(w.wallet.icon) : HiIcons.lock,
               selected: selected == w.wallet.id,
               onTap: () => onSelected(w.wallet.id),
             ),

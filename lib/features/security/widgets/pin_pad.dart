@@ -7,6 +7,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/context_ext.dart';
 import '../../../core/widgets/pressable.dart';
 import '../pin_service.dart';
+import '../../../core/widgets/hi_icons.dart';
 
 /// Dua gaya PIN di desain: [light] untuk Buat/Ganti PIN (kartu terang/gelap
 /// mengikuti tema), [onDark] untuk Layar Kunci (selalu di atas latar gelap).
@@ -146,7 +147,7 @@ class PinKeypad extends StatelessWidget {
           label: 'Buka dengan sidik jari',
           onTap: onBiometric,
           filled: false,
-          child: Icon(Icons.fingerprint, size: 32, color: dark ? Color.lerp(c.accent, Colors.white, 0.45) : c.accentText),
+          child: Icon(HiIcons.fingerprint, size: 32, color: dark ? Color.lerp(c.accent, Colors.white, 0.45) : c.accentText),
         )
       else
         const SizedBox.shrink(),
@@ -155,7 +156,7 @@ class PinKeypad extends StatelessWidget {
         label: 'Hapus satu digit',
         onTap: onBackspace,
         filled: false,
-        child: Icon(Icons.backspace_outlined, size: 24, color: dark ? Colors.white : c.sub),
+        child: Icon(HiIcons.backspace, size: 24, color: dark ? Colors.white : c.sub),
       ),
     ];
 
@@ -382,7 +383,7 @@ class PinUnlockedBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.check_rounded, size: 16, color: Color(0xFF7FE0B5)),
+            const Icon(HiIcons.check, size: 16, color: Color(0xFF7FE0B5)),
             const SizedBox(width: AppSpace.x8),
             Text('Terbuka', style: context.text.title.copyWith(fontSize: 14, color: const Color(0xFF7FE0B5))),
           ],

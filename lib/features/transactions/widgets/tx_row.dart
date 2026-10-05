@@ -9,6 +9,7 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/pressable.dart';
 import '../data/transactions_dao.dart';
+import '../../../core/widgets/hi_icons.dart';
 
 /// Judul baris: catatan, atau nama kategori bila catatan kosong.
 String txTitle(TxDetail d) {
@@ -80,7 +81,7 @@ class TxRow extends StatelessWidget {
         child: Row(
           children: [
             IconTile(
-              icon: transfer ? Icons.swap_horiz : AppIcons.of(detail.category?.icon ?? 'other'),
+              icon: transfer ? HiIcons.swap : AppIcons.of(detail.category?.icon ?? 'other'),
               color: income ? c.good : (transfer ? c.sub : null),
               background: income ? c.goodSoft : (transfer ? c.chip : null),
             ),

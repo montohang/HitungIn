@@ -14,6 +14,7 @@ import '../../core/widgets/pressable.dart';
 import '../../core/widgets/rupiah_prefix.dart';
 import '../security/app_gate.dart';
 import 'pin_setup_screen.dart' show StepHeader;
+import '../../core/widgets/hi_icons.dart';
 
 /// Langkah terakhir onboarding: dompet awal beserta saldonya.
 class FirstWalletScreen extends ConsumerStatefulWidget {
@@ -148,7 +149,7 @@ class _FirstWalletScreenState extends ConsumerState<FirstWalletScreen> {
                     children: [
                       for (final (String name, WalletType type) in remaining)
                         AppChip(label: name, icon: AppIcons.of(_iconFor(type)), onTap: () => _add(name, type)),
-                      AppChip(label: 'Lainnya', icon: Icons.add, onTap: () => _add('', WalletType.lainnya)),
+                      AppChip(label: 'Lainnya', icon: HiIcons.plus, onTap: () => _add('', WalletType.lainnya)),
                     ],
                   ),
                 ],
@@ -214,7 +215,7 @@ class _DraftCard extends StatelessWidget {
                   semanticLabel: 'Hapus dompet ${draft.name.text}',
                   child: SizedBox.square(
                     dimension: AppSpace.touch,
-                    child: Icon(Icons.close, size: 20, color: c.muted),
+                    child: Icon(HiIcons.close, size: 20, color: c.muted),
                   ),
                 ),
             ],

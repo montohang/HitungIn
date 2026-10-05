@@ -21,6 +21,7 @@ import 'widgets/amount_keypad.dart';
 import '../wallets/data/wallets_dao.dart';
 import '../security/app_gate.dart';
 import 'quick_entry_parser.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Catat atau ubah transaksi. Kolom "Catat cepat" di atas membaca kalimat
 /// bebas ("kopi 25rb gopay") dan mengisi form di bawahnya.
@@ -188,21 +189,21 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
       builder: (context) => Column(
         children: [
           _SheetOption(
-            icon: Icons.today_outlined,
+            icon: HiIcons.today,
             label: 'Hari ini',
             value: DateFmt.date(now, now: now),
             selected: daysAgo == 0,
             onTap: () => Navigator.pop(context, at(0)),
           ),
           _SheetOption(
-            icon: Icons.history,
+            icon: HiIcons.history,
             label: 'Kemarin',
             value: DateFmt.date(at(1), now: now),
             selected: daysAgo == 1,
             onTap: () => Navigator.pop(context, at(1)),
           ),
           _SheetOption(
-            icon: Icons.calendar_month_outlined,
+            icon: HiIcons.calendar,
             label: 'Pilih tanggal lain',
             value: daysAgo > 1 ? DateFmt.date(_date, now: now) : null,
             selected: daysAgo > 1,
@@ -320,7 +321,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                       width: AppSpace.touch,
                       height: AppSpace.touch,
                       decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.smAll),
-                      child: Icon(Icons.close, size: 20, color: c.ink),
+                      child: Icon(HiIcons.close, size: 20, color: c.ink),
                     ),
                   ),
                   Expanded(
@@ -414,7 +415,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                             height: 36,
                                             decoration:
                                                 BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
-                                            child: Icon(Icons.arrow_forward, size: 18, color: c.accentText),
+                                            child: Icon(HiIcons.arrowRight, size: 18, color: c.accentText),
                                           ),
                                           const SizedBox(width: AppSpace.x8),
                                           Expanded(
@@ -434,7 +435,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                         child: Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Icon(Icons.info_outline, size: 18, color: c.sub),
+                                            Icon(HiIcons.info, size: 18, color: c.sub),
                                             const SizedBox(width: AppSpace.x12),
                                             Expanded(
                                               child: Text(
@@ -595,7 +596,7 @@ class _QuickField extends StatelessWidget {
       decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.mdAll),
       child: Row(
         children: [
-          Icon(Icons.auto_awesome_outlined, size: 20, color: c.accentText),
+          Icon(HiIcons.sparkle, size: 20, color: c.accentText),
           const SizedBox(width: AppSpace.x12),
           Expanded(
             child: TextField(
@@ -690,7 +691,7 @@ class _SheetOption extends StatelessWidget {
               if (value != null) Text(value!, style: t.caption.copyWith(color: c.sub)),
               if (selected) ...[
                 const SizedBox(width: AppSpace.x8),
-                Icon(Icons.check_circle, size: 20, color: c.accent),
+                Icon(HiIcons.checkCircle, size: 20, color: c.accent),
               ],
             ],
           ),

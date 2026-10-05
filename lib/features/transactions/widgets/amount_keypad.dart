@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/context_ext.dart';
 import '../../../core/widgets/pressable.dart';
+import '../../../core/widgets/hi_icons.dart';
 
 /// Tombol keypad nominal (desain Catat): 1–9, 000, 0, ⌫.
 const List<String> keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', '⌫'];
@@ -73,7 +74,7 @@ class _Key extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(color: color, borderRadius: AppRadius.mdAll),
         child: back
-            ? Icon(Icons.backspace_outlined, size: 22, color: context.colors.ink)
+            ? Icon(HiIcons.backspace, size: 22, color: context.colors.ink)
             : Text(label, style: context.text.title.copyWith(fontSize: 22, fontWeight: FontWeight.w600)),
       ),
     );

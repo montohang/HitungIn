@@ -17,6 +17,7 @@ import '../../core/widgets/progress_bar.dart';
 import '../security/app_gate.dart';
 import 'data/budget_insights.dart';
 import 'data/budgets_dao.dart';
+import '../../core/widgets/hi_icons.dart';
 
 String _hex(Color x) => '#${(x.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
 
@@ -261,7 +262,7 @@ class _Warning extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.smAll),
-            child: Icon(Icons.auto_awesome_outlined, size: 20, color: c.warnInk),
+            child: Icon(HiIcons.sparkle, size: 20, color: c.warnInk),
           ),
           const SizedBox(width: AppSpace.x12),
           Expanded(
@@ -400,14 +401,14 @@ class _Empty extends StatelessWidget {
         Text('Mulai dari', style: t.caption.copyWith(fontWeight: FontWeight.w600, color: c.sub)),
         const SizedBox(height: AppSpace.x8),
         _Option(
-          icon: Icons.tune,
+          icon: HiIcons.filter,
           title: 'Atur manual',
           body: 'Tentukan batas tiap kategori sendiri',
           onTap: onManual,
         ),
         const SizedBox(height: AppSpace.x8),
         _Option(
-          icon: Icons.auto_awesome_outlined,
+          icon: HiIcons.sparkle,
           title: 'Saran dari kebiasaanmu',
           body: 'Dari rata-rata pengeluaran 3 bulan terakhir',
           onTap: onSuggest,
@@ -454,7 +455,7 @@ class _Option extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: c.muted),
+            Icon(HiIcons.forward, color: c.muted),
           ],
         ),
       ),

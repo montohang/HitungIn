@@ -11,6 +11,7 @@ import '../security/app_gate.dart';
 import '../security/biometric_service.dart';
 import '../security/pin_service.dart';
 import '../security/widgets/pin_pad.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Ke mana setelah PIN dibuat: data hasil pulihkan sudah punya dompet →
 /// onboarding selesai; selain itu → Dompet Awal.
@@ -138,7 +139,7 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.lgAll),
-                    child: Icon(Icons.lock_outline_rounded, size: 30, color: c.accentText),
+                    child: Icon(HiIcons.lock, size: 30, color: c.accentText),
                   ),
                   const SizedBox(height: AppSpace.x12),
                   Text(
@@ -165,7 +166,7 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.info_outline, size: 18, color: c.sub),
+                      Icon(HiIcons.info, size: 18, color: c.sub),
                       const SizedBox(width: AppSpace.x8),
                       Expanded(
                         child: Text(
@@ -206,7 +207,7 @@ class StepHeader extends StatelessWidget {
               width: AppSpace.touch,
               height: AppSpace.touch,
               decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.smAll),
-              child: Icon(Icons.chevron_left, color: c.ink),
+              child: Icon(HiIcons.back, color: c.ink),
             ),
           )
         else
@@ -238,7 +239,7 @@ class _BiometricSheet extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.check, size: 16, color: c.good),
+                Icon(HiIcons.check, size: 16, color: c.good),
                 const SizedBox(width: AppSpace.x4),
                 Text('PIN tersimpan', style: t.label.copyWith(fontSize: 13, color: c.good)),
               ],
@@ -248,7 +249,7 @@ class _BiometricSheet extends StatelessWidget {
               width: 88,
               height: 88,
               decoration: BoxDecoration(color: c.accentSoft, shape: BoxShape.circle),
-              child: Icon(Icons.fingerprint, size: 48, color: c.accentText),
+              child: Icon(HiIcons.fingerprint, size: 48, color: c.accentText),
             ),
             const SizedBox(height: AppSpace.x16),
             Text('Buka lebih cepat dengan sidik jari?', textAlign: TextAlign.center, style: t.screenTitle.copyWith(fontSize: 24)),

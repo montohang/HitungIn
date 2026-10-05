@@ -4,6 +4,7 @@ import '../theme/app_tokens.dart';
 import '../theme/context_ext.dart';
 import '../utils/date_format.dart';
 import 'pressable.dart';
+import 'hi_icons.dart';
 
 /// `‹  Oktober 2026  ›`. Tidak bisa maju melewati bulan ini.
 class MonthSwitcher extends StatelessWidget {
@@ -30,7 +31,7 @@ class MonthSwitcher extends StatelessWidget {
       decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.mdAll, border: Border.all(color: c.line)),
       child: Row(
         children: [
-          arrow(Icons.chevron_left, 'Bulan sebelumnya', () => onChanged(DateTime(month.year, month.month - 1))),
+          arrow(HiIcons.back, 'Bulan sebelumnya', () => onChanged(DateTime(month.year, month.month - 1))),
           Expanded(
             child: Text(
               DateFmt.month(month),
@@ -38,7 +39,7 @@ class MonthSwitcher extends StatelessWidget {
               style: context.text.title,
             ),
           ),
-          arrow(Icons.chevron_right, 'Bulan berikutnya', canNext ? () => onChanged(DateTime(month.year, month.month + 1)) : null),
+          arrow(HiIcons.forward, 'Bulan berikutnya', canNext ? () => onChanged(DateTime(month.year, month.month + 1)) : null),
         ],
       ),
     );
@@ -72,7 +73,7 @@ class MonthPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          arrow(Icons.chevron_left, 'Bulan sebelumnya', () => onChanged(DateTime(month.year, month.month - 1))),
+          arrow(HiIcons.back, 'Bulan sebelumnya', () => onChanged(DateTime(month.year, month.month - 1))),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpace.x4),
             child: Text(
@@ -80,7 +81,7 @@ class MonthPill extends StatelessWidget {
               style: context.text.title.copyWith(fontSize: 14),
             ),
           ),
-          arrow(Icons.chevron_right, 'Bulan berikutnya', canNext ? () => onChanged(DateTime(month.year, month.month + 1)) : null),
+          arrow(HiIcons.forward, 'Bulan berikutnya', canNext ? () => onChanged(DateTime(month.year, month.month + 1)) : null),
         ],
       ),
     );

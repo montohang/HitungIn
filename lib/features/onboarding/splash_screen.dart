@@ -5,6 +5,7 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/widgets/logo_mark.dart';
 import '../security/app_gate.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Splash (Claude Design › Splash Screen): logo "pop", koin jatuh ke palang H,
 /// tulisan Hitung**In**, lalu tagline. Setelah itu router memilih tujuan
@@ -120,7 +121,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.verified_user_outlined, size: 16, color: muted),
+                      Icon(HiIcons.shield, size: 16, color: muted),
                       const SizedBox(width: AppSpace.x8),
                       Text('Data tersimpan di HP-mu', style: t.caption.copyWith(fontWeight: FontWeight.w600, color: muted)),
                     ],

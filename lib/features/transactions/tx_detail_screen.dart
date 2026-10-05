@@ -20,6 +20,7 @@ import '../budget/data/budgets_dao.dart';
 import '../security/app_gate.dart';
 import 'data/transactions_dao.dart';
 import 'widgets/tx_row.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Asal transaksi untuk chip di bawah nominal (desain: "Pengeluaran · dicatat manual").
 String txOrigin(Txn tx) => tx.billId != null
@@ -155,7 +156,7 @@ class TxDetailScreen extends ConsumerWidget {
                           Center(
                             child: IconTile(
                               icon: d.tx.kind == TxKind.transfer
-                                  ? Icons.swap_horiz
+                                  ? HiIcons.swap
                                   : AppIcons.of(d.category?.icon ?? 'other'),
                               size: 56,
                               color: income ? c.good : null,

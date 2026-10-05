@@ -18,6 +18,7 @@ import '../ads/ads_service.dart';
 import '../ads/banner_slot.dart';
 import '../premium/pro_controller.dart';
 import '../security/app_gate.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Kerangka 4 tab + tombol Catat di tengah. Banner iklan (versi gratis)
 /// tampil di atas navigasi pada tab yang diizinkan [AdPolicy].
@@ -96,10 +97,10 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   static const List<(IconData, IconData, String)> _tabs = [
-    (Icons.home_outlined, Icons.home_rounded, 'Beranda'),
-    (Icons.pie_chart_outline, Icons.pie_chart, 'Laporan'),
-    (Icons.track_changes_outlined, Icons.track_changes, 'Budget'),
-    (Icons.grid_view_outlined, Icons.grid_view_rounded, 'Lainnya'),
+    (HiIcons.home, HiIcons.home, 'Beranda'),
+    (HiIcons.report, HiIcons.report, 'Laporan'),
+    (HiIcons.target, HiIcons.target, 'Budget'),
+    (HiIcons.grid, HiIcons.grid, 'Lainnya'),
   ];
 
   void _go(int i) => shell.goBranch(i, initialLocation: i == shell.currentIndex);
@@ -182,7 +183,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                                   BoxShadow(color: c.accent.withAlpha(0x55), blurRadius: 24, offset: const Offset(0, 10)),
                                 ],
                               ),
-                              child: Icon(Icons.add, color: c.onAccent, size: 28),
+                              child: Icon(HiIcons.plus, color: c.onAccent, size: 28),
                             ),
                           ),
                         ),

@@ -25,6 +25,7 @@ import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
 import 'data/settings_dao.dart';
 import 'widgets/settings_tile.dart';
+import '../../core/widgets/hi_icons.dart';
 
 const String appVersion = '0.1.0';
 
@@ -76,31 +77,31 @@ class SettingsScreen extends ConsumerWidget {
               title: 'Kelola',
               children: [
                 SettingsTile(
-                  icon: Icons.person_outline,
+                  icon: HiIcons.user,
                   title: 'Nama panggilan',
                   value: name ?? 'Belum diisi',
                   onTap: () => _editName(context, name),
                 ),
                 SettingsTile(
-                  icon: Icons.account_balance_wallet_outlined,
+                  icon: HiIcons.wallet,
                   title: 'Dompet',
                   value: '$wallets',
                   onTap: () => context.push(Routes.dompet),
                 ),
                 SettingsTile(
-                  icon: Icons.grid_view_outlined,
+                  icon: HiIcons.grid,
                   title: 'Kategori',
                   value: '$categories',
                   onTap: () => context.push(Routes.kategori),
                 ),
                 SettingsTile(
-                  icon: Icons.event_repeat_outlined,
+                  icon: HiIcons.calendar,
                   title: 'Tagihan',
                   badge: dueSoon > 0 ? '$dueSoon segera' : null,
                   onTap: () => context.push(Routes.tagihan),
                 ),
                 SettingsTile(
-                  icon: Icons.autorenew,
+                  icon: HiIcons.repeat,
                   title: 'Transaksi berulang',
                   badge: isPro ? null : 'PRO',
                   badgeTone: TileBadgeTone.pro,
@@ -112,27 +113,27 @@ class SettingsScreen extends ConsumerWidget {
               title: 'Data & privasi',
               children: [
                 SettingsTile(
-                  icon: Icons.verified_user_outlined,
+                  icon: HiIcons.shield,
                   title: 'Keamanan',
                   value: !hasPin ? 'Belum ada PIN' : (bio ? 'PIN + sidik jari' : 'PIN'),
                   onTap: () => context.push(Routes.keamanan),
                 ),
                 SettingsTile(
-                  icon: Icons.download_outlined,
+                  icon: HiIcons.download,
                   title: 'Backup & pulihkan',
                   badge: backup.label,
                   badgeTone: backup.fresh ? TileBadgeTone.good : TileBadgeTone.warn,
                   onTap: () => context.push(Routes.cadangan),
                 ),
                 SettingsTile(
-                  icon: Icons.upload_outlined,
+                  icon: HiIcons.upload,
                   title: 'Export data',
                   value: 'CSV',
                   onTap: () => context.push(Routes.cadangan),
                 ),
                 if (!isPro && adPrivacy)
                   SettingsTile(
-                    icon: Icons.privacy_tip_outlined,
+                    icon: HiIcons.shield,
                     title: 'Privasi iklan',
                     onTap: () => withAutoLockPaused(ref, () => ref.read(adsServiceProvider).showPrivacyOptions()),
                   ),
@@ -142,7 +143,7 @@ class SettingsScreen extends ConsumerWidget {
               title: 'Tampilan',
               children: [
                 SettingsTile(
-                  icon: Icons.palette_outlined,
+                  icon: HiIcons.palette,
                   title: 'Tema & warna',
                   value: theme.accent.label,
                   onTap: () => context.push(Routes.tampilan),
@@ -153,14 +154,14 @@ class SettingsScreen extends ConsumerWidget {
               title: 'Tentang',
               children: [
                 SettingsTile(
-                  icon: Icons.description_outlined,
+                  icon: HiIcons.document,
                   title: 'Lisensi sumber terbuka',
                   onTap: () =>
                       showLicensePage(context: context, applicationName: 'HitungIn', applicationVersion: appVersion),
                 ),
                 if (kDebugMode)
                   SettingsTile(
-                    icon: Icons.palette_outlined,
+                    icon: HiIcons.palette,
                     title: 'Galeri desain',
                     value: 'debug',
                     onTap: () => context.push(Routes.gallery),

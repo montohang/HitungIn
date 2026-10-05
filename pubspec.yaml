@@ -60,6 +60,10 @@ flutter:
           weight: 700
         - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
           weight: 800
+    # Ikon garis dari Claude Design (tool/icons/build_icons.py).
+    - family: HitungInIcons
+      fonts:
+        - asset: assets/fonts/HitungInIcons.ttf
 
 # SQLite dibundel sebagai SQLCipher supaya database terenkripsi di HP.
 # Lihat lib/core/db/connection.dart.

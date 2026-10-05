@@ -14,6 +14,7 @@ import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
 import 'widgets/settings_tile.dart';
+import '../../core/widgets/hi_icons.dart';
 
 class AppearanceScreen extends ConsumerWidget {
   const AppearanceScreen({super.key});
@@ -66,9 +67,9 @@ class AppearanceScreen extends ConsumerWidget {
                           child: DecoratedBox(
                             decoration: BoxDecoration(color: dark ? a.dark : a.light, shape: BoxShape.circle),
                             child: a == s.accent
-                                ? const Icon(Icons.check, color: Colors.white, size: 20)
+                                ? const Icon(HiIcons.check, color: Colors.white, size: 20)
                                 : a.pro && !isPro
-                                    ? const Icon(Icons.lock_outline, color: Colors.white, size: 18)
+                                    ? const Icon(HiIcons.lock, color: Colors.white, size: 18)
                                     : null,
                           ),
                         ),
@@ -87,7 +88,7 @@ class AppearanceScreen extends ConsumerWidget {
           SettingsGroup(
             children: [
               SettingsTile(
-                icon: Icons.gradient,
+                icon: HiIcons.gradient,
                 title: 'Kartu saldo bergradien',
                 subtitle: 'Gradien halus dari warna aksen',
                 trailing: Switch.adaptive(
@@ -156,7 +157,7 @@ class _AppIconPicker extends ConsumerWidget {
                           Positioned(
                             right: 2,
                             bottom: 2,
-                            child: Icon(Icons.lock, size: 16, color: v == AppIconVariant.terang ? c.sub : Colors.white),
+                            child: Icon(HiIcons.lock, size: 16, color: v == AppIconVariant.terang ? c.sub : Colors.white),
                           ),
                       ],
                     ),

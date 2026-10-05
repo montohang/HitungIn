@@ -22,6 +22,7 @@ import '../premium/widgets/pro_teaser.dart' show openPremium;
 import '../settings/data/settings_dao.dart';
 import '../settings/widgets/settings_tile.dart' show showAppSheet;
 import 'data/budget_insights.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Atur budget satu halaman (Claude Design › Atur Budget): total + pembagian,
 /// −/+ per kategori dengan rata-rata 3 bulan, peringatan 80%.
@@ -173,7 +174,7 @@ class _AturBudgetScreenState extends ConsumerState<AturBudgetScreen> {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(Icons.auto_awesome_outlined, size: 18, color: c.accentText),
+                                  Icon(HiIcons.sparkle, size: 18, color: c.accentText),
                                   const SizedBox(width: AppSpace.x8),
                                   Expanded(child: Text(_note!, style: t.caption.copyWith(color: c.ink))),
                                 ],

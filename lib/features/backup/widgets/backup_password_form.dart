@@ -5,6 +5,7 @@ import '../../../core/theme/context_ext.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../settings/widgets/settings_tile.dart';
 import '../data/backup_codec.dart';
+import '../../../core/widgets/hi_icons.dart';
 
 /// Minta kata sandi cadangan lewat lembar bawah. Null bila dibatalkan.
 Future<String?> askBackupPassword(BuildContext context, {required bool confirm}) => showAppSheet<String>(
@@ -57,7 +58,7 @@ class _BackupPasswordFormState extends State<BackupPasswordForm> {
     InputDecoration deco(String label) => InputDecoration(
           labelText: label,
           suffixIcon: IconButton(
-            icon: Icon(_show ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+            icon: Icon(_show ? HiIcons.eyeOff : HiIcons.eye),
             tooltip: _show ? 'Sembunyikan' : 'Tampilkan',
             onPressed: () => setState(() => _show = !_show),
           ),

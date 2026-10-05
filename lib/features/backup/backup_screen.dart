@@ -25,6 +25,7 @@ import 'data/backup_service.dart';
 import 'data/csv_export.dart';
 import 'restore_flow.dart';
 import 'widgets/backup_password_form.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Cadangan terenkripsi (simpan & pulihkan) dan ekspor CSV.
 /// Berkas disimpan lewat pemilih berkas sistem — HitungIn tidak
@@ -102,7 +103,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           ),
           const SizedBox(height: AppSpace.x16),
           if (canAd) ...[
-            AppButton(label: 'Tonton iklan & ekspor', icon: Icons.play_circle_outline, large: true, onPressed: () => Navigator.pop(context, 'ad')),
+            AppButton(label: 'Tonton iklan & ekspor', icon: HiIcons.play, large: true, onPressed: () => Navigator.pop(context, 'ad')),
             const SizedBox(height: AppSpace.x8),
           ],
           AppButton(label: 'Lihat HitungIn Pro', variant: AppButtonVariant.soft, onPressed: () => Navigator.pop(context, 'pro')),
@@ -157,13 +158,13 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               title: 'Cadangan terenkripsi',
               children: [
                 SettingsTile(
-                  icon: Icons.save_alt,
+                  icon: HiIcons.download,
                   title: 'Buat cadangan',
                   subtitle: 'Simpan berkas .hitungin ke penyimpanan atau Drive pilihanmu',
                   onTap: _createBackup,
                 ),
                 SettingsTile(
-                  icon: Icons.settings_backup_restore,
+                  icon: HiIcons.restore,
                   title: 'Pulihkan dari cadangan',
                   subtitle: 'Mengganti semua data di HP ini',
                   onTap: _restore,
@@ -174,7 +175,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               title: 'Ekspor',
               children: [
                 SettingsTile(
-                  icon: Icons.table_chart_outlined,
+                  icon: HiIcons.table,
                   title: 'Ekspor transaksi (CSV)',
                   subtitle: 'Untuk Excel / Google Sheets — tidak terenkripsi',
                   trailing: ref.watch(isProProvider) ? null : const AppBadge.pro(),

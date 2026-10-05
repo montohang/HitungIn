@@ -27,6 +27,7 @@ import '../settings/data/settings_dao.dart';
 import '../transactions/data/transactions_dao.dart';
 import '../transactions/widgets/tx_row.dart';
 import '../wallets/data/wallets_dao.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Sapaan sesuai jam.
 String greetingFor(DateTime now) => switch (now.hour) {
@@ -98,7 +99,7 @@ class HomeScreen extends ConsumerWidget {
                 if (!firstDay) ...[
                   const SizedBox(width: AppSpace.x8),
                   _SquareButton(
-                    icon: hidden ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    icon: hidden ? HiIcons.eyeOff : HiIcons.eye,
                     label: hidden ? 'Tampilkan saldo' : 'Sembunyikan saldo',
                     onTap: toggleHidden,
                   ),
@@ -106,7 +107,7 @@ class HomeScreen extends ConsumerWidget {
                 if (hasPin) ...[
                   const SizedBox(width: AppSpace.x8),
                   _SquareButton(
-                    icon: Icons.lock_outline,
+                    icon: HiIcons.lock,
                     label: 'Kunci sekarang',
                     onTap: () => ref.read(appGateProvider.notifier).lock(),
                   ),
@@ -237,7 +238,7 @@ class _BackupBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.verified_user_outlined, size: 16, color: fg),
+            Icon(HiIcons.shield, size: 16, color: fg),
             const SizedBox(width: AppSpace.x8),
             Flexible(
               child: Text(text,
@@ -434,7 +435,7 @@ class _QuickEntryState extends State<_QuickEntry> {
       decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.mdAll, border: Border.all(color: c.line)),
       child: Row(
         children: [
-          Icon(Icons.auto_awesome_outlined, size: 20, color: c.accentText),
+          Icon(HiIcons.sparkle, size: 20, color: c.accentText),
           const SizedBox(width: AppSpace.x12),
           Expanded(
             child: TextField(
@@ -461,7 +462,7 @@ class _QuickEntryState extends State<_QuickEntry> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(color: c.accent, borderRadius: AppRadius.smAll),
-              child: Icon(Icons.arrow_forward, size: 18, color: c.onAccent),
+              child: Icon(HiIcons.arrowRight, size: 18, color: c.onAccent),
             ),
           ),
         ],
@@ -662,7 +663,7 @@ class _SetupChecklist extends StatelessWidget {
                         color: ok ? c.good : c.surface,
                         border: Border.all(color: ok ? c.good : c.line2, width: 2),
                       ),
-                      child: ok ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
+                      child: ok ? const Icon(HiIcons.check, size: 14, color: Colors.white) : null,
                     ),
                     const SizedBox(width: AppSpace.x12),
                     Expanded(
@@ -675,7 +676,7 @@ class _SetupChecklist extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (!ok) Icon(Icons.chevron_right, size: 18, color: c.muted),
+                    if (!ok) Icon(HiIcons.forward, size: 18, color: c.muted),
                   ],
                 ),
               ),

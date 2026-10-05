@@ -26,6 +26,7 @@ import '../premium/widgets/pro_teaser.dart';
 import 'data/bill_due.dart';
 import 'data/bill_reminders.dart';
 import 'reminder_scheduler.dart';
+import '../../core/widgets/hi_icons.dart';
 
 final activeBillsProvider = StreamProvider<List<Bill>>((ref) => ref.watch(appDatabaseProvider).billsDao.watchActive());
 
@@ -53,7 +54,7 @@ class BillsScreen extends ConsumerWidget {
           if (async.hasValue && bills.isEmpty)
             AppCard(
               child: EmptyState(
-                icon: Icons.event_repeat_outlined,
+                icon: HiIcons.calendar,
                 title: 'Belum ada tagihan',
                 body: 'Catat kos, listrik, cicilan, atau langganan — HitungIn menandai yang sudah dekat jatuh tempo.',
                 action: 'Tambah tagihan',
@@ -130,7 +131,7 @@ class BillCard extends ConsumerWidget {
               const Spacer(),
               AppButton(
                 label: 'Bayar',
-                icon: Icons.check,
+                icon: HiIcons.check,
                 variant: AppButtonVariant.soft,
                 expand: false,
                 onPressed: () => _pay(context, ref),
@@ -358,7 +359,7 @@ class _BillFormState extends ConsumerState<_BillForm> {
               labelText: 'Nominal', prefixIcon: RupiahPrefix(), prefixIconConstraints: RupiahPrefix.constraints),
         ),
         const FieldLabel('Jatuh tempo'),
-        AppChip(label: DateFmt.longDate(_due), icon: Icons.calendar_today_outlined, selected: true, onTap: _pickDate),
+        AppChip(label: DateFmt.longDate(_due), icon: HiIcons.calendar, selected: true, onTap: _pickDate),
         const FieldLabel('Ulangi'),
         Wrap(
           spacing: AppSpace.x8,
@@ -447,7 +448,7 @@ class _ReminderCard extends ConsumerWidget {
         onTap: () => openPremium(context, ProReason.notifikasi),
         child: Row(
           children: [
-            const IconTile(icon: Icons.notifications_outlined, size: 40),
+            const IconTile(icon: HiIcons.bell, size: 40),
             const SizedBox(width: AppSpace.x12),
             Expanded(
               child: Column(
@@ -474,7 +475,7 @@ class _ReminderCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const IconTile(icon: Icons.notifications_outlined, size: 40),
+              const IconTile(icon: HiIcons.bell, size: 40),
               const SizedBox(width: AppSpace.x12),
               Expanded(
                 child: Column(
@@ -509,7 +510,7 @@ class _ReminderCard extends ConsumerWidget {
               const SizedBox(height: AppSpace.x12),
               Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, size: 18, color: c.warnInk),
+                  Icon(HiIcons.warning, size: 18, color: c.warnInk),
                   const SizedBox(width: AppSpace.x8),
                   Expanded(
                     child: Text('Notifikasi HitungIn sedang dimatikan di pengaturan HP.',

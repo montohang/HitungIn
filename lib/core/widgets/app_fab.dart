@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_tokens.dart';
 import '../theme/context_ext.dart';
+import 'hi_icons.dart';
 
 /// Tombol tambah mengambang: datar (tanpa bayangan berat di mode gelap),
 /// radius 16 seperti tombol lain.
 class AppFab extends StatelessWidget {
-  const AppFab({super.key, required this.label, required this.onPressed, this.icon = Icons.add});
+  const AppFab({super.key, required this.label, required this.onPressed, this.icon = HiIcons.plus});
 
   final String label;
   final IconData icon;

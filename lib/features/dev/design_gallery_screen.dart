@@ -12,6 +12,7 @@ import '../../core/widgets/count_up_text.dart';
 import '../../core/widgets/logo_mark.dart';
 import '../../core/widgets/progress_bar.dart';
 import '../../core/widgets/segmented_control.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Layar sementara untuk memeriksa design system di HP sungguhan.
 /// Akan diganti alur Splash → Onboarding pada tahap berikutnya.
@@ -118,10 +119,10 @@ class _DesignGalleryScreenState extends ConsumerState<DesignGalleryScreen> {
                 runSpacing: AppSpace.x8,
                 children: [
                   for (final (String name, IconData icon) in const [
-                    ('Makan & Minum', Icons.local_cafe_outlined),
-                    ('Transportasi', Icons.directions_bus_outlined),
-                    ('Belanja', Icons.shopping_bag_outlined),
-                    ('Tagihan', Icons.bolt_outlined),
+                    ('Makan & Minum', HiIcons.food),
+                    ('Transportasi', HiIcons.bus),
+                    ('Belanja', HiIcons.shopping),
+                    ('Tagihan', HiIcons.bolt),
                   ])
                     AppChip(label: name, icon: icon, selected: _cat == name, onTap: () => setState(() => _cat = name)),
                 ],
@@ -162,9 +163,9 @@ class _DesignGalleryScreenState extends ConsumerState<DesignGalleryScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x4),
                 child: Column(
                   children: [
-                    const _TxRow(icon: Icons.local_cafe_outlined, name: 'Kopi Kenangan', meta: 'Makan & Minum · GoPay · 08.42', amount: -25000),
+                    const _TxRow(icon: HiIcons.food, name: 'Kopi Kenangan', meta: 'Makan & Minum · GoPay · 08.42', amount: -25000),
                     Divider(color: c.line),
-                    const _TxRow(icon: Icons.work_outline, name: 'Gaji Oktober', meta: 'Gaji · BCA · Kemarin', amount: 9200000),
+                    const _TxRow(icon: HiIcons.briefcase, name: 'Gaji Oktober', meta: 'Gaji · BCA · Kemarin', amount: 9200000),
                   ],
                 ),
               ),

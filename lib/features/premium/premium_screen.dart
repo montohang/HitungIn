@@ -9,22 +9,23 @@ import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/logo_mark.dart';
 import 'data/pro_limits.dart';
 import 'pro_controller.dart';
+import '../../core/widgets/hi_icons.dart';
 
 /// Harga cadangan bila Google Play belum mengirim harga (offline/emulator).
 const String fallbackProPrice = 'Rp59.000';
 
 /// Daftar keuntungan Pro. `true` = sudah ada, `false` = segera hadir.
 const List<(IconData, String, String, bool)> proBenefits = [
-  (Icons.block, 'Tanpa iklan', 'Selamanya, di semua layar', true),
-  (Icons.savings_outlined, 'Budget tanpa batas', 'Gratis: total + ${FreeLimits.categoryBudgets} kategori', true),
-  (Icons.event_repeat_outlined, 'Tagihan tanpa batas', 'Gratis: ${FreeLimits.activeBills} tagihan aktif', true),
-  (Icons.notifications_outlined, 'Notifikasi pengingat tagihan', 'Diingatkan walau aplikasi tertutup', true),
-  (Icons.insights_outlined, 'Laporan semua bulan', 'Gratis: bulan ini & bulan lalu', true),
-  (Icons.table_chart_outlined, 'Ekspor CSV kapan saja', 'Gratis: sekali per iklan berhadiah', true),
-  (Icons.trending_up, 'Tren 6–12 bulan & filter dompet', 'Laporan lanjutan', true),
-  (Icons.autorenew, 'Transaksi berulang', 'Gaji & langganan tercatat otomatis', true),
-  (Icons.palette_outlined, 'Aksen warna tambahan', 'Plum, Laut, Kopi, Arang', true),
-  (Icons.apps, 'Ikon aplikasi alternatif', 'Gelap, Emas, Terang', true),
+  (HiIcons.noAds, 'Tanpa iklan', 'Selamanya, di semua layar', true),
+  (HiIcons.jar, 'Budget tanpa batas', 'Gratis: total + ${FreeLimits.categoryBudgets} kategori', true),
+  (HiIcons.calendar, 'Tagihan tanpa batas', 'Gratis: ${FreeLimits.activeBills} tagihan aktif', true),
+  (HiIcons.bell, 'Notifikasi pengingat tagihan', 'Diingatkan walau aplikasi tertutup', true),
+  (HiIcons.bars, 'Laporan semua bulan', 'Gratis: bulan ini & bulan lalu', true),
+  (HiIcons.table, 'Ekspor CSV kapan saja', 'Gratis: sekali per iklan berhadiah', true),
+  (HiIcons.trendUp, 'Tren 6–12 bulan & filter dompet', 'Laporan lanjutan', true),
+  (HiIcons.repeat, 'Transaksi berulang', 'Gaji & langganan tercatat otomatis', true),
+  (HiIcons.palette, 'Aksen warna tambahan', 'Plum, Laut, Kopi, Arang', true),
+  (HiIcons.grid, 'Ikon aplikasi alternatif', 'Gelap, Emas, Terang', true),
 ];
 
 class PremiumScreen extends ConsumerStatefulWidget {
@@ -96,7 +97,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                           ),
                         ),
                         if (ready)
-                          Icon(Icons.check_circle, color: c.good, size: 22)
+                          Icon(HiIcons.checkCircle, color: c.good, size: 22)
                         else
                           AppBadge('Segera', background: c.chip, foreground: c.sub),
                       ],
@@ -121,13 +122,13 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
             children: [
               if (s.pending)
                 _Note(
-                  icon: Icons.hourglass_top,
+                  icon: HiIcons.hourglass,
                   text: 'Menunggu pembayaran selesai (mis. di minimarket atau via pulsa). Pro aktif otomatis setelah lunas.',
                   color: c.warnInk,
                 ),
-              if (s.error != null) _Note(icon: Icons.error_outline, text: s.error!, color: c.danger),
+              if (s.error != null) _Note(icon: HiIcons.error, text: s.error!, color: c.danger),
               if (!s.available)
-                _Note(icon: Icons.info_outline, text: 'Google Play tidak tersedia di perangkat ini.', color: c.muted),
+                _Note(icon: HiIcons.info, text: 'Google Play tidak tersedia di perangkat ini.', color: c.muted),
               if (!s.isPro)
                 AppButton(
                   label: s.busy ? 'Membuka Google Play…' : 'Beli Pro · ${s.price ?? fallbackProPrice}',

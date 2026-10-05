@@ -24,6 +24,7 @@ import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
 import '../settings/widgets/settings_tile.dart';
 import '../wallets/data/wallets_dao.dart';
+import '../../core/widgets/hi_icons.dart';
 
 final _recurringProvider = StreamProvider.autoDispose<List<RecurringTx>>(
   (ref) => ref.watch(appDatabaseProvider).recurringDao.watchAll(),
@@ -72,7 +73,7 @@ class RecurringScreen extends ConsumerWidget {
           if (async.hasValue && items.isEmpty)
             AppCard(
               child: EmptyState(
-                icon: Icons.autorenew,
+                icon: HiIcons.repeat,
                 title: 'Belum ada jadwal',
                 body: 'Contoh: gaji tiap tanggal 25, langganan Spotify tiap bulan, uang kos tiap tanggal 1.',
                 action: 'Tambah jadwal',
@@ -90,7 +91,7 @@ class RecurringScreen extends ConsumerWidget {
                     children: [
                       IconTile(
                         icon: r.kind == TxKind.transfer
-                            ? Icons.swap_horiz
+                            ? HiIcons.swap
                             : AppIcons.of(cats.where((c) => c.id == r.categoryId).firstOrNull?.icon ?? 'other'),
                         color: r.kind == TxKind.pemasukan ? c.good : null,
                         background: r.kind == TxKind.pemasukan ? c.goodSoft : null,
@@ -333,7 +334,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
           ],
         ),
         FieldLabel(_r == null ? 'Mulai' : 'Berikutnya'),
-        AppChip(label: DateFmt.longDate(_next), icon: Icons.calendar_today_outlined, selected: true, onTap: _pickDate),
+        AppChip(label: DateFmt.longDate(_next), icon: HiIcons.calendar, selected: true, onTap: _pickDate),
         if (_error != null) ...[
           const SizedBox(height: AppSpace.x12),
           Text(_error!, style: t.caption.copyWith(color: c.danger)),

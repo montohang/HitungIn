@@ -5,6 +5,7 @@ import '../../features/security/app_gate.dart';
 import '../theme/app_tokens.dart';
 import '../theme/context_ext.dart';
 import 'pressable.dart';
+import 'hi_icons.dart';
 
 /// Tombol ikon persegi 44 dengan bingkai (kembali, filter — desain).
 class SquareIconButton extends StatelessWidget {
@@ -58,7 +59,7 @@ class ScreenHeader extends StatelessWidget {
       child: Row(
         children: [
           SquareIconButton(
-            icon: Icons.chevron_left,
+            icon: HiIcons.back,
             label: 'Kembali',
             onTap: () => context.canPop() ? context.pop() : context.go(Routes.home),
           ),
