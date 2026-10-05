@@ -165,13 +165,15 @@ void main() {
     await app.pump(tester);
     await app.go(tester, '/riwayat');
 
-    expect(find.text('Oktober 2026'), findsOneWidget);
+    expect(find.text('Masuk (1–2 Okt)'), findsOneWidget);
+    expect(find.text('+Rp9.200.000'), findsNWidgets(2), reason: 'kartu Masuk + baris Gaji');
+    expect(find.text('−Rp75.000'), findsOneWidget);
     expect(find.text('Kopi'), findsOneWidget);
     expect(find.text('Bensin'), findsOneWidget);
     expect(find.text('Gaji'), findsOneWidget);
     expect(find.text('Martabak'), findsNothing);
-    expect(find.text('Hari ini'), findsOneWidget);
-    expect(find.text('Kemarin'), findsOneWidget);
+    expect(find.text('Hari ini · Jumat, 2 Okt'), findsOneWidget);
+    expect(find.text('Kemarin · Kamis, 1 Okt'), findsOneWidget);
 
     await tester.tap(find.text('Pemasukan'));
     await tester.pumpAndSettle();
@@ -184,8 +186,26 @@ void main() {
     expect(find.text('Bensin'), findsOneWidget);
     expect(find.text('Kopi'), findsNothing);
 
+    // Cari nominal: "50rb" = tepat, "9.200" = digit di dalam nominal.
+    await tester.enterText(find.byKey(const Key('cari')), '50rb');
+    await tester.pumpAndSettle();
+    expect(find.text('Bensin'), findsOneWidget);
+    expect(find.text('Kopi'), findsNothing);
+    await tester.enterText(find.byKey(const Key('cari')), '9.200');
+    await tester.pumpAndSettle();
+    expect(find.text('Gaji'), findsOneWidget);
+    expect(find.text('Bensin'), findsNothing);
+    await tester.enterText(find.byKey(const Key('cari')), 'zzz');
+    await tester.pumpAndSettle();
+    expect(find.text('Tidak ada transaksi yang cocok'), findsOneWidget);
+
+    // Bulan dipilih lewat lembar filter.
     await tester.tap(find.byTooltip('Hapus pencarian'));
+    await tester.tap(find.bySemanticsLabel('Filter lanjutan'));
+    await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('Bulan sebelumnya'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Selesai'));
     await tester.pumpAndSettle();
     expect(find.text('September 2026'), findsOneWidget);
     expect(find.text('Martabak'), findsOneWidget);

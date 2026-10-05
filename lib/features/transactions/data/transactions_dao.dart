@@ -63,7 +63,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
   Future<Txn?> byId(int id) => (select(transactions)..where((t) => t.id.equals(id))).getSingleOrNull();
 
   /// Riwayat dalam rentang [from] (inklusif) – [to] (eksklusif), terbaru dulu.
-  /// [search] mencocokkan catatan atau nama kategori.
+  /// [search] mencocokkan catatan, nama kategori, atau nominal ([amountSearch]).
   Stream<List<TxDetail>> watchBetween(
     DateTime from,
     DateTime to, {
@@ -81,7 +81,11 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
     if (kind != null) q.where(transactions.kind.equalsValue(kind));
     final String term = search?.trim() ?? '';
     if (term.isNotEmpty) {
-      q.where(transactions.note.like('%$term%') | categories.name.like('%$term%'));
+      Expression<bool> match = transactions.note.like('%$term%') | categories.name.like('%$term%');
+      final ({int? exact, String? digits})? amount = amountSearch(term);
+      if (amount?.exact != null) match = match | transactions.amount.equals(amount!.exact!);
+      if (amount?.digits != null) match = match | transactions.amount.cast<String>().like('%${amount!.digits}%');
+      q.where(match);
     }
     return q.watch().map(_mapDetails);
   }
@@ -207,4 +211,21 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
       if (toWalletId == walletId) throw ArgumentError('Dompet asal dan tujuan tidak boleh sama');
     }
   }
+}
+
+/// Pencarian nominal di Riwayat: "25rb" / "1,5jt" → nominal tepat;
+/// "25.000" / "250" → digit yang terkandung di nominal. Null bila bukan angka.
+({int? exact, String? digits})? amountSearch(String term) {
+  final RegExpMatch? m = RegExp(r'^(?:rp\s*)?([\d.,]+)\s*(rb|ribu|k|jt|juta)?$').firstMatch(term.trim().toLowerCase());
+  if (m == null) return null;
+  final String number = m.group(1)!;
+  final String? unit = m.group(2);
+  if (unit == null) {
+    final String digits = number.replaceAll(RegExp(r'[.,]'), '');
+    return digits.isEmpty ? null : (exact: null, digits: digits);
+  }
+  final double? value = double.tryParse(number.replaceAll('.', '').replaceAll(',', '.'));
+  if (value == null) return null;
+  final int factor = unit == 'jt' || unit == 'juta' ? 1000000 : 1000;
+  return (exact: (value * factor).round(), digits: null);
 }
