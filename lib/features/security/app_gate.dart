@@ -89,6 +89,7 @@ abstract final class Routes {
   static const String riwayat = '/riwayat';
   static const String laporan = '/laporan';
   static const String budget = '/budget';
+  static const String aturBudget = '/atur-budget';
 
   /// `?text=` (isi Catat Cepat) atau `?id=` (ubah transaksi).
   static const String catat = '/catat';

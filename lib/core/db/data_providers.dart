@@ -28,6 +28,11 @@ final lastBackupProvider = StreamProvider<DateTime?>((ref) => ref
     .map((v) => v == null ? null : DateTime.tryParse(v)));
 
 /// Tombol mata di Beranda: sembunyikan nominal.
+/// Peringatan budget 80% aktif (default ya).
+final budgetWarnProvider = StreamProvider<bool>(
+  (ref) => ref.watch(appDatabaseProvider).settingsDao.watch(SettingKeys.budgetWarn80).map((v) => v != 'false'),
+);
+
 final hideBalanceProvider = StreamProvider<bool>(
   (ref) => ref.watch(appDatabaseProvider).settingsDao.watch(SettingKeys.hideBalance).map((v) => v == 'true'),
 );

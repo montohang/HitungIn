@@ -51,3 +51,16 @@ int safeDailySpend(BudgetProgress b, DateTime now) {
 
 /// Nama pendek untuk chip: "Makan & Minum" → "Makan".
 String shortCategoryName(String name) => name.split(RegExp(r'[\s&]+')).first;
+
+/// Langkah tombol −/+ di Atur budget.
+const int budgetStep = 50000;
+
+/// Saran batas dari rata-rata: dibulatkan ke atas ke kelipatan [budgetStep].
+int suggestLimit(int average) => average <= 0 ? 0 : ((average + budgetStep - 1) ~/ budgetStep) * budgetStep;
+
+/// Status pembagian total budget ke kategori (desain Atur budget).
+String allocationStatus(int total, int allocated, String Function(int) fmt) {
+  final int diff = total - allocated;
+  if (diff == 0) return 'Semua terbagi';
+  return diff < 0 ? 'Lebih ${fmt(-diff)}' : 'Sisa ${fmt(diff)}';
+}

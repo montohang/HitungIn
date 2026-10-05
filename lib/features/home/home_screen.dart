@@ -147,7 +147,7 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpace.block),
                 _BudgetGlance(
                   overview: o,
-                  hottest: hottestCategory(budgets, now),
+                  hottest: (ref.watch(budgetWarnProvider).valueOrNull ?? true) ? hottestCategory(budgets, now) : null,
                   month: month,
                   now: now,
                   onTap: () => context.go(Routes.budget),

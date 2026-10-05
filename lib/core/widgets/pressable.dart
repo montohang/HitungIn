@@ -45,7 +45,10 @@ class _PressableState extends State<Pressable> {
   @override
   Widget build(BuildContext context) {
     final bool reduce = context.reduceMotion;
+    // container: tiap tombol jadi node aksesibilitas sendiri, tidak melebur
+    // dengan teks di sebelahnya.
     return Semantics(
+      container: true,
       button: widget.isButton,
       enabled: widget.onTap != null,
       label: widget.semanticLabel,

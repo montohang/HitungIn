@@ -59,5 +59,22 @@ class BudgetsDao extends DatabaseAccessor<AppDatabase> with _$BudgetsDaoMixin {
         }
       });
 
+  Future<List<Budget>> all() => select(budgets).get();
+
+  /// Simpan seluruh isian Atur budget sekaligus: nilai 0 = budget dihapus.
+  Future<void> saveAll({required int total, required Map<int, int> perCategory}) => transaction(() async {
+        Future<void> put(int? categoryId, int amount) async {
+          if (amount > 0) return setLimit(categoryId: categoryId, limitAmount: amount);
+          await (delete(budgets)
+                ..where((b) => categoryId == null ? b.categoryId.isNull() : b.categoryId.equals(categoryId)))
+              .go();
+        }
+
+        await put(null, total);
+        for (final e in perCategory.entries) {
+          await put(e.key, e.value);
+        }
+      });
+
   Future<void> remove(int id) => (delete(budgets)..where((b) => b.id.equals(id))).go();
 }

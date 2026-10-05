@@ -73,17 +73,21 @@ void main() {
     await app.pump(tester);
     await app.go(tester, '/budget');
 
-    // Kuota kategori habis tapi total belum ada → hanya pilihan Total.
-    await app.tap('Tambah');
-    expect(_inSheet(find.text('Total pengeluaran')), findsOneWidget);
-    expect(_inSheet(find.text('Belanja')), findsNothing);
-    expect(_inSheet(find.textContaining('Versi gratis: 2 budget kategori')), findsOneWidget);
+    // Atur budget: total boleh; kategori ke-3 → layar Pro.
+    await app.tap('+ Atur');
+    await app.tap('Ubah');
     await tester.enterText(find.byKey(const Key('batas-budget')), '4000000');
-    await _tapSheet(tester, 'Simpan');
-
-    // Total sudah ada & kuota habis → langsung layar Pro.
-    await app.tap('Tambah');
+    await _tapSheet(tester, 'Pakai');
+    expect(find.text('Rp4.000.000'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Tambah Belanja 50 ribu'));
+    await tester.pumpAndSettle();
     expect(find.text(ProReason.budget.headline), findsWidgets);
+    await app.back(tester);
+
+    await app.tap('Simpan budget');
+    final budgets = await app.run((db) => db.budgetsDao.all());
+    expect(budgets.where((b) => b.categoryId == null).single.limitAmount, 4000000);
+    expect(budgets, hasLength(3));
     await app.close(tester);
   });
 

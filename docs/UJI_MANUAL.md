@@ -35,12 +35,16 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
       (atau set kunci otomatis "Segera") → buka HitungIn → masukkan PIN → yang tampil **Detail transaksi tadi**, bukan Beranda.
 
 ## 3. Catat & data harian
+- [ ] Navigasi bawah: Beranda · Laporan · **+** · Budget · Lainnya. Riwayat dibuka dari "Lihat semua" (ada tombol kembali).
+- [ ] Beranda: 👁 menyembunyikan saldo (tetap tersembunyi setelah app dibuka ulang); lencana "Data di HP-mu · backup …" (oranye bila belum/lebih dari 14 hari, ketuk → Backup); "Total saldo · N dompet ›" → Dompet; kartu Budget dengan chip kategori ≥80%.
+- [ ] Hari pertama (belum ada transaksi): contoh `kopi 25rb gopay` dll. bisa diketuk, checklist "Siapkan HitungIn n dari 4".
 - [ ] Catat cepat di Beranda: `kopi 25rb gopay`, `gaji 9,2jt bca`, `tf bca ke gopay 100rb`, `bensin 50.000 kemarin`.
-- [ ] Layar Catat: keyboard angka, Rp dekat angka, pilih kategori/dompet/tanggal, Simpan → snackbar.
-- [ ] Detail: ubah nominal, hapus (konfirmasi) → saldo dompet ikut berubah.
-- [ ] Riwayat: ganti bulan, cari, filter jenis; dikelompokkan per hari dengan total harian.
-- [ ] Laporan: angka ringkasan, ketuk kolom grafik harian → nilai; ketuk kategori → Riwayat terfilter.
-- [ ] Budget: tambah total & kategori; ≥80% oranye "Hati-hati"; >100% merah "Lewat batas".
+- [ ] Layar Catat: keypad sendiri (1–9, 000, 0, ⌫) tanpa keyboard HP; kategori satu baris geser; kartu **Dari dompet** & **Tanggal** membuka lembar pilihan (Hari ini / Kemarin / Pilih tanggal lain); Pindah Saldo menampilkan kartu Dari → Ke + info; tombol "Simpan · Rp…". Saat mengetik catatan, keypad tersembunyi.
+- [ ] Detail: Edit (kanan atas), chip "Pengeluaran · dicatat manual/otomatis/dari tagihan", kartu dampak budget, **Duplikat** → form terisi (tanggal hari ini), **Hapus** → lembar konfirmasi → snackbar "Transaksi dihapus · Urungkan" mengembalikan transaksi & saldo.
+- [ ] Riwayat: cari nama/catatan/**nominal** (`50rb`, `1,5jt`, `25.000`); chip jenis; kartu Masuk/Keluar; tombol filter → pilih bulan & kategori (titik di tombol saat filter aktif); "Tidak ada transaksi yang cocok".
+- [ ] Laporan: < 3 transaksi → "Laporan muncul setelah 3 transaksi" (cincin n/3). Selain itu: pil bulan, ringkasan, donat per kategori (ketuk legenda → Riwayat terfilter), grafik harian, Arus kas 6 bulan (12 bulan = Pro), kartu Rata-rata per hari & Kategori terbesar.
+- [ ] Budget: kosong → "Atur manual" / "Saran dari kebiasaanmu". Atur budget: Ubah total, −/+ per kategori (50rb), ketuk angka untuk mengetik, rata-rata 3 bulan, kategori ke-3 versi gratis → Pro, sakelar "Peringatan di 80%", Simpan budget.
+- [ ] Budget: kartu Terpakai dengan penanda "Hari ini", kartu peringatan kategori yang lebih cepat dari jadwal, baris per kategori (oranye ≥80%, merah >100%); pil bulan untuk melihat bulan lalu.
 
 ## 4. Pengaturan
 - [ ] Nama panggilan berubah di sapaan Beranda.

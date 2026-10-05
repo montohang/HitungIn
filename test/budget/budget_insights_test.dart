@@ -3,6 +3,7 @@ import 'package:hitungin/core/db/app_database.dart';
 import 'package:hitungin/features/backup/data/backup_age.dart';
 import 'package:hitungin/features/budget/data/budget_insights.dart';
 import 'package:hitungin/features/budget/data/budgets_dao.dart';
+import 'package:hitungin/features/transactions/data/transactions_dao.dart' show monthlyAverages;
 
 BudgetProgress _b(int limit, int spent, {String? category}) => (
       budget: Budget(id: 1, categoryId: category == null ? null : 1, limitAmount: limit, createdAt: DateTime(2026)),
@@ -77,5 +78,29 @@ void main() {
     test('lebih dari sebulan', () {
       expect(backupAge(DateTime(2026, 8, 1), now), (label: 'lebih dari sebulan lalu', fresh: false));
     });
+  });
+
+  test('saran batas dibulatkan ke atas per 50rb', () {
+    expect(suggestLimit(0), 0);
+    expect(suggestLimit(1), 50000);
+    expect(suggestLimit(1250000), 1250000);
+    expect(suggestLimit(1260000), 1300000);
+  });
+
+  test('status pembagian total', () {
+    String f(int v) => 'Rp$v';
+    expect(allocationStatus(100, 100, f), 'Semua terbagi');
+    expect(allocationStatus(100, 60, f), 'Sisa Rp40');
+    expect(allocationStatus(100, 130, f), 'Lebih Rp30');
+  });
+
+  test('rata-rata bulanan dibagi jumlah bulan yang ada datanya', () {
+    expect(monthlyAverages(const []), isEmpty);
+    final avg = monthlyAverages([
+      (categoryId: 1, amount: 300000, at: DateTime(2026, 8, 3)),
+      (categoryId: 1, amount: 100000, at: DateTime(2026, 9, 3)),
+      (categoryId: 2, amount: 50000, at: DateTime(2026, 9, 9)),
+    ]);
+    expect(avg, {1: 200000, 2: 25000});
   });
 }

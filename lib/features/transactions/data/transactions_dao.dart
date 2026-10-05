@@ -131,6 +131,24 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
         ]);
   }
 
+  /// Rata-rata pengeluaran per bulan tiap kategori selama [months] bulan
+  /// penuh sebelum [month] (untuk Atur budget). Lihat [monthlyAverages].
+  Future<Map<int, int>> categoryAverages(DateTime month, {int months = 3}) async {
+    final DateTime to = DateTime(month.year, month.month);
+    final DateTime from = DateTime(month.year, month.month - months);
+    final rows = await (selectOnly(transactions)
+          ..addColumns([transactions.categoryId, transactions.amount, transactions.occurredAt])
+          ..where(transactions.kind.equalsValue(TxKind.pengeluaran) &
+              transactions.categoryId.isNotNull() &
+              transactions.occurredAt.isBiggerOrEqualValue(from) &
+              transactions.occurredAt.isSmallerThanValue(to)))
+        .get();
+    return monthlyAverages([
+      for (final r in rows)
+        (categoryId: r.read(transactions.categoryId)!, amount: r.read(transactions.amount)!, at: r.read(transactions.occurredAt)!),
+    ]);
+  }
+
   /// Pengeluaran per hari (kunci = tanggal 00.00) untuk grafik laporan.
   Stream<Map<DateTime, int>> watchDailyExpense(DateTime from, DateTime to, {int? walletId}) {
     final q = selectOnly(transactions)
@@ -228,4 +246,16 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
   if (value == null) return null;
   final int factor = unit == 'jt' || unit == 'juta' ? 1000000 : 1000;
   return (exact: (value * factor).round(), digits: null);
+}
+
+/// Rata-rata per bulan tiap kategori. Pembaginya = jumlah bulan yang punya
+/// pengeluaran (pengguna baru 1 bulan → rata-rata = bulan itu saja).
+Map<int, int> monthlyAverages(List<({int categoryId, int amount, DateTime at})> rows) {
+  final Set<int> monthsWithData = {for (final r in rows) r.at.year * 12 + r.at.month};
+  if (monthsWithData.isEmpty) return const {};
+  final Map<int, int> sums = {};
+  for (final r in rows) {
+    sums[r.categoryId] = (sums[r.categoryId] ?? 0) + r.amount;
+  }
+  return {for (final e in sums.entries) e.key: (e.value / monthsWithData.length).round()};
 }

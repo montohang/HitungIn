@@ -251,26 +251,32 @@ void main() {
     await app.pump(tester);
     await app.go(tester, '/budget');
 
-    expect(find.text('Belum ada budget'), findsOneWidget);
-    await tester.tap(find.text('Atur budget'));
+    expect(find.text('Belum ada budget bulan ini'), findsOneWidget);
+    await tester.tap(find.text('Atur manual'));
+    await tester.pumpAndSettle();
+    expect(find.text('Atur budget Oktober'), findsOneWidget);
+
+    // Total lewat isian; kategori lewat −/+ (langkah 50rb).
+    await tester.tap(find.text('Ubah'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('batas-budget')), '3000000');
-    await tester.tap(find.text('Simpan'));
+    await tester.tap(find.text('Pakai'));
     await tester.pumpAndSettle();
-    expect(find.text('Total pengeluaran'), findsOneWidget);
-    expect(find.text('4%'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Tambah Makan & Minum 50 ribu'));
+    await tester.tap(find.bySemanticsLabel('Tambah Makan & Minum 50 ribu'));
+    await tester.tap(find.bySemanticsLabel('Tambah Makan & Minum 50 ribu'));
+    await tester.pump();
+    await tester.tap(find.bySemanticsLabel('Kurangi Makan & Minum 50 ribu'));
+    await tester.pumpAndSettle();
+    expect(find.text('Rp100rb'), findsOneWidget);
+    expect(find.text('Sisa Rp2,9 jt'), findsOneWidget);
+    await tester.tap(find.text('Simpan budget'));
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Tambah'));
-    await tester.pumpAndSettle();
-    expect(find.descendant(of: find.byType(BottomSheet), matching: find.text('Total pengeluaran')), findsNothing,
-        reason: 'budget total sudah ada');
-    await tester.tap(find.descendant(of: find.byType(BottomSheet), matching: find.text('Makan & Minum')));
-    await tester.enterText(find.byKey(const Key('batas-budget')), '100000');
-    await tester.tap(find.text('Simpan'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Lewat batas'), findsOneWidget);
-    expect(find.text('Lewat Rp20.000'), findsOneWidget);
+    expect(find.text('Oktober · hari ke-2 dari 31'), findsOneWidget);
+    expect(find.text('Rp120.000'), findsOneWidget, reason: 'terpakai (budget total)');
+    expect(find.text('Pemakaian 4% · waktu berjalan 6%'), findsOneWidget);
+    expect(find.text('Makan & Minum lewat batas'), findsOneWidget);
     expect(find.text('120%'), findsOneWidget);
 
     // Beranda menampilkan ringkasan budget total.

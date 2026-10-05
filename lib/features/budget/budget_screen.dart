@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../core/db/app_database.dart';
 import '../../core/db/data_providers.dart';
-import '../../core/db/providers.dart';
 import '../../core/security/secure_store.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
+import '../../core/utils/date_format.dart';
+import '../../core/utils/dates.dart';
 import '../../core/utils/rupiah.dart';
-import '../../core/utils/rupiah_input.dart';
-import '../../core/widgets/app_button.dart';
-import '../../core/widgets/app_card.dart';
-import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
-import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/month_switcher.dart';
+import '../../core/widgets/pressable.dart';
 import '../../core/widgets/progress_bar.dart';
-import '../../core/widgets/rupiah_prefix.dart';
-import '../premium/data/pro_limits.dart';
-import '../premium/pro_controller.dart';
-import '../premium/widgets/pro_teaser.dart';
+import '../security/app_gate.dart';
+import 'data/budget_insights.dart';
 import 'data/budgets_dao.dart';
 
+String _hex(Color x) => '#${(x.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
+
+/// Budget (Claude Design › Budget & Budget · kosong), dengan pilihan bulan dari app.
 class BudgetScreen extends ConsumerStatefulWidget {
   const BudgetScreen({super.key});
 
@@ -32,35 +31,8 @@ class BudgetScreen extends ConsumerStatefulWidget {
 class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   late DateTime _month = ref.read(currentMonthProvider);
 
-  Future<void> _edit({BudgetProgress? existing, required List<BudgetProgress> all}) async {
-    final List<Category> expense = [
-      for (final c in ref.read(activeCategoriesProvider).valueOrNull ?? const <Category>[])
-        if (c.kind == TxKind.pengeluaran) c,
-    ];
-    final Set<int?> taken = {for (final b in all) b.budget.categoryId};
-    final bool categoryAllowed = existing != null ||
-        FreeLimits.canAddCategoryBudget(existing: all.where((b) => b.category != null).length, isPro: ref.read(isProProvider));
-    // Budget total sudah ada & kuota kategori habis → langsung tawarkan Pro.
-    if (existing == null && taken.contains(null) && !categoryAllowed) {
-      openPremium(context, ProReason.budget);
-      return;
-    }
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => _BudgetSheet(
-        existing: existing,
-        categories: categoryAllowed
-            ? [for (final c in expense) if (!taken.contains(c.id) || c.id == existing?.budget.categoryId) c]
-            : const [],
-        categoryLocked: !categoryAllowed,
-        totalTaken: taken.contains(null) && !(existing != null && existing.category == null),
-        onSave: (categoryId, amount) =>
-            ref.read(appDatabaseProvider).budgetsDao.setLimit(categoryId: categoryId, limitAmount: amount),
-        onDelete: existing == null ? null : () => ref.read(appDatabaseProvider).budgetsDao.remove(existing.budget.id),
-      ),
-    );
-  }
+  void _atur({bool saran = false}) =>
+      context.push(saran ? Uri(path: Routes.aturBudget, queryParameters: {'saran': '1'}).toString() : Routes.aturBudget);
 
   @override
   Widget build(BuildContext context) {
@@ -69,11 +41,18 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     final DateTime now = ref.watch(clockProvider)();
     final AsyncValue<List<BudgetProgress>> async = ref.watch(budgetProgressProvider(_month));
     final List<BudgetProgress> all = async.valueOrNull ?? const [];
-    final BudgetProgress? total = all.where((b) => b.category == null).firstOrNull;
     final List<BudgetProgress> perCategory = [for (final b in all) if (b.category != null) b];
-
+    final BudgetOverview? overview = budgetOverview(all);
+    final bool warn = ref.watch(budgetWarnProvider).valueOrNull ?? true;
     final bool isCurrent = _month.year == now.year && _month.month == now.month;
-    final int daysLeft = isCurrent ? DateTime(now.year, now.month + 1, 0).day - now.day + 1 : 0;
+    final int days = Dates.daysInMonth(_month.year, _month.month);
+    final String monthName = DateFmt.months[_month.month - 1];
+    final String subtitle = all.isEmpty
+        ? '$monthName · belum diatur'
+        : isCurrent
+            ? '$monthName · hari ke-${now.day} dari $days'
+            : '${DateFmt.month(_month)} · sudah lewat';
+    final BudgetProgress? hot = isCurrent && warn ? hottestCategory(all, now) : null;
 
     return Scaffold(
       body: SafeArea(
@@ -81,48 +60,60 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           padding: AppSpace.screen,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: Text('Budget', style: t.pageTitle)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Budget', style: t.pageTitle),
+                      const SizedBox(height: AppSpace.x4),
+                      Text(subtitle, style: t.caption.copyWith(color: c.muted)),
+                    ],
+                  ),
+                ),
                 if (all.isNotEmpty)
-                  AppButton(
-                    label: 'Tambah',
-                    icon: Icons.add,
-                    variant: AppButtonVariant.soft,
-                    expand: false,
-                    onPressed: () => _edit(all: all),
+                  Pressable(
+                    onTap: _atur,
+                    semanticLabel: 'Atur budget',
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
+                      child: Text('+ Atur', style: t.title.copyWith(fontSize: 14, color: c.accentText)),
+                    ),
                   ),
               ],
             ),
-            const SizedBox(height: AppSpace.block),
-            MonthSwitcher(month: _month, now: now, onChanged: (m) => setState(() => _month = m)),
+            const SizedBox(height: AppSpace.x12),
+            // Pilihan bulan dari app: lihat pemakaian bulan-bulan sebelumnya.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: MonthPill(month: _month, now: now, onChanged: (m) => setState(() => _month = m)),
+            ),
             const SizedBox(height: AppSpace.block),
             if (async.hasValue && all.isEmpty)
-              AppCard(
-                child: EmptyState(
-                  icon: Icons.savings_outlined,
-                  title: 'Belum ada budget',
-                  body: 'Pasang batas belanja bulanan — total atau per kategori. HitungIn akan memberi tanda saat mendekati batas.',
-                  action: 'Atur budget',
-                  onAction: () => _edit(all: all),
+              _Empty(
+                onManual: _atur,
+                onSuggest: () => _atur(saran: true),
+              )
+            else if (overview != null) ...[
+              _Overview(overview: overview, now: now, isCurrent: isCurrent, days: days),
+              if (hot != null) ...[
+                const SizedBox(height: AppSpace.x16),
+                _Warning(budget: hot, now: now),
+              ],
+              if (perCategory.isNotEmpty) ...[
+                const SizedBox(height: AppSpace.x16),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpace.x4),
+                  child: Text('Per kategori', style: t.section.copyWith(fontSize: 17)),
                 ),
-              ),
-            if (total != null) ...[
-              _BudgetCard(progress: total, daysLeft: daysLeft, hero: true, onTap: () => _edit(existing: total, all: all)),
-              const SizedBox(height: AppSpace.x24),
-            ],
-            if (perCategory.isNotEmpty) ...[
-              const SectionHeader('Per kategori'),
-              for (final (int i, BudgetProgress b) in perCategory.indexed) ...[
-                _BudgetCard(progress: b, daysLeft: daysLeft, delay: AppMotion.stagger * i, onTap: () => _edit(existing: b, all: all)),
-                const SizedBox(height: AppSpace.x8),
+                for (final (int i, BudgetProgress b) in perCategory.indexed)
+                  _CategoryRow(budget: b, delay: AppMotion.stagger * i, onTap: _atur),
               ],
             ],
-            if (total == null && perCategory.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: AppSpace.x8),
-                child: Text('Tip: tambahkan budget total untuk melihat batas seluruh pengeluaran.',
-                    style: t.caption.copyWith(color: c.muted)),
-              ),
           ],
         ),
       ),
@@ -130,211 +121,339 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   }
 }
 
-class _BudgetCard extends StatelessWidget {
-  const _BudgetCard({required this.progress, required this.daysLeft, required this.onTap, this.hero = false, this.delay = Duration.zero});
+/// Kartu utama: terpakai, sisa, bar dengan penanda "Hari ini".
+class _Overview extends StatelessWidget {
+  const _Overview({required this.overview, required this.now, required this.isCurrent, required this.days});
 
-  final BudgetProgress progress;
-  final int daysLeft;
-  final VoidCallback onTap;
-  final bool hero;
-  final Duration delay;
+  final BudgetOverview overview;
+  final DateTime now;
+  final bool isCurrent;
+  final int days;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    final int limit = progress.budget.limitAmount;
-    final int spent = progress.spent;
-    final int left = limit - spent;
-    final double ratio = spent / limit;
-    final BudgetLevel level = budgetLevelOf(ratio);
-    final String name = progress.category?.name ?? 'Total pengeluaran';
-
-    final String status = switch (level) {
-      BudgetLevel.over => 'Lewat ${Rupiah.format(-left)}',
-      _ when daysLeft > 0 => 'Sisa ${Rupiah.format(left)} · ${Rupiah.compact(left ~/ daysLeft)}/hari',
-      _ => 'Sisa ${Rupiah.format(left)}',
-    };
-
-    return AppCard(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final double ratio = overview.limit == 0 ? 0 : overview.spent / overview.limit;
+    final double elapsed = isCurrent ? now.day / days : 1;
+    final int left = overview.limit - overview.spent;
+    final String art = '''
+<svg width="78" height="64" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="100" cy="148" rx="70" ry="7" fill="${_hex(c.track)}"/>
+  <rect x="54" y="48" width="92" height="98" rx="24" fill="${_hex(c.accentSoft)}" stroke="${_hex(c.accent)}" stroke-width="4"/>
+  <rect x="64" y="34" width="72" height="18" rx="7" fill="${_hex(c.accent)}"/>
+  <circle cx="84" cy="118" r="15" fill="#F2C14E"/>
+  <circle cx="114" cy="122" r="15" fill="#F2C14E"/>
+  <circle cx="100" cy="94" r="15" fill="#F6D27A"/>
+</svg>''';
+    return Container(
+      padding: const EdgeInsets.all(AppSpace.card),
+      decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
+      child: Stack(
         children: [
-          Row(
+          Positioned(right: -2, top: -4, child: ExcludeSemantics(child: SvgPicture.string(art, width: 78, height: 64))),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IconTile(icon: progress.category == null ? Icons.savings_outlined : AppIcons.of(progress.category!.icon), size: 40),
-              const SizedBox(width: AppSpace.x12),
-              Expanded(child: Text(name, style: hero ? t.section : t.item)),
-              if (level != BudgetLevel.normal)
-                AppBadge(
-                  level == BudgetLevel.over ? 'Lewat batas' : 'Hati-hati',
-                  background: level == BudgetLevel.over ? c.dangerSoft : c.warnSoft,
-                  foreground: level == BudgetLevel.over ? c.danger : c.warnInk,
+              Text(overview.fromTotal ? 'Terpakai' : 'Terpakai (jumlah budget kategori)',
+                  style: t.caption.copyWith(color: c.muted)),
+              const SizedBox(height: AppSpace.x2),
+              Text(Rupiah.format(overview.spent), style: t.amountL.copyWith(fontSize: 26, fontWeight: FontWeight.w800)),
+              const SizedBox(height: AppSpace.x2),
+              Text.rich(
+                TextSpan(
+                  text: 'dari ',
+                  children: [
+                    TextSpan(
+                      text: Rupiah.format(overview.limit),
+                      style: TextStyle(fontWeight: FontWeight.w600, color: c.ink),
+                    ),
+                    TextSpan(text: left >= 0 ? ' · sisa ${Rupiah.format(left)}' : ' · lewat ${Rupiah.format(-left)}'),
+                  ],
                 ),
-            ],
-          ),
-          const SizedBox(height: AppSpace.x12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(Rupiah.format(spent), style: hero ? t.amountL : t.number),
-              Expanded(
-                child: Text(' / ${Rupiah.format(limit)}', style: t.caption.copyWith(color: c.muted)),
+                style: t.caption.copyWith(color: c.muted),
               ),
-              Text('${(ratio * 100).round()}%', style: t.number.copyWith(fontSize: 13)),
+              const SizedBox(height: AppSpace.x12),
+              LayoutBuilder(
+                builder: (context, box) {
+                  final double x = box.maxWidth * elapsed.clamp(0.0, 1.0);
+                  return SizedBox(
+                    height: isCurrent ? 40 : 12,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: isCurrent ? 22 : 0,
+                          child: AppProgressBar(value: ratio, height: 12),
+                        ),
+                        if (isCurrent) ...[
+                          Positioned(
+                            left: (x - 30).clamp(0.0, box.maxWidth - 60),
+                            width: 60,
+                            top: 0,
+                            child: Text(
+                              'Hari ini',
+                              textAlign: TextAlign.center,
+                              style: t.label.copyWith(fontSize: 11, color: c.sub),
+                            ),
+                          ),
+                          Positioned(
+                            left: (x - 1).clamp(0.0, box.maxWidth - 2),
+                            top: 17,
+                            child: Container(
+                              width: 2,
+                              height: 22,
+                              decoration: BoxDecoration(color: c.ink, borderRadius: BorderRadius.circular(2)),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: AppSpace.x12),
+              Text(
+                isCurrent
+                    ? 'Pemakaian ${(ratio * 100).round()}% · waktu berjalan ${(elapsed * 100).round()}%'
+                    : 'Pemakaian ${(ratio * 100).round()}%',
+                style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted),
+              ),
             ],
           ),
-          const SizedBox(height: AppSpace.x8),
-          AppProgressBar(value: ratio, delay: delay),
-          const SizedBox(height: AppSpace.x8),
-          Text(status, style: t.caption.copyWith(color: level == BudgetLevel.over ? c.danger : c.muted)),
         ],
       ),
     );
   }
 }
 
-class _BudgetSheet extends StatefulWidget {
-  const _BudgetSheet({
-    required this.categories,
-    required this.totalTaken,
-    required this.onSave,
-    this.categoryLocked = false,
-    this.existing,
-    this.onDelete,
-  });
+/// "Makan & Minum lebih cepat dari jadwal" (desain).
+class _Warning extends StatelessWidget {
+  const _Warning({required this.budget, required this.now});
 
-  final BudgetProgress? existing;
-  final List<Category> categories;
-
-  /// Budget total sudah ada (dan bukan yang sedang diubah).
-  final bool totalTaken;
-
-  /// Kuota budget kategori versi gratis sudah terpakai.
-  final bool categoryLocked;
-  final Future<void> Function(int? categoryId, int amount) onSave;
-  final Future<void> Function()? onDelete;
-
-  @override
-  State<_BudgetSheet> createState() => _BudgetSheetState();
-}
-
-class _BudgetSheetState extends State<_BudgetSheet> {
-  late final TextEditingController _amount = TextEditingController(
-    text: widget.existing == null ? '' : Rupiah.digits(widget.existing!.budget.limitAmount),
-  );
-  // -1 = belum dipilih, null = total.
-  late int? _target = widget.existing != null
-      ? widget.existing!.budget.categoryId
-      : (widget.totalTaken ? -1 : null);
-  String? _error;
-
-  Future<void> _save() async {
-    final int amount = RupiahInputFormatter.parse(_amount.text);
-    if (_target == -1) return setState(() => _error = 'Pilih kategori.');
-    if (amount <= 0) return setState(() => _error = 'Isi batasnya dulu.');
-    await widget.onSave(_target, amount);
-    if (mounted) Navigator.pop(context);
-  }
-
-  @override
-  void dispose() {
-    _amount.dispose();
-    super.dispose();
-  }
+  final BudgetProgress budget;
+  final DateTime now;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    final bool editing = widget.existing != null;
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(AppSpace.screenH, 0, AppSpace.screenH, AppSpace.x16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(editing ? 'Ubah budget' : 'Atur budget', style: t.screenTitle),
-              const SizedBox(height: AppSpace.x16),
-              if (!editing) ...[
-                Text('Untuk', style: t.label.copyWith(color: c.muted)),
-                const SizedBox(height: AppSpace.x8),
-                Wrap(
-                  spacing: AppSpace.x8,
-                  runSpacing: AppSpace.x8,
-                  children: [
-                    if (!widget.totalTaken)
-                      AppChip(label: 'Total pengeluaran', icon: Icons.savings_outlined, selected: _target == null, onTap: () => setState(() => _target = null)),
-                    for (final cat in widget.categories)
-                      AppChip(
-                        label: cat.name,
-                        icon: AppIcons.of(cat.icon),
-                        selected: _target == cat.id,
-                        onTap: () => setState(() => _target = cat.id),
-                      ),
-                  ],
+    final int limit = budget.budget.limitAmount;
+    final int left = limit - budget.spent;
+    final int days = daysLeftInMonth(now);
+    final int lastDay = Dates.daysInMonth(now.year, now.month);
+    final String month = DateFmt.monthsShort[now.month - 1];
+    final String body = left <= 0
+        ? 'Sudah ${(budget.spent / limit * 100).round()}%, lewat ${Rupiah.compact(-left)} dari batas bulan ini.'
+        : 'Sudah ${(budget.spent / limit * 100).round()}%, sisa ${Rupiah.compact(left)} untuk $days hari. '
+            'Sekitar ${Rupiah.compact(safeDailySpend(budget, now))} per hari supaya aman sampai $lastDay $month.';
+    return Container(
+      padding: const EdgeInsets.all(AppSpace.card),
+      decoration: BoxDecoration(color: c.warnSoft, borderRadius: AppRadius.lgAll),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.smAll),
+            child: Icon(Icons.auto_awesome_outlined, size: 20, color: c.warnInk),
+          ),
+          const SizedBox(width: AppSpace.x12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  left <= 0 ? '${budget.category!.name} lewat batas' : '${budget.category!.name} lebih cepat dari jadwal',
+                  style: t.title.copyWith(fontSize: 14, color: c.warnInk),
                 ),
-                if (widget.categoryLocked) ...[
-                  const SizedBox(height: AppSpace.x12),
+                const SizedBox(height: AppSpace.x2),
+                Text(body, style: t.caption.copyWith(height: 1.5, color: c.sub)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryRow extends StatelessWidget {
+  const _CategoryRow({required this.budget, required this.delay, required this.onTap});
+
+  final BudgetProgress budget;
+  final Duration delay;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    final int limit = budget.budget.limitAmount;
+    final double ratio = limit == 0 ? 0 : budget.spent / limit;
+    final BudgetLevel level = budgetLevelOf(ratio);
+    final Color pctColor = switch (level) {
+      BudgetLevel.over => c.danger,
+      BudgetLevel.warn => c.warnInk,
+      BudgetLevel.normal => c.ink,
+    };
+    return Pressable.card(
+      onTap: onTap,
+      semanticLabel:
+          '${budget.category!.name}, ${Rupiah.format(budget.spent)} dari ${Rupiah.format(limit)}, ${(ratio * 100).round()} persen',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpace.x8),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
+              child: Icon(AppIcons.of(budget.category!.icon), size: 20, color: c.accentText),
+            ),
+            const SizedBox(width: AppSpace.x12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Row(
                     children: [
                       Expanded(
                         child: Text(
-                          'Versi gratis: ${FreeLimits.categoryBudgets} budget kategori. Tambah lagi dengan Pro.',
-                          style: t.caption.copyWith(color: c.muted),
+                          budget.category!.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: t.caption.copyWith(fontSize: 14, fontWeight: FontWeight.w600, color: c.ink),
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          openPremium(context, ProReason.budget);
-                        },
-                        child: const Text('Lihat Pro'),
+                      Text(
+                        '${Rupiah.compact(budget.spent)} / ${Rupiah.compact(limit)}',
+                        style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted),
                       ),
                     ],
                   ),
+                  const SizedBox(height: AppSpace.x8),
+                  AppProgressBar(value: ratio, height: 8, delay: delay),
                 ],
-                const SizedBox(height: AppSpace.x16),
-              ] else
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpace.x16),
-                  child: Text(widget.existing!.category?.name ?? 'Total pengeluaran', style: t.item),
-                ),
-              TextField(
-                key: const Key('batas-budget'),
-                controller: _amount,
-                autofocus: editing,
-                keyboardType: TextInputType.number,
-                inputFormatters: const [RupiahInputFormatter()],
-                style: t.number,
-                decoration: const InputDecoration(
-                  labelText: 'Batas per bulan',
-                  prefixIcon: RupiahPrefix(), prefixIconConstraints: RupiahPrefix.constraints,
-                ),
               ),
-              if (_error != null) ...[
-                const SizedBox(height: AppSpace.x8),
-                Text(_error!, style: t.caption.copyWith(color: c.danger)),
-              ],
-              const SizedBox(height: AppSpace.x16),
-              AppButton(label: 'Simpan', large: true, onPressed: _save),
-              if (widget.onDelete != null) ...[
-                const SizedBox(height: AppSpace.x8),
-                AppButton(
-                  label: 'Hapus budget',
-                  variant: AppButtonVariant.danger,
-                  onPressed: () async {
-                    await widget.onDelete!();
-                    if (context.mounted) Navigator.pop(context);
-                  },
-                ),
-              ],
+            ),
+            SizedBox(
+              width: 48,
+              child: Text(
+                '${(ratio * 100).round()}%',
+                textAlign: TextAlign.right,
+                style: t.caption.copyWith(fontWeight: FontWeight.w700, color: pctColor),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Budget · kosong: ilustrasi + pilihan "Mulai dari".
+class _Empty extends StatelessWidget {
+  const _Empty({required this.onManual, required this.onSuggest});
+
+  final VoidCallback onManual;
+  final VoidCallback onSuggest;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    final String art = '''
+<svg width="150" height="120" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="100" cy="148" rx="70" ry="7" fill="${_hex(c.track)}"/>
+  <rect x="54" y="48" width="92" height="98" rx="24" fill="${_hex(c.accentSoft)}" stroke="${_hex(c.accent)}" stroke-width="4"/>
+  <rect x="64" y="34" width="72" height="18" rx="7" fill="${_hex(c.accent)}"/>
+  <circle cx="100" cy="100" r="18" fill="none" stroke="${_hex(c.accent)}" stroke-width="4" stroke-dasharray="6 6"/>
+</svg>''';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpace.x24),
+          decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
+          child: Column(
+            children: [
+              ExcludeSemantics(child: SvgPicture.string(art, width: 150, height: 120)),
+              const SizedBox(height: AppSpace.x12),
+              Text('Belum ada budget bulan ini', textAlign: TextAlign.center, style: t.section),
+              const SizedBox(height: AppSpace.x8),
+              Text(
+                'Budget membantu HitungIn memberi peringatan sebelum uangmu kebablasan.',
+                textAlign: TextAlign.center,
+                style: t.body.copyWith(fontSize: 14, color: c.sub),
+              ),
             ],
           ),
+        ),
+        const SizedBox(height: AppSpace.x16),
+        Text('Mulai dari', style: t.caption.copyWith(fontWeight: FontWeight.w600, color: c.sub)),
+        const SizedBox(height: AppSpace.x8),
+        _Option(
+          icon: Icons.tune,
+          title: 'Atur manual',
+          body: 'Tentukan batas tiap kategori sendiri',
+          onTap: onManual,
+        ),
+        const SizedBox(height: AppSpace.x8),
+        _Option(
+          icon: Icons.auto_awesome_outlined,
+          title: 'Saran dari kebiasaanmu',
+          body: 'Dari rata-rata pengeluaran 3 bulan terakhir',
+          onTap: onSuggest,
+        ),
+      ],
+    );
+  }
+}
+
+class _Option extends StatelessWidget {
+  const _Option({required this.icon, required this.title, required this.body, required this.onTap});
+
+  final IconData icon;
+  final String title;
+  final String body;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    return Pressable.card(
+      onTap: onTap,
+      semanticLabel: title,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpace.card),
+        decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.mdAll, border: Border.all(color: c.line)),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
+              child: Icon(icon, size: 20, color: c.accentText),
+            ),
+            const SizedBox(width: AppSpace.x12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: t.item),
+                  const SizedBox(height: AppSpace.x2),
+                  Text(body, style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: c.muted),
+          ],
         ),
       ),
     );

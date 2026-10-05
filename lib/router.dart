@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'core/utils/date_format.dart';
 import 'features/backup/backup_screen.dart';
 import 'features/bills/bills_screen.dart';
+import 'features/budget/atur_budget_screen.dart';
 import 'features/budget/budget_screen.dart';
 import 'features/categories/categories_screen.dart';
 import 'features/dev/design_gallery_screen.dart';
@@ -80,6 +81,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: Routes.pengaturan, redirect: (_, __) => Routes.lainnya),
+      GoRoute(
+        path: Routes.aturBudget,
+        parentNavigatorKey: _rootKey,
+        builder: (_, state) => AturBudgetScreen(suggest: state.uri.queryParameters['saran'] == '1'),
+      ),
       GoRoute(
         path: Routes.premium,
         parentNavigatorKey: _rootKey,

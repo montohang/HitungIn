@@ -16,6 +16,9 @@ abstract final class SettingKeys {
   static const String billReminders = 'bills.reminders';
   static const String lastBackupAt = 'backup.lastAt';
   static const String hideBalance = 'home.hideBalance';
+
+  /// Peringatan budget di 80% (kartu peringatan & chip di Beranda). Default aktif.
+  static const String budgetWarn80 = 'budget.warn80';
   static const String billReminderHour = 'bills.reminderHour';
 }
 
