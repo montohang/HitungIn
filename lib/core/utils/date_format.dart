@@ -29,6 +29,12 @@ abstract final class DateFmt {
     return d.year == n.year ? base : '$base ${d.year}';
   }
 
+  /// `Hari ini, 19 Okt`, `Kemarin, 18 Okt`, atau `Jumat, 16 Okt` (isian Tanggal di Catat).
+  static String dayLabel(DateTime d, {DateTime? now}) {
+    final String rel = relativeDay(d, now: now);
+    return rel == 'Hari ini' || rel == 'Kemarin' ? '$rel, ${date(d, now: now)}' : rel;
+  }
+
   /// `Hari ini`, `Kemarin`, atau `Senin, 19 Okt`.
   static String relativeDay(DateTime d, {DateTime? now}) {
     final DateTime n = now ?? DateTime.now();

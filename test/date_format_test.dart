@@ -34,4 +34,11 @@ void main() {
     expect(niceCeil(410000), 500000);
     expect(niceCeil(1000000), 1000000);
   });
+
+  test('label tanggal di Catat', () {
+    final DateTime now = DateTime(2026, 10, 19, 9);
+    expect(DateFmt.dayLabel(DateTime(2026, 10, 19, 7), now: now), 'Hari ini, 19 Okt');
+    expect(DateFmt.dayLabel(DateTime(2026, 10, 18), now: now), 'Kemarin, 18 Okt');
+    expect(DateFmt.dayLabel(DateTime(2026, 10, 16), now: now), 'Jumat, 16 Okt');
+  });
 }

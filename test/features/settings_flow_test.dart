@@ -104,7 +104,7 @@ void main() {
     expect(find.text('whiskas, pasir'), findsOneWidget);
 
     await app.push(tester, '/catat?text=whiskas%2050rb');
-    await app.tap('Simpan transaksi');
+    await app.tap('Simpan · Rp50.000');
     final tx = (await app.run((db) => db.transactionsDao.watchRecent().first)).single;
     expect(tx.category!.name, 'Kucing');
     expect(tx.tx.amount, 50000);

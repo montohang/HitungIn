@@ -4,6 +4,17 @@ import 'package:hitungin/core/db/app_database.dart';
 
 import '../helpers/app_harness.dart';
 
+/// Ketik nominal lewat keypad Catat (hapus dulu isinya).
+Future<void> _typeAmount(WidgetTester tester, String digits) async {
+  for (int i = 0; i < 11; i++) {
+    await tester.tap(find.byKey(const Key('key-⌫')));
+  }
+  for (final String d in digits.split('')) {
+    await tester.tap(find.byKey(Key('key-$d')));
+  }
+  await tester.pump();
+}
+
 void main() {
   testWidgets('Catat cepat dari beranda → tersimpan & muncul di transaksi terbaru', (tester) async {
     final app = AppHarness(tester);
@@ -19,9 +30,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Form terisi otomatis.
-    expect(find.text('Catat'), findsOneWidget);
-    expect(find.widgetWithText(TextField, '25.000'), findsOneWidget);
-    await tester.tap(find.text('Simpan transaksi'));
+    expect(find.text('Catat transaksi'), findsOneWidget);
+    expect(find.text('Rp25.000'), findsOneWidget);
+    expect(find.text('GoPay ›'), findsOneWidget);
+    await tester.tap(find.text('Simpan · Rp25.000'));
     await tester.pumpAndSettle();
 
     expect(find.text('Kopi'), findsOneWidget);
@@ -42,22 +54,30 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('Catat transaksi'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Simpan transaksi'));
+    await tester.tap(find.text('Simpan'));
     await tester.pump();
     expect(find.text('Isi nominalnya dulu.'), findsOneWidget);
 
-    await tester.enterText(find.byKey(const Key('nominal')), '9200000');
-    await tester.tap(find.text('Simpan transaksi'));
+    await _typeAmount(tester, '9200000');
+    expect(find.text('Rp9.200.000'), findsOneWidget);
+    await tester.tap(find.text('Simpan · Rp9.200.000'));
     await tester.pump();
     expect(find.text('Pilih kategori.'), findsOneWidget);
 
     await tester.tap(find.text('Pemasukan'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Gaji'));
-    await tester.tap(find.textContaining('BCA ·'));
-    await tester.tap(find.text('Kemarin'));
-    await tester.pump();
-    await tester.tap(find.text('Simpan transaksi'));
+    // Dompet & tanggal lewat kartu → lembar pilihan.
+    await tester.tap(find.bySemanticsLabel(RegExp('^Ke dompet')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(of: find.byType(BottomSheet), matching: find.text('BCA')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel(RegExp('^Tanggal')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(of: find.byType(BottomSheet), matching: find.text('Kemarin')));
+    await tester.pumpAndSettle();
+    expect(find.text('Kemarin, 1 Okt ›'), findsOneWidget);
+    await tester.tap(find.text('Simpan · Rp9.200.000'));
     await tester.pumpAndSettle();
 
     final tx = (await app.run((db) => db.transactionsDao.watchRecent().first)).single.tx;
@@ -74,8 +94,9 @@ void main() {
     await app.pump(tester);
     await app.go(tester, '/catat?text=tf%20bca%20ke%20gopay%20100rb');
 
-    expect(find.text('Ke dompet'), findsOneWidget);
-    await tester.tap(find.text('Simpan transaksi'));
+    expect(find.text('Ke'), findsOneWidget);
+    expect(find.text('GoPay ›'), findsOneWidget);
+    await tester.tap(find.text('Simpan · Rp100.000'));
     await tester.pumpAndSettle();
 
     final b = await app.balances();
@@ -97,7 +118,7 @@ void main() {
     await tester.tap(find.text('Ubah'));
     await tester.pumpAndSettle();
     expect(find.text('Ubah transaksi'), findsOneWidget);
-    await tester.enterText(find.byKey(const Key('nominal')), '35000');
+    await _typeAmount(tester, '35000');
     await tester.tap(find.text('Simpan perubahan'));
     await tester.pumpAndSettle();
     expect(find.text('−Rp35.000'), findsOneWidget);

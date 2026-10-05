@@ -12,6 +12,7 @@ class AppSegmentedControl<T> extends StatelessWidget {
     required this.selected,
     required this.onChanged,
     required this.labelOf,
+    this.onSurface = false,
   });
 
   final List<T> options;
@@ -19,13 +20,17 @@ class AppSegmentedControl<T> extends StatelessWidget {
   final ValueChanged<T> onChanged;
   final String Function(T) labelOf;
 
+  /// Di atas latar `surface` (mis. layar Catat): wadah memakai warna chip.
+  final bool onSurface;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final bool dark = Theme.of(context).brightness == Brightness.dark;
+    final Color on = onSurface && dark ? Color.lerp(c.chip, Colors.white, 0.06)! : c.surface;
     return Container(
       padding: const EdgeInsets.all(AppSpace.x4),
-      decoration: BoxDecoration(color: c.seg, borderRadius: AppRadius.mdAll),
+      decoration: BoxDecoration(color: onSurface ? c.chip : c.seg, borderRadius: AppRadius.mdAll),
       child: Row(
         children: [
           for (final T o in options)
@@ -40,7 +45,7 @@ class AppSegmentedControl<T> extends StatelessWidget {
                     height: 40,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: o == selected ? c.surface : Colors.transparent,
+                      color: o == selected ? on : Colors.transparent,
                       borderRadius: AppRadius.smAll,
                       boxShadow: o == selected && !dark
                           ? const [BoxShadow(color: Color(0x1417152B), blurRadius: 8, offset: Offset(0, 2))]
