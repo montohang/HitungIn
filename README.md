@@ -187,6 +187,10 @@ lalu disimpan di Keystore supaya tetap berlaku offline. Pembelian selalu di-*ack
   waktu yang sudah lewat dilewati, maks. 64 terjadwal.
 - Disinkronkan (batalkan semua → jadwalkan ulang) saat aplikasi dibuka dan setiap kali tagihan, pengaturan
   pengingat, atau status Pro berubah (`AppShell`). Membayar tagihan memajukan jatuh tempo → jadwal ikut maju.
+- **Debug saat ikon alternatif aktif:** `flutter run`/VS Code membuka app lewat `LauncherActivity` (ikon Standar).
+  Selama ikon Gelap/Emas/Terang aktif, komponen itu nonaktif sehingga peluncuran otomatis gagal dan debugger menunggu.
+  Cukup buka HitungIn dari ikonnya di HP setelah "Installing…" — debugger langsung tersambung. Atau kembalikan ikon
+  ke Standar sebelum menjalankan dari IDE.
 - Penjadwalan *inexact* (`inexactAllowWhileIdle`): tidak memakai izin alarm tepat waktu yang dibatasi Play Store,
   jadi notifikasi bisa meleset beberapa menit. Dijadwalkan ulang setelah reboot (`RECEIVE_BOOT_COMPLETED`).
 - Izin notifikasi Android 13+ diminta saat pengguna menyalakan pengingat; kartu di layar Tagihan memberi tahu bila

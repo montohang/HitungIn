@@ -100,11 +100,13 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [ ] Transaksi berulang: jadwal mulai hari ini → langsung tercatat; ubah tanggal HP ke bulan depan → buka
       aplikasi → masukkan PIN → tercatat susulan + snackbar **setelah** layar kunci terbuka.
 - [ ] Aksen Pro (Plum, Laut, Kopi, Arang).
-- [ ] **Ikon alternatif** Gelap/Emas/Terang: pilih → snackbar "Ikon berganti setelah kamu keluar" → aplikasi
+- [x] **Ikon alternatif** Gelap/Emas/Terang (diuji via ADB di Samsung A52, mode gelap): pilih → snackbar "Ikon berganti setelah kamu keluar" → aplikasi
       **tidak** tertutup; tekan Home → ikon di launcher berganti (bisa butuh beberapa detik); buka lagi dari ikon baru
       tanpa crash (juga saat mode gelap HP aktif),
       aplikasi tetap bisa dibuka dari ikon baru, tidak ada ikon dobel. Uji di launcher bawaan HP & bila ada,
       launcher lain (Nova, Samsung One UI, MIUI/HyperOS).
+      Catatan debug: selama ikon alternatif aktif, setelah "Installing…" di VS Code buka HitungIn dari ikonnya di HP
+      supaya debugger tersambung (lihat README).
 - [ ] Android 13+: ikon bertema (wallpaper → "Ikon bertema") memakai logo monokrom.
 
 ## 8. Notifikasi tagihan (Pro)

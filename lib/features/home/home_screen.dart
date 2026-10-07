@@ -605,9 +605,14 @@ class _FirstEntryCard extends StatelessWidget {
                   child: Container(
                     height: 36,
                     padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12),
-                    alignment: Alignment.center,
                     decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.pillAll),
-                    child: Text(ex, style: t.caption.copyWith(color: c.accentText, fontWeight: FontWeight.w700)),
+                    // Row min: lebar mengikuti teks (alignment membuat chip melebar penuh di Wrap).
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(ex, style: t.caption.copyWith(color: c.accentText, fontWeight: FontWeight.w700)),
+                      ],
+                    ),
                   ),
                 ),
             ],

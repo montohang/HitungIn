@@ -400,12 +400,14 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
                 child: Container(
                   height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12),
-                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     borderRadius: AppRadius.pillAll,
                     border: Border.all(color: c.line2),
                   ),
-                  child: Text('+ Tambah', style: t.label.copyWith(fontSize: 13, color: c.accentText)),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [Text('+ Tambah', style: t.label.copyWith(fontSize: 13, color: c.accentText))],
+                  ),
                 ),
               ),
           ],
