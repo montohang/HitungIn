@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/db/data_providers.dart' show currentMonthProvider;
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/widgets/pressable.dart';
@@ -34,7 +35,20 @@ class AppShell extends ConsumerStatefulWidget {
 class _AppShellState extends ConsumerState<AppShell> {
   StatefulNavigationShell get shell => widget.shell;
 
-  late final AppLifecycleListener _lifecycle = AppLifecycleListener(onResume: _runRecurring);
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(onResume: () {
+    _refreshToday();
+    _runRecurring();
+  });
+
+  /// Cek pergantian bulan tiap menit (app dibiarkan terbuka melewati tengah malam).
+  Timer? _dayTimer;
+
+  /// "Bulan ini" dihitung ulang bila tanggal sudah pindah bulan (app lama di latar,
+  /// melewati tengah malam, atau tanggal HP diubah).
+  void _refreshToday() {
+    final DateTime now = ref.read(clockProvider)();
+    if (DateTime(now.year, now.month) != ref.read(currentMonthProvider)) ref.invalidate(currentMonthProvider);
+  }
 
   /// Catat transaksi berulang yang jatuh tempo (berjalan untuk semua
   /// pengguna: jadwal yang sudah ada tidak dihentikan bila Pro hilang).
@@ -76,6 +90,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   void dispose() {
     _reminderDebounce?.cancel();
+    _dayTimer?.cancel();
     _lifecycle.dispose();
     super.dispose();
   }
@@ -84,6 +99,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   void initState() {
     super.initState();
     _lifecycle;
+    _dayTimer = Timer.periodic(const Duration(minutes: 1), (_) => _refreshToday());
     Future.microtask(_runRecurring);
     Future.microtask(() async {
       await ref.read(reminderSchedulerProvider).init(onTap: _onNotificationTap);

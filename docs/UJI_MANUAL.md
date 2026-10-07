@@ -97,9 +97,11 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [ ] Bayar tertunda (metode "lambat" kartu uji) → "Menunggu pembayaran" → aktif otomatis setelah selesai.
 - [ ] Hapus & pasang ulang aplikasi → "Pulihkan pembelian" → Pro aktif lagi.
 - [x] Laporan: filter dompet, tren 6/12 bulan.
-- [ ] Transaksi berulang: jadwal mulai hari ini → langsung tercatat; ubah tanggal HP ke bulan depan → buka
+- [x] Transaksi berulang: jadwal mulai hari ini → langsung tercatat; ubah tanggal HP ke bulan depan → buka
       aplikasi → masukkan PIN → tercatat susulan + snackbar **setelah** layar kunci terbuka.
 - [ ] Aksen Pro (Plum, Laut, Kopi, Arang).
+- [ ] *(baru)* Bulan berganti saat app terbuka/di latar (mis. lewat tengah malam akhir bulan, atau tanggal HP diubah):
+      Riwayat, Laporan, Budget, Beranda pindah ke bulan baru tanpa menutup app.
 - [x] **Ikon alternatif** Gelap/Emas/Terang (diuji via ADB di Samsung A52, mode gelap): pilih → snackbar "Ikon berganti setelah kamu keluar" → aplikasi
       **tidak** tertutup; tekan Home → ikon di launcher berganti (bisa butuh beberapa detik); buka lagi dari ikon baru
       tanpa crash (juga saat mode gelap HP aktif),

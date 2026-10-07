@@ -51,6 +51,10 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
+    // Bulan berganti saat app terbuka: yang sedang melihat "bulan ini" ikut pindah.
+    ref.listen(currentMonthProvider, (prev, next) {
+      if (prev != null && _month == prev) setState(() => _month = next);
+    });
     final DateTime now = ref.watch(clockProvider)();
     final DateTime prevMonth = DateTime(_month.year, _month.month - 1);
     final bool isPro = ref.watch(isProProvider);

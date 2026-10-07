@@ -43,6 +43,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
+    // Bulan berganti saat app terbuka: yang sedang melihat "bulan ini" ikut pindah.
+    ref.listen(currentMonthProvider, (prev, next) {
+      if (prev != null && _month == prev) setState(() => _month = next);
+    });
     final DateTime now = ref.watch(clockProvider)();
     final AsyncValue<List<BudgetProgress>> async = ref.watch(budgetProgressProvider(_month));
     final List<BudgetProgress> all = async.valueOrNull ?? const [];
