@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -781,9 +782,57 @@ class _ReminderCard extends ConsumerWidget {
                 ],
               ),
             ],
+            if (kDebugMode) ...[
+              const SizedBox(height: AppSpace.x12),
+              Text('Uji notifikasi (debug)', style: t.label.copyWith(color: c.muted)),
+              const SizedBox(height: AppSpace.x8),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      label: 'Kirim sekarang',
+                      variant: AppButtonVariant.outline,
+                      onPressed: () => _debugNotify(context, ref, null),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpace.x8),
+                  Expanded(
+                    child: AppButton(
+                      label: '1 menit lagi',
+                      variant: AppButtonVariant.outline,
+                      onPressed: () => _debugNotify(context, ref, 1),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ],
       ),
     );
+  }
+
+  /// Build debug: kirim notifikasi uji untuk tagihan pertama (isi sama seperti pengingat asli).
+  Future<void> _debugNotify(BuildContext context, WidgetRef ref, int? inMinutes) async {
+    final ReminderScheduler scheduler = ref.read(reminderSchedulerProvider);
+    final List<Bill> bills = ref.read(activeBillsProvider).valueOrNull ?? const [];
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    if (scheduler is! LocalReminderScheduler) {
+      messenger.showSnackBar(const SnackBar(content: Text('Penjadwal notifikasi tidak aktif di perangkat ini.')));
+      return;
+    }
+    await scheduler.init(onTap: (_) {});
+    final Bill? b = bills.firstOrNull;
+    await scheduler.debugTest(
+      billId: b?.id ?? 0,
+      title: b == null ? 'Uji notifikasi HitungIn' : 'Tagihan: ${b.name}',
+      body: b == null ? 'Notifikasi berjalan.' : 'Jatuh tempo besok · ${Rupiah.format(b.amount)} (uji)',
+      inMinutes: inMinutes,
+    );
+    messenger.showSnackBar(SnackBar(
+      content: Text(inMinutes == null
+          ? 'Notifikasi uji dikirim.'
+          : 'Dijadwalkan $inMinutes menit lagi — tutup aplikasi (Home), lalu tunggu. Bisa meleset (inexact).'),
+    ));
   }
 }

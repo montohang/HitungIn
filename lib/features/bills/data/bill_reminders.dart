@@ -33,6 +33,21 @@ Future<void> saveReminderSettings(SettingsDao dao, ReminderSettings s) async {
 /// ID notifikasi stabil per tagihan: 0 = H-n, 1 = hari H.
 int reminderId(int billId, int slot) => billId * 4 + slot;
 
+/// Kebalikan [reminderId].
+int billIdOfReminder(int id) => id ~/ 4;
+
+/// Tagihan aktif yang sudah masuk masa pengingat (H-n sampai lewat jatuh tempo)
+/// dan belum dibayar — notifikasinya yang sudah tampil boleh tetap ada.
+Set<int> billsInReminderWindow(List<Bill> bills, DateTime now) {
+  final DateTime today = DateTime(now.year, now.month, now.day);
+  return {
+    for (final Bill b in bills)
+      if (b.active &&
+          !DateTime(b.nextDue.year, b.nextDue.month, b.nextDue.day - b.remindDaysBefore).isAfter(today))
+        b.id,
+  };
+}
+
 /// Rencana notifikasi untuk tagihan aktif: H-[Bill.remindDaysBefore] dan hari H,
 /// pada jam [hour]. Waktu yang sudah lewat dilewati (tagihan terlambat cukup
 /// ditandai di dalam aplikasi, tidak dikirimi notifikasi berulang).

@@ -1,10 +1,12 @@
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hitungin/core/db/app_database.dart';
 import 'package:hitungin/features/bills/data/bill_reminders.dart';
 import 'package:hitungin/features/bills/reminder_scheduler.dart';
 import 'package:hitungin/features/premium/data/pro_limits.dart';
+import 'package:hitungin/features/security/app_gate.dart';
 
 Bill _bill(int id, DateTime due, {int remind = 3, bool active = true, int amount = 450000, String name = 'Listrik PLN'}) => Bill(
       id: id,
@@ -21,6 +23,7 @@ Bill _bill(int id, DateTime due, {int remind = 3, bool active = true, int amount
 class _RecordingScheduler implements ReminderScheduler {
   int cancels = 0;
   final List<ReminderPlan> scheduled = [];
+  final Set<int> shown = {};
 
   @override
   Future<void> init({required void Function(String payload) onTap}) async {}
@@ -32,10 +35,13 @@ class _RecordingScheduler implements ReminderScheduler {
   Future<bool> permissionGranted() async => true;
 
   @override
-  Future<void> cancelAll() async {
+  Future<void> cancelPending() async {
     cancels++;
     scheduled.clear();
   }
+
+  @override
+  Future<void> dismissShown({required Set<int> keepBillIds}) async => shown.retainAll(keepBillIds);
 
   @override
   Future<void> schedule(List<ReminderPlan> plans) async => scheduled.addAll(plans);
@@ -126,9 +132,54 @@ void main() {
       expect(s.scheduled, isEmpty);
     });
 
+    test('notifikasi yang sudah tampil tetap ada sampai tagihan dibayar', () async {
+      // Pengingat H-3 tagihan 1 (jatuh tempo 21 Okt) sudah tampil pada 18 Okt.
+      final DateTime on18 = DateTime(2026, 10, 18, 9, 5);
+      final s = _RecordingScheduler()..shown.addAll({1, 2});
+      await syncBillReminders(scheduler: s, bills: bills, settings: (enabled: true, hour: 9), isPro: true, now: on18);
+      // Tagihan 2 (1 Nov) belum masuk masa pengingat → bukan miliknya.
+      expect(s.shown, {1});
+      // Sinkron ulang (mis. refresh tiap menit) tidak menghapusnya.
+      await syncBillReminders(scheduler: s, bills: bills, settings: (enabled: true, hour: 9), isPro: true, now: on18);
+      expect(s.shown, {1});
+      // Dibayar → jatuh tempo maju ke bulan depan → notifikasi ditutup.
+      final paid = [_bill(1, DateTime(2026, 11, 21)), bills[1]];
+      await syncBillReminders(scheduler: s, bills: paid, settings: (enabled: true, hour: 9), isPro: true, now: on18);
+      expect(s.shown, isEmpty);
+    });
+
+    test('pengingat dimatikan → notifikasi yang tampil ikut ditutup', () async {
+      final s = _RecordingScheduler()..shown.add(1);
+      await syncBillReminders(scheduler: s, bills: bills, settings: (enabled: false, hour: 9), isPro: true, now: DateTime(2026, 10, 19));
+      expect(s.shown, isEmpty);
+    });
+
+    test('masa pengingat: H-n sampai lewat jatuh tempo, hanya tagihan aktif', () {
+      final list = [
+        _bill(1, DateTime(2026, 10, 7)), // H-3
+        _bill(2, DateTime(2026, 10, 1)), // terlambat
+        _bill(3, DateTime(2026, 10, 8)), // H-4 → belum
+        _bill(4, DateTime(2026, 10, 5), active: false),
+      ];
+      expect(billsInReminderWindow(list, now), {1, 2});
+      expect(billIdOfReminder(reminderId(42, 1)), 42);
+    });
+
     test('notifikasi = fitur Pro', () {
       expect(FreeLimits.canUseBillNotifications(isPro: false), isFalse);
       expect(FreeLimits.canUseBillNotifications(isPro: true), isTrue);
+    });
+  });
+
+  group('ketukan notifikasi', () {
+    test('tagihan → Tagihan menunggu dibuka; payload lain diabaikan', () {
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final tap = c.read(notificationTapHandlerProvider);
+      tap('lain:1');
+      expect(c.read(pendingNotificationRouteProvider), isNull);
+      tap('${billPayloadPrefix}7');
+      expect(c.read(pendingNotificationRouteProvider), Routes.tagihan);
     });
   });
 }

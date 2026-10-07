@@ -107,8 +107,13 @@ class FakeReminderScheduler implements ReminderScheduler {
   @override
   Future<bool> permissionGranted() async => granted;
 
+  final Set<int> shownBillIds = {};
+
   @override
-  Future<void> cancelAll() async => scheduled.clear();
+  Future<void> cancelPending() async => scheduled.clear();
+
+  @override
+  Future<void> dismissShown({required Set<int> keepBillIds}) async => shownBillIds.retainAll(keepBillIds);
 
   @override
   Future<void> schedule(List<ReminderPlan> plans) async => scheduled.addAll(plans);

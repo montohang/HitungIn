@@ -83,8 +83,17 @@ class _AppShellState extends ConsumerState<AppShell> {
     });
   }
 
-  void _onNotificationTap(String payload) {
-    if (payload.startsWith(billPayloadPrefix) && mounted) context.push(Routes.tagihan);
+  /// Buka layar dari notifikasi yang diketuk, setelah aplikasi tidak terkunci.
+  /// Ditunda sebentar: saat kembali dari latar belakang, kunci otomatis bisa
+  /// aktif sesaat setelah ketukan diterima.
+  void _openPendingNotification() {
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted || ref.read(appGateProvider).locked) return;
+      final String? route = ref.read(pendingNotificationRouteProvider);
+      if (route == null) return;
+      ref.read(pendingNotificationRouteProvider.notifier).state = null;
+      context.push(route);
+    });
   }
 
   @override
@@ -101,8 +110,9 @@ class _AppShellState extends ConsumerState<AppShell> {
     _lifecycle;
     _dayTimer = Timer.periodic(const Duration(minutes: 1), (_) => _refreshToday());
     Future.microtask(_runRecurring);
+    Future.microtask(_openPendingNotification);
     Future.microtask(() async {
-      await ref.read(reminderSchedulerProvider).init(onTap: _onNotificationTap);
+      await ref.read(reminderSchedulerProvider).init(onTap: ref.read(notificationTapHandlerProvider));
       _scheduleReminderSync();
     });
     // Shell hanya tampil setelah onboarding & buka kunci, jadi dialog
@@ -128,7 +138,13 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   Widget build(BuildContext context) {
     ref.listen(appGateProvider.select((g) => g.unlocked), (was, now) {
-      if (now && was == false) _runRecurring();
+      if (now && was == false) {
+        _runRecurring();
+        _openPendingNotification();
+      }
+    });
+    ref.listen(pendingNotificationRouteProvider, (_, next) {
+      if (next != null) _openPendingNotification();
     });
     ref.listen(activeBillsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(reminderSettingsProvider, (_, __) => _scheduleReminderSync());

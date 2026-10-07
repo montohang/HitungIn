@@ -112,11 +112,15 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [ ] Android 13+: ikon bertema (wallpaper → "Ikon bertema") memakai logo monokrom.
 
 ## 8. Notifikasi tagihan (Pro)
-- [ ] Nyalakan pengingat → dialog izin notifikasi (Android 13+).
-- [ ] Tagihan jatuh tempo besok + jam pengingat beberapa menit lagi → **tutup aplikasi** → notifikasi muncul
+> Build debug: kartu "Notifikasi pengingat" di Tagihan punya tombol **Uji notifikasi** — "Kirim sekarang"
+> (isi sama dengan pengingat asli tagihan pertama) dan "1 menit lagi" (terjadwal; tekan lalu keluar ke Home).
+> Jadwal asli memakai alarm tidak-tepat (bisa mundur sampai ±1 jam bila HP hemat baterai).
+- [x] Nyalakan pengingat → dialog izin notifikasi (Android 13+).
+- [x] Tagihan jatuh tempo besok + jam pengingat beberapa menit lagi → **tutup aplikasi** → notifikasi muncul
       (boleh meleset beberapa menit).
+- [x] Notifikasi tetap ada di panel sampai diketuk / tagihan dibayar (tidak hilang sendiri saat aplikasi dibuka).
 - [ ] Layar kunci aman: isi notifikasi tersembunyi.
-- [ ] Ketuk notifikasi saat aplikasi tertutup → minta PIN → layar Tagihan.
+- [x] Ketuk notifikasi saat aplikasi terkunci → minta PIN → layar Tagihan; Back → Beranda.
 - [ ] Restart HP sebelum waktu pengingat → notifikasi tetap muncul.
 - [ ] Bayar tagihan → notifikasi lama tidak muncul lagi; jadwal pindah ke jatuh tempo berikutnya.
 - [ ] Matikan izin notifikasi dari pengaturan HP → kartu Tagihan menampilkan peringatan + tombol Izinkan.
