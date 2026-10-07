@@ -166,6 +166,17 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 if (kDebugMode)
                   SettingsTile(
+                    icon: HiIcons.star,
+                    title: 'Mode Pro (uji)',
+                    subtitle: 'Hanya di build debug — tidak ada di Play Store',
+                    trailing: Switch(
+                      value: isPro,
+                      onChanged: (on) => ref.read(proControllerProvider.notifier).debugSetPro(on),
+                    ),
+                    onTap: () => ref.read(proControllerProvider.notifier).debugSetPro(!isPro),
+                  ),
+                if (kDebugMode)
+                  SettingsTile(
                     icon: HiIcons.palette,
                     title: 'Galeri desain',
                     value: 'debug',

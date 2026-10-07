@@ -97,6 +97,19 @@ class ProController extends Notifier<ProState> {
     }
   }
 
+  /// "Mode Pro (uji)" di build debug: aktifkan/matikan Pro tanpa Google Play,
+  /// untuk menguji fitur Pro. Tidak bisa dipanggil di build rilis.
+  Future<void> debugSetPro(bool on) async {
+    if (!kDebugMode) return;
+    final store = ref.read(entitlementStoreProvider);
+    if (on) {
+      await store.grant(productId: proProductId, purchaseId: 'debug', at: ref.read(clockProvider)());
+    } else {
+      await store.revoke();
+    }
+    state = state.copyWith(isPro: on, pending: false, clearError: true);
+  }
+
   @visibleForTesting
   Future<void> handle(List<PurchaseDetails> purchases) async {
     for (final PurchaseDetails p in purchases) {

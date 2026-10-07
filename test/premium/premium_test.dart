@@ -110,6 +110,15 @@ void main() {
     ProController ctl() => container.read(proControllerProvider.notifier);
     ProState state() => container.read(proControllerProvider);
 
+    test('Mode Pro (uji) di debug: aktif & mati, tersimpan', () async {
+      await ctl().debugSetPro(true);
+      expect(state().isPro, isTrue);
+      expect(await container.read(entitlementStoreProvider).isPro(), isTrue);
+      await ctl().debugSetPro(false);
+      expect(state().isPro, isFalse);
+      expect(await container.read(entitlementStoreProvider).isPro(), isFalse);
+    });
+
     test('memuat harga dari Google Play', () async {
       await ctl().loadProduct();
       expect(state().price, 'Rp59.000');

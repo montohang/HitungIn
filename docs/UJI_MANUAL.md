@@ -89,6 +89,10 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] Backup: kotak peringatan kata sandi menempel di dasar layar.
 
 ## 7. Pro (setelah persiapan butir 0)
+> **Uji fitur Pro lebih dulu tanpa Google Play:** pasang build debug (`flutter run`), buka **Lainnya › Mode Pro (uji)**
+> dan nyalakan. Semua butir di bawah kecuali 3 butir pertama (beli, tertunda, pulihkan) bisa diuji dengan cara ini,
+> begitu juga bagian 8. Matikan lagi untuk melihat batas versi gratis. Sakelar ini tidak ada di build rilis.
+
 - [ ] Beli Pro → dialog Google Play → sukses → banner hilang, batas gratis hilang, "HitungIn Pro aktif".
 - [ ] Bayar tertunda (metode "lambat" kartu uji) → "Menunggu pembayaran" → aktif otomatis setelah selesai.
 - [ ] Hapus & pasang ulang aplikasi → "Pulihkan pembelian" → Pro aktif lagi.
