@@ -27,7 +27,9 @@ class MainActivity : FlutterFragmentActivity() {
                     if (key == null || key !in iconComponents) {
                         result.error("bad_key", "Varian ikon tidak dikenal: $key", null)
                     } else {
-                        setIcon(key)
+                        // Diterapkan saat aplikasi ke latar (onStop): menonaktifkan ikon yang sedang
+                        // dipakai bisa membuat launcher (mis. Samsung One UI) menutup aplikasi.
+                        pendingIcon = if (key == appliedIcon()) null else key
                         result.success(null)
                     }
                 }
@@ -46,8 +48,21 @@ class MainActivity : FlutterFragmentActivity() {
         }
     }
 
-    private fun currentIcon(): String =
+    /** Varian yang dipilih tapi belum diterapkan (menunggu aplikasi ke latar). */
+    private var pendingIcon: String? = null
+
+    private fun appliedIcon(): String =
         iconComponents.entries.firstOrNull { isEnabled(it.value) }?.key ?: "standar"
+
+    private fun currentIcon(): String = pendingIcon ?: appliedIcon()
+
+    override fun onStop() {
+        super.onStop()
+        pendingIcon?.let {
+            pendingIcon = null
+            setIcon(it)
+        }
+    }
 
     private fun setIcon(key: String) {
         // Aktifkan yang baru dulu supaya tidak ada saat tanpa ikon sama sekali.

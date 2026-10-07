@@ -76,4 +76,19 @@ void main() {
       expect(File('branding/play_store_icon_512.png').existsSync(), isTrue);
     });
   });
+
+  test('splash lama tidak menggambar ikon adaptif sebagai bitmap (crash Android 8+)', () {
+    for (final String path in [
+      'android/app/src/main/res/drawable/launch_background.xml',
+      'android/app/src/main/res/drawable-v21/launch_background.xml',
+    ]) {
+      final String xml = File(path).readAsStringSync();
+      expect(xml, isNot(contains('@mipmap/')), reason: path);
+    }
+    // Mode gelap Android 12+ memakai splash sistem, bukan launch_background.
+    final String night31 = File('android/app/src/main/res/values-night-v31/styles.xml').readAsStringSync();
+    expect(night31, contains('windowSplashScreenAnimatedIcon'));
+    expect(night31, isNot(contains('@drawable/launch_background')));
+  });
 }
+

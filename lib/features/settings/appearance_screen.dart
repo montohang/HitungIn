@@ -119,7 +119,8 @@ class _AppIconPicker extends ConsumerWidget {
       ref.invalidate(currentAppIconProvider);
       messenger.showSnackBar(const SnackBar(
         content:
-            Text('Ikon diganti. Launcher mungkin butuh beberapa detik; pintasan di layar utama perlu ditambah ulang.'),
+            Text('Ikon berganti setelah kamu keluar dari HitungIn. Launcher mungkin butuh beberapa detik; '
+                'pintasan di layar utama perlu ditambah ulang.'),
       ));
     } on Object {
       messenger.showSnackBar(const SnackBar(content: Text('Ikon tidak bisa diganti di perangkat ini.')));

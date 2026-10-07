@@ -200,7 +200,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel(RegExp('^Ikon Emas')));
     await tester.pumpAndSettle();
     expect(app.env.appIcons.sets, [AppIconVariant.emas]);
-    expect(find.textContaining('Ikon diganti'), findsOneWidget);
+    expect(find.textContaining('Ikon berganti setelah kamu keluar'), findsOneWidget);
     await app.close(tester);
   });
 

@@ -97,7 +97,8 @@ class HomeScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                if (!firstDay) ...[
+                // Selalu ada: saldo awal sudah tampil sejak hari pertama.
+                ...[
                   const SizedBox(width: AppSpace.x8),
                   _SquareButton(
                     icon: hidden ? HiIcons.eyeOff : HiIcons.eye,
@@ -129,7 +130,7 @@ class HomeScreen extends ConsumerWidget {
               walletCount: wallets.length,
               summary: summary,
               gradient: gradient && !firstDay,
-              hidden: hidden && !firstDay,
+              hidden: hidden,
               firstDay: firstDay,
               onWallets: () => context.push(Routes.dompet),
             ),

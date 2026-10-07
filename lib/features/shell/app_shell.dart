@@ -39,6 +39,10 @@ class _AppShellState extends ConsumerState<AppShell> {
   /// Catat transaksi berulang yang jatuh tempo (berjalan untuk semua
   /// pengguna: jadwal yang sudah ada tidak dihentikan bila Pro hilang).
   Future<void> _runRecurring() async {
+    // Tunggu sampai layar kunci dibuka: kalau tidak, snackbar muncul di belakang
+    // layar PIN dan sudah hilang saat pengguna masuk (dipanggil lagi saat terbuka).
+    final GateState gate = ref.read(appGateProvider);
+    if (gate.hasPin && !gate.unlocked) return;
     final int n = await ref.read(appDatabaseProvider).recurringDao.runDue(ref.read(clockProvider)());
     if (n > 0 && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$n transaksi berulang dicatat otomatis')));
@@ -107,6 +111,9 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(appGateProvider.select((g) => g.unlocked), (was, now) {
+      if (now && was == false) _runRecurring();
+    });
     ref.listen(activeBillsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(reminderSettingsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(isProProvider, (_, __) => _scheduleReminderSync());

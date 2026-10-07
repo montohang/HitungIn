@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Splash sebelum Flutter tampil (Android 7–11): latar gelap + logo. -->
+<!-- Splash sebelum Flutter tampil (Android 7–11): latar gelap + logo.
+     Pakai PNG (@drawable/splash_logo), JANGAN ikon launcher (mipmap): di Android 8+ itu ikon
+     adaptif (XML) dan <bitmap> akan crash saat aplikasi dibuka. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/splash_bg" />
     <item>
-        <bitmap android:gravity="center" android:src="@mipmap/ic_launcher" />
+        <bitmap android:gravity="center" android:src="@drawable/splash_logo" />
     </item>
 </layer-list>

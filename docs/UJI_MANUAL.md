@@ -96,11 +96,13 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [ ] Beli Pro → dialog Google Play → sukses → banner hilang, batas gratis hilang, "HitungIn Pro aktif".
 - [ ] Bayar tertunda (metode "lambat" kartu uji) → "Menunggu pembayaran" → aktif otomatis setelah selesai.
 - [ ] Hapus & pasang ulang aplikasi → "Pulihkan pembelian" → Pro aktif lagi.
-- [ ] Laporan: filter dompet, tren 6/12 bulan.
+- [x] Laporan: filter dompet, tren 6/12 bulan.
 - [ ] Transaksi berulang: jadwal mulai hari ini → langsung tercatat; ubah tanggal HP ke bulan depan → buka
-      aplikasi → tercatat susulan + snackbar.
+      aplikasi → masukkan PIN → tercatat susulan + snackbar **setelah** layar kunci terbuka.
 - [ ] Aksen Pro (Plum, Laut, Kopi, Arang).
-- [ ] **Ikon alternatif** Gelap/Emas/Terang: ikon di launcher berganti (bisa butuh beberapa detik),
+- [ ] **Ikon alternatif** Gelap/Emas/Terang: pilih → snackbar "Ikon berganti setelah kamu keluar" → aplikasi
+      **tidak** tertutup; tekan Home → ikon di launcher berganti (bisa butuh beberapa detik); buka lagi dari ikon baru
+      tanpa crash (juga saat mode gelap HP aktif),
       aplikasi tetap bisa dibuka dari ikon baru, tidak ada ikon dobel. Uji di launcher bawaan HP & bila ada,
       launcher lain (Nova, Samsung One UI, MIUI/HyperOS).
 - [ ] Android 13+: ikon bertema (wallpaper → "Ikon bertema") memakai logo monokrom.
