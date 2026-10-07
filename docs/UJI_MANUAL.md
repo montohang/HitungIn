@@ -119,11 +119,11 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] Tagihan jatuh tempo besok + jam pengingat beberapa menit lagi → **tutup aplikasi** → notifikasi muncul
       (boleh meleset beberapa menit).
 - [x] Notifikasi tetap ada di panel sampai diketuk / tagihan dibayar (tidak hilang sendiri saat aplikasi dibuka).
-- [ ] Layar kunci aman: isi notifikasi tersembunyi.
+- [x] Layar kunci aman: isi notifikasi tersembunyi.
 - [x] Ketuk notifikasi saat aplikasi terkunci → minta PIN → layar Tagihan; Back → Beranda.
-- [ ] Restart HP sebelum waktu pengingat → notifikasi tetap muncul.
-- [ ] Bayar tagihan → notifikasi lama tidak muncul lagi; jadwal pindah ke jatuh tempo berikutnya.
-- [ ] Matikan izin notifikasi dari pengaturan HP → kartu Tagihan menampilkan peringatan + tombol Izinkan.
+- [x] Restart HP sebelum waktu pengingat → notifikasi tetap muncul.
+- [x] Bayar tagihan → notifikasi lama tidak muncul lagi; jadwal pindah ke jatuh tempo berikutnya.
+- [x] Matikan izin notifikasi dari pengaturan HP → kartu Tagihan menampilkan peringatan + tombol Izinkan.
 
 ## 9. Umum
 - [x] Ukuran huruf sistem besar (Pengaturan → Tampilan) → tidak ada teks terpotong parah / tombol tertutup.
