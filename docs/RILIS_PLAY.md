@@ -45,8 +45,8 @@ lewat `--dart-define` (lihat `lib/features/ads/ad_ids.dart`) sebelum rilis produ
 2. **Buat aplikasi**: nama *HitungIn*, bahasa default Indonesia, *Aplikasi*, *Gratis*,
    centang deklarasi.
 3. **Konten aplikasi** (Kebijakan → Konten aplikasi) — isi yang diminta:
-   - Kebijakan privasi: URL publik (draf ada di `docs/KEBIJAKAN_PRIVASI.md`;
-     host misalnya di Google Sites / GitHub Pages / Notion publik).
+   - Kebijakan privasi: https://appgratis.id/hitungin/privacy-policy
+     (sumber: repo appgratis, `pages/hitungin/privacy-policy.vue`).
    - Iklan: **Ya, berisi iklan**.
    - Akses aplikasi: semua fitur bisa diakses tanpa login (PIN dibuat sendiri oleh pengguna).
    - Rating konten: isi kuesioner (aplikasi utilitas/keuangan, tanpa konten sensitif).
