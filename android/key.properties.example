@@ -1,0 +1,6 @@
+# Salin menjadi android/key.properties (JANGAN di-commit) lalu isi.
+# storeFile = path absolut ke file .jks (simpan di luar folder proyek).
+storePassword=ISI_SENDIRI
+keyPassword=ISI_SENDIRI
+keyAlias=upload
+storeFile=/Users/macbook/keystores/hitungin-upload.jks
