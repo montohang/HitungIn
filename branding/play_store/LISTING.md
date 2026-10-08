@@ -32,7 +32,7 @@ Catat tagihan rutin seperti listrik, internet, atau kos. Lihat yang jatuh tempo 
 • Ekspor CSV untuk diolah di spreadsheet
 
 ✦ NYAMAN DIPAKAI
-Tema gelap yang elegan, pilihan warna aksen, serta dukungan ukuran huruf besar serta TalkBack.
+Tema gelap yang elegan, pilihan warna aksen, serta dukungan ukuran huruf besar dan TalkBack.
 
 HITUNGIN PRO (OPSIONAL, SEKALI BAYAR)
 Fitur inti HitungIn gratis selamanya. Kalau mau lebih, HitungIn Pro dibeli sekali — bukan langganan:
