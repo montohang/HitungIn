@@ -24,6 +24,7 @@ import 'widgets/amount_keypad.dart';
 import '../wallets/data/wallets_dao.dart';
 import '../security/app_gate.dart';
 import 'data/balance_guard.dart';
+import 'data/kind_lock.dart';
 import 'quick_entry_parser.dart';
 import '../../core/widgets/hi_icons.dart';
 
@@ -145,7 +146,18 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
     });
   }
 
-  void _setKind(TxKind kind) => setState(() {
+  void _setKind(TxKind kind) {
+    final String? locked = _editing == null ? null : kindLockReason(_editing!, kind);
+    if (locked != null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(locked)));
+      return;
+    }
+    _applyKind(kind);
+  }
+
+  void _applyKind(TxKind kind) => setState(() {
         if (kind == _kind) return;
         _kind = kind;
         _categoryId = null;
@@ -442,6 +454,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                       onSurface: true,
                                       labelOf: (k) => k == TxKind.transfer ? 'Pindah Saldo' : k.label,
                                       onChanged: _setKind,
+                                      isLocked: _editing == null ? null : (k) => kindLockReason(_editing!, k) != null,
                                     ),
                                   ],
                                 ),

@@ -49,6 +49,11 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] *(baru)* Budget per bulan: ubah target di bulan ini → bulan lalu (pil bulan ‹) tetap memakai target lamanya; bulan depan ikut target baru.
 - [x] *(baru)* Ikon di seluruh app sama dengan ikon garis di desain **dan tepat di tengah kotaknya** (navigasi bawah, kategori, dompet, menu Lainnya, tombol header).
 
+- [ ] *(baru)* Catat pengeluaran melebihi saldo dompet (mis. saldo GoPay Rp20rb, catat Rp25rb) → sheet "Saldo GoPay jadi minus":
+      **Tetap catat** → tersimpan; **Sesuaikan saldo** → isi saldo sebenarnya → tersimpan & saldo dompet = isian − nominal.
+      Pindah saldo dari dompet yang kurang juga ditanya. Dompet yang sudah minus tidak ditanya lagi.
+- [ ] *(baru)* Edit transaksi: Pengeluaran ↔ Pemasukan bisa diganti; tab **Pindah Saldo** redup → ketuk → snackbar penjelasan.
+      Edit Pindah saldo / transaksi dari tagihan atau berulang: tab lain redup & tidak bisa dipilih.
 ## 4. Lainnya (pengaturan)
 - [x] Nama panggilan berubah di sapaan Beranda.
 - [x] Dompet: tambah, urutkan (tahan & geser), arsipkan (hilang dari total), hapus dompet terpakai ditolak.
@@ -83,6 +88,7 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] Banner tidak menutupi navigasi bawah & tidak ada kotak kosong saat iklan gagal dimuat (mode pesawat).
 - [x] Mode pesawat: aplikasi tetap berfungsi penuh tanpa internet.
 
+- [ ] *(baru)* Banner iklan tidak bersentuhan dengan tombol **+**: ada jarak kosong di antara banner dan bar navigasi.
 ## 6b. Navigasi (baru)
 - [x] Tombol kembali HP di Laporan / Budget / Lainnya → pindah ke Beranda; di Beranda → keluar aplikasi.
       Di layar yang dibuka di atasnya (Riwayat, Detail, Dompet, dll.) kembali seperti biasa ke layar sebelumnya.

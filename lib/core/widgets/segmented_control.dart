@@ -13,6 +13,7 @@ class AppSegmentedControl<T> extends StatelessWidget {
     required this.onChanged,
     required this.labelOf,
     this.onSurface = false,
+    this.isLocked,
   });
 
   final List<T> options;
@@ -22,6 +23,10 @@ class AppSegmentedControl<T> extends StatelessWidget {
 
   /// Di atas latar `surface` (mis. layar Catat): wadah memakai warna chip.
   final bool onSurface;
+
+  /// Pilihan yang dikunci tampil redup; ketukan tetap diteruskan ke
+  /// [onChanged] supaya layar bisa menjelaskan alasannya.
+  final bool Function(T)? isLocked;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +63,11 @@ class AppSegmentedControl<T> extends StatelessWidget {
                       style: context.text.caption.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: o == selected ? c.ink : c.muted,
+                        color: o == selected
+                            ? c.ink
+                            : (isLocked?.call(o) ?? false)
+                                ? c.muted.withAlpha(0x66)
+                                : c.muted,
                       ),
                     ),
                   ),
