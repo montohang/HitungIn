@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
 import '../../settings/data/settings_dao.dart';
+import 'backup_codec.dart';
 
 /// Ringkasan isi cadangan, ditampilkan sebelum pengguna memulihkan.
 typedef BackupSummary = ({
@@ -65,6 +66,20 @@ class BackupService {
     );
   }
 
+  /// Buka lagi berkas terenkripsi dengan [password] dan pastikan isinya sama
+  /// dengan [original] (jumlah baris per tabel). Melempar [FormatException]
+  /// bila tidak cocok — dipanggil sebelum berkas disimpan.
+  Future<void> verifyEncrypted(Uint8List bytes, String password, Map<String, Object?> original) async {
+    final Map<String, Object?> back = await BackupCodec.decrypt(bytes, password);
+    final Map<String, Object?> a = _validate(original);
+    final Map<String, Object?> b = _validate(back);
+    for (final String t in a.keys) {
+      if ((a[t] as List<Object?>?)?.length != (b[t] as List<Object?>?)?.length) {
+        throw FormatException('Isi cadangan tidak cocok ($t).');
+      }
+    }
+  }
+
   /// MENGGANTI seluruh data dengan isi cadangan, dalam satu transaksi:
   /// kalau ada baris yang gagal, tidak ada yang berubah.
   Future<void> restore(Map<String, Object?> data) async {
@@ -102,6 +117,13 @@ class BackupService {
           mode: InsertMode.insertOrReplace,
         );
       });
+      // Data sekarang sama dengan isi cadangan ini → itulah cadangan terakhir.
+      final DateTime? createdAt = DateTime.tryParse('${data['createdAt']}');
+      if (createdAt != null) {
+        await db.into(db.settings).insertOnConflictUpdate(
+              SettingsCompanion.insert(key: SettingKeys.lastBackupAt, value: createdAt.toIso8601String()),
+            );
+      }
     });
   }
 

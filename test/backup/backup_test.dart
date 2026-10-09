@@ -97,11 +97,27 @@ void main() {
       final rec = (await target.recurringDao.watchAll().first).single;
       expect((rec.note, rec.nextRun, rec.anchorDay), ('Langganan', DateTime(2026, 11, 2), 2));
       expect(await target.settingsDao.read(SettingKeys.onboardingDone), 'true', reason: 'status perangkat tetap');
+      expect(await target.settingsDao.read(SettingKeys.lastBackupAt), DateTime(2026, 10, 4, 13).toIso8601String(),
+          reason: 'data = isi cadangan itu, jadi Beranda tidak menulis "belum ada backup"');
 
       // Data baru setelah pulih tetap bisa ditambah (id tidak bentrok).
       await target.walletsDao.add(name: 'OVO', type: WalletType.ewallet);
       await source.close();
       await target.close();
+    });
+
+    test('verifikasi sebelum disimpan: berkas cocok lolos, tidak cocok ditolak', () async {
+      final db = _db();
+      await _seed(db);
+      final service = BackupService(db);
+      final snap = await service.snapshot();
+      final bytes = await BackupCodec.encrypt(snap, 'rahasia123', iterations: 1000);
+      await service.verifyEncrypted(bytes, 'rahasia123', snap);
+
+      final other = await service.snapshot();
+      ((other['tables']! as Map)['transactions']! as List).clear();
+      await expectLater(service.verifyEncrypted(bytes, 'rahasia123', other), throwsFormatException);
+      await db.close();
     });
 
     test('cadangan lama (v1, tanpa transaksi berulang) tetap bisa dipulihkan', () async {

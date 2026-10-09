@@ -73,7 +73,15 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     setState(() => _backingUp = true);
     await _run(() async {
       final AppDatabase db = ref.read(appDatabaseProvider);
-      final Uint8List bytes = await BackupCodec.encrypt(await BackupService(db).snapshot(), password);
+      final BackupService service = BackupService(db);
+      final Map<String, Object?> snapshot = await service.snapshot();
+      final Uint8List bytes = await BackupCodec.encrypt(snapshot, password);
+      try {
+        await service.verifyEncrypted(bytes, password, snapshot);
+      } on Object {
+        if (mounted) _toast('Cadangan gagal diperiksa. Tidak ada yang disimpan — coba lagi.');
+        return;
+      }
       final Uri? saved = await withAutoLockPaused(
         ref,
         () => FilePicker.saveFile(

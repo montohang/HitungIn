@@ -71,6 +71,9 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
       huruf & nominal benar, catatan berisi `=` tidak dieksekusi.
 - [x] *(baru)* Backup: kartu status (Belum ada backup / Data aman / Sudah lama tidak backup, kapan terakhir), progres saat mencadangkan, "Backup selesai · ukuran" lalu "Backup lagi"; baris Password (ditanya tiap backup), Lokasi, Backup otomatis (PRO · segera); tombol Pulihkan dari file & Export CSV; kotak peringatan kata sandi.
 - [x] *(baru)* Dompet & Kategori: keterangan kecil menempel di bawah layar (bukan menempel ke kartu terakhir).
+- [ ] *(baru)* Buat backup → muncul "Cadangan tersimpan" (berkas sudah diperiksa ulang dengan kata sandinya sebelum disimpan).
+- [ ] *(baru)* Ganti HP: instal HitungIn di HP lain → Pulihkan dari berkas → Beranda menampilkan "backup <tanggal berkas>", bukan "belum ada backup";
+      Pro aktif lagi otomatis bila akun Play sama.
 
 ## 6. Iklan (versi gratis)
 - [x] Persetujuan iklan (UMP): **di Indonesia memang tidak muncul** — Google hanya menampilkannya di wilayah yang
