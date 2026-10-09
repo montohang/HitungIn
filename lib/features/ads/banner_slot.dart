@@ -10,6 +10,11 @@ import 'ad_ids.dart';
 class BannerSlot extends ConsumerStatefulWidget {
   const BannerSlot({super.key});
 
+  /// Jarak kosong di bawah banner. Tombol Catat (+) menonjol 14 px ke atas
+  /// bar navigasi; tanpa jarak ini ujung tombolnya menimpa iklan dan ketukan
+  /// bisa jatuh ke iklan (klik tak sengaja — dilarang kebijakan AdMob).
+  static const double navGap = 24;
+
   @override
   ConsumerState<BannerSlot> createState() => _BannerSlotState();
 }
@@ -65,14 +70,17 @@ class _BannerSlotState extends ConsumerState<BannerSlot> {
   Widget build(BuildContext context) {
     final BannerAd? ad = _ad;
     if (ad == null || !_loaded) return const SizedBox.shrink();
-    return Semantics(
-      label: 'Iklan',
-      child: ColoredBox(
-        color: context.colors.surface,
-        child: SizedBox(
-          width: ad.size.width.toDouble(),
-          height: ad.size.height.toDouble(),
-          child: AdWidget(ad: ad),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: BannerSlot.navGap),
+      child: Semantics(
+        label: 'Iklan',
+        child: ColoredBox(
+          color: context.colors.surface,
+          child: SizedBox(
+            width: ad.size.width.toDouble(),
+            height: ad.size.height.toDouble(),
+            child: AdWidget(ad: ad),
+          ),
         ),
       ),
     );
