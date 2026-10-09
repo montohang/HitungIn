@@ -51,6 +51,9 @@ class FakeBilling implements BillingGateway {
   int restores = 0;
   final List<PurchaseDetails> completed = [];
 
+  /// Hasil "pembelian yang dimiliki" dari Play; null = Play tidak bisa dipastikan.
+  OwnedPurchases? ownedResult = (purchased: <String>{}, pending: <String>{});
+
   void emit(List<PurchaseDetails> p) => _ctl.add(p);
 
   @override
@@ -73,6 +76,9 @@ class FakeBilling implements BillingGateway {
 
   @override
   Future<void> complete(PurchaseDetails purchase) async => completed.add(purchase);
+
+  @override
+  Future<OwnedPurchases?> owned() async => ownedResult;
 }
 
 class FakeAppIconService implements AppIconService {

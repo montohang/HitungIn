@@ -52,6 +52,8 @@ void main() {
     expect(find.textContaining('Beli Pro'), findsNothing);
     expect(app.env.billing.completed, hasLength(1));
 
+    // Google Play kini mencatat pembelian ini sebagai milik akun.
+    app.env.billing.ownedResult = (purchased: {proProductId}, pending: <String>{});
     final int restoresBefore = app.env.billing.restores;
     await app.tap('Pulihkan pembelian');
     expect(app.env.billing.restores, restoresBefore + 1);

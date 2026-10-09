@@ -86,15 +86,56 @@ class ProController extends Notifier<ProState> {
   }
 
   /// "Pulihkan pembelian" (mis. setelah instal ulang atau ganti HP).
+  /// [silent] = pemeriksaan otomatis saat aplikasi dibuka (tanpa pesan).
   Future<void> restore({bool silent = false}) async {
     if (!silent) state = state.copyWith(busy: true, clearError: true);
     try {
-      if (await _billing.isAvailable()) await _billing.restore();
+      if (!await _billing.isAvailable()) {
+        if (!silent) state = state.copyWith(error: 'Google Play tidak tersedia di perangkat ini.');
+        return;
+      }
+      await _billing.restore();
+      final bool? found = await syncWithPlay();
+      if (!silent && found == false && !state.pending) {
+        state = state.copyWith(error: 'Belum ada pembelian HitungIn Pro di akun Google Play ini.');
+      }
     } on Object {
       if (!silent) state = state.copyWith(error: 'Gagal menghubungi Google Play.');
     } finally {
       if (!silent) state = state.copyWith(busy: false);
     }
+  }
+
+  /// Samakan status Pro dengan daftar pembelian di Google Play: aktifkan bila
+  /// dimiliki, cabut bila sudah tidak ada (refund/dibatalkan). Bila Play tidak
+  /// bisa dipastikan (offline/error), status Pro yang tersimpan dibiarkan.
+  /// Mengembalikan true/false = Pro dimiliki/tidak, null = tidak diketahui.
+  Future<bool?> syncWithPlay() async {
+    final OwnedPurchases? owned = await _billing.owned();
+    if (owned == null) return null;
+    final EntitlementStore store = ref.read(entitlementStoreProvider);
+    if (owned.purchased.contains(proProductId)) {
+      if (!await store.isPro()) {
+        await store.grant(productId: proProductId, purchaseId: '', at: ref.read(clockProvider)());
+      }
+      state = state.copyWith(isPro: true, pending: false);
+      return true;
+    }
+    final bool pending = owned.pending.contains(proProductId);
+    final entitlement = await store.read();
+    // Mode Pro (uji) di build debug tidak punya pembelian di Play.
+    final bool debugGrant = kDebugMode && entitlement?.purchaseId == 'debug';
+    if (entitlement != null && !debugGrant) {
+      await store.revoke();
+      state = state.copyWith(
+        isPro: false,
+        pending: pending,
+        error: 'Pembelian HitungIn Pro tidak lagi tercatat di Google Play (mis. dana dikembalikan).',
+      );
+    } else if (pending != state.pending) {
+      state = state.copyWith(pending: pending);
+    }
+    return false;
   }
 
   /// "Mode Pro (uji)" di build debug: aktifkan/matikan Pro tanpa Google Play,

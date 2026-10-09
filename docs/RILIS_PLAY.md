@@ -95,5 +95,5 @@ lewat `--dart-define` (lihat `lib/features/ads/ad_ids.dart`) sebelum rilis produ
 - Beli Pro → dialog Play "Pesanan uji" → Pro aktif, iklan hilang.
 - Kartu uji *"Disetujui lalu ditolak"* / *"lambat"* → status pending ditangani.
 - Uninstall → instal lagi → **Pulihkan pembelian** → Pro aktif kembali.
-- Catatan: refund belum mencabut Pro di aplikasi (status Pro disimpan lokal dan hanya
-  ditambah, tidak dicek ulang). Perlu ditambahkan sebelum rilis produksi.
+- Refund (dengan cabut hak) → saat aplikasi dibuka, Pro dicabut (dicek ke daftar pembelian Play;
+  offline/error tidak mengubah status). Akun Play yang berbeda dari akun pembeli juga dianggap tidak punya Pro.

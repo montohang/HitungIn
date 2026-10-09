@@ -168,6 +168,51 @@ void main() {
       expect(state().busy, isFalse);
     });
 
+    test('refund: Play tidak lagi mencatat pembelian → Pro dicabut + pesan', () async {
+      await ctl().handle([_purchase(PurchaseStatus.purchased)]);
+      expect(state().isPro, isTrue);
+      billing.ownedResult = (purchased: <String>{}, pending: <String>{});
+      await ctl().restore(silent: true);
+      expect(state().isPro, isFalse);
+      expect(await EntitlementStore(mem).isPro(), isFalse);
+      expect(state().error, contains('tidak lagi tercatat'));
+    });
+
+    test('Play offline/error → status Pro tersimpan tidak diubah', () async {
+      await ctl().handle([_purchase(PurchaseStatus.purchased)]);
+      billing.ownedResult = null;
+      await ctl().restore(silent: true);
+      expect(state().isPro, isTrue);
+      expect(await EntitlementStore(mem).isPro(), isTrue);
+    });
+
+    test('instal ulang: Play mencatat pembelian → Pro aktif otomatis saat dibuka', () async {
+      billing.ownedResult = (purchased: {proProductId}, pending: <String>{});
+      await ctl().restore(silent: true);
+      expect(state().isPro, isTrue);
+      expect(await EntitlementStore(mem).isPro(), isTrue);
+    });
+
+    test('pembayaran masih tertunda di Play → menunggu, belum Pro', () async {
+      billing.ownedResult = (purchased: <String>{}, pending: {proProductId});
+      await ctl().restore(silent: true);
+      expect(state().isPro, isFalse);
+      expect(state().pending, isTrue);
+    });
+
+    test('Pulihkan tanpa pembelian → pesan jelas', () async {
+      await ctl().restore();
+      expect(state().isPro, isFalse);
+      expect(state().busy, isFalse);
+      expect(state().error, contains('Belum ada pembelian'));
+    });
+
+    test('Mode Pro (uji) debug tidak dicabut oleh pemeriksaan Play', () async {
+      await ctl().debugSetPro(true);
+      await ctl().restore(silent: true);
+      expect(state().isPro, isTrue);
+    });
+
     test('produk lain diabaikan', () async {
       await ctl().handle([_purchase(PurchaseStatus.purchased, product: 'produk_lain')]);
       expect(state().isPro, isFalse);

@@ -96,6 +96,12 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] Beli Pro (Pengujian internal, penguji lisensi) → dialog Google Play → sukses → banner hilang, batas gratis hilang, "HitungIn Pro aktif".
 - [ ] Bayar tertunda (metode "lambat" kartu uji) → "Menunggu pembayaran" → aktif otomatis setelah selesai.
 - [ ] Hapus & pasang ulang aplikasi → "Pulihkan pembelian" → Pro aktif lagi.
+- [ ] *(baru)* Hapus & pasang ulang → buka aplikasi (tanpa menekan apa pun) → Pro aktif sendiri setelah Play terhubung.
+- [ ] *(baru)* Refund pesanan uji di Play Console (Pengelolaan pesanan → Refund, centang **cabut hak**) → tutup & buka
+      aplikasi → Pro dicabut, iklan kembali, layar Pro menampilkan "tidak lagi tercatat di Google Play".
+      Catatan: bisa butuh beberapa menit sampai cache Play Store di HP diperbarui.
+- [ ] *(baru)* Mode pesawat → buka aplikasi → status Pro **tidak** berubah.
+- [ ] *(baru)* Akun tanpa pembelian → "Pulihkan pembelian" → pesan "Belum ada pembelian HitungIn Pro di akun Google Play ini".
 - [x] Laporan: filter dompet, tren 6/12 bulan.
 - [x] Transaksi berulang: jadwal mulai hari ini → langsung tercatat; ubah tanggal HP ke bulan depan → buka
       aplikasi → masukkan PIN → tercatat susulan + snackbar **setelah** layar kunci terbuka.
