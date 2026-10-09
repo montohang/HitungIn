@@ -70,6 +70,13 @@ class WalletsDao extends DatabaseAccessor<AppDatabase> with _$WalletsDaoMixin {
 
   Future<void> edit(Wallet wallet) => update(wallets).replace(wallet);
 
+  /// Samakan saldo dompet dengan [target] ("Sesuaikan saldo"): saldo awalnya
+  /// digeser, riwayat transaksi tidak diubah.
+  Future<void> setBalance(int walletId, int target) async {
+    final WalletBalance wb = (await watchBalances(includeArchived: true).first).firstWhere((b) => b.wallet.id == walletId);
+    await edit(wb.wallet.copyWith(initialBalance: wb.wallet.initialBalance + (target - wb.balance)));
+  }
+
   Future<void> setArchived(int id, bool archived) =>
       (update(wallets)..where((w) => w.id.equals(id))).write(WalletsCompanion(archived: Value(archived)));
 

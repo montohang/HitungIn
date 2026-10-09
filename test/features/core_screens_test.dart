@@ -134,6 +134,11 @@ void main() {
     expect(find.text('Catat transaksi'), findsOneWidget);
     await tester.tap(find.text('Simpan · Rp35.000'));
     await tester.pumpAndSettle();
+    // Saldo Tunai Rp50.000 − 35.000 − 35.000 → minus: ditanya dulu, tidak diblokir.
+    expect(find.text('Saldo Tunai jadi minus'), findsOneWidget);
+    expect(find.textContaining('menjadi −Rp20.000'), findsOneWidget);
+    await tester.tap(find.text('Tetap catat'));
+    await tester.pumpAndSettle();
     expect(await app.run((db) => db.select(db.transactions).get()), hasLength(2));
 
     await tester.pump(const Duration(seconds: 5));

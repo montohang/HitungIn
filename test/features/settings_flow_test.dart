@@ -125,6 +125,9 @@ void main() {
     // Nama sub-kategori dikenali Catat cepat & tersimpan di transaksi.
     await app.push(tester, '/catat?text=vaksin%20150rb');
     await app.tap('Simpan · Rp150.000');
+    // Saldo Tunai (Rp50.000, sudah terpakai) jadi minus → ditanya dulu, tidak diblokir.
+    expect(find.text('Saldo Tunai jadi minus'), findsOneWidget);
+    await app.tap('Tetap catat');
     final tx2 = (await app.run((db) => db.transactionsDao.watchRecent().first)).firstWhere((d) => d.tx.amount == 150000);
     expect((tx2.category!.name, tx2.tx.sub), ('Kucing', 'Vaksin'));
 
