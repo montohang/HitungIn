@@ -70,6 +70,28 @@ class QuickEntryParser {
     'miliar': 1000000000,
     'milyar': 1000000000,
   };
+  /// Nominal sehari-hari tanpa angka. Istilah yang artinya beda antar
+  /// daerah (cepek, gocap) sengaja tidak dipakai.
+  static const Map<String, int> _wordAmounts = {
+    'seceng': 1000,
+    'goceng': 5000,
+    'ceban': 10000,
+    'goban': 50000,
+    'seribu': 1000,
+    'sejuta': 1000000,
+  };
+
+  /// Nama lain dompet → kata yang dicari di nama dompet.
+  static const Map<String, String> _walletAliases = {
+    'gpay': 'gopay',
+    'spay': 'shopeepay',
+    'livin': 'mandiri',
+    'brimo': 'bri',
+  };
+
+  /// Cara bayar, bukan dompet: dibuang dari catatan, dompet tidak berubah.
+  static const Set<String> _payMethods = {'qris'};
+
   static final RegExp _amountRe = RegExp(
     r'^([+\-−])?(?:rp\.?)?(\d+(?:[.,]\d+)*)(k|rb|ribu|jt|juta|m|miliar|milyar)?$',
   );
@@ -130,6 +152,14 @@ class QuickEntryParser {
       if (w != null) {
         walletHits.add((i, w));
         used[i] = true;
+      }
+    }
+
+    // "bayar pakai qris" → cara bayar, bukan catatan.
+    for (int i = 0; i < low.length; i++) {
+      if (!used[i] && _payMethods.contains(low[i])) {
+        used[i] = true;
+        if (i > 0 && _connectors.contains(low[i - 1])) used[i - 1] = true;
       }
     }
 
@@ -218,8 +248,20 @@ class QuickEntryParser {
 
   /// Membaca nominal di token [i]; satuan boleh di token berikutnya ("25 rb").
   _AmountHit? _readAmount(List<String> low, int i) {
+    final int? word = _wordAmounts[low[i]];
+    if (word != null) return _AmountHit(start: i, length: 1, value: word, strong: true);
+    if (low[i] == 'setengah' && i + 1 < low.length && (low[i + 1] == 'juta' || low[i + 1] == 'jt')) {
+      return _AmountHit(start: i, length: 2, value: 500000, strong: true);
+    }
     final RegExpMatch? m = _amountRe.firstMatch(low[i]);
     if (m == null) return null;
+    // "2 ceban" = Rp20.000.
+    if (m.group(3) == null && i + 1 < low.length && _wordAmounts.containsKey(low[i + 1])) {
+      final int? n = int.tryParse(m.group(2)!);
+      if (n != null && n > 0 && n < 1000) {
+        return _AmountHit(start: i, length: 2, value: n * _wordAmounts[low[i + 1]]!, strong: true, sign: m.group(1));
+      }
+    }
     String? suffix = m.group(3);
     int length = 1;
     if (suffix == null && i + 1 < low.length && _multipliers.containsKey(low[i + 1])) {
@@ -257,6 +299,11 @@ class QuickEntryParser {
     final List<Wallet> exact = [for (final w in _wallets) if (_norm(w.name) == token) w];
     if (exact.length == 1) return exact.single;
     if (exactOnly) return null;
+    final String? alias = _walletAliases[token];
+    if (alias != null) {
+      final List<Wallet> hit = [for (final w in _wallets) if (_norm(w.name).contains(alias)) w];
+      if (hit.length == 1) return hit.single;
+    }
     if (_cashAliases.contains(token)) {
       final List<Wallet> cash = [for (final w in _wallets) if (w.type == WalletType.tunai) w];
       if (cash.isNotEmpty) return cash.first;

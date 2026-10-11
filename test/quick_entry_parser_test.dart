@@ -206,5 +206,43 @@ void main() {
       expect((e.categoryId, e.sub), (catId('Makan & Minum', TxKind.pengeluaran), ''));
     });
   });
-}
 
+  group('P1-3: bahasa gaul nominal & alias dompet', () {
+    final more = QuickEntryParser(wallets: [
+      ...wallets,
+      _w(5, 'ShopeePay', WalletType.ewallet),
+      _w(6, 'Mandiri', WalletType.bank),
+    ], categories: categories);
+    QuickEntry p2(String s) => more.parse(s, now: now);
+
+    test('seceng, goceng, ceban, goban, seribu, sejuta, setengah juta', () {
+      expect(parse('parkir seceng').amount, 1000);
+      expect(parse('es teh goceng').amount, 5000);
+      expect(parse('bakso ceban').amount, 10000);
+      expect(parse('makan goban').amount, 50000);
+      expect(parse('fotokopi seribu').amount, 1000);
+      expect(parse('servis sejuta').amount, 1000000);
+      expect(parse('kos setengah juta').amount, 500000);
+      expect(parse('bakso ceban').note, 'Bakso');
+    });
+
+    test('"2 ceban" dikalikan', () {
+      final e = parse('makan 2 ceban gopay');
+      expect((e.amount, e.walletId, e.note), (20000, 2, 'Makan'));
+    });
+
+    test('alias e-wallet & bank; dompet yang tidak ada diabaikan', () {
+      expect(p2('kopi 25rb spay').walletId, 5);
+      expect(p2('kopi 25rb gpay').walletId, 2);
+      expect(p2('token listrik 100rb livin').walletId, 6);
+      expect(parse('kopi 25rb spay').walletId, isNull, reason: 'tidak ada dompet ShopeePay');
+      expect(p2('belanja shopee 150rb').walletId, isNull, reason: '"shopee" = tempat belanja, bukan dompet');
+    });
+
+    test('qris: tidak memilih dompet & tidak masuk catatan', () {
+      final e = parse('kopi 18rb pakai qris');
+      expect((e.amount, e.walletId, e.note), (18000, null, 'Kopi'));
+      expect(parse('kopi 18rb qris gopay').walletId, 2);
+    });
+  });
+}
