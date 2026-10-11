@@ -9,6 +9,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/db/app_database.dart';
 import '../../core/db/providers.dart';
+import '../../core/platform/launch_routes.dart';
 import '../security/app_gate.dart';
 import 'data/bill_reminders.dart';
 
@@ -24,6 +25,14 @@ final pendingNotificationRouteProvider = StateProvider<String?>((ref) => null);
 
 /// Penerima ketukan notifikasi. Hidup sepanjang aplikasi (bukan milik shell,
 /// yang dibuang setiap kali aplikasi terkunci).
+/// Route dari widget/tile/pintasan ikon (P1-2), lewat jalur yang sama
+/// dengan ketukan notifikasi: dibuka setelah layar kunci lewat.
+final launchRouteHandlerProvider = Provider<void Function(String route)>((ref) {
+  return (String route) {
+    if (isAllowedLaunchRoute(route)) ref.read(pendingNotificationRouteProvider.notifier).state = route;
+  };
+});
+
 final notificationTapHandlerProvider = Provider<void Function(String payload)>((ref) {
   return (String payload) {
     final String? route = routeForNotification(payload);

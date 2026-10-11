@@ -1,13 +1,37 @@
 package com.capt.hitungin
 
 import android.content.ComponentName
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Bundle
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 // FragmentActivity wajib untuk dialog sidik jari (local_auth).
 class MainActivity : FlutterFragmentActivity() {
+
+    companion object {
+        /** Route yang dibuka dari widget/tile/pintasan (lib/core/platform/launch_routes.dart). */
+        const val EXTRA_ROUTE = "hitungin_route"
+    }
+
+    private var pendingRoute: String? = null
+    private var launchChannel: MethodChannel? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        pendingRoute = intent?.getStringExtra(EXTRA_ROUTE)
+        super.onCreate(savedInstanceState)
+        AppShortcuts.publish(this, enabledLauncher())
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val route = intent.getStringExtra(EXTRA_ROUTE) ?: return
+        val channel = launchChannel
+        if (channel != null) channel.invokeMethod("route", route) else pendingRoute = route
+    }
 
     /** Kunci varian (sama dengan AppIconVariant.key di Dart) → komponen peluncur. */
     private val iconComponents = linkedMapOf(
@@ -19,6 +43,25 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        val messenger = flutterEngine.dartExecutor.binaryMessenger
+        launchChannel = MethodChannel(messenger, "com.capt.hitungin/launch").apply {
+            setMethodCallHandler { call, result ->
+                if (call.method == "initialRoute") {
+                    result.success(pendingRoute)
+                    pendingRoute = null
+                } else {
+                    result.notImplemented()
+                }
+            }
+        }
+        MethodChannel(messenger, "com.capt.hitungin/widget").setMethodCallHandler { call, result ->
+            if (call.method == "update") {
+                HomeWidgets.save(this, call.argument<String>("json") ?: "")
+                result.success(null)
+            } else {
+                result.notImplemented()
+            }
+        }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.capt.hitungin/app_icon").setMethodCallHandler { call, result ->
             when (call.method) {
                 "get" -> result.success(currentIcon())
@@ -51,6 +94,9 @@ class MainActivity : FlutterFragmentActivity() {
     /** Varian yang dipilih tapi belum diterapkan (menunggu aplikasi ke latar). */
     private var pendingIcon: String? = null
 
+    private fun enabledLauncher(): ComponentName? =
+        iconComponents.values.firstOrNull { isEnabled(it) }?.let { ComponentName(this, it) }
+
     private fun appliedIcon(): String =
         iconComponents.entries.firstOrNull { isEnabled(it.value) }?.key ?: "standar"
 
@@ -80,5 +126,7 @@ class MainActivity : FlutterFragmentActivity() {
                 PackageManager.DONT_KILL_APP,
             )
         }
+        // Pintasan ikut pindah ke peluncur yang baru.
+        AppShortcuts.publish(this, ComponentName(this, iconComponents.getValue(key)))
     }
 }

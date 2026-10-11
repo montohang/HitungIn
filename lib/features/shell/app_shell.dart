@@ -20,6 +20,8 @@ import '../ads/banner_slot.dart';
 import '../premium/pro_controller.dart';
 import '../security/app_gate.dart';
 import '../../core/widgets/hi_icons.dart';
+import '../../core/platform/launch_routes.dart';
+import '../home/widget_sync.dart';
 
 /// Kerangka 4 tab + tombol Catat di tengah. Banner iklan (versi gratis)
 /// tampil di atas navigasi pada tab yang diizinkan [AdPolicy].
@@ -93,7 +95,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       final String? route = ref.read(pendingNotificationRouteProvider);
       if (route == null) return;
       ref.read(pendingNotificationRouteProvider.notifier).state = null;
-      context.push(route);
+      route == Routes.home ? context.go(route) : context.push(route);
     });
   }
 
@@ -114,6 +116,8 @@ class _AppShellState extends ConsumerState<AppShell> {
     Future.microtask(_openPendingNotification);
     Future.microtask(() async {
       await ref.read(reminderSchedulerProvider).init(onTap: ref.read(notificationTapHandlerProvider));
+      await LaunchRoutes.init(ref.read(launchRouteHandlerProvider));
+      if (mounted) await HomeWidgetSync.push(ref.read(widgetSnapshotProvider));
       _scheduleReminderSync();
     });
     // Shell hanya tampil setelah onboarding & buka kunci, jadi dialog
@@ -144,6 +148,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         _openPendingNotification();
       }
     });
+    ref.listen(widgetSnapshotProvider, (_, next) => HomeWidgetSync.push(next));
     ref.listen(pendingNotificationRouteProvider, (_, next) {
       if (next != null) _openPendingNotification();
     });

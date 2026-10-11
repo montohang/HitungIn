@@ -65,6 +65,13 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [ ] *(P1)* **Sekali ketuk**: catat transaksi yang sama (catatan, kategori, dompet, nominal) 3× → chip muncul di bawah Catat cepat.
       Ketuk chip → langsung tercatat hari ini + "… dicatat · Urungkan" (Urungkan menghapusnya). Tekan lama → Ubah dulu / Sembunyikan.
 - [ ] *(P1)* Detail transaksi → **Jadikan favorit** → chip langsung muncul paling depan; ketuk lagi → dilepas. Pindah saldo tidak punya tombol ini.
+- [ ] *(P1)* **Widget**: tahan layar utama → Widget → HitungIn: "Jatah hari ini" (4×2) & "Catat" (2×1).
+      Widget sedang menampilkan jatah, sisa, bar, dan 3 favorit; catat transaksi → widget berubah dalam beberapa detik.
+      Tombol mata (sembunyikan saldo) → widget menampilkan Rp ••••. Besok sebelum aplikasi dibuka → "Buka HitungIn untuk memperbarui jatah".
+- [ ] *(P1)* Ketuk widget/favorit/tombol + saat aplikasi terkunci → PIN → langsung Catat (favorit: form terisi, tinggal Simpan); Back → Beranda.
+- [ ] *(P1)* **Tile Quick Settings**: edit panel Quick Settings → tambah "Catat · HitungIn" → ketuk → panel tertutup, layar Catat terbuka.
+- [ ] *(P1)* **Pintasan ikon**: tekan lama ikon HitungIn → Catat pengeluaran / Catat pemasukan (tab Pemasukan) / Pindah saldo / Riwayat.
+      Ganti ikon alternatif (Pro) → pintasan tetap muncul di ikon yang baru.
 ## 4. Lainnya (pengaturan)
 - [x] Nama panggilan berubah di sapaan Beranda.
 - [x] Dompet: tambah, urutkan (tahan & geser), arsipkan (hilang dari total), hapus dompet terpakai ditolak.

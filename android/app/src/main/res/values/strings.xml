@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_jatah_label">Jatah hari ini</string>
+    <string name="widget_jatah_desc">Jatah hari ini, tombol Catat, dan transaksi favorit</string>
+    <string name="widget_catat_desc">Catat transaksi sekali ketuk</string>
+    <string name="widget_catat">Catat</string>
+    <string name="widget_stale">Buka HitungIn untuk memperbarui jatah</string>
+    <string name="tile_catat">Catat · HitungIn</string>
+    <string name="shortcut_out">Catat pengeluaran</string>
+    <string name="shortcut_in">Catat pemasukan</string>
+    <string name="shortcut_tf">Pindah saldo</string>
+    <string name="shortcut_hist">Riwayat</string>
+</resources>

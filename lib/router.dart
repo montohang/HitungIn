@@ -71,6 +71,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             editId: int.tryParse(state.uri.queryParameters['id'] ?? ''),
             copyId: int.tryParse(state.uri.queryParameters['copy'] ?? ''),
             transfer: state.uri.queryParameters['kind'] == 'transfer',
+            income: state.uri.queryParameters['kind'] == 'pemasukan',
           ),
         ),
       ),

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Warna widget layar utama & pintasan (mode terang). -->
+<resources>
+    <color name="widget_bg">#F2FFFFFF</color>
+    <color name="widget_ink">#17152B</color>
+    <color name="widget_muted">#6B6782</color>
+    <color name="widget_chip">#F1F0F6</color>
+    <color name="widget_track">#EFEDF5</color>
+    <color name="widget_accent">#5B4BDB</color>
+    <color name="widget_warn">#B45309</color>
+</resources>

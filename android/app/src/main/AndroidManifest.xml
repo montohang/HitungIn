@@ -97,6 +97,31 @@
             </intent-filter>
         </activity-alias>
 
+        <!-- Widget layar utama & tile Quick Settings (P1-2). Membuka MainActivity
+             dengan extra hitungin_route; data widget = ringkasan kecil dari aplikasi. -->
+        <receiver android:name=".JatahWidget" android:exported="false" android:label="@string/widget_jatah_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_jatah_info" />
+        </receiver>
+        <receiver android:name=".CatatWidget" android:exported="false" android:label="@string/widget_catat">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_catat_info" />
+        </receiver>
+        <service
+            android:name=".CatatTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_catat"
+            android:label="@string/tile_catat"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
         <!-- flutter_local_notifications: tampilkan & jadwalkan ulang pengingat tagihan. -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">

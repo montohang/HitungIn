@@ -29,7 +29,7 @@ import '../../core/widgets/hi_icons.dart';
 /// Catat atau ubah transaksi. Kolom "Catat cepat" di atas membaca kalimat
 /// bebas ("kopi 25rb gopay") dan mengisi form di bawahnya.
 class CatatScreen extends ConsumerStatefulWidget {
-  const CatatScreen({super.key, this.initialText, this.editId, this.copyId, this.transfer = false});
+  const CatatScreen({super.key, this.initialText, this.editId, this.copyId, this.transfer = false, this.income = false});
 
   final String? initialText;
 
@@ -41,6 +41,9 @@ class CatatScreen extends ConsumerStatefulWidget {
 
   /// Langsung ke Pindah Saldo (tombol di layar Dompet).
   final bool transfer;
+
+  /// Mulai di tab Pemasukan (pintasan ikon "Catat pemasukan").
+  final bool income;
 
   @override
   ConsumerState<CatatScreen> createState() => _CatatScreenState();
@@ -108,6 +111,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
         _note.text = editing.note;
       }
       if (widget.transfer && editing == null && copy == null) _kind = TxKind.transfer;
+      if (widget.income && editing == null && copy == null) _kind = TxKind.pemasukan;
       if (copy != null) {
         _kind = copy.kind;
         _amount = copy.amount;

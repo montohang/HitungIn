@@ -52,6 +52,9 @@ abstract final class DateFmt {
   /// Kunci bulan untuk URL: `2026-10`.
   static String monthKey(DateTime d) => '${d.year}-${_two(d.month)}';
 
+  /// `2026-10-19` (widget layar utama membandingkannya dengan tanggal HP).
+  static String dayKey(DateTime d) => '${d.year}-${_two(d.month)}-${_two(d.day)}';
+
   static DateTime? parseMonthKey(String? s) {
     final RegExpMatch? m = RegExp(r'^(\d{4})-(\d{2})$').firstMatch(s ?? '');
     if (m == null) return null;

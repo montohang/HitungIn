@@ -18,6 +18,25 @@ import '../data/allowance.dart';
 
 String _dayMonth(DateTime d) => '${d.day} ${DateFmt.monthsShort[d.month - 1]}';
 
+/// Angka besar kartu/widget Jatah.
+String allowanceAmount(Allowance a, {required bool hidden}) => hidden
+    ? 'Rp ••••'
+    : a.state == AllowanceState.kosong
+        ? '—'
+        : Rupiah.format(a.jatah);
+
+/// Baris kecil di bawah angka Jatah (Beranda & widget).
+String allowanceLine(Allowance a, DateTime now, {required bool hidden}) => switch (a.state) {
+      _ when hidden => 'Ketuk mata untuk menampilkan',
+      AllowanceState.kosong => 'Isi saldo dompet untuk melihat jatah harianmu',
+      AllowanceState.habis => 'Tagihan sudah menutup saldo sampai gajian',
+      AllowanceState.lewat => a.tomorrow == null
+          ? 'Lewat ${Rupiah.compact(-a.remaining)} hari ini'
+          : 'Lewat ${Rupiah.compact(-a.remaining)} — jatah besok jadi ${Rupiah.format(a.tomorrow!)}',
+      _ => 'Sisa ${Rupiah.format(a.remaining)} · '
+          '${a.useBudget ? 'budget s.d. ${_dayMonth(DateTime(now.year, now.month + 1, 0))}' : 'gajian ${a.daysToPayday} hari lagi'}',
+    };
+
 /// Kartu "Jatah hari ini" di Beranda (P1-1, Claude Design › Beranda).
 class AllowanceCard extends ConsumerWidget {
   const AllowanceCard({super.key, required this.allowance, required this.hidden, required this.now});
@@ -39,21 +58,8 @@ class AllowanceCard extends ConsumerWidget {
       AllowanceState.lewat => 'Lewat',
       _ => 'Menipis',
     };
-    final String line = switch (a.state) {
-      _ when hidden => 'Ketuk mata untuk menampilkan',
-      AllowanceState.kosong => 'Isi saldo dompet untuk melihat jatah harianmu',
-      AllowanceState.habis => 'Tagihan sudah menutup saldo sampai gajian',
-      AllowanceState.lewat => a.tomorrow == null
-          ? 'Lewat ${Rupiah.compact(-a.remaining)} hari ini'
-          : 'Lewat ${Rupiah.compact(-a.remaining)} — jatah besok jadi ${Rupiah.format(a.tomorrow!)}',
-      _ => 'Sisa ${Rupiah.format(a.remaining)} · '
-          '${a.useBudget ? 'budget s.d. ${_dayMonth(DateTime(now.year, now.month + 1, 0))}' : 'gajian ${a.daysToPayday} hari lagi'}',
-    };
-    final String amount = hidden
-        ? 'Rp ••••'
-        : a.state == AllowanceState.kosong
-            ? '—'
-            : Rupiah.format(a.jatah);
+    final String line = allowanceLine(a, now, hidden: hidden);
+    final String amount = allowanceAmount(a, hidden: hidden);
     return Pressable.card(
       onTap: () => a.state == AllowanceState.kosong ? context.push(Routes.dompet) : showAllowanceDetails(context, ref, a, now),
       semanticLabel: 'Jatah hari ini $amount. $line',
