@@ -22,10 +22,10 @@ object AppShortcuts {
                 .setLongLabel(label)
                 .setIcon(Icon.createWithResource(context, icon))
                 .setIntent(
-                    Intent(context, MainActivity::class.java).apply {
+                    Intent(context, RouteActivity::class.java).apply {
                         action = Intent.ACTION_VIEW
                         putExtra(MainActivity.EXTRA_ROUTE, route)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     },
                 )
                 .apply { if (launcher != null) setActivity(launcher) }

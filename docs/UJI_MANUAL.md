@@ -54,24 +54,25 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
       Pindah saldo dari dompet yang kurang juga ditanya. Dompet yang sudah minus tidak ditanya lagi.
 - [ ] *(baru)* Edit transaksi: Pengeluaran ↔ Pemasukan bisa diganti; tab **Pindah Saldo** redup → ketuk → snackbar penjelasan.
       Edit Pindah saldo / transaksi dari tagihan atau berulang: tab lain redup & tidak bisa dipilih.
-- [ ] *(P1)* **Jatah hari ini** di Beranda (di bawah Total saldo): angka = (saldo − tagihan & transaksi berulang sampai gajian) ÷ sisa hari,
+- [x] *(P1)* **Jatah hari ini** di Beranda (di bawah Total saldo): angka = (saldo − tagihan & transaksi berulang sampai gajian) ÷ sisa hari,
       atau sisa budget bulan ini bila lebih kecil. Catat pengeluaran → jatah tetap, hanya "Sisa" yang turun; lewat → "Lewat … — jatah besok jadi …".
 - [ ] *(P1)* Ketuk kartu → "Dari mana angka ini?" (rincian, hitungan pembanding) → Ubah tanggal gajian → pilih tanggal → angka & "gajian N hari lagi" berubah.
       Saran tanggal muncul bila ada transaksi berulang pemasukan berkategori Gaji.
 - [ ] *(P1)* Dompet › Ubah dompet → matikan "Ikut dihitung di jatah harian" → dompet itu bertuliskan "tidak dihitung di jatah" dan saldonya tidak ikut jatah.
 - [ ] *(P1)* Tombol mata menyamarkan jatah; besok (atau ubah tanggal HP) jatah dihitung ulang tanpa menutup aplikasi.
-- [ ] *(P1)* Catat cepat: "parkir seceng", "es teh goceng", "bakso ceban", "makan goban", "2 ceban", "sejuta", "setengah juta" → nominal benar;
+- [x] *(P1)* Catat cepat: "parkir seceng", "es teh goceng", "bakso ceban", "makan goban", "2 ceban", "sejuta", "setengah juta" → nominal benar;
       "kopi 25rb spay/gpay/livin/brimo" memilih dompet yang cocok (bila ada); "kopi 18rb pakai qris" tidak memilih dompet & "qris" tidak masuk catatan.
-- [ ] *(P1)* **Sekali ketuk**: catat transaksi yang sama (catatan, kategori, dompet, nominal) 3× → chip muncul di bawah Catat cepat.
+- [x] *(P1)* **Sekali ketuk**: catat transaksi yang sama (catatan, kategori, dompet, nominal) 3× → chip muncul di bawah Catat cepat.
       Ketuk chip → langsung tercatat hari ini + "… dicatat · Urungkan" (Urungkan menghapusnya). Tekan lama → Ubah dulu / Sembunyikan.
 - [ ] *(P1)* Detail transaksi → **Jadikan favorit** → chip langsung muncul paling depan; ketuk lagi → dilepas. Pindah saldo tidak punya tombol ini.
-- [ ] *(P1)* **Widget**: tahan layar utama → Widget → HitungIn: "Jatah hari ini" (4×2) & "Catat" (2×1).
+- [x] *(P1)* **Widget**: tahan layar utama → Widget → HitungIn: "Jatah hari ini" (4×2) & "Catat" (2×1).
       Widget sedang menampilkan jatah, sisa, bar, dan 3 favorit; catat transaksi → widget berubah dalam beberapa detik.
       Tombol mata (sembunyikan saldo) → widget menampilkan Rp ••••. Besok sebelum aplikasi dibuka → "Buka HitungIn untuk memperbarui jatah".
-- [ ] *(P1)* Ketuk widget/favorit/tombol + saat aplikasi terkunci → PIN → langsung Catat (favorit: form terisi, tinggal Simpan); Back → Beranda.
-- [ ] *(P1)* **Tile Quick Settings**: edit panel Quick Settings → tambah "Catat · HitungIn" → ketuk → panel tertutup, layar Catat terbuka.
-- [ ] *(P1)* **Pintasan ikon**: tekan lama ikon HitungIn → Catat pengeluaran / Catat pemasukan (tab Pemasukan) / Pindah saldo / Riwayat.
-      Ganti ikon alternatif (Pro) → pintasan tetap muncul di ikon yang baru.
+- [x] *(P1)* Ketuk widget/favorit/tombol + saat aplikasi terkunci → PIN → langsung Catat (favorit: form terisi, tinggal Simpan); Back → Beranda.
+- [x] *(P1)* **Tile Quick Settings**: edit panel Quick Settings → tambah "Catat · HitungIn" → ketuk → panel tertutup, layar Catat terbuka.
+- [x] *(P1)* **Pintasan ikon**: tekan lama ikon HitungIn → Catat pengeluaran / Catat pemasukan (tab Pemasukan) / Pindah saldo / Riwayat.
+      Ganti ikon alternatif (Pro) → pintasan tetap muncul di ikon yang baru (belum diuji: butuh Pro).
+- [x] *(P1)* Widget/tile/pintasan saat aplikasi sedang terbuka → TIDAK membuat salinan kedua di Recents (satu task).
 ## 4. Lainnya (pengaturan)
 - [x] Nama panggilan berubah di sapaan Beranda.
 - [x] Dompet: tambah, urutkan (tahan & geser), arsipkan (hilang dari total), hapus dompet terpakai ditolak.

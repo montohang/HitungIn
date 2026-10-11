@@ -60,9 +60,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- Perantara widget/tile/pintasan (lihat Entry.kt): tidak tampil di Recents. -->
+        <activity
+            android:name=".RouteActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity-alias
             android:name=".IconGelap"
-            android:targetActivity=".MainActivity"
+            android:targetActivity=".LauncherActivity"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_gelap"
@@ -74,7 +82,7 @@
         </activity-alias>
         <activity-alias
             android:name=".IconEmas"
-            android:targetActivity=".MainActivity"
+            android:targetActivity=".LauncherActivity"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_emas"
@@ -86,7 +94,7 @@
         </activity-alias>
         <activity-alias
             android:name=".IconTerang"
-            android:targetActivity=".MainActivity"
+            android:targetActivity=".LauncherActivity"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_terang"

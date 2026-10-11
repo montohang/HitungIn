@@ -14,13 +14,29 @@ class MainActivity : FlutterFragmentActivity() {
     companion object {
         /** Route yang dibuka dari widget/tile/pintasan (lib/core/platform/launch_routes.dart). */
         const val EXTRA_ROUTE = "hitungin_route"
+
+        private var current: java.lang.ref.WeakReference<MainActivity>? = null
+        private var queuedRoute: String? = null
+
+        /** Kirim route ke instans yang sedang berjalan (dari [Entry]). */
+        fun deliver(route: String) {
+            val activity = current?.get()
+            if (activity != null) activity.deliverRoute(route) else queuedRoute = route
+        }
+    }
+
+    private fun deliverRoute(route: String) {
+        val channel = launchChannel
+        if (channel != null) channel.invokeMethod("route", route) else pendingRoute = route
     }
 
     private var pendingRoute: String? = null
     private var launchChannel: MethodChannel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        pendingRoute = intent?.getStringExtra(EXTRA_ROUTE)
+        pendingRoute = intent?.getStringExtra(EXTRA_ROUTE) ?: queuedRoute
+        queuedRoute = null
+        current = java.lang.ref.WeakReference(this)
         super.onCreate(savedInstanceState)
         AppShortcuts.publish(this, enabledLauncher())
     }
@@ -29,8 +45,12 @@ class MainActivity : FlutterFragmentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         val route = intent.getStringExtra(EXTRA_ROUTE) ?: return
-        val channel = launchChannel
-        if (channel != null) channel.invokeMethod("route", route) else pendingRoute = route
+        deliverRoute(route)
+    }
+
+    override fun onDestroy() {
+        if (current?.get() === this) current = null
+        super.onDestroy()
     }
 
     /** Kunci varian (sama dengan AppIconVariant.key di Dart) → komponen peluncur. */

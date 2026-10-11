@@ -1,7 +1,6 @@
 package com.capt.hitungin
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 
 /**
@@ -13,10 +12,8 @@ import android.os.Bundle
 class LauncherActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
         // Tanpa animasi: tema peluncur = splash yang sama dengan MainActivity.
-        @Suppress("DEPRECATION")
-        overridePendingTransition(0, 0)
+        // Bila HitungIn sudah berjalan (mis. dibuka dari widget), task itu yang dipakai.
+        Entry.open(this, null)
     }
 }

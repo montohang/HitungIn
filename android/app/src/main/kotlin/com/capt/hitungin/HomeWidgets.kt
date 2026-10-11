@@ -40,10 +40,10 @@ object HomeWidgets {
 
     /** Buka aplikasi di [route] (lewat layar PIN bila terkunci). */
     fun launch(context: Context, route: String, requestCode: Int): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java).apply {
+        val intent = Intent(context, RouteActivity::class.java).apply {
             action = "com.capt.hitungin.OPEN.$requestCode"
             putExtra(MainActivity.EXTRA_ROUTE, route)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         return PendingIntent.getActivity(
             context, requestCode, intent,

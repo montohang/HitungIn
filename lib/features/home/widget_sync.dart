@@ -32,7 +32,11 @@ Map<String, Object?> buildWidgetSnapshot({
     'date': DateFmt.dayKey(now),
     'hidden': hidden,
     'jatah': a == null ? '—' : allowanceAmount(a, hidden: hidden),
-    'line': a == null ? 'Buka HitungIn untuk melihat jatah' : allowanceLine(a, now, hidden: hidden),
+    'line': hidden
+        ? 'Saldo disembunyikan'
+        : a == null
+            ? 'Buka HitungIn untuk melihat jatah'
+            : allowanceLine(a, now, hidden: false),
     'progress': a == null || a.jatah == 0 || hidden ? 0 : (a.spentToday * 100 ~/ a.jatah).clamp(0, 100),
     'warn': warn && !hidden,
     'favs': [

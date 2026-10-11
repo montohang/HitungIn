@@ -89,7 +89,7 @@ class AllowanceCard extends ConsumerWidget {
             if (a.state != AllowanceState.kosong) ...[
               const SizedBox(height: AppSpace.x8),
               AppProgressBar(
-                value: a.state == AllowanceState.habis ? 1 : (a.jatah == 0 ? 0 : a.spentToday / a.jatah),
+                value: hidden ? 0 : (a.state == AllowanceState.habis ? 1 : (a.jatah == 0 ? 0 : a.spentToday / a.jatah)),
                 height: 8,
                 autoLevel: false,
                 color: warn ? c.warnInk : c.accent,

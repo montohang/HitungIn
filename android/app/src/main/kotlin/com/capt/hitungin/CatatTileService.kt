@@ -16,9 +16,9 @@ class CatatTileService : TileService() {
     }
 
     override fun onClick() {
-        val intent = Intent(this, MainActivity::class.java).apply {
+        val intent = Intent(this, RouteActivity::class.java).apply {
             putExtra(MainActivity.EXTRA_ROUTE, "/catat")
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         if (Build.VERSION.SDK_INT >= 34) {
             startActivityAndCollapse(

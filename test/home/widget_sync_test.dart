@@ -25,6 +25,7 @@ void main() {
   test('mode sembunyikan saldo: tidak ada nominal sama sekali', () {
     final s = buildWidgetSnapshot(now: now, allowance: a, favorites: const [fav], categories: const [], hidden: true);
     expect(s['jatah'], 'Rp ••••');
+    expect(s['line'], 'Saldo disembunyikan');
     expect(s['progress'], 0);
     expect((s['favs']! as List).single, containsPair('amount', '••'));
     expect(s.toString(), isNot(contains('100.000')));
