@@ -148,6 +148,38 @@ abstract final class HiIcons {
   static const IconData jar = IconData(0xe045, fontFamily: _family);
   /// chevronDown (gaya desain).
   static const IconData chevronDown = IconData(0xe046, fontFamily: _family);
+  /// pet (desain).
+  static const IconData pet = IconData(0xe047, fontFamily: _family);
+  /// baby (desain).
+  static const IconData baby = IconData(0xe048, fontFamily: _family);
+  /// fitness (desain).
+  static const IconData fitness = IconData(0xe049, fontFamily: _family);
+  /// coffee (desain).
+  static const IconData coffee = IconData(0xe04a, fontFamily: _family);
+  /// fuel (desain).
+  static const IconData fuel = IconData(0xe04b, fontFamily: _family);
+  /// parking (desain).
+  static const IconData parking = IconData(0xe04c, fontFamily: _family);
+  /// wrench (desain).
+  static const IconData wrench = IconData(0xe04d, fontFamily: _family);
+  /// suitcase (desain).
+  static const IconData suitcase = IconData(0xe04e, fontFamily: _family);
+  /// laundry (desain).
+  static const IconData laundry = IconData(0xe04f, fontFamily: _family);
+  /// scissors (desain).
+  static const IconData scissors = IconData(0xe050, fontFamily: _family);
+  /// pill (desain).
+  static const IconData pill = IconData(0xe051, fontFamily: _family);
+  /// donation (desain).
+  static const IconData donation = IconData(0xe052, fontFamily: _family);
+  /// people (desain).
+  static const IconData people = IconData(0xe053, fontFamily: _family);
+  /// gamepad (desain).
+  static const IconData gamepad = IconData(0xe054, fontFamily: _family);
+  /// signal (desain).
+  static const IconData signal = IconData(0xe055, fontFamily: _family);
+  /// installment (desain).
+  static const IconData installment = IconData(0xe056, fontFamily: _family);
 
   /// Semua ikon (galeri desain).
   static const Map<String, IconData> all = {
@@ -222,5 +254,21 @@ abstract final class HiIcons {
     'gradient': gradient,
     'jar': jar,
     'chevronDown': chevronDown,
+    'pet': pet,
+    'baby': baby,
+    'fitness': fitness,
+    'coffee': coffee,
+    'fuel': fuel,
+    'parking': parking,
+    'wrench': wrench,
+    'suitcase': suitcase,
+    'laundry': laundry,
+    'scissors': scissors,
+    'pill': pill,
+    'donation': donation,
+    'people': people,
+    'gamepad': gamepad,
+    'signal': signal,
+    'installment': installment,
   };
 }

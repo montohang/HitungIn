@@ -85,6 +85,10 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] *(baru)* Tagihan: kartu **30 hari ke depan**, daftar **Akan datang** (chip jatuh tempo, dompet · ulang, **Tandai lunas**), **Sudah dicatat bulan ini** setelah melunasi; kartu Notifikasi pengingat (PRO) di bawah.
 - [x] *(baru)* Setelah menyimpan transaksi lalu langsung membuka Catat lagi, tombol Simpan tidak tertutup snackbar.
 
+- [ ] *(P1)* Kategori › ubah/baru → tab **Ikon** (30 ikon, termasuk peliharaan, bensin, parkir, arisan, cicilan, dll.) dan tab **Emoji**
+      (40 pilihan + "Emoji lain" dari keyboard; huruf/angka ditolak). Emoji tampil di Beranda, Catat, Riwayat, Budget, Tagihan, favorit.
+- [ ] *(P1)* Dompet › ubah → Tampilan **Inisial | Emoji** → daftar dompet & pilihan dompet di Catat memakai emoji itu.
+- [ ] *(P1)* Backup → pulihkan di HP lain → emoji kategori & dompet tetap sama.
 ## 5. Cadangan & ekspor
 - [x] Buat cadangan → simpan ke folder / Google Drive lewat pemilih berkas.
 - [x] Hapus data aplikasi (Pengaturan Android) → onboarding lagi → Pulihkan dari cadangan: kata sandi salah ditolak;

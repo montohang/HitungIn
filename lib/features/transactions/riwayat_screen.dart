@@ -117,6 +117,7 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
                     AppChip(
                       label: cat.name,
                       icon: AppIcons.of(cat.icon),
+                      emoji: AppIcons.emojiOf(cat.icon),
                       selected: cat.id == _categoryId,
                       onTap: () => update(() => _categoryId = cat.id),
                     ),

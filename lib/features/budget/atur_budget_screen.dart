@@ -12,7 +12,7 @@ import '../../core/utils/date_format.dart';
 import '../../core/utils/rupiah.dart';
 import '../../core/utils/rupiah_input.dart';
 import '../../core/widgets/app_button.dart';
-import '../../core/widgets/app_icons.dart';
+import '../../core/widgets/glyph_icon.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/progress_bar.dart';
 import '../../core/widgets/rupiah_prefix.dart';
@@ -374,7 +374,7 @@ class _CategoryStepper extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(color: AppPalette.soft(context, category.color), borderRadius: AppRadius.smAll),
-          child: Icon(AppIcons.of(category.icon), size: 20, color: AppPalette.ink(context, category.color)),
+          child: GlyphIcon(category.icon, size: 20, color: AppPalette.ink(context, category.color)),
         ),
         const SizedBox(width: AppSpace.x12),
         Expanded(

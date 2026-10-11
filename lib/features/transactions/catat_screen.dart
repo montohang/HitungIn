@@ -191,6 +191,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
           for (final Wallet w in options)
             _SheetOption(
               icon: AppIcons.of(w.icon),
+              emoji: AppIcons.emojiOf(w.icon),
               label: w.name,
               value: balances[w.id] == null ? null : Rupiah.format(balances[w.id]!),
               selected: w.id == (to ? _toWalletId : _walletId),
@@ -535,6 +536,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                           itemBuilder: (_, i) => AppChip(
                                             label: cats[i].name,
                                             icon: AppIcons.of(cats[i].icon),
+                                            emoji: AppIcons.emojiOf(cats[i].icon),
                                             selected: cats[i].id == _categoryId,
                                             onTap: () => setState(() {
                                               if (_categoryId != cats[i].id) _sub = '';
@@ -723,9 +725,10 @@ class _PickTile extends StatelessWidget {
 /// Satu baris pilihan di lembar bawah dompet / tanggal.
 class _SheetOption extends StatelessWidget {
   const _SheetOption(
-      {required this.icon, required this.label, required this.selected, required this.onTap, this.value});
+      {required this.icon, required this.label, required this.selected, required this.onTap, this.value, this.emoji});
 
   final IconData icon;
+  final String? emoji;
   final String label;
   final String? value;
   final bool selected;
@@ -752,8 +755,11 @@ class _SheetOption extends StatelessWidget {
               Container(
                 width: 40,
                 height: 40,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.smAll),
-                child: Icon(icon, size: 20, color: c.accentText),
+                child: emoji != null
+                    ? Text(emoji!, textScaler: TextScaler.noScaling, style: const TextStyle(fontSize: 19, height: 1))
+                    : Icon(icon, size: 20, color: c.accentText),
               ),
               const SizedBox(width: AppSpace.x12),
               Expanded(child: Text(label, style: t.item)),

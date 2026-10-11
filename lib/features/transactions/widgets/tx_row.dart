@@ -84,6 +84,7 @@ class TxRow extends StatelessWidget {
           children: [
             IconTile(
               icon: transfer ? HiIcons.swap : AppIcons.of(detail.category?.icon ?? 'other'),
+              emoji: transfer ? null : AppIcons.emojiOf(detail.category?.icon ?? ''),
               color: income ? c.good : (transfer ? c.sub : AppPalette.ink(context, detail.category?.color ?? 0)),
               background: income ? c.goodSoft : (transfer ? c.chip : AppPalette.soft(context, detail.category?.color ?? 0)),
             ),

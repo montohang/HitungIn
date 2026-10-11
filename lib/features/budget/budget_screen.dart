@@ -11,7 +11,7 @@ import '../../core/theme/context_ext.dart';
 import '../../core/utils/date_format.dart';
 import '../../core/utils/dates.dart';
 import '../../core/utils/rupiah.dart';
-import '../../core/widgets/app_icons.dart';
+import '../../core/widgets/glyph_icon.dart';
 import '../../core/widgets/month_switcher.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/progress_bar.dart';
@@ -328,7 +328,7 @@ class _CategoryRow extends StatelessWidget {
                 color: AppPalette.soft(context, budget.category!.color),
                 borderRadius: AppRadius.smAll,
               ),
-              child: Icon(AppIcons.of(budget.category!.icon), size: 20, color: AppPalette.ink(context, budget.category!.color)),
+              child: GlyphIcon(budget.category!.icon, size: 20, color: AppPalette.ink(context, budget.category!.color)),
             ),
             const SizedBox(width: AppSpace.x12),
             Expanded(

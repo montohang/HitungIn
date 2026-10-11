@@ -45,9 +45,13 @@ class IconTile extends StatelessWidget {
     this.size = 44,
     this.color,
     this.background,
+    this.emoji,
   });
 
   final IconData icon;
+
+  /// Emoji pengganti ikon (kategori/dompet beremoji, P1-4).
+  final String? emoji;
   final double size;
   final Color? color;
   final Color? background;
@@ -60,7 +64,10 @@ class IconTile extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(color: background ?? c.accentSoft, borderRadius: AppRadius.smAll),
       alignment: Alignment.center,
-      child: Icon(icon, size: size * 0.5, color: color ?? c.accentText),
+      child: emoji != null
+          ? ExcludeSemantics(
+              child: Text(emoji!, textScaler: TextScaler.noScaling, style: TextStyle(fontSize: size * 0.48, height: 1)))
+          : Icon(icon, size: size * 0.5, color: color ?? c.accentText),
     );
   }
 }

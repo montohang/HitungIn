@@ -16,6 +16,9 @@ import '../../core/widgets/bottom_note_scroll_view.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/color_swatches.dart';
+import '../../core/widgets/emoji_picker.dart';
+import '../../core/widgets/glyph_icon.dart';
+import '../../core/widgets/segmented_control.dart';
 import '../../core/widgets/hi_icons.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/rupiah_prefix.dart';
@@ -403,10 +406,12 @@ class _WalletRow extends StatelessWidget {
               height: 44,
               alignment: Alignment.center,
               decoration: BoxDecoration(color: AppPalette.soft(context, w.color), borderRadius: AppRadius.smAll),
-              child: Text(
-                walletInitials(w),
-                style: t.caption.copyWith(fontWeight: FontWeight.w800, color: AppPalette.ink(context, w.color)),
-              ),
+              child: AppIcons.emojiOf(w.icon) != null
+                  ? GlyphIcon(w.icon, size: 22)
+                  : Text(
+                      walletInitials(w),
+                      style: t.caption.copyWith(fontWeight: FontWeight.w800, color: AppPalette.ink(context, w.color)),
+                    ),
             ),
             const SizedBox(width: AppSpace.x12),
             Expanded(
@@ -455,6 +460,10 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
   );
   late WalletType _type = _w?.type ?? WalletType.bank;
   late int _color = _w?.color ?? -1;
+
+  /// Emoji pengganti inisial (P1-4); null = inisial.
+  late String? _emoji = AppIcons.emojiOf(_w?.icon ?? '');
+  late bool _emojiLook = _emoji != null;
   late final Set<int> _excluded = ref.read(allowanceExcludedProvider).valueOrNull ?? const {};
   late bool _inAllowance = _w == null || !_excluded.contains(_w.id);
   String? _error;
@@ -465,6 +474,8 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
     _balance.dispose();
     super.dispose();
   }
+
+  String get _iconKey => _emojiLook && _emoji != null ? AppIcons.emojiKey(_emoji!) : walletIconFor(_type);
 
   Future<void> _save() async {
     final String name = _name.text.trim();
@@ -479,7 +490,7 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
         name: name,
         type: _type,
         initialBalance: amount,
-        icon: walletIconFor(_type),
+        icon: _iconKey,
         color: _color < 0 ? null : _color,
       );
     } else {
@@ -491,7 +502,7 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
         name: name,
         type: _type,
         initialBalance: _w.initialBalance + (target - current),
-        icon: walletIconFor(_type),
+        icon: _iconKey,
         color: _color < 0 ? _w.color : _color,
       ));
     }
@@ -563,6 +574,22 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
         ),
         const FieldLabel('Warna'),
         ColorSwatches(selected: _color, onChanged: (i) => setState(() => _color = i)),
+        const FieldLabel('Tampilan'),
+        AppSegmentedControl<bool>(
+          options: const [false, true],
+          selected: _emojiLook,
+          labelOf: (e) => e ? 'Emoji' : 'Inisial',
+          onSurface: true,
+          onChanged: (e) => setState(() => _emojiLook = e),
+        ),
+        if (_emojiLook) ...[
+          const SizedBox(height: AppSpace.x12),
+          EmojiPicker(
+            selected: _emoji,
+            accent: AppPalette.of(context, _color < 0 ? 0 : _color),
+            onPick: (e) => setState(() => _emoji = e),
+          ),
+        ],
         const SizedBox(height: AppSpace.x16),
         TextField(
           key: const Key('saldo-dompet'),

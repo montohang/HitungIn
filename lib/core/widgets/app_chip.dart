@@ -12,12 +12,16 @@ class AppChip extends StatelessWidget {
     this.selected = false,
     this.onTap,
     this.icon,
+    this.emoji,
   });
 
   final String label;
   final bool selected;
   final VoidCallback? onTap;
   final IconData? icon;
+
+  /// Emoji pengganti [icon] (kategori/dompet beremoji, P1-4).
+  final String? emoji;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +35,7 @@ class AppChip extends StatelessWidget {
         child: AnimatedContainer(
           duration: context.reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
           height: 38,
-          padding: EdgeInsets.fromLTRB(icon == null ? AppSpace.x16 : AppSpace.x12, 0, AppSpace.x16, 0),
+          padding: EdgeInsets.fromLTRB(icon == null && emoji == null ? AppSpace.x16 : AppSpace.x12, 0, AppSpace.x16, 0),
           decoration: BoxDecoration(
             color: selected ? c.accent : c.chip,
             borderRadius: AppRadius.pillAll,
@@ -39,7 +43,11 @@ class AppChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (icon != null) ...[
+              if (emoji != null) ...[
+                ExcludeSemantics(
+                    child: Text(emoji!, textScaler: TextScaler.noScaling, style: const TextStyle(fontSize: 17, height: 1))),
+                const SizedBox(width: AppSpace.x8),
+              ] else if (icon != null) ...[
                 Icon(icon, size: 18, color: fg),
                 const SizedBox(width: AppSpace.x8),
               ],

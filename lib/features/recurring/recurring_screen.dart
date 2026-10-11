@@ -93,6 +93,9 @@ class RecurringScreen extends ConsumerWidget {
                         icon: r.kind == TxKind.transfer
                             ? HiIcons.swap
                             : AppIcons.of(cats.where((c) => c.id == r.categoryId).firstOrNull?.icon ?? 'other'),
+                        emoji: r.kind == TxKind.transfer
+                            ? null
+                            : AppIcons.emojiOf(cats.where((c) => c.id == r.categoryId).firstOrNull?.icon ?? ''),
                         color: r.kind == TxKind.pemasukan ? c.good : null,
                         background: r.kind == TxKind.pemasukan ? c.goodSoft : null,
                       ),
@@ -312,6 +315,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
                 AppChip(
                   label: cat.name,
                   icon: AppIcons.of(cat.icon),
+                  emoji: AppIcons.emojiOf(cat.icon),
                   selected: cat.id == _categoryId,
                   onTap: () => setState(() => _categoryId = cat.id),
                 ),

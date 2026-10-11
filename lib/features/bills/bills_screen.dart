@@ -17,6 +17,7 @@ import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/app_icons.dart';
+import '../../core/widgets/glyph_icon.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/rupiah_prefix.dart';
 import '../security/app_gate.dart';
@@ -226,8 +227,7 @@ class _BillRow extends ConsumerWidget {
                 color: AppPalette.soft(context, category?.color ?? 0),
                 borderRadius: AppRadius.smAll,
               ),
-              child: Icon(AppIcons.of(category?.icon ?? 'bills'),
-                  size: 22, color: AppPalette.ink(context, category?.color ?? 0)),
+              child: GlyphIcon(category?.icon ?? 'bills', size: 22, color: AppPalette.ink(context, category?.color ?? 0)),
             ),
             const SizedBox(width: AppSpace.x12),
             Expanded(
@@ -363,7 +363,7 @@ class BillCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              IconTile(icon: AppIcons.of(category?.icon ?? 'bills')),
+              IconTile(icon: AppIcons.of(category?.icon ?? 'bills'), emoji: AppIcons.emojiOf(category?.icon ?? '')),
               const SizedBox(width: AppSpace.x12),
               Expanded(
                 child: Column(
@@ -647,6 +647,7 @@ class _BillFormState extends ConsumerState<_BillForm> {
               AppChip(
                 label: cat.name,
                 icon: AppIcons.of(cat.icon),
+                emoji: AppIcons.emojiOf(cat.icon),
                 selected: cat.id == _categoryId,
                 onTap: () => setState(() => _categoryId = cat.id == _categoryId ? null : cat.id),
               ),

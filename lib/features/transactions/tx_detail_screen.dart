@@ -161,6 +161,7 @@ class TxDetailScreen extends ConsumerWidget {
                               icon: d.tx.kind == TxKind.transfer
                                   ? HiIcons.swap
                                   : AppIcons.of(d.category?.icon ?? 'other'),
+                              emoji: d.tx.kind == TxKind.transfer ? null : AppIcons.emojiOf(d.category?.icon ?? ''),
                               size: 56,
                               color: income
                                   ? c.good

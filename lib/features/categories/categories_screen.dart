@@ -7,11 +7,13 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/theme/app_palette.dart';
 import '../../core/widgets/color_swatches.dart';
+import '../../core/widgets/emoji_picker.dart';
 import '../../core/widgets/hi_icons.dart';
 import '../../core/widgets/screen_header.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/bottom_note_scroll_view.dart';
 import '../../core/widgets/app_icons.dart';
+import '../../core/widgets/glyph_icon.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/segmented_control.dart';
 import '../settings/widgets/settings_tile.dart';
@@ -197,7 +199,7 @@ class _CategoryTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(color: AppPalette.soft(context, category.color), borderRadius: AppRadius.smAll),
-              child: Icon(AppIcons.of(category.icon), size: 20, color: AppPalette.ink(context, category.color)),
+              child: GlyphIcon(category.icon, size: 20, color: AppPalette.ink(context, category.color)),
             ),
             const SizedBox(width: AppSpace.x12),
             Expanded(
@@ -243,6 +245,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
   late final TextEditingController _keywords = TextEditingController(text: _cat?.keywords.replaceAll(',', ', ') ?? '');
   final TextEditingController _newSub = TextEditingController();
   late String _icon = _cat?.icon ?? 'other';
+  late bool _emojiTab = AppIcons.emojiOf(_icon) != null;
   late int _color = _cat?.color ?? 0;
   late List<String> _subs = [...subsOf(_cat)];
   bool _addingSub = false;
@@ -310,7 +313,7 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
               height: 56,
               margin: const EdgeInsets.only(top: AppSpace.x4),
               decoration: BoxDecoration(color: AppPalette.soft(context, _color), borderRadius: AppRadius.mdAll),
-              child: Icon(AppIcons.of(_icon), size: 28, color: AppPalette.ink(context, _color)),
+              child: GlyphIcon(_icon, size: 28, color: AppPalette.ink(context, _color)),
             ),
             const SizedBox(width: AppSpace.x12),
             Expanded(
@@ -326,29 +329,44 @@ class _CategoryFormState extends ConsumerState<_CategoryForm> {
           ],
         ),
         const FieldLabel('Ikon'),
-        Wrap(
-          spacing: AppSpace.x8,
-          runSpacing: AppSpace.x8,
-          children: [
-            for (final key in AppIcons.categoryKeys)
-              Semantics(
-                selected: key == _icon,
-                child: Pressable(
-                  onTap: () => setState(() => _icon = key),
-                  semanticLabel: 'Ikon $key',
-                  child: Container(
-                    width: AppSpace.touch,
-                    height: AppSpace.touch,
-                    decoration: BoxDecoration(
-                      color: key == _icon ? AppPalette.of(context, _color) : c.chip,
-                      borderRadius: AppRadius.smAll,
+        AppSegmentedControl<bool>(
+          options: const [false, true],
+          selected: _emojiTab,
+          labelOf: (e) => e ? 'Emoji' : 'Ikon',
+          onSurface: true,
+          onChanged: (e) => setState(() => _emojiTab = e),
+        ),
+        const SizedBox(height: AppSpace.x12),
+        if (_emojiTab)
+          EmojiPicker(
+            selected: AppIcons.emojiOf(_icon),
+            accent: AppPalette.of(context, _color),
+            onPick: (e) => setState(() => _icon = AppIcons.emojiKey(e)),
+          )
+        else
+          Wrap(
+            spacing: AppSpace.x8,
+            runSpacing: AppSpace.x8,
+            children: [
+              for (final key in AppIcons.categoryKeys)
+                Semantics(
+                  selected: key == _icon,
+                  child: Pressable(
+                    onTap: () => setState(() => _icon = key),
+                    semanticLabel: 'Ikon $key',
+                    child: Container(
+                      width: AppSpace.touch,
+                      height: AppSpace.touch,
+                      decoration: BoxDecoration(
+                        color: key == _icon ? AppPalette.of(context, _color) : c.chip,
+                        borderRadius: AppRadius.smAll,
+                      ),
+                      child: Icon(AppIcons.of(key), size: 22, color: key == _icon ? Colors.white : c.sub),
                     ),
-                    child: Icon(AppIcons.of(key), size: 22, color: key == _icon ? Colors.white : c.sub),
                   ),
                 ),
-              ),
-          ],
-        ),
+            ],
+          ),
         const FieldLabel('Warna'),
         ColorSwatches(selected: _color, onChanged: (i) => setState(() => _color = i)),
         const FieldLabel('Sub-kategori'),

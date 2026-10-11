@@ -11,7 +11,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/context_ext.dart';
 import '../../../core/utils/rupiah.dart';
 import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_icons.dart';
+import '../../../core/widgets/glyph_icon.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../security/app_gate.dart';
 import '../../settings/widgets/settings_tile.dart' show showAppSheet;
@@ -77,7 +77,7 @@ class FavoriteChips extends ConsumerWidget {
                           height: 28,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(color: AppPalette.soft(context, color), shape: BoxShape.circle),
-                          child: Icon(AppIcons.of(cat?.icon ?? 'other'), size: 16, color: AppPalette.ink(context, color)),
+                          child: GlyphIcon(cat?.icon ?? 'other', size: 16, color: AppPalette.ink(context, color)),
                         ),
                         const SizedBox(width: AppSpace.x8),
                         Text(label, style: t.caption.copyWith(color: c.ink, fontWeight: FontWeight.w600)),
