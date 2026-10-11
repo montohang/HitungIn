@@ -29,6 +29,9 @@ import '../transactions/widgets/tx_row.dart';
 import '../transactions/riwayat_screen.dart' show riwayatLink;
 import '../wallets/data/wallets_dao.dart';
 import '../../core/widgets/hi_icons.dart';
+import 'allowance_provider.dart';
+import 'data/allowance.dart';
+import 'widgets/allowance_card.dart';
 
 /// Sapaan sesuai jam.
 String greetingFor(DateTime now) => switch (now.hour) {
@@ -145,6 +148,10 @@ class HomeScreen extends ConsumerWidget {
                 hasBudget: budgets.isNotEmpty,
               ),
             ] else ...[
+              if (ref.watch(allowanceProvider) case final Allowance a) ...[
+                AllowanceCard(allowance: a, hidden: hidden, now: now),
+                const SizedBox(height: AppSpace.block),
+              ],
               _QuickEntry(onSubmit: (text) => _openCatat(context, text)),
               if (budgetOverview(budgets) case final BudgetOverview o) ...[
                 const SizedBox(height: AppSpace.block),

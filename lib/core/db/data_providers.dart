@@ -99,6 +99,12 @@ final txListProvider = StreamProvider.family<List<TxDetail>, TxQuery>((ref, q) {
       );
 });
 
+/// Hari ini (jam 00.00); diperbarui AppShell saat tanggal berganti.
+final currentDayProvider = Provider<DateTime>((ref) {
+  final DateTime now = ref.watch(clockProvider)();
+  return DateTime(now.year, now.month, now.day);
+});
+
 /// Bulan berjalan (tanggal 1). Dipisah supaya bisa diganti di tes.
 final currentMonthProvider = Provider<DateTime>((ref) {
   final DateTime now = ref.watch(clockProvider)();

@@ -20,6 +20,12 @@ abstract final class SettingKeys {
   /// Peringatan budget di 80% (kartu peringatan & chip di Beranda). Default aktif.
   static const String budgetWarn80 = 'budget.warn80';
   static const String billReminderHour = 'bills.reminderHour';
+
+  /// Tanggal gajian 1–31 untuk Jatah hari ini (bawaan 1 = bulan kalender).
+  static const String allowancePayday = 'allowance.payday';
+
+  /// ID dompet yang tidak ikut dihitung di Jatah hari ini, dipisah koma.
+  static const String allowanceExcluded = 'allowance.excludedWallets';
 }
 
 @DriftAccessor(tables: [Settings])

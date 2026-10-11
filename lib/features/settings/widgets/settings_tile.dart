@@ -124,9 +124,12 @@ class SettingsGroup extends StatelessWidget {
 }
 
 /// Lembar bawah standar dengan judul; menyesuaikan tinggi keyboard.
-Future<T?> showAppSheet<T>(BuildContext context, {required String title, required WidgetBuilder builder}) {
+/// [aboveNav] = tampil di atas bar navigasi bawah (dibuka dari tab Beranda dll).
+Future<T?> showAppSheet<T>(BuildContext context,
+    {required String title, required WidgetBuilder builder, bool aboveNav = false}) {
   return showModalBottomSheet<T>(
     context: context,
+    useRootNavigator: aboveNav,
     isScrollControlled: true,
     builder: (context) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),

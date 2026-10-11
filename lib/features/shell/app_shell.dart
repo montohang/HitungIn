@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/db/data_providers.dart' show currentMonthProvider;
+import '../../core/db/data_providers.dart' show currentDayProvider, currentMonthProvider;
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/widgets/pressable.dart';
@@ -48,6 +48,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   void _refreshToday() {
     final DateTime now = ref.read(clockProvider)();
     if (DateTime(now.year, now.month) != ref.read(currentMonthProvider)) ref.invalidate(currentMonthProvider);
+    if (DateTime(now.year, now.month, now.day) != ref.read(currentDayProvider)) ref.invalidate(currentDayProvider);
   }
 
   /// Catat transaksi berulang yang jatuh tempo (berjalan untuk semua

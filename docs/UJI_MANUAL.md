@@ -54,6 +54,12 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
       Pindah saldo dari dompet yang kurang juga ditanya. Dompet yang sudah minus tidak ditanya lagi.
 - [ ] *(baru)* Edit transaksi: Pengeluaran ↔ Pemasukan bisa diganti; tab **Pindah Saldo** redup → ketuk → snackbar penjelasan.
       Edit Pindah saldo / transaksi dari tagihan atau berulang: tab lain redup & tidak bisa dipilih.
+- [ ] *(P1)* **Jatah hari ini** di Beranda (di bawah Total saldo): angka = (saldo − tagihan & transaksi berulang sampai gajian) ÷ sisa hari,
+      atau sisa budget bulan ini bila lebih kecil. Catat pengeluaran → jatah tetap, hanya "Sisa" yang turun; lewat → "Lewat … — jatah besok jadi …".
+- [ ] *(P1)* Ketuk kartu → "Dari mana angka ini?" (rincian, hitungan pembanding) → Ubah tanggal gajian → pilih tanggal → angka & "gajian N hari lagi" berubah.
+      Saran tanggal muncul bila ada transaksi berulang pemasukan berkategori Gaji.
+- [ ] *(P1)* Dompet › Ubah dompet → matikan "Ikut dihitung di jatah harian" → dompet itu bertuliskan "tidak dihitung di jatah" dan saldonya tidak ikut jatah.
+- [ ] *(P1)* Tombol mata menyamarkan jatah; besok (atau ubah tanggal HP) jatah dihitung ulang tanpa menutup aplikasi.
 ## 4. Lainnya (pengaturan)
 - [x] Nama panggilan berubah di sapaan Beranda.
 - [x] Dompet: tambah, urutkan (tahan & geser), arsipkan (hilang dari total), hapus dompet terpakai ditolak.

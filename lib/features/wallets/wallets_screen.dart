@@ -22,6 +22,7 @@ import '../../core/widgets/rupiah_prefix.dart';
 import '../../core/widgets/screen_header.dart';
 import '../security/app_gate.dart';
 import '../settings/widgets/settings_tile.dart';
+import '../home/allowance_provider.dart';
 import 'data/wallets_dao.dart';
 
 final _allWalletsProvider = StreamProvider.autoDispose<List<WalletBalance>>(
@@ -71,6 +72,8 @@ class WalletsScreen extends ConsumerWidget {
     final t = context.text;
     final List<WalletBalance> all = ref.watch(_allWalletsProvider).valueOrNull ?? const [];
     final Map<int, int> counts = ref.watch(_txCountProvider).valueOrNull ?? const {};
+    // Dimuat dulu supaya form Ubah dompet tahu dompet mana yang dikecualikan dari jatah.
+    final Set<int> excluded = ref.watch(allowanceExcludedProvider).valueOrNull ?? const {};
     final List<WalletBalance> active = [
       for (final w in all)
         if (!w.wallet.archived) w
@@ -150,6 +153,7 @@ class WalletsScreen extends ConsumerWidget {
                           child: _WalletRow(
                             item: w,
                             count: counts[w.wallet.id] ?? 0,
+                            inAllowance: !excluded.contains(w.wallet.id),
                             last: i == items.length - 1,
                             onTap: () => _openForm(context, w),
                           ),
@@ -367,10 +371,14 @@ class _Summary extends StatelessWidget {
 }
 
 class _WalletRow extends StatelessWidget {
-  const _WalletRow({required this.item, required this.count, required this.last, required this.onTap});
+  const _WalletRow(
+      {required this.item, required this.count, required this.last, required this.onTap, this.inAllowance = true});
 
   final WalletBalance item;
   final int count;
+
+  /// False → keterangan "tidak dihitung di jatah".
+  final bool inAllowance;
   final bool last;
   final VoidCallback onTap;
 
@@ -408,7 +416,7 @@ class _WalletRow extends StatelessWidget {
                   Text(w.name, style: t.item),
                   const SizedBox(height: AppSpace.x2),
                   Text(
-                    '${w.type.label} · ${count == 0 ? 'belum ada transaksi' : '$count transaksi'}',
+                    '${w.type.label} · ${!inAllowance ? 'tidak dihitung di jatah' : count == 0 ? 'belum ada transaksi' : '$count transaksi'}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: t.caption.copyWith(color: c.muted),
@@ -447,6 +455,8 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
   );
   late WalletType _type = _w?.type ?? WalletType.bank;
   late int _color = _w?.color ?? -1;
+  late final Set<int> _excluded = ref.read(allowanceExcludedProvider).valueOrNull ?? const {};
+  late bool _inAllowance = _w == null || !_excluded.contains(_w.id);
   String? _error;
 
   @override
@@ -463,8 +473,9 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
     final bool taken = (await dao.all()).any((w) => w.id != _w?.id && w.name.toLowerCase() == name.toLowerCase());
     if (taken) return setState(() => _error = 'Nama dompet sudah dipakai.');
     final int amount = RupiahInputFormatter.parse(_balance.text);
+    final int id;
     if (_w == null) {
-      await dao.add(
+      id = await dao.add(
         name: name,
         type: _type,
         initialBalance: amount,
@@ -472,6 +483,7 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
         color: _color < 0 ? null : _color,
       );
     } else {
+      id = _w.id;
       // Saldo sekarang negatif tidak bisa diketik; pertahankan tandanya bila tidak diubah.
       final int current = widget.existing!.balance;
       final int target = current < 0 && amount == current.abs() ? current : amount;
@@ -482,6 +494,9 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
         icon: walletIconFor(_type),
         color: _color < 0 ? _w.color : _color,
       ));
+    }
+    if (_inAllowance == _excluded.contains(id)) {
+      await setWalletInAllowance(ref.read(appDatabaseProvider).settingsDao, _excluded, id, _inAllowance);
     }
     if (mounted) Navigator.pop(context);
   }
@@ -562,6 +577,31 @@ class _WalletFormState extends ConsumerState<_WalletForm> {
                 : 'Ubah bila berbeda dengan saldo aslinya (sesuaikan saldo).',
             prefixIcon: const RupiahPrefix(),
             prefixIconConstraints: RupiahPrefix.constraints,
+          ),
+        ),
+        const SizedBox(height: AppSpace.x12),
+        Container(
+          padding: const EdgeInsets.fromLTRB(AppSpace.x16, AppSpace.x12, AppSpace.x8, AppSpace.x12),
+          decoration: BoxDecoration(borderRadius: AppRadius.mdAll, border: Border.all(color: c.line)),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Ikut dihitung di jatah harian', style: t.item),
+                    const SizedBox(height: AppSpace.x2),
+                    Text('Matikan untuk dompet tabungan atau dana darurat.',
+                        style: t.label.copyWith(color: c.muted, fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              ),
+              Switch(
+                key: const Key('ikut-jatah'),
+                value: _inAllowance,
+                onChanged: (v) => setState(() => _inAllowance = v),
+              ),
+            ],
           ),
         ),
         if (_error != null) ...[
