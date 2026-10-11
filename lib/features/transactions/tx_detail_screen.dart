@@ -19,6 +19,8 @@ import '../../core/widgets/progress_bar.dart';
 import '../../core/widgets/screen_header.dart';
 import '../budget/data/budgets_dao.dart';
 import '../security/app_gate.dart';
+import '../favorites/data/favorites.dart';
+import '../favorites/favorites_provider.dart';
 import 'data/transactions_dao.dart';
 import 'widgets/tx_row.dart';
 import '../../core/widgets/hi_icons.dart';
@@ -233,6 +235,10 @@ class TxDetailScreen extends ConsumerWidget {
               ),
               if (d != null) ...[
                 const SizedBox(height: AppSpace.x16),
+                if (d.tx.kind != TxKind.transfer) ...[
+                  _FavoriteButton(tx: d.tx),
+                  const SizedBox(height: AppSpace.x8),
+                ],
                 Row(
                   children: [
                     Expanded(
@@ -347,6 +353,32 @@ class _BudgetImpact extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// "Jadikan favorit" → langsung jadi chip "Sekali ketuk" di Beranda (P1-3).
+class _FavoriteButton extends ConsumerWidget {
+  const _FavoriteButton({required this.tx});
+
+  final Txn tx;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bool pinned = ref.watch(pinnedFavoriteKeysProvider).contains(favoriteKeyOf(tx));
+    return AppButton(
+      key: const Key('jadikan-favorit'),
+      label: pinned ? 'Favorit · ketuk untuk melepas' : 'Jadikan favorit',
+      icon: HiIcons.star,
+      variant: pinned ? AppButtonVariant.soft : AppButtonVariant.outline,
+      onPressed: () async {
+        await setPinned(ref.read(appDatabaseProvider).settingsDao, tx, !pinned);
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+              content: Text(pinned ? 'Dilepas dari Sekali ketuk' : 'Ditambahkan ke Sekali ketuk di Beranda')));
+      },
     );
   }
 }

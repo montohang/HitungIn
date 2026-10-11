@@ -60,6 +60,11 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
       Saran tanggal muncul bila ada transaksi berulang pemasukan berkategori Gaji.
 - [ ] *(P1)* Dompet › Ubah dompet → matikan "Ikut dihitung di jatah harian" → dompet itu bertuliskan "tidak dihitung di jatah" dan saldonya tidak ikut jatah.
 - [ ] *(P1)* Tombol mata menyamarkan jatah; besok (atau ubah tanggal HP) jatah dihitung ulang tanpa menutup aplikasi.
+- [ ] *(P1)* Catat cepat: "parkir seceng", "es teh goceng", "bakso ceban", "makan goban", "2 ceban", "sejuta", "setengah juta" → nominal benar;
+      "kopi 25rb spay/gpay/livin/brimo" memilih dompet yang cocok (bila ada); "kopi 18rb pakai qris" tidak memilih dompet & "qris" tidak masuk catatan.
+- [ ] *(P1)* **Sekali ketuk**: catat transaksi yang sama (catatan, kategori, dompet, nominal) 3× → chip muncul di bawah Catat cepat.
+      Ketuk chip → langsung tercatat hari ini + "… dicatat · Urungkan" (Urungkan menghapusnya). Tekan lama → Ubah dulu / Sembunyikan.
+- [ ] *(P1)* Detail transaksi → **Jadikan favorit** → chip langsung muncul paling depan; ketuk lagi → dilepas. Pindah saldo tidak punya tombol ini.
 ## 4. Lainnya (pengaturan)
 - [x] Nama panggilan berubah di sapaan Beranda.
 - [x] Dompet: tambah, urutkan (tahan & geser), arsipkan (hilang dari total), hapus dompet terpakai ditolak.

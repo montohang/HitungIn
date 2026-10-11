@@ -26,6 +26,11 @@ abstract final class SettingKeys {
 
   /// ID dompet yang tidak ikut dihitung di Jatah hari ini, dipisah koma.
   static const String allowanceExcluded = 'allowance.excludedWallets';
+
+  /// Favorit "Sekali ketuk" yang dipasang manual (JSON) dan kunci favorit
+  /// otomatis yang disembunyikan (JSON).
+  static const String favoritesPinned = 'favorites.pinned';
+  static const String favoritesHidden = 'favorites.hidden';
 }
 
 @DriftAccessor(tables: [Settings])

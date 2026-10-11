@@ -32,6 +32,7 @@ import '../../core/widgets/hi_icons.dart';
 import 'allowance_provider.dart';
 import 'data/allowance.dart';
 import 'widgets/allowance_card.dart';
+import '../favorites/widgets/favorite_chips.dart';
 
 /// Sapaan sesuai jam.
 String greetingFor(DateTime now) => switch (now.hour) {
@@ -153,6 +154,7 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpace.block),
               ],
               _QuickEntry(onSubmit: (text) => _openCatat(context, text)),
+              FavoriteChips(hidden: hidden),
               if (budgetOverview(budgets) case final BudgetOverview o) ...[
                 const SizedBox(height: AppSpace.block),
                 _BudgetGlance(

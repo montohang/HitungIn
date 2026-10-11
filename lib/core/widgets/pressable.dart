@@ -13,6 +13,7 @@ class Pressable extends StatefulWidget {
     this.scale = AppMotion.pressScale,
     this.semanticLabel,
     this.isButton = true,
+    this.onLongPress,
   });
 
   /// Varian untuk kartu besar.
@@ -21,6 +22,7 @@ class Pressable extends StatefulWidget {
     required this.child,
     this.onTap,
     this.semanticLabel,
+    this.onLongPress,
   })  : scale = AppMotion.pressScaleCard,
         isButton = true;
 
@@ -29,6 +31,9 @@ class Pressable extends StatefulWidget {
   final double scale;
   final String? semanticLabel;
   final bool isButton;
+
+  /// Tekan lama (mis. menu chip favorit).
+  final VoidCallback? onLongPress;
 
   @override
   State<Pressable> createState() => _PressableState();
@@ -58,6 +63,7 @@ class _PressableState extends State<Pressable> {
         onTapUp: (_) => _set(false),
         onTapCancel: () => _set(false),
         onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
         child: AnimatedScale(
           scale: _down && !reduce ? widget.scale : 1,
           duration: reduce ? Duration.zero : AppMotion.press,
