@@ -15,6 +15,8 @@ class MainActivity : FlutterFragmentActivity() {
         /** Route yang dibuka dari widget/tile/pintasan (lib/core/platform/launch_routes.dart). */
         const val EXTRA_ROUTE = "hitungin_route"
 
+        private const val REQ_SHARE = 4101
+
         private var current: java.lang.ref.WeakReference<MainActivity>? = null
         private var queuedRoute: String? = null
 
@@ -33,6 +35,9 @@ class MainActivity : FlutterFragmentActivity() {
     private var pendingRoute: String? = null
     private var launchChannel: MethodChannel? = null
 
+    /** Selesai saat pengguna kembali dari menu Bagikan (lib/core/platform/share_text.dart). */
+    private var shareResult: MethodChannel.Result? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         pendingRoute = intent?.getStringExtra(EXTRA_ROUTE) ?: queuedRoute
         queuedRoute = null
@@ -46,6 +51,16 @@ class MainActivity : FlutterFragmentActivity() {
         setIntent(intent)
         val route = intent.getStringExtra(EXTRA_ROUTE) ?: return
         deliverRoute(route)
+    }
+
+    @Deprecated("Dipakai untuk menu Bagikan; cukup sederhana tanpa Activity Result API.")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQ_SHARE) {
+            shareResult?.success(null)
+            shareResult = null
+        }
     }
 
     override fun onDestroy() {
@@ -78,6 +93,20 @@ class MainActivity : FlutterFragmentActivity() {
             if (call.method == "update") {
                 HomeWidgets.save(this, call.argument<String>("json") ?: "")
                 result.success(null)
+            } else {
+                result.notImplemented()
+            }
+        }
+        MethodChannel(messenger, "com.capt.hitungin/share").setMethodCallHandler { call, result ->
+            if (call.method == "text") {
+                val send = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, call.argument<String>("text") ?: "")
+                }
+                shareResult?.success(null)
+                shareResult = result
+                @Suppress("DEPRECATION")
+                startActivityForResult(Intent.createChooser(send, call.argument<String>("title")), REQ_SHARE)
             } else {
                 result.notImplemented()
             }

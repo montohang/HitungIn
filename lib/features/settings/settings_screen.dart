@@ -17,6 +17,9 @@ import '../../core/db/app_database.dart';
 import '../backup/data/backup_age.dart';
 import '../bills/bills_screen.dart' show activeBillsProvider;
 import '../bills/data/bill_due.dart';
+import '../debts/data/debts_dao.dart';
+import '../debts/debts_provider.dart';
+import '../../core/utils/rupiah.dart';
 import '../security/pin_service.dart';
 import '../../core/widgets/app_chip.dart';
 import '../ads/ads_service.dart';
@@ -54,6 +57,9 @@ class SettingsScreen extends ConsumerWidget {
     final ThemeSettings theme = ref.watch(themeControllerProvider);
     final int wallets = ref.watch(walletBalancesProvider).valueOrNull?.length ?? 0;
     final int categories = ref.watch(activeCategoriesProvider).valueOrNull?.length ?? 0;
+    final int owedToMe = (ref.watch(debtsProvider).valueOrNull ?? const <DebtWithPayments>[])
+        .where((d) => d.debt.direction == DebtDirection.piutang)
+        .fold(0, (sum, d) => sum + d.left);
     final int dueSoon = [
       for (final b in ref.watch(activeBillsProvider).valueOrNull ?? const <Bill>[])
         if (billNeedsAttention(b, now)) b,
@@ -104,6 +110,12 @@ class SettingsScreen extends ConsumerWidget {
                   title: 'Tagihan',
                   badge: dueSoon > 0 ? '$dueSoon segera' : null,
                   onTap: () => context.push(Routes.tagihan),
+                ),
+                SettingsTile(
+                  icon: HiIcons.people,
+                  title: 'Utang-piutang',
+                  value: owedToMe > 0 ? Rupiah.format(owedToMe) : null,
+                  onTap: () => context.push(Routes.utang),
                 ),
                 SettingsTile(
                   icon: HiIcons.repeat,

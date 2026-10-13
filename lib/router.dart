@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'core/db/data_providers.dart';
 import 'core/db/app_database.dart';
 import 'core/utils/date_format.dart';
+import 'features/debts/debts_screen.dart';
 import 'features/backup/backup_screen.dart';
 import 'features/bills/bills_screen.dart';
 import 'features/budget/atur_budget_screen.dart';
@@ -100,6 +101,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.premium,
         parentNavigatorKey: _rootKey,
         builder: (_, state) => PremiumScreen(reason: ProReason.parse(state.uri.queryParameters['from'])),
+      ),
+      GoRoute(
+        path: Routes.utang,
+        parentNavigatorKey: _rootKey,
+        builder: (_, state) => DebtsScreen(
+          openId: int.tryParse(state.uri.queryParameters['id'] ?? ''),
+          draft: debtDraftFrom(state.uri.queryParameters),
+        ),
       ),
       GoRoute(
         path: '/tx/:id',

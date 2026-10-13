@@ -1,5 +1,9 @@
 import '../../core/db/app_database.dart';
 
+/// Kalimat Catat cepat yang berarti utang-piutang (P2-2): "pinjam budi 200rb",
+/// "budi bayar 100rb", "pinjam dari sinta 300rb", "bayar utang sinta 100rb".
+typedef DebtIntent = ({DebtDirection direction, bool payment, String name});
+
 /// Hasil Catat Cepat. Kolom yang tidak terbaca dibiarkan kosong supaya
 /// layar Catat bisa menanyakannya ke pengguna.
 class QuickEntry {
@@ -12,7 +16,11 @@ class QuickEntry {
     this.toWalletId,
     this.categoryId,
     this.sub = '',
+    this.debt,
   });
+
+  /// Bukan transaksi biasa melainkan catatan/pembayaran utang-piutang.
+  final DebtIntent? debt;
 
   final TxKind kind;
   final int? amount;
@@ -92,6 +100,13 @@ class QuickEntryParser {
   /// Cara bayar, bukan dompet: dibuang dari catatan, dompet tidak berubah.
   static const Set<String> _payMethods = {'qris'};
 
+  // Utang-piutang (P2-2).
+  static const Set<String> _lendWords = {'pinjamin', 'pinjamkan', 'minjemin', 'pinjemin', 'dipinjam', 'dipinjamin'};
+  static const Set<String> _borrowWords = {'pinjam', 'minjem', 'pinjem', 'ngutang', 'utang', 'hutang'};
+  static const Set<String> _debtNouns = {'utang', 'hutang'};
+  static const Set<String> _repayWords = {'bayar', 'balikin', 'kembaliin', 'ngembaliin', 'lunasin', 'lunasi', 'nyicil', 'cicil'};
+  static const Set<String> _debtFiller = {'dari', 'ke', 'sama', 'ama', 'sm', 'ya', 'udah', 'sudah', 'nya', 'buat', 'untuk'};
+
   static final RegExp _amountRe = RegExp(
     r'^([+\-−])?(?:rp\.?)?(\d+(?:[.,]\d+)*)(k|rb|ribu|jt|juta|m|miliar|milyar)?$',
   );
@@ -153,6 +168,18 @@ class QuickEntryParser {
         walletHits.add((i, w));
         used[i] = true;
       }
+    }
+
+    // 3b. Utang-piutang? Dibaca sebelum transfer & kategori.
+    final DebtIntent? debt = _readDebt(low, raw, used);
+    if (debt != null) {
+      return QuickEntry(
+        kind: TxKind.pengeluaran,
+        amount: amount,
+        walletId: walletHits.firstOrNull?.$2.id,
+        occurredAt: daysAgo == 0 ? at : DateTime(at.year, at.month, at.day - daysAgo, at.hour, at.minute),
+        debt: debt,
+      );
     }
 
     // "bayar pakai qris" → cara bayar, bukan catatan.
@@ -244,6 +271,39 @@ class QuickEntryParser {
       sub: sub,
       occurredAt: daysAgo == 0 ? at : day,
     );
+  }
+
+  /// Pola utang-piutang. Nama = kata sisa yang bukan kata kunci/sambung.
+  DebtIntent? _readDebt(List<String> low, List<String> raw, List<bool> used) {
+    final List<int> free = [for (int i = 0; i < low.length; i++) if (!used[i]) i];
+    bool has(Set<String> words) => free.any((i) => words.contains(low[i]));
+    int? firstOf(Set<String> words) => free.where((i) => words.contains(low[i])).firstOrNull;
+    final Set<String> keywords = {..._lendWords, ..._borrowWords, ..._repayWords, 'dibayar', ..._debtFiller};
+    final List<int> nameIdx = [for (final i in free) if (!keywords.contains(low[i]) && !_connectors.contains(low[i])) i];
+    String name() => [
+          for (final i in nameIdx) raw[i][0].toUpperCase() + raw[i].substring(1),
+        ].join(' ');
+    // Nama yang ternyata kategori ("listrik bayar 200rb") → bukan utang.
+    bool looksLikeCategory() => _matchCategory([for (final i in nameIdx) _norm(low[i])], TxKind.pengeluaran).$1 != null;
+    DebtIntent make(DebtDirection d, {required bool payment}) => (direction: d, payment: payment, name: name());
+
+    if (has({'dibayar'})) return make(DebtDirection.piutang, payment: true);
+    if (has(_repayWords) && has(_debtNouns)) return make(DebtDirection.utang, payment: true);
+    if (has(_lendWords)) return make(DebtDirection.piutang, payment: false);
+    final int? borrow = firstOf(_borrowWords);
+    if (borrow != null) {
+      // "pinjam dari sinta", "utang ke sinta" → aku meminjam.
+      final bool fromSomeone = free.any((i) => i > borrow && (low[i] == 'dari' || low[i] == 'ke' || low[i] == 'sama' || low[i] == 'ama'));
+      if (fromSomeone) return make(DebtDirection.utang, payment: false);
+      // "pinjam budi", "budi pinjam", "budi utang" → budi meminjam dariku.
+      return make(DebtDirection.piutang, payment: false);
+    }
+    // "budi bayar 100rb", "budi balikin 50rb": nama dulu, lalu kata bayar.
+    final int? repay = firstOf(_repayWords);
+    if (repay != null && nameIdx.isNotEmpty && nameIdx.first < repay && !looksLikeCategory()) {
+      return make(DebtDirection.piutang, payment: true);
+    }
+    return null;
   }
 
   /// Membaca nominal di token [i]; satuan boleh di token berikutnya ("25 rb").

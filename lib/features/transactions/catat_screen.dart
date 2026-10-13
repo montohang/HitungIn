@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../debts/debts_screen.dart' show DebtDraft, debtDraftLink;
 import '../../core/db/app_database.dart';
 import '../../core/db/data_providers.dart';
 import '../../core/db/providers.dart';
@@ -51,6 +52,9 @@ class CatatScreen extends ConsumerStatefulWidget {
 
 class _CatatScreenState extends ConsumerState<CatatScreen> {
   final TextEditingController _quick = TextEditingController();
+
+  /// Kalimat Catat cepat yang dibaca sebagai utang-piutang.
+  DebtDraft? _debt;
   final TextEditingController _note = TextEditingController();
 
   TxKind _kind = TxKind.pengeluaran;
@@ -127,14 +131,30 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
     final String text = widget.initialText?.trim() ?? '';
     if (text.isNotEmpty && editing == null) {
       _quick.text = text;
-      _applyQuick(text);
+      _applyQuick(text, open: true);
     }
   }
 
-  void _applyQuick(String text) {
+  /// [open] = dari Catat cepat di Beranda: kalimat utang langsung dibuka di
+  /// Utang-piutang. Saat mengetik di sini cukup ditawarkan lewat [_debt].
+  void _applyQuick(String text, {bool open = false}) {
     final QuickEntry e =
         QuickEntryParser(wallets: _wallets, categories: _categories).parse(text, now: ref.read(clockProvider)());
+    final DebtIntent? debt = e.debt;
+    final DebtDraft? draft = debt == null
+        ? null
+        : (direction: debt.direction, payment: debt.payment, name: debt.name, amount: e.amount, walletId: e.walletId);
+    if (draft != null && open) {
+      // "pinjam budi 200rb" → Utang-piutang, bukan pengeluaran.
+      context.pushReplacement(debtDraftLink(draft));
+      return;
+    }
+    if (draft != null) {
+      setState(() => _debt = draft);
+      return;
+    }
     setState(() {
+      _debt = null;
       _error = null;
       _kind = e.kind;
       if (e.amount != null) _amount = e.amount!;
@@ -406,10 +426,14 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                         autofocus: false,
                                         onChanged: _applyQuick,
                                       ),
+                                      if (_debt case final DebtDraft d?) ...[
+                                        const SizedBox(height: AppSpace.x8),
+                                        _DebtHint(draft: d, onOpen: () => context.pushReplacement(debtDraftLink(d))),
+                                      ],
                                       const SizedBox(height: AppSpace.x16),
                                     ],
                                     AppSegmentedControl<TxKind>(
-                                      options: TxKind.values,
+                                      options: TxKind.manual,
                                       selected: _kind,
                                       onSurface: true,
                                       labelOf: (k) => k == TxKind.transfer ? 'Pindah Saldo' : k.label,
@@ -809,6 +833,44 @@ class _SubChip extends StatelessWidget {
               color: selected ? c.accentText : c.sub2,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "Ini utang-piutang: Budi pinjam Rp200.000 · Buka".
+class _DebtHint extends StatelessWidget {
+  const _DebtHint({required this.draft, required this.onOpen});
+
+  final DebtDraft draft;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    final String who = draft.name.isEmpty ? 'seseorang' : draft.name;
+    final String amount = draft.amount == null ? '' : ' ${Rupiah.format(draft.amount!)}';
+    final String what = switch ((draft.direction, draft.payment)) {
+      (DebtDirection.piutang, false) => '$who pinjam$amount',
+      (DebtDirection.piutang, true) => '$who bayar$amount',
+      (DebtDirection.utang, false) => 'Pinjam$amount dari $who',
+      (DebtDirection.utang, true) => 'Bayar utang$amount ke $who',
+    };
+    return Pressable(
+      onTap: onOpen,
+      semanticLabel: 'Catat di Utang-piutang: $what',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12, vertical: AppSpace.x8),
+        decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.mdAll),
+        child: Row(
+          children: [
+            Icon(HiIcons.people, size: 18, color: c.accentText),
+            const SizedBox(width: AppSpace.x8),
+            Expanded(child: Text('Utang-piutang: $what', style: t.caption.copyWith(color: c.accentText, fontWeight: FontWeight.w600))),
+            Text('Buka ›', style: t.caption.copyWith(color: c.accentText, fontWeight: FontWeight.w700)),
+          ],
         ),
       ),
     );

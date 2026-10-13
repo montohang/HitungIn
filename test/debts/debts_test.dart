@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hitungin/core/db/app_database.dart';
 import 'package:hitungin/features/debts/data/debts.dart';
 import 'package:hitungin/features/debts/data/debts_dao.dart';
+import 'package:hitungin/features/debts/debts_screen.dart';
 
 void main() {
   late AppDatabase db;
@@ -117,5 +118,31 @@ void main() {
     await db.debtsDao.removePayment(p);
     expect(await balance(), 800000);
     expect((await load(id)).status, DebtStatus.belumLunas);
+  });
+
+  test('Catat cepat → tautan /utang → isian kembali sama', () {
+    const DebtDraft d = (direction: DebtDirection.piutang, payment: true, name: 'Budi', amount: 100000, walletId: 2);
+    final Uri u = Uri.parse(debtDraftLink(d));
+    expect(u.path, '/utang');
+    expect(debtDraftFrom(u.queryParameters), d);
+    expect(debtDraftFrom(const {'id': '3'}), isNull);
+  });
+
+  test('cari catatan belum lunas menurut nama (tanpa beda huruf besar/kecil)', () async {
+    final a = await db.debtsDao.add(direction: DebtDirection.piutang, name: 'Budi', amount: 100000, occurredAt: oct);
+    await db.debtsDao.pay(a, amount: 100000, paidAt: oct);
+    final b = await db.debtsDao.add(direction: DebtDirection.piutang, name: 'Budi Santoso', amount: 200000, occurredAt: oct);
+    await db.debtsDao.add(direction: DebtDirection.utang, name: 'Budi', amount: 50000, occurredAt: oct);
+    final all = await db.debtsDao.watchAll().first;
+    expect(findOpenDebt(all, DebtDirection.piutang, 'budi')!.debt.id, b, reason: 'yang lunas dilewati');
+    expect(findOpenDebt(all, DebtDirection.piutang, 'Sari'), isNull);
+  });
+
+  test('pesan tagih: sopan, menyebut sisa & tanggal', () {
+    String rp(int v) => 'Rp$v';
+    String day(DateTime d) => '${d.day} Okt';
+    expect(debtReminderText(name: 'Budi', left: 200000, paid: 0, date: oct, rupiah: rp, day: day),
+        'Halo Budi, cuma mengingatkan pinjaman Rp200000 tgl 5 Okt ya. Makasih banyak 🙏');
+    expect(debtReminderText(name: 'Budi', left: 100000, paid: 100000, date: oct, rupiah: rp, day: day), contains('sisa pinjaman Rp100000'));
   });
 }

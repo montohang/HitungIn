@@ -280,7 +280,7 @@ class _RecurringFormState extends ConsumerState<_RecurringForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppSegmentedControl<TxKind>(
-          options: TxKind.values,
+          options: TxKind.manual,
           selected: _kind,
           labelOf: (k) => k == TxKind.transfer ? 'Pindah Saldo' : k.label,
           onChanged: (k) => setState(() {

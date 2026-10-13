@@ -34,6 +34,9 @@ enum TxKind {
 
   bool get isDebt => this == utangKeluar || this == utangMasuk;
 
+  /// Jenis yang bisa dipilih di Catat & transaksi berulang.
+  static const List<TxKind> manual = [pengeluaran, pemasukan, transfer];
+
   /// Menambah saldo dompet sumbernya ([walletId]).
   bool get isInflow => this == pemasukan || this == utangMasuk;
 }

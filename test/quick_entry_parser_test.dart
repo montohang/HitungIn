@@ -245,4 +245,38 @@ void main() {
       expect(parse('kopi 18rb qris gopay').walletId, 2);
     });
   });
+
+  group('utang-piutang (P2-2)', () {
+    DebtIntent? debt(String s) => parse(s).debt;
+
+    test('meminjamkan: "pinjam budi 200rb", "budi pinjam", "pinjamin"', () {
+      final e = parse('pinjam budi 200rb tunai');
+      expect(e.debt, (direction: DebtDirection.piutang, payment: false, name: 'Budi'));
+      expect((e.amount, e.walletId), (200000, 1));
+      expect(debt('budi pinjam 50rb'), (direction: DebtDirection.piutang, payment: false, name: 'Budi'));
+      expect(debt('minjemin dimas 1 ceban'), (direction: DebtDirection.piutang, payment: false, name: 'Dimas'));
+    });
+
+    test('meminjam: "pinjam dari sinta", "utang ke kak sinta"', () {
+      expect(debt('pinjam dari sinta 300rb'), (direction: DebtDirection.utang, payment: false, name: 'Sinta'));
+      expect(debt('utang ke kak sinta 300rb bca'), (direction: DebtDirection.utang, payment: false, name: 'Kak Sinta'));
+      expect(debt('minjem sama budi 100rb'), (direction: DebtDirection.utang, payment: false, name: 'Budi'));
+    });
+
+    test('pembayaran: "budi bayar 100rb", "dibayar budi", "bayar utang sinta"', () {
+      expect(debt('budi bayar 100rb'), (direction: DebtDirection.piutang, payment: true, name: 'Budi'));
+      expect(debt('dibayar budi 100rb gopay'), (direction: DebtDirection.piutang, payment: true, name: 'Budi'));
+      expect(debt('budi balikin 50rb'), (direction: DebtDirection.piutang, payment: true, name: 'Budi'));
+      expect(debt('bayar utang ke sinta 100rb'), (direction: DebtDirection.utang, payment: true, name: 'Sinta'));
+      expect(debt('bayar hutang sinta 100rb'), (direction: DebtDirection.utang, payment: true, name: 'Sinta'));
+    });
+
+    test('kalimat biasa tetap transaksi biasa', () {
+      expect(debt('kopi 25rb gopay'), isNull);
+      expect(debt('bayar listrik 200rb'), isNull);
+      expect(debt('listrik bayar 200rb'), isNull, reason: 'kata sebelum "bayar" adalah kategori');
+      expect(debt('bayar cicilan motor 780rb'), isNull);
+      expect(debt('tf bca ke gopay 100rb'), isNull);
+    });
+  });
 }

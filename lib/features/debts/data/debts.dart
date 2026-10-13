@@ -58,3 +58,9 @@ String debtTxNote(DebtDirection direction, String name, {required bool payment})
       (DebtDirection.utang, false) => 'Pinjam dari $name',
       (DebtDirection.utang, true) => 'Bayar utang ke $name',
     };
+
+/// Pesan pengingat sopan untuk "Tagih lewat WhatsApp" (bisa diubah pengguna).
+String debtReminderText({required String name, required int left, required int paid, required DateTime date, required String Function(int) rupiah, required String Function(DateTime) day}) =>
+    paid > 0
+        ? 'Halo $name, cuma mengingatkan sisa pinjaman ${rupiah(left)} (pinjam tgl ${day(date)}) ya. Makasih banyak 🙏'
+        : 'Halo $name, cuma mengingatkan pinjaman ${rupiah(left)} tgl ${day(date)} ya. Makasih banyak 🙏';
