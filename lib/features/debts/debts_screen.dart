@@ -100,7 +100,9 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
           return;
         }
         await showAppSheet<void>(context,
-            title: draft.direction == DebtDirection.piutang ? 'Catat pembayaran ${d.debt.name}' : 'Bayar utang ke ${d.debt.name}',
+            title: draft.direction == DebtDirection.piutang
+                ? 'Catat pembayaran ${d.debt.name}'
+                : 'Bayar utang ke ${d.debt.name}',
             builder: (_) => _PaySheet(d: d, amount: draft.amount, walletId: draft.walletId));
       } else if (draft != null) {
         await openDebtForm(context, draft: draft);
@@ -130,9 +132,8 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         int rank(DebtWithPayments d) => d.left == 0 ? 2 : (debtOverdue(d.facts, now) ? 0 : 1);
         return rank(a).compareTo(rank(b));
       });
-    final int overdueOwed = all
-        .where((d) => d.debt.direction == DebtDirection.piutang && debtOverdue(d.facts, now))
-        .length;
+    final int overdueOwed =
+        all.where((d) => d.debt.direction == DebtDirection.piutang && debtOverdue(d.facts, now)).length;
     final DateTime? nextDue = (all
             .where((d) => d.debt.direction == DebtDirection.utang && d.left > 0 && d.debt.dueDate != null)
             .map((d) => d.debt.dueDate!)
@@ -161,30 +162,33 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
               ),
             ),
             const SizedBox(height: AppSpace.x16),
-            Row(
-              children: [
-                Expanded(
-                  child: _TotalCard(
-                    label: 'Orang berutang ke kamu',
-                    amount: totals.owedToMe,
-                    color: c.good,
-                    meta: totals.owedToMeCount == 0
-                        ? 'Tidak ada'
-                        : '${totals.owedToMeCount} orang${overdueOwed > 0 ? ' · $overdueOwed lewat jatuh tempo' : ''}',
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _TotalCard(
+                      label: 'Orang berutang ke kamu',
+                      amount: totals.owedToMe,
+                      color: c.good,
+                      meta: totals.owedToMeCount == 0
+                          ? 'Tidak ada'
+                          : '${totals.owedToMeCount} orang${overdueOwed > 0 ? ' · $overdueOwed lewat jatuh tempo' : ''}',
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpace.x12),
-                Expanded(
-                  child: _TotalCard(
-                    label: 'Kamu berutang',
-                    amount: totals.iOwe,
-                    color: c.ink,
-                    meta: totals.iOweCount == 0
-                        ? 'Tidak ada'
-                        : '${totals.iOweCount} orang${nextDue != null ? ' · jatuh tempo ${DateFmt.date(nextDue, now: now)}' : ''}',
+                  const SizedBox(width: AppSpace.x12),
+                  Expanded(
+                    child: _TotalCard(
+                      label: 'Kamu berutang',
+                      amount: totals.iOwe,
+                      color: c.ink,
+                      meta: totals.iOweCount == 0
+                          ? 'Tidak ada'
+                          : '${totals.iOweCount} orang${nextDue != null ? ' · jatuh tempo ${DateFmt.date(nextDue, now: now)}' : ''}',
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: AppSpace.x16),
             AppSegmentedControl<DebtDirection>(
@@ -196,7 +200,8 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
             const SizedBox(height: AppSpace.x16),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x4),
-              decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
+              decoration:
+                  BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
               child: list.isEmpty
                   ? Padding(
                       padding: const EdgeInsets.symmetric(vertical: AppSpace.x24),
@@ -256,7 +261,8 @@ class _TotalCard extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(Rupiah.format(amount), style: t.amountL.copyWith(fontSize: 20, fontWeight: FontWeight.w800, color: color)),
+            child: Text(Rupiah.format(amount),
+                style: t.amountL.copyWith(fontSize: 20, fontWeight: FontWeight.w800, color: color)),
           ),
           const SizedBox(height: AppSpace.x4),
           Text(meta, maxLines: 2, style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted)),
@@ -290,7 +296,8 @@ class _Avatar extends StatelessWidget {
       decoration: BoxDecoration(color: AppPalette.soft(context, color), shape: BoxShape.circle),
       child: Text(
         _initials(name),
-        style: context.text.item.copyWith(fontSize: size * 0.32, fontWeight: FontWeight.w800, color: AppPalette.ink(context, color)),
+        style: context.text.item
+            .copyWith(fontSize: size * 0.32, fontWeight: FontWeight.w800, color: AppPalette.ink(context, color)),
       ),
     );
   }
@@ -467,7 +474,8 @@ class _DebtDetail extends ConsumerWidget {
         for (final DebtPayment p in d.payments)
           _HistoryLine(
             when: DateFmt.date(p.paidAt, now: now),
-            what: 'Dibayar ${Rupiah.format(p.amount)}${p.walletId != null ? ' · ${walletNames[p.walletId] ?? ''}' : ''}',
+            what:
+                'Dibayar ${Rupiah.format(p.amount)}${p.walletId != null ? ' · ${walletNames[p.walletId] ?? ''}' : ''}',
             onDelete: () => _deletePayment(context, ref, p),
           ),
         const SizedBox(height: AppSpace.x16),
@@ -485,7 +493,8 @@ class _DebtDetail extends ConsumerWidget {
               label: 'Tagih lewat WhatsApp',
               icon: HiIcons.phone,
               variant: AppButtonVariant.soft,
-              onPressed: () => showAppSheet<void>(context, title: 'Pesan pengingat', builder: (_) => _RemindSheet(d: d)),
+              onPressed: () =>
+                  showAppSheet<void>(context, title: 'Pesan pengingat', builder: (_) => _RemindSheet(d: d)),
             ),
           ],
           const SizedBox(height: AppSpace.x8),
@@ -501,7 +510,8 @@ class _DebtDetail extends ConsumerWidget {
             ),
             const SizedBox(width: AppSpace.x8),
             Expanded(
-              child: AppButton(label: 'Hapus', variant: AppButtonVariant.danger, onPressed: () => _delete(context, ref, d)),
+              child: AppButton(
+                  label: 'Hapus', variant: AppButtonVariant.danger, onPressed: () => _delete(context, ref, d)),
             ),
           ],
         ),
@@ -513,7 +523,9 @@ class _DebtDetail extends ConsumerWidget {
     final bool ok = await confirmDialog(
       context,
       title: 'Hapus pembayaran ${Rupiah.format(p.amount)}?',
-      body: p.walletId == null ? 'Sisa utangnya bertambah lagi.' : 'Sisa utangnya bertambah lagi dan saldo dompet dikembalikan.',
+      body: p.walletId == null
+          ? 'Sisa utangnya bertambah lagi.'
+          : 'Sisa utangnya bertambah lagi dan saldo dompet dikembalikan.',
       confirm: 'Hapus',
       danger: true,
     );
@@ -607,8 +619,8 @@ class _PaySheet extends ConsumerStatefulWidget {
 }
 
 class _PaySheetState extends ConsumerState<_PaySheet> {
-  late final TextEditingController _amount =
-      TextEditingController(text: Rupiah.digits(widget.amount != null && widget.amount! <= widget.d.left ? widget.amount! : widget.d.left));
+  late final TextEditingController _amount = TextEditingController(
+      text: Rupiah.digits(widget.amount != null && widget.amount! <= widget.d.left ? widget.amount! : widget.d.left));
   late int? _walletId = widget.walletId ?? widget.d.debt.walletId;
   String? _error;
 
@@ -660,7 +672,9 @@ class _PaySheetState extends ConsumerState<_PaySheet> {
           inputFormatters: const [RupiahInputFormatter()],
           style: t.number,
           decoration: const InputDecoration(
-              labelText: 'Nominal dibayar', prefixIcon: RupiahPrefix(), prefixIconConstraints: RupiahPrefix.constraints),
+              labelText: 'Nominal dibayar',
+              prefixIcon: RupiahPrefix(),
+              prefixIconConstraints: RupiahPrefix.constraints),
         ),
         const SizedBox(height: AppSpace.x12),
         Wrap(
@@ -779,7 +793,9 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
   late DebtDirection _dir = _e?.direction ?? widget.direction ?? DebtDirection.piutang;
   late final TextEditingController _name = TextEditingController(text: _e?.name ?? widget.draft?.name ?? '');
   late final TextEditingController _amount = TextEditingController(
-      text: _e != null ? Rupiah.digits(_e.amount) : (widget.draft?.amount == null ? '' : Rupiah.digits(widget.draft!.amount!)));
+      text: _e != null
+          ? Rupiah.digits(_e.amount)
+          : (widget.draft?.amount == null ? '' : Rupiah.digits(widget.draft!.amount!)));
   late final TextEditingController _note = TextEditingController(text: _e?.note ?? '');
   late int? _walletId = _e?.walletId ?? widget.draft?.walletId;
   late DateTime _date = _e?.occurredAt ?? ref.read(clockProvider)();
@@ -855,7 +871,8 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
           maxLength: 40,
           style: t.item,
           textCapitalization: TextCapitalization.words,
-          decoration: InputDecoration(labelText: 'Nama', hintText: lend ? 'Siapa yang pinjam?' : 'Pinjam dari siapa?', counterText: ''),
+          decoration: InputDecoration(
+              labelText: 'Nama', hintText: lend ? 'Siapa yang pinjam?' : 'Pinjam dari siapa?', counterText: ''),
         ),
         const SizedBox(height: AppSpace.x12),
         TextField(

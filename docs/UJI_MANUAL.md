@@ -169,3 +169,22 @@ Semua alur di bawah juga sudah punya tes otomatis; daftar ini untuk hal yang **t
 - [x] "Kurangi animasi" aktif → animasi (splash, angka, progress) mati.
 - [x] Rotasi: tetap potret.
 - [x] Gestur kembali Android (predictive back) wajar di semua layar.
+
+## 10. Cicilan & utang-piutang (P2, baru)
+Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut teruji.
+- [ ] Setelah update: dompet, transaksi, tagihan lama tetap utuh.
+- [ ] Tagihan → + Tambah → chip "SPayLater" → saklar Cicilan menyala; atur tenor 12, sudah dibayar 3 → baris "Cicilan 4/12 · sisa … · lunas …" + bar progres.
+- [ ] "Bayar 4/12" → tercatat pengeluaran "SPayLater · cicilan 4/12" (kategori Tagihan bila kosong), hitungan naik.
+- [ ] Cicilan terakhir → muncul "… lunas!", tagihan hilang dari Akan datang, tidak ada pengingat lagi.
+- [ ] Ringkasan "Sisa cicilan Rp… · N berjalan" di Tagihan dan Beranda (Beranda: tersamar saat saldo disembunyikan).
+- [ ] Versi gratis: cicilan ikut batas 3 tagihan aktif.
+- [ ] Lainnya › Utang-piutang → + Catat "Aku meminjamkan" Budi Rp200.000 dari Tunai → saldo Tunai turun, Laporan pengeluaran tidak berubah, Riwayat menampilkan "Dipinjamkan ke Budi".
+- [ ] Catat pembayaran Rp100.000 → status Dicicil + bar; bayar lagi Rp100.000 → "Budi lunas!", status Lunas.
+- [ ] Jatuh tempo lewat → chip "Lewat jatuh tempo" + hitungan di kartu ringkasan.
+- [ ] Tagih lewat WhatsApp → teks bisa diubah → menu Bagikan → WhatsApp; kembali ke HitungIn tidak minta PIN lagi.
+- [ ] Utangku dengan jatuh tempo sebelum gajian → Jatah hari ini turun; rinciannya ada baris "Utang jatuh tempo".
+- [ ] Catat cepat di Beranda: "pinjam budi 200rb" → form Utang-piutang terisi; "budi bayar 100rb" → sheet pembayaran Budi; "pinjam dari sinta 300rb" → arah Aku meminjam.
+- [ ] Ketik "pinjam budi" di kolom Catat cepat layar Catat → muncul ajakan "Utang-piutang: … Buka ›".
+- [ ] Detail transaksi utang → tanpa Edit/Hapus, tombol "Buka Utang-piutang".
+- [ ] Hapus catatan utang → saldo dompet kembali seperti semula.
+- [ ] Backup → pulihkan: catatan utang, pembayaran, dan cicilan kembali utuh.
