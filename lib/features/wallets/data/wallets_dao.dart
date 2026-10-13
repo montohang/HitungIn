@@ -12,10 +12,11 @@ typedef WalletBalance = ({Wallet wallet, int balance});
 class WalletsDao extends DatabaseAccessor<AppDatabase> with _$WalletsDaoMixin {
   WalletsDao(super.attachedDatabase);
 
-  /// Saldo = saldo awal + pemasukan − pengeluaran − transfer keluar + transfer masuk.
+  /// Saldo = saldo awal + pemasukan − pengeluaran − transfer keluar + transfer masuk
+  /// ± uang utang-piutang (utangMasuk menambah, utangKeluar mengurangi).
   static const String _balanceSql = '''
     w.initial_balance
-    + COALESCE((SELECT SUM(CASE t.kind WHEN 'pemasukan' THEN t.amount ELSE -t.amount END)
+    + COALESCE((SELECT SUM(CASE WHEN t.kind IN ('pemasukan', 'utangMasuk') THEN t.amount ELSE -t.amount END)
                 FROM transactions t WHERE t.wallet_id = w.id), 0)
     + COALESCE((SELECT SUM(t.amount) FROM transactions t WHERE t.to_wallet_id = w.id), 0)
   ''';

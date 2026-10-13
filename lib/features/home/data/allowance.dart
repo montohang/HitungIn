@@ -1,8 +1,10 @@
 import '../../../core/db/tables.dart';
 import '../../../core/utils/dates.dart';
 
-/// Satu kewajiban yang akan jatuh tempo (tagihan atau pengeluaran berulang).
-typedef UpcomingDue = ({String name, int amount, DateTime next, BillRepeat repeat, int anchorDay});
+/// Satu kewajiban yang akan jatuh tempo (tagihan, cicilan, pengeluaran
+/// berulang, atau utang). [times] membatasi jumlah kemunculan (sisa cicilan);
+/// null = tanpa batas.
+typedef UpcomingDue = ({String name, int amount, DateTime next, BillRepeat repeat, int anchorDay, int? times});
 
 /// Keadaan kartu "Jatah hari ini".
 enum AllowanceState {
@@ -31,6 +33,8 @@ class Allowance {
     required this.balance,
     required this.billsDue,
     required this.recurringDue,
+    this.debtsDue = 0,
+    this.debtNames = const [],
     required this.perSaldo,
     required this.perBudget,
     required this.useBudget,
@@ -55,6 +59,10 @@ class Allowance {
   final int billsDue;
   final int recurringDue;
 
+  /// Utang (aku berutang) yang jatuh tempo sampai akhir periode (P2-2).
+  final int debtsDue;
+  final List<String> debtNames;
+
   /// Jatah per hari menurut saldo, dan menurut sisa budget bulan ini (null
   /// bila budget total tidak diatur).
   final int perSaldo;
@@ -75,7 +83,7 @@ class Allowance {
 
   /// Uang yang tidak terikat tagihan/berulang sampai gajian (sudah dikurangi
   /// pengeluaran hari ini, karena saldo sekarang sudah termasuk itu).
-  int get free => balance - billsDue - recurringDue;
+  int get free => balance - billsDue - recurringDue - debtsDue;
 }
 
 /// Tanggal gajian berikutnya setelah [today] untuk tanggal [payday] (1–31;
@@ -104,7 +112,7 @@ int _floor100(int v) => v <= 0 ? 0 : (v ~/ 100) * 100;
   for (final UpcomingDue it in items) {
     DateTime? at = Dates.day(it.next);
     int count = 0;
-    while (at != null && !at.isAfter(until) && count < 60) {
+    while (at != null && !at.isAfter(until) && count < (it.times ?? 60)) {
       if (overdue || !at.isBefore(from)) {
         total += it.amount;
         if (!names.contains(it.name)) names.add(it.name);
@@ -127,6 +135,7 @@ Allowance computeAllowance({
   required int spentToday,
   required List<UpcomingDue> bills,
   required List<UpcomingDue> recurring,
+  List<UpcomingDue> debts = const [],
   int? budgetLeft,
 }) {
   final DateTime today = Dates.day(now);
@@ -137,7 +146,8 @@ Allowance computeAllowance({
 
   final b = _dueUntil(bills, today, periodEnd, overdue: true);
   final r = _dueUntil(recurring, today, periodEnd, overdue: false);
-  final int free = balance - b.total - r.total;
+  final d = _dueUntil(debts, today, periodEnd, overdue: true);
+  final int free = balance - b.total - r.total - d.total;
 
   final int perSaldo = _floor100((free + spentToday) ~/ daysPay);
   final int? perBudget = budgetLeft == null ? null : _floor100((budgetLeft + spentToday) ~/ daysMonth);
@@ -170,6 +180,8 @@ Allowance computeAllowance({
     balance: balance,
     billsDue: b.total,
     recurringDue: r.total,
+    debtsDue: d.total,
+    debtNames: d.names,
     perSaldo: perSaldo,
     perBudget: perBudget,
     useBudget: useBudget,

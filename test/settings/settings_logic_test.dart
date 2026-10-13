@@ -12,6 +12,7 @@ import 'package:hitungin/features/settings/data/settings_dao.dart';
 import '../helpers/fakes.dart';
 
 Bill _bill(DateTime due, {int remind = 3}) => Bill(
+      installmentPaid: 0,
       id: 1,
       name: 'Listrik',
       amount: 450000,

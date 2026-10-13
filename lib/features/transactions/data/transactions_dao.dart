@@ -186,7 +186,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
     final DateTime end = DateTime(lastMonth.year, lastMonth.month + 1);
     final q = selectOnly(transactions)
       ..addColumns([transactions.kind, transactions.amount, transactions.occurredAt])
-      ..where(transactions.kind.isNotValue(TxKind.transfer.name) &
+      ..where(transactions.kind.isInValues([TxKind.pemasukan, TxKind.pengeluaran]) &
           transactions.occurredAt.isBiggerOrEqualValue(first) &
           transactions.occurredAt.isSmallerThanValue(end));
     if (walletId != null) q.where(transactions.walletId.equals(walletId));

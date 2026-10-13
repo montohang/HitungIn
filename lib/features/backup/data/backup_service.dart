@@ -13,6 +13,7 @@ typedef BackupSummary = ({
   int bills,
   int budgets,
   int recurring,
+  int debts,
 });
 
 /// Mengubah seluruh isi database menjadi peta JSON dan sebaliknya.
@@ -41,6 +42,8 @@ class BackupService {
         'categories': rows(await db.select(db.categories).get()),
         'bills': rows(await db.select(db.bills).get()),
         'recurring': rows(await db.select(db.recurringTxs).get()),
+        'debts': rows(await db.select(db.debts).get()),
+        'debtPayments': rows(await db.select(db.debtPayments).get()),
         'transactions': rows(await db.select(db.transactions).get()),
         'budgets': rows(await db.select(db.budgets).get()),
         'settings': rows([
@@ -63,6 +66,7 @@ class BackupService {
       bills: count('bills'),
       budgets: count('budgets'),
       recurring: count('recurring'),
+      debts: count('debts'),
     );
   }
 
@@ -91,6 +95,8 @@ class BackupService {
     await db.transaction(() async {
       // Hapus dari anak ke induk (foreign key aktif).
       await db.delete(db.transactions).go();
+      await db.delete(db.debtPayments).go();
+      await db.delete(db.debts).go();
       await db.delete(db.recurringTxs).go();
       await db.delete(db.budgets).go();
       await db.delete(db.bills).go();
@@ -102,9 +108,13 @@ class BackupService {
         // Cadangan sebelum v4 tidak punya warna/sub-kategori → nilai bawaan.
         b.insertAll(db.wallets, [for (final r in rows('wallets')) Wallet.fromJson({'color': 0, ...r})]);
         b.insertAll(db.categories, [for (final r in rows('categories')) Category.fromJson({'color': 0, 'subs': '', ...r})]);
-        b.insertAll(db.bills, [for (final r in rows('bills')) Bill.fromJson(r)]);
+        // Cadangan sebelum v5 tidak punya kolom cicilan → tagihan biasa.
+        b.insertAll(db.bills, [for (final r in rows('bills')) Bill.fromJson({'installmentPaid': 0, ...r})]);
         // Cadangan v1 tidak punya 'recurring' → kosong.
         b.insertAll(db.recurringTxs, [for (final r in rows('recurring')) RecurringTx.fromJson(r)]);
+        // Cadangan sebelum v5 tidak punya utang-piutang → kosong.
+        b.insertAll(db.debts, [for (final r in rows('debts')) Debt.fromJson(r)]);
+        b.insertAll(db.debtPayments, [for (final r in rows('debtPayments')) DebtPayment.fromJson(r)]);
         b.insertAll(db.transactions, [for (final r in rows('transactions')) Txn.fromJson({'sub': '', ...r})]);
         // Cadangan sebelum v3 tidak punya fromMonth → berlaku sejak awal.
         b.insertAll(db.budgets, [

@@ -11,11 +11,11 @@ void main() {
 
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  // AppDatabase selalu bermigrasi ke versi terbaru, jadi validasi ke v3.
-  test('v1 → v4: skema hasil migrasi sama dengan skema baru', () async {
+  // AppDatabase selalu bermigrasi ke versi terbaru, jadi validasi ke v5.
+  test('v1 → v5: skema hasil migrasi sama dengan skema baru', () async {
     final schema = await verifier.schemaAt(1);
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 4);
+    await verifier.migrateAndValidate(db, 5);
     await db.close();
   });
 
@@ -49,10 +49,10 @@ void main() {
     await db.close();
   });
 
-  test('v2 → v4: skema hasil migrasi sama dengan skema baru', () async {
+  test('v2 → v5: skema hasil migrasi sama dengan skema baru', () async {
     final schema = await verifier.schemaAt(2);
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 4);
+    await verifier.migrateAndValidate(db, 5);
     await db.close();
   });
 
@@ -80,12 +80,34 @@ void main() {
       ..execute("INSERT INTO categories (id, name, kind, icon, keywords, sort_order, archived) "
           "VALUES (1, 'Makan & Minum', 'pengeluaran', 'food', 'makan', 0, 0), (2, 'Kucing', 'pengeluaran', 'fun', '', 1, 0)");
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 4);
+    await verifier.migrateAndValidate(db, 5);
     final cats = {for (final c in await db.select(db.categories).get()) c.name: c};
     expect((cats['Makan & Minum']!.color, cats['Makan & Minum']!.subs), (0, 'Kopi,Makan siang,Jajan'));
     expect((cats['Kucing']!.color, cats['Kucing']!.subs), (0, ''));
     final wallets = await (db.select(db.wallets)..orderBy([(w) => OrderingTerm(expression: w.sortOrder)])).get();
     expect([for (final w in wallets) w.color], [0, 2]);
+    await db.close();
+  });
+
+  test('v4 → v5: tagihan lama jadi tagihan biasa, cicilan & utang-piutang langsung bisa dipakai', () async {
+    final schema = await verifier.schemaAt(4);
+    schema.rawDatabase
+      ..execute("INSERT INTO wallets (id, name, type, initial_balance, icon, color, sort_order, archived, created_at) "
+          "VALUES (1, 'Tunai', 'tunai', 500000, 'cash', 0, 0, 0, 1759000000)")
+      ..execute("INSERT INTO bills (id, name, amount, wallet_id, next_due, repeat, anchor_day, remind_days_before, active, created_at) "
+          "VALUES (1, 'Kos', 1000000, 1, 1761955200, 'bulanan', 1, 1, 1, 1759000000)")
+      ..execute("INSERT INTO transactions (kind, amount, wallet_id, note, sub, occurred_at, created_at, updated_at) "
+          "VALUES ('pengeluaran', 25000, 1, 'Kopi', '', 1759300000, 1759300000, 1759300000)");
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 5);
+    final Bill kos = (await db.select(db.bills).get()).single;
+    expect((kos.installmentTotal, kos.installmentPaid), (null, 0));
+    expect((await db.walletsDao.watchBalances().first).single.balance, 475000);
+
+    await db.debtsDao.add(
+        direction: DebtDirection.piutang, name: 'Budi', amount: 200000, occurredAt: DateTime(2026, 10, 5), walletId: 1);
+    expect((await db.walletsDao.watchBalances().first).single.balance, 275000);
     await db.close();
   });
 }

@@ -17,12 +17,36 @@ enum WalletType {
 }
 
 /// Jenis transaksi. Kategori hanya punya [pengeluaran] / [pemasukan].
+///
+/// [utangKeluar] / [utangMasuk] (v5) = uang keluar/masuk dompet karena
+/// utang-piutang: mengubah saldo tetapi tidak dihitung sebagai pengeluaran
+/// atau pemasukan di Laporan, Budget, maupun Jatah. Hanya dibuat oleh
+/// `DebtsDao`, tidak bisa dipilih di Catat.
 enum TxKind {
   pengeluaran('Pengeluaran'),
   pemasukan('Pemasukan'),
-  transfer('Transfer');
+  transfer('Transfer'),
+  utangKeluar('Utang-piutang'),
+  utangMasuk('Utang-piutang');
 
   const TxKind(this.label);
+  final String label;
+
+  bool get isDebt => this == utangKeluar || this == utangMasuk;
+
+  /// Menambah saldo dompet sumbernya ([walletId]).
+  bool get isInflow => this == pemasukan || this == utangMasuk;
+}
+
+/// Arah catatan utang-piutang (v5).
+enum DebtDirection {
+  /// Orang lain berutang ke aku (aku meminjamkan).
+  piutang('Ditagih ke orang'),
+
+  /// Aku berutang ke orang lain (aku meminjam).
+  utang('Utangku');
+
+  const DebtDirection(this.label);
   final String label;
 }
 
@@ -112,6 +136,12 @@ class Transactions extends Table {
 
   /// Jadwal asal, bila transaksi dicatat otomatis oleh transaksi berulang (v2).
   IntColumn get recurringId => integer().nullable().references(RecurringTxs, #id, onDelete: KeyAction.setNull)();
+
+  /// Catatan utang-piutang asal (v5). Ikut terhapus bersama catatannya.
+  IntColumn get debtId => integer().nullable().references(Debts, #id, onDelete: KeyAction.cascade)();
+
+  /// Pembayaran utang asal (v5); kosong = transaksi pinjaman awal.
+  IntColumn get debtPaymentId => integer().nullable().references(DebtPayments, #id, onDelete: KeyAction.cascade)();
   DateTimeColumn get occurredAt => dateTime()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
@@ -161,6 +191,41 @@ class Bills extends Table {
   IntColumn get anchorDay => integer().check(anchorDay.isBetweenValues(1, 31))();
   IntColumn get remindDaysBefore => integer().withDefault(const Constant(1))();
   BoolColumn get active => boolean().withDefault(const Constant(true))();
+
+  /// Cicilan (v5): jumlah cicilan (tenor, 2–60); kosong = tagihan biasa.
+  IntColumn get installmentTotal => integer().nullable().check(installmentTotal.isBetweenValues(2, 60))();
+
+  /// Cicilan yang sudah dibayar. Saat sama dengan tenor, tagihan selesai.
+  IntColumn get installmentPaid => integer().withDefault(const Constant(0))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Catatan utang-piutang (v5). Sisa = [amount] − jumlah [DebtPayments].
+/// Bila [walletId] diisi, pinjaman awal tercatat sebagai transaksi
+/// utangKeluar/utangMasuk sehingga saldo dompet ikut berubah.
+@DataClassName('Debt')
+class Debts extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get direction => textEnum<DebtDirection>()();
+  TextColumn get name => text().withLength(min: 1, max: 40)();
+  IntColumn get amount => integer().check(amount.isBiggerThanValue(0))();
+  IntColumn get walletId => integer().nullable().references(Wallets, #id, onDelete: KeyAction.setNull)();
+  DateTimeColumn get occurredAt => dateTime()();
+
+  /// Jatuh tempo (tanggal saja), opsional.
+  DateTimeColumn get dueDate => dateTime().nullable()();
+  TextColumn get note => text().withDefault(const Constant(''))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Pembayaran (sebagian) satu catatan utang-piutang (v5).
+@DataClassName('DebtPayment')
+class DebtPayments extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get debtId => integer().references(Debts, #id, onDelete: KeyAction.cascade)();
+  IntColumn get amount => integer().check(amount.isBiggerThanValue(0))();
+  IntColumn get walletId => integer().nullable().references(Wallets, #id, onDelete: KeyAction.setNull)();
+  DateTimeColumn get paidAt => dateTime()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 

@@ -101,6 +101,7 @@ abstract final class Routes {
   static const String dompet = '/pengaturan/dompet';
   static const String kategori = '/pengaturan/kategori';
   static const String tagihan = '/tagihan';
+  static const String utang = '/utang';
   static const String keamanan = '/pengaturan/keamanan';
   static const String gantiPin = '/pengaturan/keamanan/ganti-pin';
   static const String cadangan = '/pengaturan/cadangan';

@@ -19,8 +19,8 @@ abstract final class CsvExport {
         d.category?.name ?? '',
         d.wallet.name,
         d.toWallet?.name ?? '',
-        // Bertanda supaya mudah dijumlah: pengeluaran negatif.
-        '${d.tx.kind == TxKind.pengeluaran ? -d.tx.amount : d.tx.amount}',
+        // Bertanda supaya mudah dijumlah: uang keluar negatif.
+        '${d.tx.kind == TxKind.pengeluaran || d.tx.kind == TxKind.utangKeluar ? -d.tx.amount : d.tx.amount}',
         d.tx.note,
       ].map(_cell).join(','));
     }

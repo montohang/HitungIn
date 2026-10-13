@@ -9,6 +9,7 @@ import 'package:hitungin/features/premium/data/pro_limits.dart';
 import 'package:hitungin/features/security/app_gate.dart';
 
 Bill _bill(int id, DateTime due, {int remind = 3, bool active = true, int amount = 450000, String name = 'Listrik PLN'}) => Bill(
+      installmentPaid: 0,
       id: id,
       name: name,
       amount: amount,

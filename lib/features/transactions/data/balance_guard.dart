@@ -3,7 +3,7 @@ import '../../../core/db/app_database.dart';
 /// Pengaruh satu transaksi pada saldo dompet [walletId].
 int txEffectOn(int walletId, {required TxKind kind, required int amount, required int fromWallet, int? toWallet}) {
   int effect = 0;
-  if (fromWallet == walletId) effect += kind == TxKind.pemasukan ? amount : -amount;
+  if (fromWallet == walletId) effect += kind.isInflow ? amount : -amount;
   if (kind == TxKind.transfer && toWallet == walletId) effect += amount;
   return effect;
 }

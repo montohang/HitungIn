@@ -20,10 +20,11 @@ String txTitle(TxDetail d) {
   return d.category?.name ?? d.tx.kind.label;
 }
 
-/// Nominal bertanda: pengeluaran −, pemasukan +, transfer tanpa tanda.
+/// Nominal bertanda: pengeluaran −, pemasukan +, transfer tanpa tanda;
+/// utang-piutang mengikuti arah uang di dompet.
 int txSignedAmount(Txn tx) => switch (tx.kind) {
-      TxKind.pengeluaran => -tx.amount,
-      TxKind.pemasukan => tx.amount,
+      TxKind.pengeluaran || TxKind.utangKeluar => -tx.amount,
+      TxKind.pemasukan || TxKind.utangMasuk => tx.amount,
       TxKind.transfer => 0,
     };
 
@@ -54,6 +55,7 @@ class TxRow extends StatelessWidget {
     final Txn tx = detail.tx;
     final bool income = tx.kind == TxKind.pemasukan;
     final bool transfer = tx.kind == TxKind.transfer;
+    final bool debt = tx.kind.isDebt;
 
     final String day = DateFmt.relativeDay(tx.occurredAt, now: now);
     final String when = !showDate || day == 'Hari ini'
@@ -83,10 +85,10 @@ class TxRow extends StatelessWidget {
         child: Row(
           children: [
             IconTile(
-              icon: transfer ? HiIcons.swap : AppIcons.of(detail.category?.icon ?? 'other'),
-              emoji: transfer ? null : AppIcons.emojiOf(detail.category?.icon ?? ''),
-              color: income ? c.good : (transfer ? c.sub : AppPalette.ink(context, detail.category?.color ?? 0)),
-              background: income ? c.goodSoft : (transfer ? c.chip : AppPalette.soft(context, detail.category?.color ?? 0)),
+              icon: transfer ? HiIcons.swap : (debt ? HiIcons.people : AppIcons.of(detail.category?.icon ?? 'other')),
+              emoji: transfer || debt ? null : AppIcons.emojiOf(detail.category?.icon ?? ''),
+              color: income ? c.good : (transfer || debt ? c.sub : AppPalette.ink(context, detail.category?.color ?? 0)),
+              background: income ? c.goodSoft : (transfer || debt ? c.chip : AppPalette.soft(context, detail.category?.color ?? 0)),
             ),
             SizedBox(width: gap),
             Expanded(

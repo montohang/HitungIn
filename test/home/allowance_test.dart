@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hitungin/core/db/tables.dart';
 import 'package:hitungin/features/home/data/allowance.dart';
 
-UpcomingDue _due(String name, int amount, DateTime next, {BillRepeat repeat = BillRepeat.bulanan}) =>
-    (name: name, amount: amount, next: next, repeat: repeat, anchorDay: next.day);
+UpcomingDue _due(String name, int amount, DateTime next, {BillRepeat repeat = BillRepeat.bulanan, int? times}) =>
+    (name: name, amount: amount, next: next, repeat: repeat, anchorDay: next.day, times: times);
 
 void main() {
   group('tanggal gajian berikutnya', () {
@@ -112,6 +112,41 @@ void main() {
       final a = computeAllowance(
           now: DateTime(2026, 10, 31), payday: 1, balance: 50000, spentToday: 0, bills: const [], recurring: const []);
       expect((a.daysToPayday, a.jatah, a.tomorrow), (1, 50000, null));
+    });
+  });
+
+  group('cicilan & utang (P2)', () {
+    final now = DateTime(2026, 10, 19, 8);
+
+    test('cicilan berhenti dihitung setelah cicilan terakhir', () {
+      final a = computeAllowance(
+        now: now,
+        payday: 1,
+        balance: 1000000,
+        spentToday: 0,
+        bills: [_due('Kredivo', 100000, DateTime(2026, 10, 20), repeat: BillRepeat.mingguan, times: 2)],
+        recurring: const [],
+      );
+      expect(a.billsDue, 200000, reason: '20 & 27 Okt saja, tidak sampai 3 Nov');
+    });
+
+    test('utang yang jatuh tempo sebelum gajian mengurangi uang bebas; sesudahnya tidak', () {
+      final a = computeAllowance(
+        now: now,
+        payday: 1,
+        balance: 1300000,
+        spentToday: 0,
+        bills: const [],
+        recurring: const [],
+        debts: [
+          _due('Kak Sinta', 260000, DateTime(2026, 10, 25), repeat: BillRepeat.sekali, times: 1),
+          _due('Lewat', 50000, DateTime(2026, 10, 10), repeat: BillRepeat.sekali, times: 1),
+          _due('Nanti', 90000, DateTime(2026, 11, 5), repeat: BillRepeat.sekali, times: 1),
+        ],
+      );
+      expect(a.debtsDue, 310000);
+      expect(a.debtNames, ['Kak Sinta', 'Lewat']);
+      expect(a.jatah, 76100, reason: '(1.300.000 − 310.000) ÷ 13 = 76.153 → 76.100');
     });
   });
 }

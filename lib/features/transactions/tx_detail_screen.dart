@@ -26,7 +26,9 @@ import 'widgets/tx_row.dart';
 import '../../core/widgets/hi_icons.dart';
 
 /// Asal transaksi untuk chip di bawah nominal (desain: "Pengeluaran · dicatat manual").
-String txOrigin(Txn tx) => tx.billId != null
+String txOrigin(Txn tx) => tx.debtId != null
+    ? 'tidak masuk laporan'
+    : tx.billId != null
     ? 'dari tagihan'
     : tx.recurringId != null
         ? 'dicatat otomatis'
@@ -56,6 +58,8 @@ class TxDetailScreen extends ConsumerWidget {
         'Saldo ${d.wallet.name} akan berkurang ${Rupiah.format(d.tx.amount)} dan laporan bulan ini ikut diperbarui.',
       TxKind.transfer =>
         '${Rupiah.format(d.tx.amount)} kembali ke ${d.wallet.name} dari ${d.toWallet?.name ?? 'dompet tujuan'}.',
+      // Tidak bisa dihapus dari sini (lihat tombol "Buka Utang-piutang").
+      TxKind.utangKeluar || TxKind.utangMasuk => '',
     };
     final bool? ok = await showModalBottomSheet<bool>(
       context: context,
@@ -130,7 +134,7 @@ class TxDetailScreen extends ConsumerWidget {
             children: [
               ScreenHeader(
                 title: 'Detail transaksi',
-                trailing: d == null
+                trailing: d == null || d.tx.kind.isDebt
                     ? null
                     : Pressable(
                         onTap: () => context.push(Uri(path: Routes.catat, queryParameters: {'id': '$id'}).toString()),
@@ -160,17 +164,21 @@ class TxDetailScreen extends ConsumerWidget {
                             child: IconTile(
                               icon: d.tx.kind == TxKind.transfer
                                   ? HiIcons.swap
-                                  : AppIcons.of(d.category?.icon ?? 'other'),
-                              emoji: d.tx.kind == TxKind.transfer ? null : AppIcons.emojiOf(d.category?.icon ?? ''),
+                                  : d.tx.kind.isDebt
+                                      ? HiIcons.people
+                                      : AppIcons.of(d.category?.icon ?? 'other'),
+                              emoji: d.tx.kind == TxKind.transfer || d.tx.kind.isDebt
+                                  ? null
+                                  : AppIcons.emojiOf(d.category?.icon ?? ''),
                               size: 56,
                               color: income
                                   ? c.good
-                                  : d.tx.kind == TxKind.transfer
+                                  : d.tx.kind == TxKind.transfer || d.tx.kind.isDebt
                                       ? c.sub
                                       : AppPalette.ink(context, d.category?.color ?? 0),
                               background: income
                                   ? c.goodSoft
-                                  : d.tx.kind == TxKind.transfer
+                                  : d.tx.kind == TxKind.transfer || d.tx.kind.isDebt
                                       ? c.chip
                                       : AppPalette.soft(context, d.category?.color ?? 0),
                             ),
@@ -234,7 +242,22 @@ class TxDetailScreen extends ConsumerWidget {
                         ],
                       ),
               ),
-              if (d != null) ...[
+              if (d != null && d.tx.kind.isDebt) ...[
+                const SizedBox(height: AppSpace.x16),
+                Text(
+                  'Tercatat dari Utang-piutang: mengubah saldo dompet, tidak masuk laporan. Ubah atau hapus dari sana.',
+                  textAlign: TextAlign.center,
+                  style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted, height: 1.5),
+                ),
+                const SizedBox(height: AppSpace.x12),
+                AppButton(
+                  key: const Key('buka-utang'),
+                  label: 'Buka Utang-piutang',
+                  icon: HiIcons.people,
+                  variant: AppButtonVariant.soft,
+                  onPressed: () => context.push(Uri(path: Routes.utang, queryParameters: {'id': '${d.tx.debtId}'}).toString()),
+                ),
+              ] else if (d != null) ...[
                 const SizedBox(height: AppSpace.x16),
                 if (d.tx.kind != TxKind.transfer) ...[
                   _FavoriteButton(tx: d.tx),

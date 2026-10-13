@@ -9,6 +9,8 @@ mixin _$BudgetsDaoMixin on DatabaseAccessor<AppDatabase> {
   $WalletsTable get wallets => attachedDatabase.wallets;
   $BillsTable get bills => attachedDatabase.bills;
   $RecurringTxsTable get recurringTxs => attachedDatabase.recurringTxs;
+  $DebtsTable get debts => attachedDatabase.debts;
+  $DebtPaymentsTable get debtPayments => attachedDatabase.debtPayments;
   $TransactionsTable get transactions => attachedDatabase.transactions;
   BudgetsDaoManager get managers => BudgetsDaoManager(this);
 }
@@ -26,6 +28,10 @@ class BudgetsDaoManager {
       $$BillsTableTableManager(_db.attachedDatabase, _db.bills);
   $$RecurringTxsTableTableManager get recurringTxs =>
       $$RecurringTxsTableTableManager(_db.attachedDatabase, _db.recurringTxs);
+  $$DebtsTableTableManager get debts =>
+      $$DebtsTableTableManager(_db.attachedDatabase, _db.debts);
+  $$DebtPaymentsTableTableManager get debtPayments =>
+      $$DebtPaymentsTableTableManager(_db.attachedDatabase, _db.debtPayments);
   $$TransactionsTableTableManager get transactions =>
       $$TransactionsTableTableManager(_db.attachedDatabase, _db.transactions);
 }

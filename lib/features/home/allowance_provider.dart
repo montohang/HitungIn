@@ -5,6 +5,9 @@ import '../../core/db/data_providers.dart';
 import '../../core/db/providers.dart';
 import '../../core/security/secure_store.dart';
 import '../bills/bills_screen.dart' show activeBillsProvider;
+import '../bills/data/bill_due.dart';
+import '../debts/data/debts_dao.dart';
+import '../debts/debts_provider.dart';
 import '../settings/data/settings_dao.dart';
 import '../transactions/data/transactions_dao.dart' show TxDetail;
 import '../wallets/data/wallets_dao.dart';
@@ -63,9 +66,10 @@ final allowanceProvider = Provider<Allowance?>((ref) {
   final List<Bill>? bills = ref.watch(activeBillsProvider).valueOrNull;
   final List<RecurringTx>? rec = ref.watch(_recurringProvider).valueOrNull;
   final List<TxDetail>? today = ref.watch(_todayExpensesProvider).valueOrNull;
+  final List<DebtWithPayments>? debts = ref.watch(debtsProvider).valueOrNull;
   final DateTime month = ref.watch(currentMonthProvider);
   final budgets = ref.watch(budgetProgressProvider(month)).valueOrNull;
-  if (wallets == null || payday == null || excluded == null || bills == null || rec == null || today == null || budgets == null) {
+  if (wallets == null || payday == null || excluded == null || bills == null || rec == null || today == null || budgets == null || debts == null) {
     return null;
   }
   ref.watch(currentDayProvider);
@@ -76,11 +80,20 @@ final allowanceProvider = Provider<Allowance?>((ref) {
     payday: payday,
     balance: wallets.where((w) => counted.contains(w.wallet.id)).fold(0, (s, w) => s + w.balance),
     spentToday: today.where((d) => counted.contains(d.tx.walletId)).fold(0, (s, d) => s + d.tx.amount),
-    bills: [for (final b in bills) (name: b.name, amount: b.amount, next: b.nextDue, repeat: b.repeat, anchorDay: b.anchorDay)],
+    bills: [
+      for (final b in bills)
+        (name: b.name, amount: b.amount, next: b.nextDue, repeat: b.repeat, anchorDay: b.anchorDay, times: installmentOf(b)?.remainingCount),
+    ],
     recurring: [
       for (final r in rec)
         if (r.active && r.kind == TxKind.pengeluaran && counted.contains(r.walletId))
-          (name: r.note.isEmpty ? 'Transaksi berulang' : r.note, amount: r.amount, next: r.nextRun, repeat: r.repeat, anchorDay: r.anchorDay),
+          (name: r.note.isEmpty ? 'Transaksi berulang' : r.note, amount: r.amount, next: r.nextRun, repeat: r.repeat, anchorDay: r.anchorDay, times: null),
+    ],
+    // Utangku yang punya jatuh tempo: sisanya harus disiapkan sebelum gajian.
+    debts: [
+      for (final d in debts)
+        if (d.debt.direction == DebtDirection.utang && d.debt.dueDate != null && d.left > 0)
+          (name: d.debt.name, amount: d.left, next: d.debt.dueDate!, repeat: BillRepeat.sekali, anchorDay: d.debt.dueDate!.day, times: 1),
     ],
     budgetLeft: total == null ? null : total.budget.limitAmount - total.spent,
   );

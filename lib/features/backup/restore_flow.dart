@@ -58,7 +58,8 @@ Future<bool> runRestoreFlow(BuildContext context, WidgetRef ref, {bool onboardin
   }
   if (!context.mounted) return false;
   final String isi = '${s.wallets} dompet, ${s.transactions} transaksi, ${s.budgets} budget, '
-      '${s.bills} tagihan, dan ${s.recurring} transaksi berulang';
+      '${s.bills} tagihan, ${s.recurring} transaksi berulang'
+      '${s.debts > 0 ? ', ${s.debts} catatan utang-piutang' : ''}';
   final bool ok = await confirmDialog(
     context,
     title: onboarding ? 'Pulihkan data ini?' : 'Ganti semua data?',

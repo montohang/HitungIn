@@ -133,6 +133,60 @@ void main() {
       await target.close();
     });
 
+    test('utang-piutang & cicilan: catatan, pembayaran, dan saldonya kembali utuh', () async {
+      final db = _db();
+      final tunai = await db.walletsDao.add(name: 'Tunai', type: WalletType.tunai, initialBalance: 1000000);
+      final id = await db.debtsDao.add(
+          direction: DebtDirection.piutang, name: 'Budi', amount: 200000, occurredAt: DateTime(2026, 10, 5), walletId: tunai, dueDate: DateTime(2026, 10, 20));
+      await db.debtsDao.pay(id, amount: 100000, paidAt: DateTime(2026, 10, 10), walletId: tunai);
+      await db.billsDao.add(
+          name: 'SPayLater', amount: 400000, dueDate: DateTime(2026, 10, 31), repeat: BillRepeat.bulanan, installmentTotal: 12, installmentPaid: 3);
+      final snap = await BackupService(db).snapshot();
+      final restored = await BackupCodec.decrypt(await BackupCodec.encrypt(snap, 'rahasia123', iterations: 1000), 'rahasia123');
+
+      final target = _db();
+      final service = BackupService(target);
+      expect(service.inspect(restored).debts, 1);
+      await service.restore(restored);
+      expect((await target.walletsDao.watchBalances().first).single.balance, 900000);
+      final d = (await target.debtsDao.watchAll().first).single;
+      expect((d.debt.name, d.debt.dueDate, d.payments.single.amount), ('Budi', DateTime(2026, 10, 20), 100000));
+      final txs = await target.transactionsDao.watchRecent().first;
+      expect({for (final t in txs) t.tx.kind}, {TxKind.utangKeluar, TxKind.utangMasuk});
+      final bill = (await target.billsDao.watchActive().first).single;
+      expect((bill.installmentTotal, bill.installmentPaid), (12, 3));
+      await db.close();
+      await target.close();
+    });
+
+    test('cadangan sebelum v5 (tanpa kolom cicilan & utang) → tagihan biasa', () async {
+      final db = _db();
+      await _seed(db);
+      final snap = await BackupService(db).snapshot();
+      final tables = Map<String, Object?>.from(snap['tables']! as Map)
+        ..remove('debts')
+        ..remove('debtPayments');
+      tables['bills'] = [
+        for (final b in tables['bills']! as List)
+          Map<String, Object?>.from(b as Map)
+            ..remove('installmentTotal')
+            ..remove('installmentPaid'),
+      ];
+      tables['transactions'] = [
+        for (final t in tables['transactions']! as List)
+          Map<String, Object?>.from(t as Map)
+            ..remove('debtId')
+            ..remove('debtPaymentId'),
+      ];
+      final target = _db();
+      await BackupService(target).restore({...snap, 'schemaVersion': 4, 'tables': tables});
+      final bill = (await target.billsDao.watchActive().first).single;
+      expect((bill.name, bill.installmentTotal, bill.installmentPaid), ('Kos', null, 0));
+      expect(await target.debtsDao.watchAll().first, isEmpty);
+      await db.close();
+      await target.close();
+    });
+
     test('status onboarding tidak ikut dicadangkan', () async {
       final db = _db();
       await _seed(db);

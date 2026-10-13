@@ -52,7 +52,7 @@ class Favorite {
     final TxKind? kind = TxKind.values.where((k) => k.name == j['kind']).firstOrNull;
     final Object? wallet = j['walletId'];
     final Object? amount = j['amount'];
-    if (kind == null || kind == TxKind.transfer || wallet is! int || amount is! int || amount <= 0) return null;
+    if (kind == null || kind == TxKind.transfer || kind.isDebt || wallet is! int || amount is! int || amount <= 0) return null;
     return Favorite(
       kind: kind,
       note: '${j['note'] ?? ''}',
@@ -125,7 +125,7 @@ List<Favorite> learnFavorites(
 }) {
   final Map<String, ({Txn latest, int count})> groups = {};
   for (final Txn t in txs) {
-    if (t.kind == TxKind.transfer || t.amount <= 0) continue;
+    if (t.kind == TxKind.transfer || t.kind.isDebt || t.amount <= 0) continue;
     final String k = favoriteKeyOf(t);
     final g = groups[k];
     if (g == null) {
