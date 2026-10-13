@@ -11,13 +11,21 @@ import '../../core/db/app_database.dart';
 import '../../core/db/providers.dart';
 import '../../core/platform/launch_routes.dart';
 import '../security/app_gate.dart';
+import '../debts/data/debt_reminders.dart';
+import '../debts/data/debts_dao.dart';
 import 'data/bill_reminders.dart';
 
-/// Payload notifikasi tagihan: `bill:<id>`.
-const String billPayloadPrefix = 'bill:';
+export 'data/bill_reminders.dart' show billPayloadPrefix, debtPayloadPrefix;
 
 /// Layar tujuan untuk payload notifikasi, atau null bila tidak dikenal.
-String? routeForNotification(String payload) => payload.startsWith(billPayloadPrefix) ? Routes.tagihan : null;
+String? routeForNotification(String payload) {
+  if (payload.startsWith(billPayloadPrefix)) return Routes.tagihan;
+  if (payload.startsWith(debtPayloadPrefix)) {
+    final int? id = int.tryParse(payload.substring(debtPayloadPrefix.length));
+    return id == null ? Routes.utang : Uri(path: Routes.utang, queryParameters: {'id': '$id'}).toString();
+  }
+  return null;
+}
 
 /// Layar dari notifikasi yang diketuk, menunggu dibuka oleh shell setelah
 /// layar kunci lewat (push saat terkunci membuat layar kunci ganda).
@@ -112,7 +120,7 @@ class LocalReminderScheduler implements ReminderScheduler {
   @override
   Future<void> cancelPending() async {
     for (final PendingNotificationRequest r in await _plugin.pendingNotificationRequests()) {
-      if (r.id < _debugIdBase) await _plugin.cancel(id: r.id);
+      if (!isDebugReminderId(r.id)) await _plugin.cancel(id: r.id);
     }
   }
 
@@ -120,7 +128,7 @@ class LocalReminderScheduler implements ReminderScheduler {
   Future<void> dismissShown({required Set<int> keepBillIds}) async {
     for (final ActiveNotification n in await _plugin.getActiveNotifications()) {
       final int? id = n.id;
-      if (id == null || id >= _debugIdBase) continue;
+      if (id == null || isDebugReminderId(id)) continue;
       if (!keepBillIds.contains(billIdOfReminder(id))) await _plugin.cancel(id: id);
     }
   }
@@ -161,7 +169,7 @@ class LocalReminderScheduler implements ReminderScheduler {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         title: p.title,
         body: p.body,
-        payload: '$billPayloadPrefix${p.billId}',
+        payload: p.payload,
       );
     }
   }
@@ -217,12 +225,19 @@ Future<int> syncBillReminders({
   required ReminderSettings settings,
   required bool isPro,
   required DateTime now,
+  List<DebtWithPayments> debts = const [],
 }) async {
   final bool on = settings.enabled && isPro;
   await scheduler.cancelPending();
-  await scheduler.dismissShown(keepBillIds: on ? billsInReminderWindow(bills, now) : const {});
+  await scheduler.dismissShown(
+    keepBillIds: on ? {...billsInReminderWindow(bills, now), ...debtsInReminderWindow(debts, now)} : const {},
+  );
   if (!on) return 0;
-  final List<ReminderPlan> plans = planBillReminders(bills, now, hour: settings.hour);
+  final List<ReminderPlan> all = [
+    ...planBillReminders(bills, now, hour: settings.hour),
+    ...planDebtReminders(debts, now, hour: settings.hour),
+  ]..sort((a, b) => a.at.compareTo(b.at));
+  final List<ReminderPlan> plans = all.length > maxScheduledReminders ? all.sublist(0, maxScheduledReminders) : all;
   await scheduler.schedule(plans);
   return plans.length;
 }

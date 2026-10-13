@@ -2,8 +2,13 @@ import '../../../core/db/app_database.dart';
 import '../../../core/utils/rupiah.dart';
 import '../../settings/data/settings_dao.dart';
 
-/// Satu notifikasi yang akan dijadwalkan. [at] = waktu lokal HP.
-typedef ReminderPlan = ({int id, int billId, DateTime at, String title, String body});
+/// Satu notifikasi yang akan dijadwalkan. [at] = waktu lokal HP. [billId] = 0
+/// untuk pengingat utang-piutang; [payload] menentukan layar saat diketuk.
+typedef ReminderPlan = ({int id, int billId, DateTime at, String title, String body, String payload});
+
+/// Payload notifikasi tagihan: `bill:<id>`; utang-piutang: `debt:<id>`.
+const String billPayloadPrefix = 'bill:';
+const String debtPayloadPrefix = 'debt:';
 
 /// Pengaturan pengingat tagihan.
 typedef ReminderSettings = ({bool enabled, int hour});
@@ -33,8 +38,15 @@ Future<void> saveReminderSettings(SettingsDao dao, ReminderSettings s) async {
 /// ID notifikasi stabil per tagihan: 0 = H-n, 1 = hari H.
 int reminderId(int billId, int slot) => billId * 4 + slot;
 
-/// Kebalikan [reminderId].
+/// Kebalikan [reminderId]: pemilik notifikasi (id tagihan, atau
+/// [debtReminderOwner] untuk utang-piutang).
 int billIdOfReminder(int id) => id ~/ 4;
+
+/// Pemilik notifikasi utang-piutang, di luar rentang id tagihan & notifikasi uji.
+int debtReminderOwner(int debtId) => 500000 + debtId;
+
+/// Notifikasi uji (build debug) memakai id 900000–900099.
+bool isDebugReminderId(int id) => id >= 900000 && id < 900100;
 
 /// Tagihan aktif yang sudah masuk masa pengingat (H-n sampai lewat jatuh tempo)
 /// dan belum dibayar — notifikasinya yang sudah tampil boleh tetap ada.
@@ -68,12 +80,20 @@ List<ReminderPlan> planBillReminders(List<Bill> bills, DateTime now, {required i
           at: at,
           title: title,
           body: '${n == 1 ? 'Jatuh tempo besok' : 'Jatuh tempo $n hari lagi'} · $amount',
+          payload: '$billPayloadPrefix${b.id}',
         ));
       }
     }
     final DateTime onDue = DateTime(due.year, due.month, due.day, hour);
     if (onDue.isAfter(now)) {
-      out.add((id: reminderId(b.id, 1), billId: b.id, at: onDue, title: title, body: 'Jatuh tempo hari ini · $amount'));
+      out.add((
+        id: reminderId(b.id, 1),
+        billId: b.id,
+        at: onDue,
+        title: title,
+        body: 'Jatuh tempo hari ini · $amount',
+        payload: '$billPayloadPrefix${b.id}',
+      ));
     }
   }
   out.sort((a, b) => a.at.compareTo(b.at));

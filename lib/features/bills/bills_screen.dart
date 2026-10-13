@@ -949,7 +949,7 @@ class _ReminderCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Notifikasi pengingat', style: t.item),
-                  Text('Diingatkan sebelum jatuh tempo, walau aplikasi tertutup',
+                  Text('Tagihan, cicilan & utang diingatkan sebelum jatuh tempo, walau aplikasi tertutup',
                       style: t.caption.copyWith(color: c.muted)),
                 ],
               ),

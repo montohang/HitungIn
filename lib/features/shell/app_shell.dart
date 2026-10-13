@@ -22,6 +22,8 @@ import '../security/app_gate.dart';
 import '../../core/widgets/hi_icons.dart';
 import '../../core/platform/launch_routes.dart';
 import '../home/widget_sync.dart';
+import '../debts/data/debts_dao.dart';
+import '../debts/debts_provider.dart';
 
 /// Kerangka 4 tab + tombol Catat di tengah. Banner iklan (versi gratis)
 /// tampil di atas navigasi pada tab yang diizinkan [AdPolicy].
@@ -68,20 +70,22 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   Timer? _reminderDebounce;
 
-  /// Jadwalkan ulang notifikasi tagihan (ditunda sebentar supaya beberapa
+  /// Jadwalkan ulang notifikasi tagihan & utang-piutang (ditunda sebentar supaya beberapa
   /// perubahan beruntun cukup sekali disinkronkan).
   void _scheduleReminderSync() {
     _reminderDebounce?.cancel();
     _reminderDebounce = Timer(const Duration(milliseconds: 600), () async {
       final List<Bill>? bills = ref.read(activeBillsProvider).valueOrNull;
       final ReminderSettings? settings = ref.read(reminderSettingsProvider).valueOrNull;
-      if (bills == null || settings == null || !mounted) return;
+      final List<DebtWithPayments>? debts = ref.read(debtsProvider).valueOrNull;
+      if (bills == null || settings == null || debts == null || !mounted) return;
       await syncBillReminders(
         scheduler: ref.read(reminderSchedulerProvider),
         bills: bills,
         settings: settings,
         isPro: ref.read(isProProvider),
         now: ref.read(clockProvider)(),
+        debts: debts,
       );
     });
   }
@@ -153,6 +157,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       if (next != null) _openPendingNotification();
     });
     ref.listen(activeBillsProvider, (_, __) => _scheduleReminderSync());
+    ref.listen(debtsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(reminderSettingsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(isProProvider, (_, __) => _scheduleReminderSync());
     final c = context.colors;

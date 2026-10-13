@@ -25,6 +25,10 @@ import '../../core/widgets/screen_header.dart';
 import '../../core/widgets/segmented_control.dart';
 import '../security/app_gate.dart';
 import '../settings/widgets/settings_tile.dart';
+import '../premium/data/pro_limits.dart';
+import '../premium/pro_controller.dart';
+import '../premium/widgets/pro_teaser.dart';
+import '../bills/reminder_scheduler.dart' show reminderSettingsProvider;
 import '../wallets/data/wallets_dao.dart' show WalletBalance;
 import 'data/debts.dart';
 import 'data/debts_dao.dart';
@@ -918,6 +922,10 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
             if (_due != null) AppChip(label: 'Hapus jatuh tempo', onTap: () => setState(() => _due = null)),
           ],
         ),
+        if (_due != null) ...[
+          const SizedBox(height: AppSpace.x8),
+          _ReminderNote(lend: lend),
+        ],
         const SizedBox(height: AppSpace.x12),
         TextField(
           controller: _note,
@@ -933,6 +941,38 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
         const SizedBox(height: AppSpace.x16),
         AppButton(label: 'Simpan', large: true, onPressed: _save),
       ],
+    );
+  }
+}
+
+/// "Diingatkan H-1 & hari H" — notifikasi memakai pengingat Tagihan (Pro).
+class _ReminderNote extends ConsumerWidget {
+  const _ReminderNote({required this.lend});
+
+  final bool lend;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
+    final t = context.text;
+    final bool pro = FreeLimits.canUseBillNotifications(isPro: ref.watch(isProProvider));
+    final bool on = ref.watch(reminderSettingsProvider).valueOrNull?.enabled ?? true;
+    final String text = !pro
+        ? 'Notifikasi H-1 & hari H ${lend ? 'untuk menagih' : 'sebelum jatuh tempo'} tersedia di Pro.'
+        : on
+            ? 'Diingatkan lewat notifikasi H-1 & hari H, pada jam pengingat Tagihan.'
+            : 'Notifikasi pengingat sedang mati (atur di Tagihan).';
+    return Pressable(
+      onTap: pro ? null : () => openPremium(context, ProReason.notifikasi),
+      semanticLabel: text,
+      child: Row(
+        children: [
+          Icon(HiIcons.bell, size: 16, color: c.muted),
+          const SizedBox(width: AppSpace.x8),
+          Expanded(child: Text(text, style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted))),
+          if (!pro) ...[const SizedBox(width: AppSpace.x8), const AppBadge.pro()],
+        ],
+      ),
     );
   }
 }

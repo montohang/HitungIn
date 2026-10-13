@@ -188,3 +188,5 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [ ] Detail transaksi utang → tanpa Edit/Hapus, tombol "Buka Utang-piutang".
 - [ ] Hapus catatan utang → saldo dompet kembali seperti semula.
 - [ ] Backup → pulihkan: catatan utang, pembayaran, dan cicilan kembali utuh.
+- [ ] (Pro) Utang/piutang dengan jatuh tempo besok → notifikasi H-1 & hari H pada jam pengingat ("Utang ke …" / "Waktunya menagih …"); ketuk saat terkunci → PIN → detail catatan itu.
+- [ ] Catatan dilunasi → notifikasinya yang sudah tampil ikut hilang; versi gratis: form menampilkan lencana PRO, tanpa notifikasi.

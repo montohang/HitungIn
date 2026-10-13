@@ -19,7 +19,7 @@ const List<(IconData, String, String, bool)> proBenefits = [
   (HiIcons.noAds, 'Tanpa iklan', 'Selamanya, di semua layar', true),
   (HiIcons.jar, 'Budget tanpa batas', 'Gratis: total + ${FreeLimits.categoryBudgets} kategori', true),
   (HiIcons.calendar, 'Tagihan tanpa batas', 'Gratis: ${FreeLimits.activeBills} tagihan aktif', true),
-  (HiIcons.bell, 'Notifikasi pengingat tagihan', 'Diingatkan walau aplikasi tertutup', true),
+  (HiIcons.bell, 'Notifikasi pengingat tagihan', 'Tagihan, cicilan & utang diingatkan walau aplikasi tertutup', true),
   (HiIcons.bars, 'Laporan semua bulan', 'Gratis: bulan ini & bulan lalu', true),
   (HiIcons.table, 'Ekspor CSV kapan saja', 'Gratis: sekali per iklan berhadiah', true),
   (HiIcons.trendUp, 'Arus kas 12 bulan & filter dompet', 'Gratis: arus kas 6 bulan', true),
