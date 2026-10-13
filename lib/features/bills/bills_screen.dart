@@ -35,6 +35,8 @@ import '../../core/widgets/screen_header.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/utils/dates.dart';
 import '../../core/theme/app_palette.dart';
+import '../../core/widgets/celebration.dart';
+import '../../core/widgets/progress_bar.dart';
 
 final activeBillsProvider = StreamProvider<List<Bill>>((ref) => ref.watch(appDatabaseProvider).billsDao.watchActive());
 
@@ -121,6 +123,11 @@ class BillsScreen extends ConsumerWidget {
                             soon.count == 0 ? 'Tidak ada tagihan tertunda' : '${soon.count} tagihan belum dibayar',
                             style: t.caption.copyWith(color: c.muted),
                           ),
+                          if (installmentsSummary(bills) case (amount: final int left, count: final int n) when n > 0) ...[
+                            const SizedBox(height: AppSpace.x8),
+                            AppBadge(installmentSummaryLabel(left, n),
+                                background: c.accentSoft, foreground: c.accentText),
+                          ],
                         ],
                       ),
                     ),
@@ -198,6 +205,7 @@ class _BillRow extends ConsumerWidget {
     final c = context.colors;
     final t = context.text;
     final BillDue due = billDue(bill, now);
+    final InstallmentInfo? inst = installmentOf(bill);
     final Category? category = (ref.watch(activeCategoriesProvider).valueOrNull ?? const <Category>[])
         .where((cat) => cat.id == bill.categoryId)
         .firstOrNull;
@@ -241,6 +249,10 @@ class _BillRow extends ConsumerWidget {
                       Text(Rupiah.format(bill.amount), style: t.number),
                     ],
                   ),
+                  if (inst != null) ...[
+                    const SizedBox(height: AppSpace.x8),
+                    _InstallmentLine(inst: inst),
+                  ],
                   const SizedBox(height: AppSpace.x8),
                   Row(
                     children: [
@@ -253,7 +265,7 @@ class _BillRow extends ConsumerWidget {
                           children: [
                             AppBadge(billDueLabel(due), background: bg, foreground: fg),
                             Text(
-                              [if (wallet != null) wallet, bill.repeat.label.toLowerCase()].join(' · '),
+                              [if (wallet != null) wallet, inst != null ? 'cicilan' : bill.repeat.label.toLowerCase()].join(' · '),
                               style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted),
                             ),
                           ],
@@ -263,7 +275,7 @@ class _BillRow extends ConsumerWidget {
                       Pressable(
                         onTap: () => showAppSheet<void>(context,
                             title: 'Bayar ${bill.name}', builder: (_) => _PaySheet(bill: bill)),
-                        semanticLabel: 'Tandai lunas ${bill.name}',
+                        semanticLabel: inst == null ? 'Tandai lunas ${bill.name}' : 'Bayar cicilan ${inst.next} dari ${inst.total} ${bill.name}',
                         child: Container(
                           height: 32,
                           padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12),
@@ -273,7 +285,8 @@ class _BillRow extends ConsumerWidget {
                             borderRadius: AppRadius.smAll,
                             border: Border.all(color: c.line),
                           ),
-                          child: Text('Tandai lunas', style: t.label.copyWith(color: c.ink)),
+                          child: Text(inst == null ? 'Tandai lunas' : 'Bayar ${inst.next}/${inst.total}',
+                              style: t.label.copyWith(color: c.ink)),
                         ),
                       ),
                     ],
@@ -284,6 +297,45 @@ class _BillRow extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// "Sisa cicilan Rp4,8 jt · 3 berjalan".
+String installmentSummaryLabel(int amount, int count) => 'Sisa cicilan ${Rupiah.compact(amount)} · $count berjalan';
+
+/// "Cicilan 4/12 · sisa Rp3,6 jt · lunas Jun 2027" + bar progres.
+class _InstallmentLine extends StatelessWidget {
+  const _InstallmentLine({required this.inst});
+
+  final InstallmentInfo inst;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    final DateTime end = inst.lastDue;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Cicilan ${inst.next}/${inst.total}', style: t.label.copyWith(color: c.sub2)),
+            const SizedBox(width: AppSpace.x8),
+            Expanded(
+              child: Text(
+                'sisa ${Rupiah.compact(inst.remainingAmount)} · lunas ${DateFmt.monthsShort[end.month - 1]} ${end.year}',
+                textAlign: TextAlign.right,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpace.x8),
+        AppProgressBar(value: inst.paid / inst.total, height: 6, autoLevel: false, color: c.accent),
+      ],
     );
   }
 }
@@ -371,7 +423,8 @@ class BillCard extends ConsumerWidget {
                   children: [
                     Text(bill.name, style: t.item),
                     Text(
-                      '${DateFmt.date(bill.nextDue, now: now)} · ${bill.repeat.label}',
+                      '${DateFmt.date(bill.nextDue, now: now)} · '
+                      '${switch (installmentOf(bill)) { final InstallmentInfo i => 'cicilan ${i.next}/${i.total}', null => bill.repeat.label }}',
                       style: t.caption.copyWith(color: c.muted),
                     ),
                   ],
@@ -436,11 +489,27 @@ class _PaySheetState extends ConsumerState<_PaySheet> {
         .pay(widget.bill, walletId: _walletId, amount: amount, paidAt: ref.read(clockProvider)());
     if (!mounted) return;
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
-    Navigator.pop(context);
+    final NavigatorState nav = Navigator.of(context);
+    final BuildContext outer = nav.context;
+    nav.pop();
+    final InstallmentInfo? inst = installmentOf(widget.bill);
+    if (inst != null && inst.remainingCount <= 1) {
+      // Cicilan terakhir: tagihan selesai sendiri.
+      if (!outer.mounted) return;
+      await showCelebration(
+        outer,
+        title: '${widget.bill.name} lunas!',
+        body: 'Cicilan ${inst.total} kali selesai. ${Rupiah.format(widget.bill.amount)} per bulan sekarang kembali '
+            'jadi milikmu — jatah harianmu ikut naik.',
+      );
+      return;
+    }
     messenger.showSnackBar(SnackBar(
-      content: Text(widget.bill.repeat == BillRepeat.sekali
-          ? 'Lunas · tercatat sebagai pengeluaran'
-          : 'Tercatat · jatuh tempo berikutnya sudah dimajukan'),
+      content: Text(inst != null
+          ? 'Cicilan ${inst.next}/${inst.total} tercatat · sisa ${Rupiah.compact(inst.remainingAmount - widget.bill.amount)}'
+          : widget.bill.repeat == BillRepeat.sekali
+              ? 'Lunas · tercatat sebagai pengeluaran'
+              : 'Tercatat · jatuh tempo berikutnya sudah dimajukan'),
     ));
   }
 
@@ -452,7 +521,12 @@ class _PaySheetState extends ConsumerState<_PaySheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Dicatat sebagai pengeluaran hari ini.', style: t.caption.copyWith(color: c.muted)),
+        Text(
+            switch (installmentOf(widget.bill)) {
+              final InstallmentInfo i => 'Cicilan ${i.next} dari ${i.total} · dicatat sebagai pengeluaran hari ini.',
+              null => 'Dicatat sebagai pengeluaran hari ini.',
+            },
+            style: t.caption.copyWith(color: c.muted)),
         const SizedBox(height: AppSpace.x12),
         TextField(
           controller: _amount,
@@ -481,7 +555,10 @@ class _PaySheetState extends ConsumerState<_PaySheet> {
           Text(_error!, style: t.caption.copyWith(color: c.danger)),
         ],
         const SizedBox(height: AppSpace.x16),
-        AppButton(label: 'Tandai lunas', large: true, onPressed: _confirm),
+        AppButton(
+            label: installmentOf(widget.bill) == null ? 'Tandai lunas' : 'Bayar cicilan',
+            large: true,
+            onPressed: _confirm),
       ],
     );
   }
@@ -520,7 +597,15 @@ class _BillFormState extends ConsumerState<_BillForm> {
   late int _remind = _b?.remindDaysBefore ?? 3;
   late int? _categoryId = _b?.categoryId;
   late int? _walletId = _b?.walletId;
+  late bool _installment = _b?.installmentTotal != null;
+  late int _tenor = _b?.installmentTotal ?? 12;
+  late int _paid = _b?.installmentPaid ?? 0;
   String? _error;
+
+  /// Pilihan cepat nama cicilan/paylater (P2-1).
+  static const List<String> quickNames = [
+    'SPayLater', 'Kredivo', 'Akulaku', 'GoPayLater', 'Kartu kredit', 'Cicilan motor', 'Cicilan HP',
+  ];
 
   @override
   void dispose() {
@@ -528,6 +613,11 @@ class _BillFormState extends ConsumerState<_BillForm> {
     _amount.dispose();
     super.dispose();
   }
+
+  void _setInstallment(bool on) => setState(() {
+        _installment = on;
+        if (on && _repeat == BillRepeat.sekali) _repeat = BillRepeat.bulanan;
+      });
 
   Future<void> _pickDate() async {
     final DateTime? d = await showDatePicker(
@@ -546,6 +636,8 @@ class _BillFormState extends ConsumerState<_BillForm> {
     if (name.isEmpty) return setState(() => _error = 'Isi nama tagihan.');
     if (amount <= 0) return setState(() => _error = 'Isi nominalnya.');
     final dao = ref.read(appDatabaseProvider).billsDao;
+    final int? tenor = _installment ? _tenor : null;
+    final int paid = _installment ? _paid.clamp(0, _tenor - 1) : 0;
     if (_b == null) {
       await dao.add(
         name: name,
@@ -555,6 +647,8 @@ class _BillFormState extends ConsumerState<_BillForm> {
         categoryId: _categoryId,
         walletId: _walletId,
         remindDaysBefore: _remind,
+        installmentTotal: tenor,
+        installmentPaid: paid,
       );
     } else {
       await dao.edit(_b.copyWith(
@@ -566,6 +660,8 @@ class _BillFormState extends ConsumerState<_BillForm> {
         remindDaysBefore: _remind,
         categoryId: Value(_categoryId),
         walletId: Value(_walletId),
+        installmentTotal: Value(tenor),
+        installmentPaid: paid,
       ));
     }
     if (mounted) Navigator.pop(context);
@@ -593,9 +689,31 @@ class _BillFormState extends ConsumerState<_BillForm> {
         if (cat.kind == TxKind.pengeluaran) cat,
     ];
     final wallets = ref.watch(walletBalancesProvider).valueOrNull ?? const [];
+    final int amountNow = RupiahInputFormatter.parse(_amount.text);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_b == null) ...[
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final String n in quickNames) ...[
+                  AppChip(
+                    label: n,
+                    selected: _name.text == n,
+                    onTap: () {
+                      _name.text = n;
+                      _setInstallment(true);
+                    },
+                  ),
+                  const SizedBox(width: AppSpace.x8),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpace.x12),
+        ],
         TextField(
           controller: _name,
           autofocus: _b == null,
@@ -611,9 +729,48 @@ class _BillFormState extends ConsumerState<_BillForm> {
           keyboardType: TextInputType.number,
           inputFormatters: const [RupiahInputFormatter()],
           style: t.number,
-          decoration: const InputDecoration(
-              labelText: 'Nominal', prefixIcon: RupiahPrefix(), prefixIconConstraints: RupiahPrefix.constraints),
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+              labelText: _installment ? 'Nominal per cicilan' : 'Nominal',
+              prefixIcon: const RupiahPrefix(),
+              prefixIconConstraints: RupiahPrefix.constraints),
         ),
+        const SizedBox(height: AppSpace.x12),
+        _InstallmentSwitch(value: _installment, onChanged: _setInstallment),
+        if (_installment) ...[
+          const SizedBox(height: AppSpace.x8),
+          Container(
+            padding: const EdgeInsets.all(AppSpace.x12),
+            decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.mdAll),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Stepper(
+                  label: 'Tenor',
+                  hint: '2–60 kali',
+                  value: '$_tenor kali',
+                  onMinus: _tenor > 2 ? () => setState(() => _paid = _paid.clamp(0, --_tenor - 1)) : null,
+                  onPlus: _tenor < 60 ? () => setState(() => _tenor++) : null,
+                ),
+                const SizedBox(height: AppSpace.x12),
+                _Stepper(
+                  label: 'Sudah dibayar',
+                  hint: 'Kalau cicilan sudah berjalan',
+                  value: '${_paid}x',
+                  onMinus: _paid > 0 ? () => setState(() => _paid--) : null,
+                  onPlus: _paid < _tenor - 1 ? () => setState(() => _paid++) : null,
+                ),
+                const SizedBox(height: AppSpace.x12),
+                Text(
+                  'Berikutnya cicilan ${_paid + 1}/$_tenor'
+                  '${amountNow > 0 ? ' · sisa ${Rupiah.format((_tenor - _paid) * amountNow)}' : ''}. '
+                  'Setelah cicilan ke-$_tenor dibayar, tagihan ini selesai sendiri.',
+                  style: t.caption.copyWith(color: c.sub, height: 1.5),
+                ),
+              ],
+            ),
+          ),
+        ],
         const FieldLabel('Jatuh tempo'),
         AppChip(label: DateFmt.longDate(_due), icon: HiIcons.calendar, selected: true, onTap: _pickDate),
         const FieldLabel('Ulangi'),
@@ -622,7 +779,8 @@ class _BillFormState extends ConsumerState<_BillForm> {
           runSpacing: AppSpace.x8,
           children: [
             for (final r in BillRepeat.values)
-              AppChip(label: r.label, selected: r == _repeat, onTap: () => setState(() => _repeat = r)),
+              if (!_installment || r != BillRepeat.sekali)
+                AppChip(label: r.label, selected: r == _repeat, onTap: () => setState(() => _repeat = r)),
           ],
         ),
         const FieldLabel('Tandai sejak'),
@@ -677,6 +835,85 @@ class _BillFormState extends ConsumerState<_BillForm> {
           const SizedBox(height: AppSpace.x8),
           AppButton(label: 'Hapus tagihan', variant: AppButtonVariant.danger, onPressed: _delete),
         ],
+      ],
+    );
+  }
+}
+
+/// Saklar "Cicilan" di form tagihan.
+class _InstallmentSwitch extends StatelessWidget {
+  const _InstallmentSwitch({required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    return Pressable(
+      onTap: () => onChanged(!value),
+      semanticLabel: 'Cicilan',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12, vertical: AppSpace.x8),
+        decoration: BoxDecoration(borderRadius: AppRadius.mdAll, border: Border.all(color: c.line)),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Cicilan', style: t.item),
+                  Text('Paylater, kartu kredit, kredit motor/HP — berhenti sendiri saat lunas',
+                      style: t.caption.copyWith(color: c.muted)),
+                ],
+              ),
+            ),
+            Switch.adaptive(key: const Key('saklar-cicilan'), value: value, activeTrackColor: c.accent, onChanged: onChanged),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Stepper extends StatelessWidget {
+  const _Stepper({required this.label, required this.hint, required this.value, this.onMinus, this.onPlus});
+
+  final String label;
+  final String hint;
+  final String value;
+  final VoidCallback? onMinus;
+  final VoidCallback? onPlus;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    Widget btn(IconData icon, VoidCallback? onTap, String semantic) => Pressable(
+          onTap: onTap,
+          semanticLabel: semantic,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.smAll, border: Border.all(color: c.line)),
+            child: Icon(icon, size: 18, color: onTap == null ? c.muted : c.ink),
+          ),
+        );
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: t.item.copyWith(fontSize: 14)),
+              Text(hint, style: t.caption.copyWith(color: c.muted)),
+            ],
+          ),
+        ),
+        btn(HiIcons.minus, onMinus, 'Kurangi $label'),
+        SizedBox(width: 64, child: Text(value, textAlign: TextAlign.center, style: t.number.copyWith(fontSize: 15))),
+        btn(HiIcons.plus, onPlus, 'Tambah $label'),
       ],
     );
   }

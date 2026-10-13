@@ -14,6 +14,9 @@ Finder _field(String label) => find.widgetWithText(TextField, label);
 
 Future<void> _tapSheet(WidgetTester tester, String text, {bool chip = false}) async {
   final Finder f = _inSheet(chip ? find.widgetWithText(AppChip, text) : find.text(text));
+  // Tutup keyboard dulu, seperti pengguna sebelum menggulir ke tombol di bawah.
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pumpAndSettle();
   await tester.ensureVisible(f);
   await tester.pumpAndSettle();
   await tester.tap(f);

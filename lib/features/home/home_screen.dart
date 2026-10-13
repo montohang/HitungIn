@@ -62,10 +62,12 @@ class HomeScreen extends ConsumerWidget {
     final bool gradient = ref.watch(themeControllerProvider.select((s) => s.gradientBalanceCard));
     final bool hidden = ref.watch(hideBalanceProvider).valueOrNull ?? false;
     final ({String label, bool fresh}) backup = backupAge(ref.watch(lastBackupProvider).valueOrNull, now);
+    final List<Bill> activeBills = ref.watch(activeBillsProvider).valueOrNull ?? const <Bill>[];
     final List<Bill> dueBills = [
-      for (final b in ref.watch(activeBillsProvider).valueOrNull ?? const <Bill>[])
+      for (final b in activeBills)
         if (billNeedsAttention(b, now)) b,
     ];
+    final ({int amount, int count}) installments = installmentsSummary(activeBills);
     final int total = wallets.fold(0, (sum, w) => sum + w.balance);
     final bool firstDay = recentAsync.hasValue && recent.isEmpty;
 
@@ -169,6 +171,16 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpace.x24),
                 SectionHeader('Tagihan mendatang',
                     action: 'Semua tagihan', onAction: () => context.push(Routes.tagihan)),
+                if (installments.count > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpace.x8),
+                    child: Text(
+                      hidden
+                          ? 'Sisa cicilan Rp•••• · ${installments.count} berjalan'
+                          : installmentSummaryLabel(installments.amount, installments.count),
+                      style: t.caption.copyWith(color: c.muted),
+                    ),
+                  ),
                 for (final b in dueBills.take(3))
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSpace.x8),
