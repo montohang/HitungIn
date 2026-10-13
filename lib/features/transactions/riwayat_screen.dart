@@ -307,7 +307,11 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
                   const SizedBox(height: AppSpace.x16),
                   Row(
                     children: [
-                      Expanded(child: _SumTile(label: 'Masuk ($period)', value: Rupiah.format(sumIn, signed: true), color: sumIn > 0 ? c.good : c.ink)),
+                      Expanded(
+                          child: _SumTile(
+                              label: 'Masuk ($period)',
+                              value: Rupiah.format(sumIn, signed: true),
+                              color: sumIn > 0 ? c.good : c.ink)),
                       const SizedBox(width: AppSpace.x8),
                       Expanded(
                         child: _SumTile(
@@ -343,7 +347,8 @@ class _RiwayatScreenState extends ConsumerState<RiwayatScreen> {
                 itemCount: groups.length,
                 itemBuilder: (context, i) {
                   final (DateTime day, List<TxDetail> list) = groups[i];
-                  final int net = list.fold(0, (sum, d) => sum + txSignedAmount(d.tx));
+                  // Utang-piutang tidak dihitung, sama seperti Masuk/Keluar & Laporan.
+                  final int net = list.where((d) => !d.tx.kind.isDebt).fold(0, (sum, d) => sum + txSignedAmount(d.tx));
                   return Padding(
                     padding: const EdgeInsets.only(bottom: AppSpace.x16),
                     child: Column(
@@ -407,12 +412,16 @@ class _SumTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.text.label.copyWith(fontWeight: FontWeight.w500, color: c.muted)),
+          Text(label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.text.label.copyWith(fontWeight: FontWeight.w500, color: c.muted)),
           const SizedBox(height: AppSpace.x2),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(value, style: context.text.number.copyWith(fontSize: 16, fontWeight: FontWeight.w800, color: color)),
+            child: Text(value,
+                style: context.text.number.copyWith(fontSize: 16, fontWeight: FontWeight.w800, color: color)),
           ),
         ],
       ),

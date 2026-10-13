@@ -814,13 +814,17 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
     super.dispose();
   }
 
-  Future<DateTime?> _pick(DateTime initial, String help) => showDatePicker(
-        context: context,
-        initialDate: initial,
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
-        helpText: help,
-      );
+  Future<DateTime?> _pick(DateTime initial, String help) {
+    // Tanpa ini fokus kembali ke kolom Nama & keyboard muncul lagi setelah memilih tanggal.
+    FocusManager.instance.primaryFocus?.unfocus();
+    return showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      helpText: help,
+    );
+  }
 
   Future<void> _save() async {
     final String name = _name.text.trim();

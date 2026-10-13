@@ -620,6 +620,7 @@ class _BillFormState extends ConsumerState<_BillForm> {
       });
 
   Future<void> _pickDate() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final DateTime? d = await showDatePicker(
       context: context,
       initialDate: _due,
