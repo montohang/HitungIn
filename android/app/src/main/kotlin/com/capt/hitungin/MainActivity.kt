@@ -20,6 +20,11 @@ class MainActivity : FlutterFragmentActivity() {
         private var current: java.lang.ref.WeakReference<MainActivity>? = null
         private var queuedRoute: String? = null
 
+        /** Teruskan intent (ketukan notifikasi) ke instans yang sedang berjalan. */
+        fun deliverIntent(intent: Intent) {
+            current?.get()?.receive(intent)
+        }
+
         /** Kirim route ke instans yang sedang berjalan (dari [Entry]). */
         fun deliver(route: String) {
             val activity = current?.get()
@@ -45,6 +50,9 @@ class MainActivity : FlutterFragmentActivity() {
         super.onCreate(savedInstanceState)
         AppShortcuts.publish(this, enabledLauncher())
     }
+
+    /** Seperti intent baru dari sistem: plugin (notifikasi) ikut menerimanya. */
+    fun receive(intent: Intent) = onNewIntent(intent)
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)

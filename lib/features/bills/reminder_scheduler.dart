@@ -137,13 +137,19 @@ class LocalReminderScheduler implements ReminderScheduler {
 
   /// Build debug saja: notifikasi uji sekarang ([inMinutes] null) atau
   /// dijadwalkan beberapa menit lagi (menguji saat aplikasi ditutup).
-  Future<void> debugTest({required int billId, required String title, required String body, int? inMinutes}) async {
+  /// [debtId] diisi = notifikasi utang-piutang (payload `debt:<id>`).
+  Future<void> debugTest({required int billId, required String title, required String body, int? inMinutes, int? debtId}) async {
     if (!kDebugMode) return;
     const NotificationDetails details = NotificationDetails(android: _android);
-    final String payload = '$billPayloadPrefix$billId';
+    final String payload = debtId != null ? '$debtPayloadPrefix$debtId' : '$billPayloadPrefix$billId';
     if (inMinutes == null) {
       // Pakai id pengingat asli supaya ikut diuji oleh sinkronisasi.
-      await _plugin.show(id: billId > 0 ? reminderId(billId, 0) : _debugIdBase + 1, title: title, body: body, notificationDetails: details, payload: payload);
+      final int id = debtId != null
+          ? debtReminderOwner(debtId) * 4
+          : billId > 0
+              ? reminderId(billId, 0)
+              : _debugIdBase + 1;
+      await _plugin.show(id: id, title: title, body: body, notificationDetails: details, payload: payload);
       return;
     }
     final DateTime at = DateTime.now().add(Duration(minutes: inMinutes));

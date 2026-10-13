@@ -37,6 +37,9 @@ import '../../core/utils/dates.dart';
 import '../../core/theme/app_palette.dart';
 import '../../core/widgets/celebration.dart';
 import '../../core/widgets/progress_bar.dart';
+import '../debts/data/debt_reminders.dart';
+import '../debts/data/debts_dao.dart';
+import '../debts/debts_provider.dart';
 
 final activeBillsProvider = StreamProvider<List<Bill>>((ref) => ref.watch(appDatabaseProvider).billsDao.watchActive());
 
@@ -123,7 +126,8 @@ class BillsScreen extends ConsumerWidget {
                             soon.count == 0 ? 'Tidak ada tagihan tertunda' : '${soon.count} tagihan belum dibayar',
                             style: t.caption.copyWith(color: c.muted),
                           ),
-                          if (installmentsSummary(bills) case (amount: final int left, count: final int n) when n > 0) ...[
+                          if (installmentsSummary(bills) case (amount: final int left, count: final int n)
+                              when n > 0) ...[
                             const SizedBox(height: AppSpace.x8),
                             AppBadge(installmentSummaryLabel(left, n),
                                 background: c.accentSoft, foreground: c.accentText),
@@ -235,7 +239,8 @@ class _BillRow extends ConsumerWidget {
                 color: AppPalette.soft(context, category?.color ?? 0),
                 borderRadius: AppRadius.smAll,
               ),
-              child: GlyphIcon(category?.icon ?? 'bills', size: 22, color: AppPalette.ink(context, category?.color ?? 0)),
+              child:
+                  GlyphIcon(category?.icon ?? 'bills', size: 22, color: AppPalette.ink(context, category?.color ?? 0)),
             ),
             const SizedBox(width: AppSpace.x12),
             Expanded(
@@ -265,7 +270,8 @@ class _BillRow extends ConsumerWidget {
                           children: [
                             AppBadge(billDueLabel(due), background: bg, foreground: fg),
                             Text(
-                              [if (wallet != null) wallet, inst != null ? 'cicilan' : bill.repeat.label.toLowerCase()].join(' · '),
+                              [if (wallet != null) wallet, inst != null ? 'cicilan' : bill.repeat.label.toLowerCase()]
+                                  .join(' · '),
                               style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted),
                             ),
                           ],
@@ -275,7 +281,9 @@ class _BillRow extends ConsumerWidget {
                       Pressable(
                         onTap: () => showAppSheet<void>(context,
                             title: 'Bayar ${bill.name}', builder: (_) => _PaySheet(bill: bill)),
-                        semanticLabel: inst == null ? 'Tandai lunas ${bill.name}' : 'Bayar cicilan ${inst.next} dari ${inst.total} ${bill.name}',
+                        semanticLabel: inst == null
+                            ? 'Tandai lunas ${bill.name}'
+                            : 'Bayar cicilan ${inst.next} dari ${inst.total} ${bill.name}',
                         child: Container(
                           height: 32,
                           padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12),
@@ -424,7 +432,10 @@ class BillCard extends ConsumerWidget {
                     Text(bill.name, style: t.item),
                     Text(
                       '${DateFmt.date(bill.nextDue, now: now)} · '
-                      '${switch (installmentOf(bill)) { final InstallmentInfo i => 'cicilan ${i.next}/${i.total}', null => bill.repeat.label }}',
+                      '${switch (installmentOf(bill)) {
+                        final InstallmentInfo i => 'cicilan ${i.next}/${i.total}',
+                        null => bill.repeat.label
+                      }}',
                       style: t.caption.copyWith(color: c.muted),
                     ),
                   ],
@@ -604,7 +615,13 @@ class _BillFormState extends ConsumerState<_BillForm> {
 
   /// Pilihan cepat nama cicilan/paylater (P2-1).
   static const List<String> quickNames = [
-    'SPayLater', 'Kredivo', 'Akulaku', 'GoPayLater', 'Kartu kredit', 'Cicilan motor', 'Cicilan HP',
+    'SPayLater',
+    'Kredivo',
+    'Akulaku',
+    'GoPayLater',
+    'Kartu kredit',
+    'Cicilan motor',
+    'Cicilan HP',
   ];
 
   @override
@@ -870,7 +887,8 @@ class _InstallmentSwitch extends StatelessWidget {
                 ],
               ),
             ),
-            Switch.adaptive(key: const Key('saklar-cicilan'), value: value, activeTrackColor: c.accent, onChanged: onChanged),
+            Switch.adaptive(
+                key: const Key('saklar-cicilan'), value: value, activeTrackColor: c.accent, onChanged: onChanged),
           ],
         ),
       ),
@@ -897,7 +915,8 @@ class _Stepper extends StatelessWidget {
           child: Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.smAll, border: Border.all(color: c.line)),
+            decoration:
+                BoxDecoration(color: c.surface, borderRadius: AppRadius.smAll, border: Border.all(color: c.line)),
             child: Icon(icon, size: 18, color: onTap == null ? c.muted : c.ink),
           ),
         );
@@ -1044,6 +1063,26 @@ class _ReminderCard extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: AppSpace.x8),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      label: 'Utang · sekarang',
+                      variant: AppButtonVariant.outline,
+                      onPressed: () => _debugNotify(context, ref, null, debt: true),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpace.x8),
+                  Expanded(
+                    child: AppButton(
+                      label: 'Utang · 1 menit',
+                      variant: AppButtonVariant.outline,
+                      onPressed: () => _debugNotify(context, ref, 1, debt: true),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ],
         ],
@@ -1052,7 +1091,8 @@ class _ReminderCard extends ConsumerWidget {
   }
 
   /// Build debug: kirim notifikasi uji untuk tagihan pertama (isi sama seperti pengingat asli).
-  Future<void> _debugNotify(BuildContext context, WidgetRef ref, int? inMinutes) async {
+  /// [debt] = pakai catatan utang-piutang pertama yang belum lunas.
+  Future<void> _debugNotify(BuildContext context, WidgetRef ref, int? inMinutes, {bool debt = false}) async {
     final ReminderScheduler scheduler = ref.read(reminderSchedulerProvider);
     final List<Bill> bills = ref.read(activeBillsProvider).valueOrNull ?? const [];
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
@@ -1061,13 +1101,25 @@ class _ReminderCard extends ConsumerWidget {
       return;
     }
     await scheduler.init(onTap: (_) {});
-    final Bill? b = bills.firstOrNull;
-    await scheduler.debugTest(
-      billId: b?.id ?? 0,
-      title: b == null ? 'Uji notifikasi HitungIn' : 'Tagihan: ${b.name}',
-      body: b == null ? 'Notifikasi berjalan.' : 'Jatuh tempo besok · ${Rupiah.format(b.amount)} (uji)',
-      inMinutes: inMinutes,
-    );
+    if (debt) {
+      final DebtWithPayments? d =
+          (ref.read(debtsProvider).valueOrNull ?? const <DebtWithPayments>[]).where((x) => x.left > 0).firstOrNull;
+      if (d == null) {
+        messenger.showSnackBar(const SnackBar(content: Text('Belum ada utang-piutang yang belum lunas.')));
+        return;
+      }
+      final ({String title, String body}) text = debtReminderText(d, daysBefore: 1);
+      await scheduler.debugTest(
+          billId: 0, debtId: d.debt.id, title: text.title, body: '${text.body} (uji)', inMinutes: inMinutes);
+    } else {
+      final Bill? b = bills.firstOrNull;
+      await scheduler.debugTest(
+        billId: b?.id ?? 0,
+        title: b == null ? 'Uji notifikasi HitungIn' : 'Tagihan: ${b.name}',
+        body: b == null ? 'Notifikasi berjalan.' : 'Jatuh tempo besok · ${Rupiah.format(b.amount)} (uji)',
+        inMinutes: inMinutes,
+      );
+    }
     messenger.showSnackBar(SnackBar(
       content: Text(inMinutes == null
           ? 'Notifikasi uji dikirim.'
