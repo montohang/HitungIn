@@ -60,8 +60,16 @@ object HomeWidgets {
 
     fun catatViews(context: Context): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_catat).apply {
+            setTextViewText(R.id.motivation, motivationOfToday(context))
             setOnClickPendingIntent(R.id.widget_root, launch(context, "/catat", 10))
         }
+
+    /** Kalimat penyemangat, berganti setiap hari (sama sepanjang hari itu). */
+    private fun motivationOfToday(context: Context): String {
+        val lines = context.resources.getStringArray(R.array.widget_motivation)
+        val day = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_YEAR)
+        return lines[day % lines.size]
+    }
 
     fun jatahViews(context: Context): RemoteViews {
         val v = RemoteViews(context.packageName, R.layout.widget_jatah)

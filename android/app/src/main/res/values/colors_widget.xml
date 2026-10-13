@@ -8,4 +8,6 @@
     <color name="widget_track">#EFEDF5</color>
     <color name="widget_accent">#5B4BDB</color>
     <color name="widget_warn">#B45309</color>
+    <!-- Latar ikon pintasan: ungu muda seperti pintasan bawaan Samsung (Jam, Kamera). -->
+    <color name="shortcut_bg">#ECE9FF</color>
 </resources>

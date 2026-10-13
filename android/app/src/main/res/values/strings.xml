@@ -4,6 +4,17 @@
     <string name="widget_jatah_desc">Jatah hari ini, tombol Catat, dan transaksi favorit</string>
     <string name="widget_catat_desc">Catat transaksi sekali ketuk</string>
     <string name="widget_catat">Catat</string>
+    <string name="widget_catat_title">Catat</string>
+    <!-- Kalimat penyemangat widget Catat, berganti setiap hari. -->
+    <string-array name="widget_motivation">
+        <item>Sedikit-sedikit jadi bukit</item>
+        <item>Catat dulu, tenang kemudian</item>
+        <item>Jajan boleh, catat juga</item>
+        <item>Rapi hari ini, lega nanti</item>
+        <item>Satu catatan, satu langkah</item>
+        <item>Uangmu, kamu yang atur</item>
+        <item>Kecil dicatat, besar terasa</item>
+    </string-array>
     <string name="widget_stale">Buka HitungIn untuk memperbarui jatah</string>
     <string name="tile_catat">Catat · HitungIn</string>
     <string name="shortcut_out">Catat pengeluaran</string>

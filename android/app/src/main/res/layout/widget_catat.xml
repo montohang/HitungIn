@@ -1,25 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Widget kecil 2×1 (Claude Design › Widget, tile & pintasan ikon). -->
+<!-- Widget kecil 2×1 (Claude Design › Widget, tile & pintasan ikon): rata tengah,
+     tombol + beraksen, "Catat sekarang", dan kalimat penyemangat harian. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg"
-    android:gravity="center_vertical"
+    android:gravity="center"
     android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp">
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp">
     <ImageView
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/widget_button_bg"
         android:contentDescription="@null"
-        android:src="@mipmap/ic_launcher" />
-    <TextView
+        android:padding="10dp"
+        android:src="@drawable/ic_widget_plus" />
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:text="@string/widget_catat"
-        android:textColor="@color/widget_ink"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:layout_marginStart="10dp"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="@string/widget_catat_title"
+            android:textColor="@color/widget_ink"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/motivation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:maxWidth="120dp"
+            android:text="@string/widget_catat_desc"
+            android:textColor="@color/widget_muted"
+            android:textSize="11sp" />
+    </LinearLayout>
 </LinearLayout>
