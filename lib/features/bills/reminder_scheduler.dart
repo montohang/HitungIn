@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show Color;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -81,7 +82,10 @@ class LocalReminderScheduler implements ReminderScheduler {
     category: AndroidNotificationCategory.reminder,
     // Layar kunci yang aman: isi (nominal) disembunyikan.
     visibility: NotificationVisibility.private,
-    icon: '@mipmap/ic_launcher_mono',
+    // Siluet logo penuh 24dp (ikon launcher mono terlalu kecil karena padding adaptif).
+    icon: '@drawable/ic_notif',
+    // Aksen HitungIn; tanpa ini Samsung memakai biru sistem.
+    color: Color(0xFF5B4BDB),
   );
 
   @override
@@ -96,7 +100,7 @@ class LocalReminderScheduler implements ReminderScheduler {
       tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
     }
     await _plugin.initialize(
-      settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher_mono')),
+      settings: const InitializationSettings(android: AndroidInitializationSettings('@drawable/ic_notif')),
       onDidReceiveNotificationResponse: (r) {
         if (r.payload != null) onTap(r.payload!);
       },
