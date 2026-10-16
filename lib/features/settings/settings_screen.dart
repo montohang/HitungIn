@@ -171,6 +171,13 @@ class SettingsScreen extends ConsumerWidget {
                   value: 'Warna, gradien, foto',
                   onTap: () => context.push(Routes.widget),
                 ),
+                SettingsTile(
+                  icon: HiIcons.table,
+                  title: 'Atur Beranda',
+                  badge: isPro ? null : 'PRO',
+                  badgeTone: TileBadgeTone.pro,
+                  onTap: () => context.push(Routes.aturBeranda),
+                ),
               ],
             ),
             SettingsGroup(

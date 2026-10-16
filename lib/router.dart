@@ -8,6 +8,7 @@ import 'core/db/app_database.dart';
 import 'core/utils/date_format.dart';
 import 'features/debts/debts_screen.dart';
 import 'features/widgets/widget_settings_screen.dart';
+import 'features/home/home_layout_screen.dart';
 import 'features/backup/backup_screen.dart';
 import 'features/bills/bills_screen.dart';
 import 'features/budget/atur_budget_screen.dart';
@@ -130,6 +131,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         (Routes.cadangan, BackupScreen()),
         (Routes.tampilan, AppearanceScreen()),
         (Routes.berulang, RecurringScreen()),
+        (Routes.aturBeranda, HomeLayoutScreen()),
       ])
         GoRoute(path: path, parentNavigatorKey: _rootKey, builder: (_, __) => screen),
       if (kDebugMode) GoRoute(path: Routes.gallery, builder: (_, __) => const DesignGalleryScreen()),

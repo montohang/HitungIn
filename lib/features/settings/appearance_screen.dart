@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/branding/app_icon_service.dart';
 import '../../core/branding/app_icon_variants.dart';
@@ -13,6 +14,7 @@ import '../../core/widgets/segmented_control.dart';
 import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
+import '../security/app_gate.dart';
 import 'widgets/accent_picker.dart';
 import 'widgets/icon_look_picker.dart';
 import 'widgets/settings_tile.dart';
@@ -46,6 +48,25 @@ class AppearanceScreen extends ConsumerWidget {
           const AccentPicker(),
           const SizedBox(height: AppSpace.x12),
           const IconLookPicker(),
+          const SizedBox(height: AppSpace.x16),
+          SettingsGroup(
+            children: [
+              SettingsTile(
+                icon: HiIcons.grid,
+                title: 'Widget',
+                subtitle: 'Warna, gradien, atau foto untuk tiap widget',
+                onTap: () => context.push(Routes.widget),
+              ),
+              SettingsTile(
+                icon: HiIcons.table,
+                title: 'Atur Beranda',
+                subtitle: 'Urutkan atau sembunyikan kartu Beranda',
+                badge: isPro ? null : 'PRO',
+                badgeTone: TileBadgeTone.pro,
+                onTap: () => context.push(Routes.aturBeranda),
+              ),
+            ],
+          ),
           const SizedBox(height: AppSpace.x24),
           const FieldLabel('Ikon aplikasi'),
           _AppIconPicker(isPro: isPro),

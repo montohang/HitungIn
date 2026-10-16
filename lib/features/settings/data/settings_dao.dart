@@ -45,6 +45,9 @@ abstract final class SettingKeys {
 
   /// Gaya widget layar utama per id widget (JSON, P2b).
   static const String widgetStyles = 'widget.styles';
+
+  /// Urutan & kartu Beranda yang disembunyikan (JSON, P2b Pro).
+  static const String homeLayout = 'home.layout';
 }
 
 @DriftAccessor(tables: [Settings])
