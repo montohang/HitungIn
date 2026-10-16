@@ -66,14 +66,19 @@ abstract interface class ReminderScheduler {
 
   /// Tutup notifikasi tagihan yang sedang tampil, kecuali milik [keepBillIds].
   Future<void> dismissShown({required Set<int> keepBillIds});
-  Future<void> schedule(List<ReminderPlan> plans);
+
+  /// [color] = warna aksen tema pilihan pengguna (lingkaran ikon notifikasi).
+  Future<void> schedule(List<ReminderPlan> plans, {Color? color});
 }
+
+/// Warna bawaan notifikasi bila tema belum terbaca (aksen Indigo).
+const Color defaultReminderColor = Color(0xFF5B4BDB);
 
 class LocalReminderScheduler implements ReminderScheduler {
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
   Future<void>? _ready;
 
-  static const AndroidNotificationDetails _android = AndroidNotificationDetails(
+  static AndroidNotificationDetails _android(Color color) => AndroidNotificationDetails(
     'tagihan',
     'Pengingat tagihan',
     channelDescription: 'Pengingat jatuh tempo tagihan',
@@ -84,8 +89,8 @@ class LocalReminderScheduler implements ReminderScheduler {
     visibility: NotificationVisibility.private,
     // Siluet logo penuh 24dp (ikon launcher mono terlalu kecil karena padding adaptif).
     icon: '@drawable/ic_notif',
-    // Aksen HitungIn; tanpa ini Samsung memakai biru sistem.
-    color: Color(0xFF5B4BDB),
+    // Aksen tema pilihan pengguna; tanpa ini Samsung memakai biru sistem.
+    color: color,
   );
 
   @override
@@ -142,9 +147,16 @@ class LocalReminderScheduler implements ReminderScheduler {
   /// Build debug saja: notifikasi uji sekarang ([inMinutes] null) atau
   /// dijadwalkan beberapa menit lagi (menguji saat aplikasi ditutup).
   /// [debtId] diisi = notifikasi utang-piutang (payload `debt:<id>`).
-  Future<void> debugTest({required int billId, required String title, required String body, int? inMinutes, int? debtId}) async {
+  Future<void> debugTest({
+    required int billId,
+    required String title,
+    required String body,
+    int? inMinutes,
+    int? debtId,
+    Color color = defaultReminderColor,
+  }) async {
     if (!kDebugMode) return;
-    const NotificationDetails details = NotificationDetails(android: _android);
+    final NotificationDetails details = NotificationDetails(android: _android(color));
     final String payload = debtId != null ? '$debtPayloadPrefix$debtId' : '$billPayloadPrefix$billId';
     if (inMinutes == null) {
       // Pakai id pengingat asli supaya ikut diuji oleh sinkronisasi.
@@ -169,12 +181,13 @@ class LocalReminderScheduler implements ReminderScheduler {
   }
 
   @override
-  Future<void> schedule(List<ReminderPlan> plans) async {
+  Future<void> schedule(List<ReminderPlan> plans, {Color? color}) async {
+    final NotificationDetails details = NotificationDetails(android: _android(color ?? defaultReminderColor));
     for (final ReminderPlan p in plans) {
       await _plugin.zonedSchedule(
         id: p.id,
         scheduledDate: tz.TZDateTime(tz.local, p.at.year, p.at.month, p.at.day, p.at.hour, p.at.minute),
-        notificationDetails: const NotificationDetails(android: _android),
+        notificationDetails: details,
         // Tanpa izin alarm tepat waktu; boleh meleset beberapa menit.
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         title: p.title,
@@ -205,7 +218,7 @@ class NoReminderScheduler implements ReminderScheduler {
   Future<void> dismissShown({required Set<int> keepBillIds}) async {}
 
   @override
-  Future<void> schedule(List<ReminderPlan> plans) async {}
+  Future<void> schedule(List<ReminderPlan> plans, {Color? color}) async {}
 }
 
 final reminderSchedulerProvider = Provider<ReminderScheduler>((ref) => LocalReminderScheduler());
@@ -236,6 +249,7 @@ Future<int> syncBillReminders({
   required bool isPro,
   required DateTime now,
   List<DebtWithPayments> debts = const [],
+  Color? color,
 }) async {
   final bool on = settings.enabled && isPro;
   await scheduler.cancelPending();
@@ -248,6 +262,6 @@ Future<int> syncBillReminders({
     ...planDebtReminders(debts, now, hour: settings.hour),
   ]..sort((a, b) => a.at.compareTo(b.at));
   final List<ReminderPlan> plans = all.length > maxScheduledReminders ? all.sublist(0, maxScheduledReminders) : all;
-  await scheduler.schedule(plans);
+  await scheduler.schedule(plans, color: color);
   return plans.length;
 }

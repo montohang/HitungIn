@@ -1,3 +1,4 @@
+import 'package:flutter/painting.dart' show Color;
 import 'dart:async';
 
 import 'package:drift/drift.dart';
@@ -122,7 +123,7 @@ class FakeReminderScheduler implements ReminderScheduler {
   Future<void> dismissShown({required Set<int> keepBillIds}) async => shownBillIds.retainAll(keepBillIds);
 
   @override
-  Future<void> schedule(List<ReminderPlan> plans) async => scheduled.addAll(plans);
+  Future<void> schedule(List<ReminderPlan> plans, {Color? color}) async => scheduled.addAll(plans);
 }
 
 /// Jam palsu yang bisa dimajukan.

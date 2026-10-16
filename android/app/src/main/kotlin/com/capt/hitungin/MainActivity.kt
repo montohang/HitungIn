@@ -20,9 +20,17 @@ class MainActivity : FlutterFragmentActivity() {
         private var current: java.lang.ref.WeakReference<MainActivity>? = null
         private var queuedRoute: String? = null
 
-        /** Teruskan intent (ketukan notifikasi) ke instans yang sedang berjalan. */
+        /** Ketukan notifikasi yang menunggu MainActivity dibuat (proses baru dimulai). */
+        private var queuedIntent: Intent? = null
+
+        /**
+         * Teruskan intent (ketukan notifikasi) ke instans yang sedang berjalan. Bila
+         * task masih tercatat tapi activity-nya sudah mati, intent disimpan dan
+         * dipakai sebagai intent awal saat MainActivity dibuat ulang.
+         */
         fun deliverIntent(intent: Intent) {
-            current?.get()?.receive(intent)
+            val activity = current?.get()
+            if (activity != null) activity.receive(intent) else queuedIntent = intent
         }
 
         /** Kirim route ke instans yang sedang berjalan (dari [Entry]). */
@@ -46,6 +54,9 @@ class MainActivity : FlutterFragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         pendingRoute = intent?.getStringExtra(EXTRA_ROUTE) ?: queuedRoute
         queuedRoute = null
+        // Plugin notifikasi membaca intent awal activity untuk payload ketukan.
+        queuedIntent?.let { setIntent(it) }
+        queuedIntent = null
         current = java.lang.ref.WeakReference(this)
         super.onCreate(savedInstanceState)
         AppShortcuts.publish(this, enabledLauncher())

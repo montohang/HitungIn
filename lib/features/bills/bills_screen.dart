@@ -35,6 +35,7 @@ import '../../core/widgets/screen_header.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/utils/dates.dart';
 import '../../core/theme/app_palette.dart';
+import '../../core/theme/theme_controller.dart';
 import '../../core/widgets/celebration.dart';
 import '../../core/widgets/progress_bar.dart';
 import '../debts/data/debt_reminders.dart';
@@ -1110,7 +1111,12 @@ class _ReminderCard extends ConsumerWidget {
       }
       final ({String title, String body}) text = debtReminderText(d, daysBefore: 1);
       await scheduler.debugTest(
-          billId: 0, debtId: d.debt.id, title: text.title, body: '${text.body} (uji)', inMinutes: inMinutes);
+          billId: 0,
+          debtId: d.debt.id,
+          title: text.title,
+          body: '${text.body} (uji)',
+          inMinutes: inMinutes,
+          color: ref.read(themeControllerProvider).accent.light);
     } else {
       final Bill? b = bills.firstOrNull;
       await scheduler.debugTest(
@@ -1118,6 +1124,7 @@ class _ReminderCard extends ConsumerWidget {
         title: b == null ? 'Uji notifikasi HitungIn' : 'Tagihan: ${b.name}',
         body: b == null ? 'Notifikasi berjalan.' : 'Jatuh tempo besok · ${Rupiah.format(b.amount)} (uji)',
         inMinutes: inMinutes,
+        color: ref.read(themeControllerProvider).accent.light,
       );
     }
     messenger.showSnackBar(SnackBar(

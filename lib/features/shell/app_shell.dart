@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/db/data_providers.dart' show currentDayProvider, currentMonthProvider;
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/theme_controller.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/db/providers.dart';
@@ -86,6 +87,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         isPro: ref.read(isProProvider),
         now: ref.read(clockProvider)(),
         debts: debts,
+        color: ref.read(themeControllerProvider).accent.light,
       );
     });
   }
@@ -158,6 +160,8 @@ class _AppShellState extends ConsumerState<AppShell> {
     });
     ref.listen(activeBillsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(debtsProvider, (_, __) => _scheduleReminderSync());
+    // Warna notifikasi mengikuti aksen tema.
+    ref.listen(themeControllerProvider.select((t) => t.accent), (_, __) => _scheduleReminderSync());
     ref.listen(reminderSettingsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(isProProvider, (_, __) => _scheduleReminderSync());
     final c = context.colors;

@@ -1,3 +1,4 @@
+import 'package:flutter/painting.dart' show Color;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hitungin/core/db/app_database.dart';
 import 'package:hitungin/features/bills/data/bill_reminders.dart';
@@ -24,6 +25,7 @@ DebtWithPayments _debt(int id, DebtDirection dir, String name, int amount, DateT
 class _Scheduler implements ReminderScheduler {
   final List<ReminderPlan> scheduled = [];
   final Set<int> shown = {};
+  Color? color;
   @override
   Future<void> init({required void Function(String payload) onTap}) async {}
   @override
@@ -35,7 +37,10 @@ class _Scheduler implements ReminderScheduler {
   @override
   Future<void> dismissShown({required Set<int> keepBillIds}) async => shown.retainAll(keepBillIds);
   @override
-  Future<void> schedule(List<ReminderPlan> plans) async => scheduled.addAll(plans);
+  Future<void> schedule(List<ReminderPlan> plans, {Color? color}) async {
+    this.color = color;
+    scheduled.addAll(plans);
+  }
 }
 
 void main() {
@@ -84,5 +89,12 @@ void main() {
     expect(routeForNotification('debt:7'), '/utang?id=7');
     expect(routeForNotification('bill:3'), '/tagihan');
     expect(routeForNotification('lain'), isNull);
+  });
+
+  test('warna notifikasi = aksen tema pilihan pengguna', () async {
+    final s = _Scheduler();
+    await syncBillReminders(
+        scheduler: s, bills: const [], settings: (enabled: true, hour: 9), isPro: true, now: now, debts: debts, color: const Color(0xFF0F766E));
+    expect(s.color, const Color(0xFF0F766E));
   });
 }

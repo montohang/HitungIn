@@ -35,11 +35,16 @@ object Entry {
             activity.startActivity(
                 (if (notification != null) Intent(notification) else Intent()).apply {
                     setClass(activity, MainActivity::class.java)
+                    // Selalu task sendiri untuk MainActivity: task pintu masuk dihapus di bawah,
+                    // dan task RouteActivity dikecualikan dari Recent apps.
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     if (route != null) putExtra(MainActivity.EXTRA_ROUTE, route)
                 },
             )
         }
-        activity.finish()
+        // Task pintu masuk ini kosong setelah ditutup; hapus supaya Recent apps
+        // tidak menampilkan HitungIn dua kali.
+        activity.finishAndRemoveTask()
         @Suppress("DEPRECATION")
         activity.overridePendingTransition(0, 0)
     }

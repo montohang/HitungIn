@@ -1,3 +1,4 @@
+import 'package:flutter/painting.dart' show Color;
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,7 +46,7 @@ class _RecordingScheduler implements ReminderScheduler {
   Future<void> dismissShown({required Set<int> keepBillIds}) async => shown.retainAll(keepBillIds);
 
   @override
-  Future<void> schedule(List<ReminderPlan> plans) async => scheduled.addAll(plans);
+  Future<void> schedule(List<ReminderPlan> plans, {Color? color}) async => scheduled.addAll(plans);
 }
 
 void main() {
