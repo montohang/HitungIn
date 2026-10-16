@@ -3,6 +3,7 @@ package com.capt.hitungin
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -117,6 +118,16 @@ class MainActivity : FlutterFragmentActivity() {
                 "list" -> result.success(HomeWidgets.list(this))
                 "pin" -> result.success(HomeWidgets.requestPin(this, call.argument<String>("kind") ?: "jatah"))
                 else -> result.notImplemented()
+            }
+        }
+        // Warna aksen sistem (Material You) untuk pilihan aksen "Wallpaper" (P2b).
+        MethodChannel(messenger, "com.capt.hitungin/theme").setMethodCallHandler { call, result ->
+            if (call.method == "systemAccent") {
+                result.success(
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) getColor(android.R.color.system_accent1_600) else null,
+                )
+            } else {
+                result.notImplemented()
             }
         }
         MethodChannel(messenger, "com.capt.hitungin/share").setMethodCallHandler { call, result ->

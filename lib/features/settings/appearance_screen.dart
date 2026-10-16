@@ -13,6 +13,7 @@ import '../../core/widgets/segmented_control.dart';
 import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
+import 'widgets/accent_picker.dart';
 import 'widgets/settings_tile.dart';
 import '../../core/widgets/hi_icons.dart';
 
@@ -25,7 +26,6 @@ class AppearanceScreen extends ConsumerWidget {
     final t = context.text;
     final ThemeSettings s = ref.watch(themeControllerProvider);
     final ThemeController ctl = ref.read(themeControllerProvider.notifier);
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
     final bool isPro = ref.watch(isProProvider);
 
     return Scaffold(
@@ -42,45 +42,7 @@ class AppearanceScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpace.x16),
           const FieldLabel('Warna aksen'),
-          Wrap(
-            spacing: AppSpace.x12,
-            runSpacing: AppSpace.x12,
-            children: [
-              for (final a in AccentPreset.values)
-                Semantics(
-                  selected: a == s.accent,
-                  child: Pressable(
-                    onTap: () => a.pro && !isPro ? openPremium(context, ProReason.tema) : ctl.setAccent(a),
-                    semanticLabel: 'Aksen ${a.label}',
-                    child: Column(
-                      children: [
-                        AnimatedContainer(
-                          duration: context.reduceMotion ? Duration.zero : AppMotion.press,
-                          width: 48,
-                          height: 48,
-                          padding: const EdgeInsets.all(AppSpace.x4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color: a == s.accent ? (dark ? a.dark : a.light) : Colors.transparent, width: 2),
-                          ),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(color: dark ? a.dark : a.light, shape: BoxShape.circle),
-                            child: a == s.accent
-                                ? const Icon(HiIcons.check, color: Colors.white, size: 20)
-                                : a.pro && !isPro
-                                    ? const Icon(HiIcons.lock, color: Colors.white, size: 18)
-                                    : null,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpace.x4),
-                        Text(a.pro && !isPro ? '${a.label} · Pro' : a.label, style: t.label.copyWith(color: c.sub)),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          const AccentPicker(),
           const SizedBox(height: AppSpace.x24),
           const FieldLabel('Ikon aplikasi'),
           _AppIconPicker(isPro: isPro),

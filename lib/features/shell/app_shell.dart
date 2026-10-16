@@ -22,6 +22,7 @@ import '../premium/pro_controller.dart';
 import '../security/app_gate.dart';
 import '../../core/widgets/hi_icons.dart';
 import '../../core/platform/launch_routes.dart';
+import '../../core/platform/system_accent.dart';
 import '../home/widget_sync.dart';
 import '../debts/data/debts_dao.dart';
 import '../debts/debts_provider.dart';
@@ -43,6 +44,8 @@ class _AppShellState extends ConsumerState<AppShell> {
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(onResume: () {
     _refreshToday();
     _runRecurring();
+    // Wallpaper bisa berganti selama HitungIn di latar (aksen "Wallpaper").
+    SystemAccent.read().then(ref.read(themeControllerProvider.notifier).setSystemWallpaper);
   });
 
   /// Cek pergantian bulan tiap menit (app dibiarkan terbuka melewati tengah malam).
@@ -87,7 +90,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         isPro: ref.read(isProProvider),
         now: ref.read(clockProvider)(),
         debts: debts,
-        color: ref.read(themeControllerProvider).accent.light,
+        color: ref.read(themeControllerProvider).accentLight,
       );
     });
   }
@@ -161,7 +164,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     ref.listen(activeBillsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(debtsProvider, (_, __) => _scheduleReminderSync());
     // Warna notifikasi mengikuti aksen tema.
-    ref.listen(themeControllerProvider.select((t) => t.accent), (_, __) => _scheduleReminderSync());
+    ref.listen(themeControllerProvider.select((t) => t.accentLight), (_, __) => _scheduleReminderSync());
     ref.listen(reminderSettingsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(isProProvider, (_, __) => _scheduleReminderSync());
     final c = context.colors;

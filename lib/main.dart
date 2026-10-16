@@ -1,3 +1,4 @@
+import 'core/platform/system_accent.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,7 +22,8 @@ Future<void> main() async {
 
   // Dibaca sebelum frame pertama supaya tema & layar awal langsung benar.
   final AppDatabase db = AppDatabase(openEncryptedConnection());
-  final ThemeSettings theme = await loadThemeSettings(db.settingsDao);
+  // Warna wallpaper dibaca sebelum layar pertama supaya aksen "Wallpaper" tidak berkedip.
+  final ThemeSettings theme = (await loadThemeSettings(db.settingsDao)).copyWith(wallpaper: await SystemAccent.read());
   final GateState gate = await loadGateState(db.settingsDao, PinService(const FlutterSecureStore()));
   final AutoLockDelay autoLock = await loadAutoLockDelay(db.settingsDao);
   final bool isPro = await EntitlementStore(const FlutterSecureStore()).isPro();

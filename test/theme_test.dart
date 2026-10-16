@@ -43,13 +43,13 @@ void main() {
   }
 
   testWidgets('galeri tampil tanpa error di mode gelap', (tester) async {
-    await pumpGallery(tester, AppTheme.dark(AccentPreset.indigo));
+    await pumpGallery(tester, AppTheme.dark(AccentPreset.indigo.dark));
     expect(find.text('HitungIn'), findsOneWidget);
     expect(find.text('Rp8.450.000'), findsOneWidget);
   });
 
   testWidgets('galeri tampil tanpa error di mode terang', (tester) async {
-    await pumpGallery(tester, AppTheme.light(AccentPreset.teal));
+    await pumpGallery(tester, AppTheme.light(AccentPreset.teal.light));
     expect(find.text('Selamat pagi, Rina'), findsOneWidget);
   });
 }

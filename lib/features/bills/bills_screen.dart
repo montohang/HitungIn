@@ -1116,7 +1116,7 @@ class _ReminderCard extends ConsumerWidget {
           title: text.title,
           body: '${text.body} (uji)',
           inMinutes: inMinutes,
-          color: ref.read(themeControllerProvider).accent.light);
+          color: ref.read(themeControllerProvider).accentLight);
     } else {
       final Bill? b = bills.firstOrNull;
       await scheduler.debugTest(
@@ -1124,7 +1124,7 @@ class _ReminderCard extends ConsumerWidget {
         title: b == null ? 'Uji notifikasi HitungIn' : 'Tagihan: ${b.name}',
         body: b == null ? 'Notifikasi berjalan.' : 'Jatuh tempo besok · ${Rupiah.format(b.amount)} (uji)',
         inMinutes: inMinutes,
-        color: ref.read(themeControllerProvider).accent.light,
+        color: ref.read(themeControllerProvider).accentLight,
       );
     }
     messenger.showSnackBar(SnackBar(

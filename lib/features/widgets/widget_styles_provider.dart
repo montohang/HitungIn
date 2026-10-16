@@ -21,7 +21,7 @@ final widgetThemeProvider = Provider<({Color accent, bool dark})>((ref) {
     AppThemeMode.terang => false,
     AppThemeMode.sistem => PlatformDispatcher.instance.platformBrightness == Brightness.dark,
   };
-  return (accent: dark ? t.accent.dark : t.accent.light, dark: dark);
+  return (accent: dark ? t.accentDark : t.accentLight, dark: dark);
 });
 
 /// Tampilan akhir: bawaan (widget yang belum diatur) + per id.

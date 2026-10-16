@@ -9,6 +9,10 @@ part 'settings_dao.g.dart';
 abstract final class SettingKeys {
   static const String themeMode = 'theme.mode';
   static const String themeAccent = 'theme.accent';
+
+  /// Asal aksen: preset / wallpaper / custom, dan warna bebasnya (ARGB) (P2b).
+  static const String themeAccentSource = 'theme.accentSource';
+  static const String themeAccentCustom = 'theme.accentCustom';
   static const String themeGradientCard = 'theme.gradientCard';
   static const String onboardingDone = 'onboarding.done';
   static const String userName = 'user.name';

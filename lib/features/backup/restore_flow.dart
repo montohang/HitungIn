@@ -74,7 +74,8 @@ Future<bool> runRestoreFlow(BuildContext context, WidgetRef ref, {bool onboardin
 
   await _withProgress(context, () => service.restore(data));
   // Tema & kunci otomatis ikut dari cadangan.
-  ref.read(themeControllerProvider.notifier).applyLoaded(await loadThemeSettings(db.settingsDao));
+  ref.read(themeControllerProvider.notifier).applyLoaded(
+      (await loadThemeSettings(db.settingsDao)).copyWith(wallpaper: ref.read(themeControllerProvider).wallpaper));
   await ref.read(autoLockProvider.notifier).set(await loadAutoLockDelay(db.settingsDao));
   toast(onboarding ? 'Data dipulihkan. Buat PIN untuk HP ini.' : 'Data dipulihkan.');
   return true;

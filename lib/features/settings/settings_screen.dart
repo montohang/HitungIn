@@ -162,7 +162,7 @@ class SettingsScreen extends ConsumerWidget {
                 SettingsTile(
                   icon: HiIcons.palette,
                   title: 'Tema & warna',
-                  value: theme.accent.label,
+                  value: theme.accentLabel,
                   onTap: () => context.push(Routes.tampilan),
                 ),
                 SettingsTile(

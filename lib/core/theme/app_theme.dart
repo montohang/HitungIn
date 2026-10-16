@@ -7,10 +7,10 @@ import 'app_typography.dart';
 
 /// Membangun [ThemeData] Material 3 dari token HitungIn.
 abstract final class AppTheme {
-  static ThemeData light(AccentPreset accent) => _build(AppColors.light(accent.light), Brightness.light);
+  static ThemeData light(Color accent) => _build(AppColors.light(accent), Brightness.light);
 
-  static ThemeData dark(AccentPreset accent, {bool amoled = false}) =>
-      _build(AppColors.dark(accent.dark, amoled: amoled), Brightness.dark);
+  static ThemeData dark(Color accent, {bool amoled = false}) =>
+      _build(AppColors.dark(accent, amoled: amoled), Brightness.dark);
 
   static ThemeData _build(AppColors c, Brightness brightness) {
     final scheme = ColorScheme(

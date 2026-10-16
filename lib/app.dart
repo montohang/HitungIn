@@ -16,8 +16,8 @@ class HitungInApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'HitungIn',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(settings.accent),
-      darkTheme: AppTheme.dark(settings.accent, amoled: settings.isAmoled),
+      theme: AppTheme.light(settings.accentLight),
+      darkTheme: AppTheme.dark(settings.accentDark, amoled: settings.isAmoled),
       themeMode: settings.flutterMode,
       locale: const Locale('id', 'ID'),
       supportedLocales: const [Locale('id', 'ID')],

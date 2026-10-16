@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' show Color;
 
 import 'package:drift/drift.dart' hide isNull;
@@ -108,7 +107,7 @@ void main() {
     await db.settingsDao.write(
         SettingKeys.widgetStyles, encodeWidgetStyles({3: const WidgetStyle(bg: WidgetBg.foto, photoPath: '/data/w3.png')}));
     final snap = await BackupService(db).snapshot();
-    final row = ((snap['tables']! as Map)['settings'] as List).cast<Map>().firstWhere((r) => r['key'] == SettingKeys.widgetStyles);
+    final row = ((snap['tables']! as Map)['settings'] as List).cast<Map<String, Object?>>().firstWhere((r) => r['key'] == SettingKeys.widgetStyles);
     expect(row['value'], isNot(contains('w3.png')));
     expect(decodeWidgetStyles(row['value'] as String)[3]!.bg, WidgetBg.tema);
     await db.close();
