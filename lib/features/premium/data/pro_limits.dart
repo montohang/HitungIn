@@ -38,7 +38,8 @@ enum ProReason {
   iklan('Tanpa iklan'),
   berulang('Transaksi berulang otomatis'),
   tema('Aksen & ikon aplikasi tambahan'),
-  notifikasi('Pengingat tagihan lewat notifikasi');
+  notifikasi('Pengingat tagihan lewat notifikasi'),
+  personalisasi('Foto widget, warna bebas & Beranda sesukamu');
 
   const ProReason(this.headline);
   final String headline;

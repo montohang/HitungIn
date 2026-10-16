@@ -11,6 +11,8 @@ import '../../core/utils/rupiah.dart';
 import '../favorites/data/favorites.dart';
 import '../favorites/favorites_provider.dart';
 import '../favorites/widgets/favorite_chips.dart' show favoriteLabel;
+import '../widgets/data/widget_style.dart';
+import '../widgets/widget_styles_provider.dart';
 import 'allowance_provider.dart';
 import 'data/allowance.dart';
 import 'widgets/allowance_card.dart' show allowanceAmount, allowanceLine;
@@ -24,6 +26,8 @@ Map<String, Object?> buildWidgetSnapshot({
   required List<Favorite> favorites,
   required List<Category> categories,
   required bool hidden,
+  WidgetLook? fallbackLook,
+  Map<int, WidgetLook> looks = const {},
 }) {
   final Allowance? a = allowance;
   final bool warn = a != null &&
@@ -39,6 +43,10 @@ Map<String, Object?> buildWidgetSnapshot({
             : allowanceLine(a, now, hidden: false),
     'progress': a == null || a.jatah == 0 || hidden ? 0 : (a.spentToday * 100 ~/ a.jatah).clamp(0, 100),
     'warn': warn && !hidden,
+    // Teks untuk widget yang menyamarkan angka sendiri (P2b).
+    'masked': {'jatah': 'Rp ••••', 'line': 'Angka disamarkan', 'fav': '••'},
+    if (fallbackLook != null) 'look': fallbackLook.toJson(),
+    'looks': {for (final e in looks.entries) '${e.key}': e.value.toJson()},
     'favs': [
       for (final f in favorites.take(3))
         {
@@ -52,12 +60,15 @@ Map<String, Object?> buildWidgetSnapshot({
 
 final widgetSnapshotProvider = Provider<Map<String, Object?>>((ref) {
   ref.watch(currentDayProvider);
+  final looks = ref.watch(widgetLooksProvider);
   return buildWidgetSnapshot(
     now: ref.read(clockProvider)(),
     allowance: ref.watch(allowanceProvider),
     favorites: ref.watch(favoritesProvider),
     categories: ref.watch(activeCategoriesProvider).valueOrNull ?? const [],
     hidden: ref.watch(hideBalanceProvider).valueOrNull ?? false,
+    fallbackLook: looks.fallback,
+    looks: looks.byId,
   );
 });
 
@@ -65,6 +76,35 @@ final widgetSnapshotProvider = Provider<Map<String, Object?>>((ref) {
 abstract final class HomeWidgetSync {
   static const MethodChannel _channel = MethodChannel('com.capt.hitungin/widget');
   static String? _last;
+
+  /// Widget yang sedang terpasang di layar utama: (id, jenis 'jatah'/'catat').
+  static Future<List<({int id, String kind})>> installed() async {
+    try {
+      final List<Object?>? raw = await _channel.invokeMethod<List<Object?>>('list');
+      return [
+        for (final Object? e in raw ?? const [])
+          if (e is Map && e['id'] is int) (id: e['id'] as int, kind: '${e['kind']}'),
+      ];
+    } on MissingPluginException {
+      return const [];
+    } on PlatformException {
+      return const [];
+    }
+  }
+
+  /// Minta launcher memasang widget [kind]. False bila launcher tidak mendukung.
+  static Future<bool> requestPin(String kind) async {
+    try {
+      return await _channel.invokeMethod<bool>('pin', {'kind': kind}) ?? false;
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
+  }
+
+  /// Kirim ulang ringkasan terakhir (mis. widget baru dipasang).
+  static void invalidate() => _last = null;
 
   static Future<void> push(Map<String, Object?> snapshot) async {
     final String json = jsonEncode(snapshot);

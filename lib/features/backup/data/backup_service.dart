@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
 import '../../settings/data/settings_dao.dart';
+import '../../widgets/data/widget_style.dart';
 import 'backup_codec.dart';
 
 /// Ringkasan isi cadangan, ditampilkan sebelum pengguna memulihkan.
@@ -48,7 +49,9 @@ class BackupService {
         'budgets': rows(await db.select(db.budgets).get()),
         'settings': rows([
           for (final s in await db.select(db.settings).get())
-            if (!_localOnlySettings.contains(s.key)) s,
+            if (!_localOnlySettings.contains(s.key))
+              // Foto widget tidak ikut cadangan (ukuran besar, tetap di HP ini).
+              s.key == SettingKeys.widgetStyles ? s.copyWith(value: stripWidgetPhotos(s.value)) : s,
         ]),
       },
     };

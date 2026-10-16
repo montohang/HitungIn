@@ -62,6 +62,17 @@
         </activity>
         <!-- Perantara widget/tile/pintasan (lihat Entry.kt): tidak tampil di Recents. -->
         <activity
+            android:name=".WidgetConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".RouteActivity"
             android:exported="true"
             android:excludeFromRecents="true"

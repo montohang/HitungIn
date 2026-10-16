@@ -31,6 +31,9 @@ abstract final class SettingKeys {
   /// otomatis yang disembunyikan (JSON).
   static const String favoritesPinned = 'favorites.pinned';
   static const String favoritesHidden = 'favorites.hidden';
+
+  /// Gaya widget layar utama per id widget (JSON, P2b).
+  static const String widgetStyles = 'widget.styles';
 }
 
 @DriftAccessor(tables: [Settings])

@@ -165,6 +165,12 @@ class SettingsScreen extends ConsumerWidget {
                   value: theme.accent.label,
                   onTap: () => context.push(Routes.tampilan),
                 ),
+                SettingsTile(
+                  icon: HiIcons.grid,
+                  title: 'Widget',
+                  value: 'Warna, gradien, foto',
+                  onTap: () => context.push(Routes.widget),
+                ),
               ],
             ),
             SettingsGroup(

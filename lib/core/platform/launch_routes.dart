@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 bool isAllowedLaunchRoute(String route) {
   final Uri? u = Uri.tryParse(route);
   if (u == null || u.hasScheme || u.hasAuthority) return false;
-  return const {'/catat', '/riwayat', '/home'}.contains(u.path);
+  return const {'/catat', '/riwayat', '/home', '/widget'}.contains(u.path);
 }
 
 /// Route dari widget/tile/pintasan (P1-2). Android mengirim route saat

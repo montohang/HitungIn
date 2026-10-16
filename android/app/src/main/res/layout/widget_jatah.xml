@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Widget sedang 4×2 (Claude Design › Widget, tile & pintasan ikon). -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Latar (warna/gradien/foto) digambar sebagai bitmap ke @id/bg (P2b). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_bg" />
+<LinearLayout
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_bg"
     android:orientation="vertical"
     android:padding="16dp">
     <LinearLayout
@@ -27,6 +37,7 @@
                     android:contentDescription="@null"
                     android:src="@mipmap/ic_launcher" />
                 <TextView
+                    android:id="@+id/label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
@@ -54,14 +65,26 @@
                 android:textColor="@color/widget_muted"
                 android:textSize="12sp" />
         </LinearLayout>
-        <ImageView
+        <FrameLayout
             android:id="@+id/btn_catat"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/widget_button_bg"
-            android:contentDescription="@string/widget_catat"
-            android:padding="12dp"
-            android:src="@drawable/ic_widget_plus" />
+            android:contentDescription="@string/widget_catat">
+            <ImageView
+                android:id="@+id/btn_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:src="@drawable/widget_btn_shape"
+                android:tint="@color/widget_accent" />
+            <ImageView
+                android:id="@+id/btn_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:padding="12dp"
+                android:src="@drawable/ic_widget_plus" />
+        </FrameLayout>
     </LinearLayout>
     <ProgressBar
         android:id="@+id/progress"
@@ -83,3 +106,4 @@
         <TextView android:id="@+id/fav2" style="@style/WidgetFav" android:layout_marginStart="8dp" />
     </LinearLayout>
 </LinearLayout>
+</FrameLayout>

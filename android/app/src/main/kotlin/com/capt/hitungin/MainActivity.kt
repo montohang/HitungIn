@@ -109,11 +109,14 @@ class MainActivity : FlutterFragmentActivity() {
             }
         }
         MethodChannel(messenger, "com.capt.hitungin/widget").setMethodCallHandler { call, result ->
-            if (call.method == "update") {
-                HomeWidgets.save(this, call.argument<String>("json") ?: "")
-                result.success(null)
-            } else {
-                result.notImplemented()
+            when (call.method) {
+                "update" -> {
+                    HomeWidgets.save(this, call.argument<String>("json") ?: "")
+                    result.success(null)
+                }
+                "list" -> result.success(HomeWidgets.list(this))
+                "pin" -> result.success(HomeWidgets.requestPin(this, call.argument<String>("kind") ?: "jatah"))
+                else -> result.notImplemented()
             }
         }
         MethodChannel(messenger, "com.capt.hitungin/share").setMethodCallHandler { call, result ->

@@ -1,28 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Widget kecil 2×1 (Claude Design › Widget, tile & pintasan ikon): rata tengah,
      tombol + beraksen, "Catat sekarang", dan kalimat penyemangat harian. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_bg" />
+<LinearLayout
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_bg"
     android:gravity="center"
     android:orientation="horizontal"
     android:paddingStart="12dp"
     android:paddingEnd="12dp">
-    <ImageView
+    <FrameLayout
         android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="@drawable/widget_button_bg"
-        android:contentDescription="@null"
-        android:padding="10dp"
-        android:src="@drawable/ic_widget_plus" />
+        android:layout_height="40dp">
+        <ImageView
+            android:id="@+id/btn_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@null"
+            android:src="@drawable/widget_btn_shape"
+            android:tint="@color/widget_accent" />
+        <ImageView
+            android:id="@+id/btn_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@null"
+            android:padding="10dp"
+            android:src="@drawable/ic_widget_plus" />
+    </FrameLayout>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:orientation="vertical">
         <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
@@ -43,3 +64,4 @@
             android:textSize="11sp" />
     </LinearLayout>
 </LinearLayout>
+</FrameLayout>
