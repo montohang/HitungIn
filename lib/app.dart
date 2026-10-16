@@ -13,6 +13,7 @@ class HitungInApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(themeControllerProvider);
+    applyIconLook(settings);
     return MaterialApp.router(
       title: 'HitungIn',
       debugShowCheckedModeBanner: false,

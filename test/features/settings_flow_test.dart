@@ -183,6 +183,9 @@ void main() {
     expect(await app.setting(SettingKeys.themeAccent), 'teal');
     await app.back(tester);
 
+    await tester.scrollUntilVisible(find.bySemanticsLabel(RegExp('^Ikon Emas')), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel(RegExp('^Ikon Emas')));
     await tester.pumpAndSettle();
     expect(find.text(ProReason.tema.headline), findsOneWidget);
@@ -200,6 +203,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(await app.setting(SettingKeys.themeAccent), 'plum');
 
+    await tester.scrollUntilVisible(find.bySemanticsLabel(RegExp('^Ikon Emas')), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel(RegExp('^Ikon Emas')));
     await tester.pumpAndSettle();
     expect(app.env.appIcons.sets, [AppIconVariant.emas]);

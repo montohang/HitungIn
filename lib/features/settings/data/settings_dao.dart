@@ -13,6 +13,13 @@ abstract final class SettingKeys {
   /// Asal aksen: preset / wallpaper / custom, dan warna bebasnya (ARGB) (P2b).
   static const String themeAccentSource = 'theme.accentSource';
   static const String themeAccentCustom = 'theme.accentCustom';
+
+  /// Ikon di dalam aplikasi (P2b).
+  static const String themeIconStyle = 'theme.iconStyle';
+  static const String themeIconWrap = 'theme.iconWrap';
+  static const String themeFabShape = 'theme.fabShape';
+  static const String themeFabIcon = 'theme.fabIcon';
+  static const String themeTabLabels = 'theme.tabLabels';
   static const String themeGradientCard = 'theme.gradientCard';
   static const String onboardingDone = 'onboarding.done';
   static const String userName = 'user.name';

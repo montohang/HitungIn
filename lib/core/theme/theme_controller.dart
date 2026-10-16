@@ -3,8 +3,40 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/settings/data/settings_dao.dart';
 import '../db/providers.dart';
+import '../widgets/hi_icons.dart';
 import 'accent_color.dart';
 import 'app_tokens.dart';
+
+/// Wadah ikon kategori & dompet (P2b).
+enum IconWrap {
+  kotak('Kotak'),
+  lingkaran('Lingkaran'),
+  tanpa('Tanpa');
+
+  const IconWrap(this.label);
+  final String label;
+}
+
+/// Bentuk tombol Catat di nav bawah (P2b).
+enum FabShape {
+  kotak('Kotak'),
+  bulat('Bulat'),
+  pil('+ Catat');
+
+  const FabShape(this.label);
+  final String label;
+}
+
+/// Ikon tombol Catat (P2b).
+enum FabIcon {
+  plus('Tambah', HiIcons.plus),
+  pensil('Pensil', HiIcons.edit),
+  koin('Koin', HiIcons.coin);
+
+  const FabIcon(this.label, this.icon);
+  final String label;
+  final IconData icon;
+}
 
 /// Asal warna aksen (P2b).
 enum AccentSource {
@@ -38,7 +70,19 @@ class ThemeSettings {
     this.source = AccentSource.preset,
     this.custom,
     this.wallpaper,
+    this.iconStyle = HiIconStyle.garis,
+    this.iconWrap = IconWrap.kotak,
+    this.fabShape = FabShape.kotak,
+    this.fabIcon = FabIcon.plus,
+    this.tabLabels = true,
   });
+
+  /// Ikon di dalam aplikasi (P2b).
+  final HiIconStyle iconStyle;
+  final IconWrap iconWrap;
+  final FabShape fabShape;
+  final FabIcon fabIcon;
+  final bool tabLabels;
 
   /// Default HitungIn: GELAP.
   final AppThemeMode mode;
@@ -90,6 +134,11 @@ class ThemeSettings {
     AccentSource? source,
     Color? custom,
     Color? wallpaper,
+    HiIconStyle? iconStyle,
+    IconWrap? iconWrap,
+    FabShape? fabShape,
+    FabIcon? fabIcon,
+    bool? tabLabels,
   }) =>
       ThemeSettings(
         mode: mode ?? this.mode,
@@ -98,6 +147,11 @@ class ThemeSettings {
         source: source ?? this.source,
         custom: custom ?? this.custom,
         wallpaper: wallpaper ?? this.wallpaper,
+        iconStyle: iconStyle ?? this.iconStyle,
+        iconWrap: iconWrap ?? this.iconWrap,
+        fabShape: fabShape ?? this.fabShape,
+        fabIcon: fabIcon ?? this.fabIcon,
+        tabLabels: tabLabels ?? this.tabLabels,
       );
 }
 
@@ -139,6 +193,40 @@ class ThemeController extends Notifier<ThemeSettings> {
     _save(SettingKeys.themeAccentCustom, '${safe.toARGB32()}');
   }
 
+  void setIconStyle(HiIconStyle v) {
+    state = state.copyWith(iconStyle: v);
+    _save(SettingKeys.themeIconStyle, v.name);
+    _repaintIcons();
+  }
+
+  void setIconWrap(IconWrap v) {
+    state = state.copyWith(iconWrap: v);
+    _save(SettingKeys.themeIconWrap, v.name);
+    _repaintIcons();
+  }
+
+  void setFabShape(FabShape v) {
+    state = state.copyWith(fabShape: v);
+    _save(SettingKeys.themeFabShape, v.name);
+  }
+
+  void setFabIcon(FabIcon v) {
+    state = state.copyWith(fabIcon: v);
+    _save(SettingKeys.themeFabIcon, v.name);
+  }
+
+  void setTabLabels(bool v) {
+    state = state.copyWith(tabLabels: v);
+    _save(SettingKeys.themeTabLabels, '$v');
+  }
+
+  /// Ikon `const` tidak dibangun ulang saat tema berubah; minta Flutter
+  /// membangun ulang semua widget supaya gaya baru langsung terlihat.
+  void _repaintIcons() {
+    applyIconLook(state);
+    WidgetsBinding.instance.addPostFrameCallback((_) => WidgetsBinding.instance.reassembleApplication());
+  }
+
   /// Warna wallpaper terbaru dari sistem (dipanggil saat aplikasi dibuka/kembali).
   void setSystemWallpaper(Color? color) {
     if (color == null || color == state.wallpaper) return;
@@ -167,6 +255,11 @@ Future<ThemeSettings> loadThemeSettings(SettingsDao dao) async {
     mode: byName(AppThemeMode.values, all[SettingKeys.themeMode]) ?? AppThemeMode.gelap,
     accent: byName(AccentPreset.values, all[SettingKeys.themeAccent]) ?? AccentPreset.indigo,
     source: byName(AccentSource.values, all[SettingKeys.themeAccentSource]) ?? AccentSource.preset,
+    iconStyle: byName(HiIconStyle.values, all[SettingKeys.themeIconStyle]) ?? HiIconStyle.garis,
+    iconWrap: byName(IconWrap.values, all[SettingKeys.themeIconWrap]) ?? IconWrap.kotak,
+    fabShape: byName(FabShape.values, all[SettingKeys.themeFabShape]) ?? FabShape.kotak,
+    fabIcon: byName(FabIcon.values, all[SettingKeys.themeFabIcon]) ?? FabIcon.plus,
+    tabLabels: all[SettingKeys.themeTabLabels] != 'false',
     custom: switch (int.tryParse(all[SettingKeys.themeAccentCustom] ?? '')) {
       final int v => Color(v),
       null => null,
@@ -177,3 +270,15 @@ Future<ThemeSettings> loadThemeSettings(SettingsDao dao) async {
 }
 
 final themeControllerProvider = NotifierProvider<ThemeController, ThemeSettings>(ThemeController.new);
+
+/// Gaya ikon & wadahnya dibaca dari variabel global (ikon dipakai di ratusan
+/// tempat, banyak yang `const`). Dipanggil saat tema dimuat/berubah.
+void applyIconLook(ThemeSettings s) {
+  HiIcons.style = s.iconStyle;
+  IconLook.wrap = s.iconWrap;
+}
+
+/// Wadah ikon aktif untuk [IconTile].
+abstract final class IconLook {
+  static IconWrap wrap = IconWrap.kotak;
+}

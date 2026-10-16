@@ -122,13 +122,18 @@ G = {
                 'M8 11v3M6.5 12.5h3M15 12h.01M17 13.5h.01', 1.8, True),
     'signal': ('M8 3h8v18H8zM11 18h2M19 8a5 5 0 0 1 0 6M21.5 5.5a9 9 0 0 1 0 11', 1.8, True),
     'installment': ('M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 15l2 2 4-4', 1.8, True),
+    # Tombol Catat berikon koin (P2b › Tema › Ikon tombol).
+    'coin': ('M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zM12 7v10M14.5 9.5h-3.5a1.5 1.5 0 0 0 0 3h2a1.5 1.5 0 0 1 0 3H9.5', 1.8, False),
 }
 
 UPM = 960
 SCALE = UPM / 24
 
+import re
+import pathops
 
-def fill_path(d, width):
+
+def stroke_path(d, width):
     svg = SVG.fromstring(
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
         f'<path d="{d}" fill="none" stroke="#000" stroke-width="{width}" '
@@ -136,6 +141,93 @@ def fill_path(d, width):
     )
     pico = svg.topicosvg()
     return ' '.join(p.d for p in pico.shapes())
+
+
+def solid_path(d):
+    svg = SVG.fromstring(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="{d}" fill="#000"/></svg>')
+    pico = svg.topicosvg()
+    return ' '.join(p.d for p in pico.shapes())
+
+
+def to_ops(d):
+    path = pathops.Path()
+    if d.strip():
+        parse_path(d, path.getPen())
+    return path
+
+
+def union(a, b):
+    return pathops.op(a, b, pathops.PathOp.UNION)
+
+
+def area_box(p):
+    if not p.bounds:
+        return 0
+    x0, y0, x1, y1 = p.bounds
+    return max(0, x1 - x0) * max(0, y1 - y0)
+
+
+def area(p):
+    """Luas sebenarnya (bukan kotak batas)."""
+    from fontTools.pens.areaPen import AreaPen
+
+    class _Closed(AreaPen):
+        def _endPath(self):
+            self._closePath()
+
+    pen = _Closed()
+    p.draw(pen)
+    return abs(pen.value)
+
+
+def is_closed(sp):
+    """Sub-path tertutup: diakhiri z, atau ujungnya kembali dekat titik awal."""
+    if sp.strip()[-1] in 'zZ':
+        return True
+    from fontTools.pens.recordingPen import RecordingPen
+    rec = RecordingPen()
+    parse_path(sp, rec)
+    pts = [pt for _, args in rec.value for pt in args if isinstance(pt, tuple)]
+    if len(pts) < 3:
+        return False
+    (x0, y0), (x1, y1) = pts[0], pts[-1]
+    return (x1 - x0) ** 2 + (y1 - y0) ** 2 < 2.5 ** 2
+
+
+def filled(d, width):
+    """Gaya Isi: bentuk tertutup terisi + garis; detail yang (hampir) seluruhnya
+    di dalam bidang utama (garis kalender, lensa kamera, titik dompet) jadi celah."""
+    subs = [m.group(0) for m in re.finditer(r'[Mm][^Mm]*', d)]
+    fills = [to_ops(solid_path(sp)) if is_closed(sp) else pathops.Path() for sp in subs]
+    strokes = [to_ops(stroke_path(sp, width)) for sp in subs]
+    body_i = max(range(len(subs)), key=lambda i: area(fills[i]))
+    body = fills[body_i]
+    out = pathops.Path()
+    for f in fills:
+        out = union(out, f)
+    for st in strokes:
+        out = union(out, st)
+    if area(body) < 4:
+        return out
+    for i, st in enumerate(strokes):
+        if i == body_i:
+            continue
+        outside = area(pathops.op(st, body, pathops.PathOp.DIFFERENCE))
+        if outside <= 0.2 * max(area(st), 0.01):
+            out = pathops.op(out, st, pathops.PathOp.DIFFERENCE)
+            inner = pathops.op(fills[i], to_ops(stroke_path(subs[i], width * 1.9)), pathops.PathOp.DIFFERENCE)
+            if area(inner) > 0.5:
+                out = union(out, inner)
+    # Batas bidang utama tetap tergambar (detail yang menyentuh tepi tidak memotong tepi).
+    out = union(out, pathops.op(strokes[body_i], pathops.Path(), pathops.PathOp.UNION))
+    return out
+
+
+def glyph_from_ops(path):
+    pen = TTGlyphPen(None)
+    tpen = TransformPen(Cu2QuPen(pen, max_err=1.0, reverse_direction=True), (SCALE, 0, 0, -SCALE, 0, UPM * 0.84))
+    path.draw(tpen)
+    return pen.glyph()
 
 
 def glyph(d):
@@ -149,41 +241,78 @@ def glyph(d):
 names = list(G)
 order = ['.notdef'] + names
 cmap = {0xE000 + i: n for i, n in enumerate(names)}
-glyphs = {'.notdef': TTGlyphPen(None).glyph()}
-for n in names:
-    path, width, _ = G[n]
-    glyphs[n] = glyph(fill_path(path, width))
 
-fb = FontBuilder(UPM, isTTF=True)
-fb.setupGlyphOrder(order)
-fb.setupCharacterMap(cmap)
-fb.setupGlyf(glyphs)
-# lsb harus = xMin glyph; kalau 0, renderer menggeser ikon ke kiri (tidak di tengah).
-glyf = fb.font['glyf']
-fb.setupHorizontalMetrics({n: (UPM, getattr(glyf[n], 'xMin', 0)) for n in order})
-fb.setupHorizontalHeader(ascent=int(UPM * 0.84), descent=-int(UPM * 0.16))
-fb.setupNameTable({'familyName': 'HitungInIcons', 'styleName': 'Regular'})
-fb.setupOS2(sTypoAscender=int(UPM * 0.84), sTypoDescender=-int(UPM * 0.16), usWinAscent=int(UPM * 0.84), usWinDescent=int(UPM * 0.16))
-fb.setupPost()
-fb.save(os.path.join(ROOT, 'assets/fonts/HitungInIcons.ttf'))
+# Gaya ikon (P2b): kode glyph sama, beda font-family (lihat HiIconData).
+STYLES = {
+    'HitungInIcons': lambda path, width: glyph(stroke_path(path, width)),
+    'HitungInIconsBulat': lambda path, width: glyph(stroke_path(path, min(2.9, width * 1.45))),
+    'HitungInIconsIsi': lambda path, width: glyph_from_ops(filled(path, width)),
+}
+
+for family, make in STYLES.items():
+    glyphs = {'.notdef': TTGlyphPen(None).glyph()}
+    for n in names:
+        path, width, _ = G[n]
+        glyphs[n] = make(path, width)
+    fb = FontBuilder(UPM, isTTF=True)
+    fb.setupGlyphOrder(order)
+    fb.setupCharacterMap(cmap)
+    fb.setupGlyf(glyphs)
+    # lsb harus = xMin glyph; kalau 0, renderer menggeser ikon ke kiri (tidak di tengah).
+    glyf = fb.font['glyf']
+    fb.setupHorizontalMetrics({n: (UPM, getattr(glyf[n], 'xMin', 0)) for n in order})
+    fb.setupHorizontalHeader(ascent=int(UPM * 0.84), descent=-int(UPM * 0.16))
+    fb.setupNameTable({'familyName': family, 'styleName': 'Regular'})
+    fb.setupOS2(sTypoAscender=int(UPM * 0.84), sTypoDescender=-int(UPM * 0.16), usWinAscent=int(UPM * 0.84), usWinDescent=int(UPM * 0.16))
+    fb.setupPost()
+    fb.save(os.path.join(ROOT, f'assets/fonts/{family}.ttf'))
 
 lines = [
     "import 'package:flutter/widgets.dart';",
-    '',
-    '// DIBUAT OTOMATIS oleh tool/icons/build_icons.py — jangan diubah manual.',
-    '',
-    '/// Ikon garis HitungIn (dari Claude Design), dipakai seperti `Icons.*`.',
-    'abstract final class HiIcons {',
-    "  static const String _family = 'HitungInIcons';",
-    '',
+    "",
+    "/// Gaya set ikon di seluruh aplikasi (P2b). Duotone memakai glyph Garis",
+    "/// di atas glyph Isi transparan (lihat `HiIcon`).",
+    "enum HiIconStyle {",
+    "  garis('Garis', 'HitungInIcons'),",
+    "  isi('Isi', 'HitungInIconsIsi'),",
+    "  duotone('Duotone', 'HitungInIcons'),",
+    "  bulat('Bulat', 'HitungInIconsBulat');",
+    "",
+    "  const HiIconStyle(this.label, this.family);",
+    "  final String label;",
+    "  final String family;",
+    "",
+    "  bool get pro => this == duotone || this == bulat;",
+    "}",
+    "",
+    "/// IconData HitungIn: kode glyph tetap, font mengikuti [HiIcons.style] —",
+    "/// semua `Icon(HiIcons.x)` ikut berganti gaya tanpa diubah satu per satu.",
+    "class HiIconData extends IconData {",
+    "  const HiIconData(super.codePoint) : super(fontFamily: 'HitungInIcons');",
+    "",
+    "  @override",
+    "  String? get fontFamily => HiIcons.style.family;",
+    "",
+    "  /// Glyph versi Isi (lapisan bawah Duotone).",
+    "  IconData get solid => IconData(codePoint, fontFamily: HiIconStyle.isi.family);",
+    "",
+    "  /// Glyph versi Garis.",
+    "  IconData get line => IconData(codePoint, fontFamily: HiIconStyle.garis.family);",
+    "}",
+    "",
+    "/// Ikon garis HitungIn (dihasilkan tool/icons/build_icons.py — jangan diedit manual).",
+    "abstract final class HiIcons {",
+    "  /// Gaya aktif; diatur dari pengaturan Tema (lihat app.dart).",
+    "  static HiIconStyle style = HiIconStyle.garis;",
+    "",
 ]
 for i, n in enumerate(names):
     src = 'desain' if G[n][2] else 'gaya desain'
     lines.append(f'  /// {n} ({src}).')
-    lines.append(f'  static const IconData {n} = IconData(0x{0xE000 + i:x}, fontFamily: _family);')
+    lines.append(f'  static const HiIconData {n} = HiIconData(0x{0xE000 + i:x});')
 lines.append('')
 lines.append('  /// Semua ikon (galeri desain).')
-lines.append('  static const Map<String, IconData> all = {')
+lines.append('  static const Map<String, HiIconData> all = {')
 for n in names:
     lines.append(f"    '{n}': {n},")
 lines.append('  };')

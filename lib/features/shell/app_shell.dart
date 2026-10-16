@@ -21,6 +21,7 @@ import '../ads/banner_slot.dart';
 import '../premium/pro_controller.dart';
 import '../security/app_gate.dart';
 import '../../core/widgets/hi_icons.dart';
+import '../../core/widgets/hi_icon.dart';
 import '../../core/platform/launch_routes.dart';
 import '../../core/platform/system_accent.dart';
 import '../home/widget_sync.dart';
@@ -173,6 +174,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       isPro: ref.watch(isProProvider),
       adsReady: ref.watch(adsReadyProvider),
     );
+    final ThemeSettings look = ref.watch(themeControllerProvider);
     Widget tab(int i) {
       final (IconData icon, IconData active, String label) = _tabs[i];
       final bool selected = shell.currentIndex == i;
@@ -188,16 +190,18 @@ class _AppShellState extends ConsumerState<AppShell> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(selected ? active : icon, color: color, size: 24),
-                  const SizedBox(height: AppSpace.x2),
-                  Text(
-                    label,
-                    style: context.text.label.copyWith(
-                      color: color,
-                      fontSize: 11,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  HiIcon(selected ? active : icon, color: color, size: 24),
+                  if (look.tabLabels) ...[
+                    const SizedBox(height: AppSpace.x2),
+                    Text(
+                      label,
+                      style: context.text.label.copyWith(
+                        color: color,
+                        fontSize: 11,
+                        fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -236,18 +240,29 @@ class _AppShellState extends ConsumerState<AppShell> {
                             child: Pressable(
                               onTap: () => context.push(Routes.catat),
                               semanticLabel: 'Catat transaksi',
+                              // Bentuk & ikon tombol pilihan pengguna (P2b).
                               child: Container(
-                                width: 58,
+                                width: look.fabShape == FabShape.pil ? 104 : 58,
                                 height: 58,
                                 decoration: BoxDecoration(
                                   color: c.accent,
-                                  borderRadius: AppRadius.mdAll,
+                                  borderRadius: look.fabShape == FabShape.kotak ? AppRadius.mdAll : AppRadius.pillAll,
                                   boxShadow: [
                                     BoxShadow(
                                         color: c.accent.withAlpha(0x55), blurRadius: 24, offset: const Offset(0, 10)),
                                   ],
                                 ),
-                                child: Icon(HiIcons.plus, color: c.onAccent, size: 28),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(look.fabIcon.icon, color: c.onAccent, size: look.fabShape == FabShape.pil ? 22 : 28),
+                                    if (look.fabShape == FabShape.pil) ...[
+                                      const SizedBox(width: AppSpace.x4),
+                                      Text('Catat',
+                                          style: context.text.title.copyWith(color: c.onAccent, fontSize: 15)),
+                                    ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),

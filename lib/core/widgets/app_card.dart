@@ -1,3 +1,5 @@
+import '../theme/theme_controller.dart';
+import 'hi_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_tokens.dart';
@@ -59,15 +61,23 @@ class IconTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    // Wadah ikon pilihan pengguna (P2b): kotak membulat / lingkaran / tanpa.
+    final IconWrap wrap = IconLook.wrap;
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: background ?? c.accentSoft, borderRadius: AppRadius.smAll),
+      decoration: BoxDecoration(
+        color: wrap == IconWrap.tanpa ? null : background ?? c.accentSoft,
+        borderRadius: wrap == IconWrap.kotak ? AppRadius.smAll : null,
+        shape: wrap == IconWrap.lingkaran ? BoxShape.circle : BoxShape.rectangle,
+      ),
       alignment: Alignment.center,
       child: emoji != null
           ? ExcludeSemantics(
-              child: Text(emoji!, textScaler: TextScaler.noScaling, style: TextStyle(fontSize: size * 0.48, height: 1)))
-          : Icon(icon, size: size * 0.5, color: color ?? c.accentText),
+              child: Text(emoji!,
+                  textScaler: TextScaler.noScaling,
+                  style: TextStyle(fontSize: size * (wrap == IconWrap.tanpa ? 0.62 : 0.48), height: 1)))
+          : HiIcon(icon, size: size * (wrap == IconWrap.tanpa ? 0.62 : 0.5), color: color ?? c.accentText),
     );
   }
 }

@@ -14,6 +14,7 @@ import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
 import 'widgets/accent_picker.dart';
+import 'widgets/icon_look_picker.dart';
 import 'widgets/settings_tile.dart';
 import '../../core/widgets/hi_icons.dart';
 
@@ -43,6 +44,8 @@ class AppearanceScreen extends ConsumerWidget {
           const SizedBox(height: AppSpace.x16),
           const FieldLabel('Warna aksen'),
           const AccentPicker(),
+          const SizedBox(height: AppSpace.x12),
+          const IconLookPicker(),
           const SizedBox(height: AppSpace.x24),
           const FieldLabel('Ikon aplikasi'),
           _AppIconPicker(isPro: isPro),

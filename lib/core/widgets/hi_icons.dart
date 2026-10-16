@@ -1,188 +1,219 @@
 import 'package:flutter/widgets.dart';
 
-// DIBUAT OTOMATIS oleh tool/icons/build_icons.py — jangan diubah manual.
+/// Gaya set ikon di seluruh aplikasi (P2b). Duotone memakai glyph Garis
+/// di atas glyph Isi transparan (lihat `HiIcon`).
+enum HiIconStyle {
+  garis('Garis', 'HitungInIcons'),
+  isi('Isi', 'HitungInIconsIsi'),
+  duotone('Duotone', 'HitungInIcons'),
+  bulat('Bulat', 'HitungInIconsBulat');
 
-/// Ikon garis HitungIn (dari Claude Design), dipakai seperti `Icons.*`.
+  const HiIconStyle(this.label, this.family);
+  final String label;
+  final String family;
+
+  bool get pro => this == duotone || this == bulat;
+}
+
+/// IconData HitungIn: kode glyph tetap, font mengikuti [HiIcons.style] —
+/// semua `Icon(HiIcons.x)` ikut berganti gaya tanpa diubah satu per satu.
+class HiIconData extends IconData {
+  const HiIconData(super.codePoint) : super(fontFamily: 'HitungInIcons');
+
+  @override
+  String? get fontFamily => HiIcons.style.family;
+
+  /// Glyph versi Isi (lapisan bawah Duotone).
+  IconData get solid => IconData(codePoint, fontFamily: HiIconStyle.isi.family);
+
+  /// Glyph versi Garis.
+  IconData get line => IconData(codePoint, fontFamily: HiIconStyle.garis.family);
+}
+
+/// Ikon garis HitungIn (dihasilkan tool/icons/build_icons.py — jangan diedit manual).
 abstract final class HiIcons {
-  static const String _family = 'HitungInIcons';
+  /// Gaya aktif; diatur dari pengaturan Tema (lihat app.dart).
+  static HiIconStyle style = HiIconStyle.garis;
 
   /// back (desain).
-  static const IconData back = IconData(0xe000, fontFamily: _family);
+  static const HiIconData back = HiIconData(0xe000);
   /// forward (desain).
-  static const IconData forward = IconData(0xe001, fontFamily: _family);
+  static const HiIconData forward = HiIconData(0xe001);
   /// close (desain).
-  static const IconData close = IconData(0xe002, fontFamily: _family);
+  static const HiIconData close = HiIconData(0xe002);
   /// check (desain).
-  static const IconData check = IconData(0xe003, fontFamily: _family);
+  static const HiIconData check = HiIconData(0xe003);
   /// plus (desain).
-  static const IconData plus = IconData(0xe004, fontFamily: _family);
+  static const HiIconData plus = HiIconData(0xe004);
   /// minus (gaya desain).
-  static const IconData minus = IconData(0xe005, fontFamily: _family);
+  static const HiIconData minus = HiIconData(0xe005);
   /// arrowRight (desain).
-  static const IconData arrowRight = IconData(0xe006, fontFamily: _family);
+  static const HiIconData arrowRight = HiIconData(0xe006);
   /// home (desain).
-  static const IconData home = IconData(0xe007, fontFamily: _family);
+  static const HiIconData home = HiIconData(0xe007);
   /// report (desain).
-  static const IconData report = IconData(0xe008, fontFamily: _family);
+  static const HiIconData report = HiIconData(0xe008);
   /// target (desain).
-  static const IconData target = IconData(0xe009, fontFamily: _family);
+  static const HiIconData target = HiIconData(0xe009);
   /// grid (desain).
-  static const IconData grid = IconData(0xe00a, fontFamily: _family);
+  static const HiIconData grid = HiIconData(0xe00a);
   /// shield (desain).
-  static const IconData shield = IconData(0xe00b, fontFamily: _family);
+  static const HiIconData shield = HiIconData(0xe00b);
   /// sparkle (desain).
-  static const IconData sparkle = IconData(0xe00c, fontFamily: _family);
+  static const HiIconData sparkle = HiIconData(0xe00c);
   /// eye (desain).
-  static const IconData eye = IconData(0xe00d, fontFamily: _family);
+  static const HiIconData eye = HiIconData(0xe00d);
   /// eyeOff (desain).
-  static const IconData eyeOff = IconData(0xe00e, fontFamily: _family);
+  static const HiIconData eyeOff = HiIconData(0xe00e);
   /// lock (desain).
-  static const IconData lock = IconData(0xe00f, fontFamily: _family);
+  static const HiIconData lock = HiIconData(0xe00f);
   /// info (desain).
-  static const IconData info = IconData(0xe010, fontFamily: _family);
+  static const HiIconData info = HiIconData(0xe010);
   /// warning (desain).
-  static const IconData warning = IconData(0xe011, fontFamily: _family);
+  static const HiIconData warning = HiIconData(0xe011);
   /// fingerprint (desain).
-  static const IconData fingerprint = IconData(0xe012, fontFamily: _family);
+  static const HiIconData fingerprint = HiIconData(0xe012);
   /// filter (desain).
-  static const IconData filter = IconData(0xe013, fontFamily: _family);
+  static const HiIconData filter = HiIconData(0xe013);
   /// camera (desain).
-  static const IconData camera = IconData(0xe014, fontFamily: _family);
+  static const HiIconData camera = HiIconData(0xe014);
   /// search (desain).
-  static const IconData search = IconData(0xe015, fontFamily: _family);
+  static const HiIconData search = HiIconData(0xe015);
   /// swap (desain).
-  static const IconData swap = IconData(0xe016, fontFamily: _family);
+  static const HiIconData swap = HiIconData(0xe016);
   /// bell (desain).
-  static const IconData bell = IconData(0xe017, fontFamily: _family);
+  static const HiIconData bell = HiIconData(0xe017);
   /// calendar (desain).
-  static const IconData calendar = IconData(0xe018, fontFamily: _family);
+  static const HiIconData calendar = HiIconData(0xe018);
   /// download (desain).
-  static const IconData download = IconData(0xe019, fontFamily: _family);
+  static const HiIconData download = HiIconData(0xe019);
   /// upload (desain).
-  static const IconData upload = IconData(0xe01a, fontFamily: _family);
+  static const HiIconData upload = HiIconData(0xe01a);
   /// palette (desain).
-  static const IconData palette = IconData(0xe01b, fontFamily: _family);
+  static const HiIconData palette = HiIconData(0xe01b);
   /// document (desain).
-  static const IconData document = IconData(0xe01c, fontFamily: _family);
+  static const HiIconData document = HiIconData(0xe01c);
   /// fileCheck (desain).
-  static const IconData fileCheck = IconData(0xe01d, fontFamily: _family);
+  static const HiIconData fileCheck = HiIconData(0xe01d);
   /// star (desain).
-  static const IconData star = IconData(0xe01e, fontFamily: _family);
+  static const HiIconData star = HiIconData(0xe01e);
   /// noAds (desain).
-  static const IconData noAds = IconData(0xe01f, fontFamily: _family);
+  static const HiIconData noAds = HiIconData(0xe01f);
   /// music (desain).
-  static const IconData music = IconData(0xe020, fontFamily: _family);
+  static const HiIconData music = HiIconData(0xe020);
   /// wifi (desain).
-  static const IconData wifi = IconData(0xe021, fontFamily: _family);
+  static const HiIconData wifi = HiIconData(0xe021);
   /// wallet (desain).
-  static const IconData wallet = IconData(0xe022, fontFamily: _family);
+  static const HiIconData wallet = HiIconData(0xe022);
   /// cash (desain).
-  static const IconData cash = IconData(0xe023, fontFamily: _family);
+  static const HiIconData cash = HiIconData(0xe023);
   /// bank (desain).
-  static const IconData bank = IconData(0xe024, fontFamily: _family);
+  static const HiIconData bank = HiIconData(0xe024);
   /// phone (desain).
-  static const IconData phone = IconData(0xe025, fontFamily: _family);
+  static const HiIconData phone = HiIconData(0xe025);
   /// food (desain).
-  static const IconData food = IconData(0xe026, fontFamily: _family);
+  static const HiIconData food = HiIconData(0xe026);
   /// shopping (desain).
-  static const IconData shopping = IconData(0xe027, fontFamily: _family);
+  static const HiIconData shopping = HiIconData(0xe027);
   /// bolt (desain).
-  static const IconData bolt = IconData(0xe028, fontFamily: _family);
+  static const HiIconData bolt = HiIconData(0xe028);
   /// bus (desain).
-  static const IconData bus = IconData(0xe029, fontFamily: _family);
+  static const HiIconData bus = HiIconData(0xe029);
   /// film (desain).
-  static const IconData film = IconData(0xe02a, fontFamily: _family);
+  static const HiIconData film = HiIconData(0xe02a);
   /// heart (desain).
-  static const IconData heart = IconData(0xe02b, fontFamily: _family);
+  static const HiIconData heart = HiIconData(0xe02b);
   /// education (desain).
-  static const IconData education = IconData(0xe02c, fontFamily: _family);
+  static const HiIconData education = HiIconData(0xe02c);
   /// gift (desain).
-  static const IconData gift = IconData(0xe02d, fontFamily: _family);
+  static const HiIconData gift = HiIconData(0xe02d);
   /// briefcase (desain).
-  static const IconData briefcase = IconData(0xe02e, fontFamily: _family);
+  static const HiIconData briefcase = HiIconData(0xe02e);
   /// laptop (desain).
-  static const IconData laptop = IconData(0xe02f, fontFamily: _family);
+  static const HiIconData laptop = HiIconData(0xe02f);
   /// trendUp (desain).
-  static const IconData trendUp = IconData(0xe030, fontFamily: _family);
+  static const HiIconData trendUp = HiIconData(0xe030);
   /// dots (gaya desain).
-  static const IconData dots = IconData(0xe031, fontFamily: _family);
+  static const HiIconData dots = HiIconData(0xe031);
   /// store (gaya desain).
-  static const IconData store = IconData(0xe032, fontFamily: _family);
+  static const HiIconData store = HiIconData(0xe032);
   /// backspace (gaya desain).
-  static const IconData backspace = IconData(0xe033, fontFamily: _family);
+  static const HiIconData backspace = HiIconData(0xe033);
   /// edit (gaya desain).
-  static const IconData edit = IconData(0xe034, fontFamily: _family);
+  static const HiIconData edit = HiIconData(0xe034);
   /// trash (gaya desain).
-  static const IconData trash = IconData(0xe035, fontFamily: _family);
+  static const HiIconData trash = HiIconData(0xe035);
   /// copy (gaya desain).
-  static const IconData copy = IconData(0xe036, fontFamily: _family);
+  static const HiIconData copy = HiIconData(0xe036);
   /// repeat (gaya desain).
-  static const IconData repeat = IconData(0xe037, fontFamily: _family);
+  static const HiIconData repeat = HiIconData(0xe037);
   /// user (gaya desain).
-  static const IconData user = IconData(0xe038, fontFamily: _family);
+  static const HiIconData user = HiIconData(0xe038);
   /// history (gaya desain).
-  static const IconData history = IconData(0xe039, fontFamily: _family);
+  static const HiIconData history = HiIconData(0xe039);
   /// restore (gaya desain).
-  static const IconData restore = IconData(0xe03a, fontFamily: _family);
+  static const HiIconData restore = HiIconData(0xe03a);
   /// today (gaya desain).
-  static const IconData today = IconData(0xe03b, fontFamily: _family);
+  static const HiIconData today = HiIconData(0xe03b);
   /// pin (gaya desain).
-  static const IconData pin = IconData(0xe03c, fontFamily: _family);
+  static const HiIconData pin = HiIconData(0xe03c);
   /// table (gaya desain).
-  static const IconData table = IconData(0xe03d, fontFamily: _family);
+  static const HiIconData table = HiIconData(0xe03d);
   /// hourglass (gaya desain).
-  static const IconData hourglass = IconData(0xe03e, fontFamily: _family);
+  static const HiIconData hourglass = HiIconData(0xe03e);
   /// play (gaya desain).
-  static const IconData play = IconData(0xe03f, fontFamily: _family);
+  static const HiIconData play = HiIconData(0xe03f);
   /// receipt (gaya desain).
-  static const IconData receipt = IconData(0xe040, fontFamily: _family);
+  static const HiIconData receipt = HiIconData(0xe040);
   /// bars (gaya desain).
-  static const IconData bars = IconData(0xe041, fontFamily: _family);
+  static const HiIconData bars = HiIconData(0xe041);
   /// checkCircle (gaya desain).
-  static const IconData checkCircle = IconData(0xe042, fontFamily: _family);
+  static const HiIconData checkCircle = HiIconData(0xe042);
   /// error (gaya desain).
-  static const IconData error = IconData(0xe043, fontFamily: _family);
+  static const HiIconData error = HiIconData(0xe043);
   /// gradient (gaya desain).
-  static const IconData gradient = IconData(0xe044, fontFamily: _family);
+  static const HiIconData gradient = HiIconData(0xe044);
   /// jar (gaya desain).
-  static const IconData jar = IconData(0xe045, fontFamily: _family);
+  static const HiIconData jar = HiIconData(0xe045);
   /// chevronDown (gaya desain).
-  static const IconData chevronDown = IconData(0xe046, fontFamily: _family);
+  static const HiIconData chevronDown = HiIconData(0xe046);
   /// pet (desain).
-  static const IconData pet = IconData(0xe047, fontFamily: _family);
+  static const HiIconData pet = HiIconData(0xe047);
   /// baby (desain).
-  static const IconData baby = IconData(0xe048, fontFamily: _family);
+  static const HiIconData baby = HiIconData(0xe048);
   /// fitness (desain).
-  static const IconData fitness = IconData(0xe049, fontFamily: _family);
+  static const HiIconData fitness = HiIconData(0xe049);
   /// coffee (desain).
-  static const IconData coffee = IconData(0xe04a, fontFamily: _family);
+  static const HiIconData coffee = HiIconData(0xe04a);
   /// fuel (desain).
-  static const IconData fuel = IconData(0xe04b, fontFamily: _family);
+  static const HiIconData fuel = HiIconData(0xe04b);
   /// parking (desain).
-  static const IconData parking = IconData(0xe04c, fontFamily: _family);
+  static const HiIconData parking = HiIconData(0xe04c);
   /// wrench (desain).
-  static const IconData wrench = IconData(0xe04d, fontFamily: _family);
+  static const HiIconData wrench = HiIconData(0xe04d);
   /// suitcase (desain).
-  static const IconData suitcase = IconData(0xe04e, fontFamily: _family);
+  static const HiIconData suitcase = HiIconData(0xe04e);
   /// laundry (desain).
-  static const IconData laundry = IconData(0xe04f, fontFamily: _family);
+  static const HiIconData laundry = HiIconData(0xe04f);
   /// scissors (desain).
-  static const IconData scissors = IconData(0xe050, fontFamily: _family);
+  static const HiIconData scissors = HiIconData(0xe050);
   /// pill (desain).
-  static const IconData pill = IconData(0xe051, fontFamily: _family);
+  static const HiIconData pill = HiIconData(0xe051);
   /// donation (desain).
-  static const IconData donation = IconData(0xe052, fontFamily: _family);
+  static const HiIconData donation = HiIconData(0xe052);
   /// people (desain).
-  static const IconData people = IconData(0xe053, fontFamily: _family);
+  static const HiIconData people = HiIconData(0xe053);
   /// gamepad (desain).
-  static const IconData gamepad = IconData(0xe054, fontFamily: _family);
+  static const HiIconData gamepad = HiIconData(0xe054);
   /// signal (desain).
-  static const IconData signal = IconData(0xe055, fontFamily: _family);
+  static const HiIconData signal = HiIconData(0xe055);
   /// installment (desain).
-  static const IconData installment = IconData(0xe056, fontFamily: _family);
+  static const HiIconData installment = HiIconData(0xe056);
+  /// coin (gaya desain).
+  static const HiIconData coin = HiIconData(0xe057);
 
   /// Semua ikon (galeri desain).
-  static const Map<String, IconData> all = {
+  static const Map<String, HiIconData> all = {
     'back': back,
     'forward': forward,
     'close': close,
@@ -270,5 +301,6 @@ abstract final class HiIcons {
     'gamepad': gamepad,
     'signal': signal,
     'installment': installment,
+    'coin': coin,
   };
 }
