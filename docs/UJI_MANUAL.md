@@ -180,7 +180,7 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [ ] Versi gratis: cicilan ikut batas 3 tagihan aktif.
 - [x] Lainnya › Utang-piutang → + Catat "Aku meminjamkan" Budi Rp200.000 dari Tunai → saldo Tunai turun, Laporan pengeluaran tidak berubah, Riwayat menampilkan "Dipinjamkan ke Budi".
 - [x] Catat pembayaran Rp100.000 → status Dicicil + bar; bayar lagi Rp100.000 → "Budi lunas!", status Lunas.
-- [ ] Jatuh tempo lewat → chip "Lewat jatuh tempo" + hitungan di kartu ringkasan.
+- [x] Jatuh tempo lewat → chip "Lewat jatuh tempo" + hitungan di kartu ringkasan.
 - [x] Tagih lewat WhatsApp → teks bisa diubah → menu Bagikan → WhatsApp; kembali ke HitungIn tidak minta PIN lagi.
 - [x] Utangku dengan jatuh tempo sebelum gajian → Jatah hari ini turun; rinciannya ada baris "Utang jatuh tempo".
 - [x] Catat cepat di Beranda: "pinjam budi 200rb" → form Utang-piutang terisi; "budi bayar 100rb" → sheet pembayaran Budi; "pinjam dari sinta 300rb" → arah Aku meminjam.
@@ -188,5 +188,5 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] Detail transaksi utang → tanpa Edit/Hapus, tombol "Buka Utang-piutang".
 - [x] Hapus catatan utang → saldo dompet kembali seperti semula.
 - [ ] Backup → pulihkan: catatan utang, pembayaran, dan cicilan kembali utuh.
-- [ ] (Pro) Utang/piutang dengan jatuh tempo besok → notifikasi H-1 & hari H pada jam pengingat ("Utang ke …" / "Waktunya menagih …"); ketuk saat terkunci → PIN → detail catatan itu.
-- [ ] Catatan dilunasi → notifikasinya yang sudah tampil ikut hilang; versi gratis: form menampilkan lencana PRO, tanpa notifikasi.
+- [x] (Pro) Utang/piutang dengan jatuh tempo besok → notifikasi H-1 & hari H pada jam pengingat ("Utang ke …" / "Waktunya menagih …"); ketuk saat terkunci → PIN → detail catatan itu.
+- [x] Catatan dilunasi → notifikasinya yang sudah tampil ikut hilang; versi gratis: form menampilkan lencana PRO, tanpa notifikasi.
