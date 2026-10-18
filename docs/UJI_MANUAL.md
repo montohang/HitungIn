@@ -193,16 +193,16 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 
 ## 11. Personalisasi (P2b, baru)
 - [ ] Pasang widget Jatah 4×2 → HitungIn terbuka di "Atur widget" (lewat PIN bila terkunci); widget langsung tampil dengan gaya "Ikut tema".
-- [ ] Latar Aksen / Gradien (Senja, Laut, Lembut) / transparansi / sudut / warna teks → Simpan → widget di layar utama berubah sama seperti pratinjau.
-- [ ] (Pro) Latar Foto: pilih foto → atur posisi & lapisan → angka tetap terbaca di foto terang dan gelap. Versi gratis: pilihan Foto membuka layar Pro.
+- [x] Latar Aksen / Gradien (Senja, Laut, Lembut) / transparansi / sudut / warna teks → Simpan → widget di layar utama berubah sama seperti pratinjau.
+- [x] (Pro) Latar Foto: pilih foto → atur posisi & lapisan → angka tetap terbaca di foto terang dan gelap. Versi gratis: pilihan Foto membuka layar Pro.
 - [ ] Pasang dua widget Jatah, beri gaya berbeda → keduanya tampil beda dan sama-sama terbarui setelah transaksi disimpan.
 - [ ] "Samarkan angka di widget ini" → hanya widget itu yang Rp ••••.
-- [ ] Tekan lama widget › Atur ulang (Android 12+) → kembali ke Atur widget untuk widget itu.
+- [x] Tekan lama widget › Atur ulang (Android 12+) → kembali ke Atur widget untuk widget itu.
 - [ ] Lepas widget berfoto → buka Atur widget → fotonya ikut terhapus (tidak tersisa di penyimpanan).
 - [ ] Backup → pulihkan: gaya widget kembali, widget berfoto jadi "Ikut tema".
-- [ ] Tema › Wallpaper (Android 12+): aksen mengikuti wallpaper; ganti wallpaper → kembali ke HitungIn → aksen ikut berubah.
+- [x] Tema › Wallpaper (Android 12+): aksen mengikuti wallpaper; ganti wallpaper → kembali ke HitungIn → aksen ikut berubah.
 - [ ] (Pro) Warna bebas: warna terlalu terang diberi keterangan & digelapkan; (Pro) Dari foto: 2–4 warna muncul, ketuk → aksen berubah.
-- [ ] Gaya ikon Garis / Isi / (Pro) Duotone / (Pro) Bulat → semua layar (Beranda, Catat, Riwayat, Laporan, Budget, Lainnya) langsung berganti tanpa restart.
-- [ ] Wadah ikon Kotak / Lingkaran / Tanpa; tombol Catat Kotak / Bulat / "+ Catat"; ikon tombol +, pensil, koin; label tab disembunyikan.
-- [ ] Notifikasi & widget ikut warna aksen yang dipilih.
-- [ ] (Pro) Atur Beranda: seret kartu, sembunyikan kartu, "Bawaan" → Beranda mengikuti; versi gratis tetap susunan bawaan.
+- [x] Gaya ikon Garis / Isi / (Pro) Duotone / (Pro) Bulat → semua layar (Beranda, Catat, Riwayat, Laporan, Budget, Lainnya) langsung berganti tanpa restart.
+- [x] Wadah ikon Kotak / Lingkaran / Tanpa; tombol Catat Kotak / Bulat / "+ Catat"; ikon tombol +, pensil, koin; label tab disembunyikan.
+- [x] Notifikasi & widget ikut warna aksen yang dipilih.
+- [x] (Pro) Atur Beranda: seret kartu, sembunyikan kartu, "Bawaan" → Beranda mengikuti; versi gratis tetap susunan bawaan.

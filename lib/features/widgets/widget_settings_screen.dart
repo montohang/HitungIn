@@ -58,6 +58,11 @@ class _WidgetSettingsScreenState extends ConsumerState<WidgetSettingsScreen> wit
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    // Foto draf yang tidak jadi disimpan dihapus (bukan foto yang sedang dipakai widget).
+    final Map<int, WidgetStyle> saved = ref.read(widgetStylesProvider).valueOrNull ?? const {};
+    for (final MapEntry<int, WidgetStyle> e in _draft.entries) {
+      if (e.value.photoPath != null && e.value.photoPath != saved[e.key]?.photoPath) deleteWidgetPhoto(e.value.photoPath);
+    }
     super.dispose();
   }
 
@@ -299,13 +304,18 @@ class _Preview extends ConsumerWidget {
             children: [
               button(40),
               const SizedBox(width: 10),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Catat', style: base.copyWith(fontSize: 15, fontWeight: FontWeight.w700, color: look.ink)),
-                  Text('Sedikit-sedikit jadi bukit', style: base.copyWith(fontSize: 11, color: look.muted)),
-                ],
+              Flexible(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Catat', style: base.copyWith(fontSize: 15, fontWeight: FontWeight.w700, color: look.ink)),
+                    Text('Sedikit-sedikit jadi bukit',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: base.copyWith(fontSize: 11, height: 1.3, color: look.muted)),
+                  ],
+                ),
               ),
             ],
           )
@@ -359,8 +369,7 @@ class _Preview extends ConsumerWidget {
     return Semantics(
       label: 'Pratinjau widget',
       child: Container(
-        height: kind == 'catat' ? 150 : 210,
-        padding: const EdgeInsets.symmetric(horizontal: 18),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 28),
         decoration: const BoxDecoration(
           borderRadius: AppRadius.lgAll,
           gradient: LinearGradient(
@@ -375,8 +384,8 @@ class _Preview extends ConsumerWidget {
           child: ClipRRect(
             borderRadius: radius,
             child: SizedBox(
-              width: kind == 'catat' ? 190 : double.infinity,
-              height: kind == 'catat' ? 76 : null,
+              width: kind == 'catat' ? 210 : double.infinity,
+              height: kind == 'catat' ? 80 : null,
               child: Stack(
                 children: [
                   Positioned.fill(child: bg()),
@@ -577,6 +586,7 @@ class _BgOption extends StatelessWidget {
       onTap: onTap,
       semanticLabel: 'Latar ${bg.label}${pro ? ', Pro' : ''}',
       child: Container(
+        width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: AppSpace.x8),
         decoration: BoxDecoration(
           color: c.surface,
@@ -585,8 +595,10 @@ class _BgOption extends StatelessWidget {
         ),
         child: Stack(
           clipBehavior: Clip.none,
+          alignment: Alignment.topCenter,
           children: [
             Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 44,
@@ -599,7 +611,7 @@ class _BgOption extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpace.x4),
-                Text(bg.label, style: t.label.copyWith(color: c.sub2)),
+                Text(bg.label, maxLines: 1, overflow: TextOverflow.ellipsis, style: t.label.copyWith(color: c.sub2)),
               ],
             ),
             if (pro) const Positioned(top: -4, right: 2, child: AppBadge.pro()),
