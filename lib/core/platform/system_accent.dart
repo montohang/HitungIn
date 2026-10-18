@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 
-/// Warna aksen sistem dari wallpaper (Material You, Android 12+). Null bila
-/// tidak didukung atau di tes.
+/// Warna utama wallpaper layar utama (Android 8.1+), untuk aksen "Wallpaper".
+/// Null bila tidak didukung atau di tes.
 abstract final class SystemAccent {
   static const MethodChannel _channel = MethodChannel('com.capt.hitungin/theme');
 

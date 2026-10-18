@@ -43,7 +43,7 @@ enum AccentSource {
   /// Salah satu [AccentPreset].
   preset,
 
-  /// Material You: warna aksen sistem dari wallpaper (Android 12+).
+  /// Warna utama wallpaper layar utama (Android 8.1+).
   wallpaper,
 
   /// Warna bebas / dari foto (Pro).
@@ -179,7 +179,7 @@ class ThemeController extends Notifier<ThemeSettings> {
     _save(SettingKeys.themeAccentSource, AccentSource.preset.name);
   }
 
-  /// Material You (Android 12+).
+  /// Aksen dari wallpaper (Android 8.1+).
   void setWallpaperAccent() {
     state = state.copyWith(source: AccentSource.wallpaper);
     _save(SettingKeys.themeAccentSource, AccentSource.wallpaper.name);
