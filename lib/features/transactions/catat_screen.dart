@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../debts/debts_screen.dart' show DebtDraft, debtDraftLink;
+import '../goals/goals_screen.dart' show GoalDraft, goalDraftLink;
 import '../../core/db/app_database.dart';
 import '../../core/db/data_providers.dart';
 import '../../core/db/providers.dart';
@@ -55,6 +56,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
 
   /// Kalimat Catat cepat yang dibaca sebagai utang-piutang.
   DebtDraft? _debt;
+  GoalDraft? _goal;
   final TextEditingController _note = TextEditingController();
 
   TxKind _kind = TxKind.pengeluaran;
@@ -140,6 +142,19 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
   void _applyQuick(String text, {bool open = false}) {
     final QuickEntry e =
         QuickEntryParser(wallets: _wallets, categories: _categories).parse(text, now: ref.read(clockProvider)());
+    if (e.goal case final String name?) {
+      // "nabung 100rb dana darurat" → Target tabungan.
+      final GoalDraft g = (name: name, amount: e.amount, walletId: e.walletId);
+      if (open) {
+        context.pushReplacement(goalDraftLink(g));
+      } else {
+        setState(() {
+          _goal = g;
+          _debt = null;
+        });
+      }
+      return;
+    }
     final DebtIntent? debt = e.debt;
     final DebtDraft? draft = debt == null
         ? null
@@ -150,11 +165,15 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
       return;
     }
     if (draft != null) {
-      setState(() => _debt = draft);
+      setState(() {
+        _debt = draft;
+        _goal = null;
+      });
       return;
     }
     setState(() {
       _debt = null;
+      _goal = null;
       _error = null;
       _kind = e.kind;
       if (e.amount != null) _amount = e.amount!;
@@ -429,6 +448,15 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                       if (_debt case final DebtDraft d?) ...[
                                         const SizedBox(height: AppSpace.x8),
                                         _DebtHint(draft: d, onOpen: () => context.pushReplacement(debtDraftLink(d))),
+                                      ],
+                                      if (_goal case final GoalDraft g?) ...[
+                                        const SizedBox(height: AppSpace.x8),
+                                        _OpenHint(
+                                          icon: HiIcons.jar,
+                                          text: 'Target tabungan: sisihkan${g.amount == null ? '' : ' ${Rupiah.format(g.amount!)}'}'
+                                              '${g.name.isEmpty ? '' : ' untuk ${g.name}'}',
+                                          onOpen: () => context.pushReplacement(goalDraftLink(g)),
+                                        ),
                                       ],
                                       const SizedBox(height: AppSpace.x16),
                                     ],
@@ -848,8 +876,6 @@ class _DebtHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
     final String who = draft.name.isEmpty ? 'seseorang' : draft.name;
     final String amount = draft.amount == null ? '' : ' ${Rupiah.format(draft.amount!)}';
     final String what = switch ((draft.direction, draft.payment)) {
@@ -858,17 +884,33 @@ class _DebtHint extends StatelessWidget {
       (DebtDirection.utang, false) => 'Pinjam$amount dari $who',
       (DebtDirection.utang, true) => 'Bayar utang$amount ke $who',
     };
+    return _OpenHint(icon: HiIcons.people, text: 'Utang-piutang: $what', onOpen: onOpen);
+  }
+}
+
+/// Saran membuka layar lain untuk kalimat Catat cepat ("… · Buka ›").
+class _OpenHint extends StatelessWidget {
+  const _OpenHint({required this.icon, required this.text, required this.onOpen});
+
+  final IconData icon;
+  final String text;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
     return Pressable(
       onTap: onOpen,
-      semanticLabel: 'Catat di Utang-piutang: $what',
+      semanticLabel: '$text, buka',
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12, vertical: AppSpace.x8),
         decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.mdAll),
         child: Row(
           children: [
-            Icon(HiIcons.people, size: 18, color: c.accentText),
+            Icon(icon, size: 18, color: c.accentText),
             const SizedBox(width: AppSpace.x8),
-            Expanded(child: Text('Utang-piutang: $what', style: t.caption.copyWith(color: c.accentText, fontWeight: FontWeight.w600))),
+            Expanded(child: Text(text, style: t.caption.copyWith(color: c.accentText, fontWeight: FontWeight.w600))),
             Text('Buka ›', style: t.caption.copyWith(color: c.accentText, fontWeight: FontWeight.w700)),
           ],
         ),

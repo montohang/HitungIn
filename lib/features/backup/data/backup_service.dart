@@ -15,6 +15,7 @@ typedef BackupSummary = ({
   int budgets,
   int recurring,
   int debts,
+  int goals,
 });
 
 /// Mengubah seluruh isi database menjadi peta JSON dan sebaliknya.
@@ -45,6 +46,8 @@ class BackupService {
         'recurring': rows(await db.select(db.recurringTxs).get()),
         'debts': rows(await db.select(db.debts).get()),
         'debtPayments': rows(await db.select(db.debtPayments).get()),
+        'goals': rows(await db.select(db.goals).get()),
+        'goalDeposits': rows(await db.select(db.goalDeposits).get()),
         'transactions': rows(await db.select(db.transactions).get()),
         'budgets': rows(await db.select(db.budgets).get()),
         'settings': rows([
@@ -70,6 +73,7 @@ class BackupService {
       budgets: count('budgets'),
       recurring: count('recurring'),
       debts: count('debts'),
+      goals: count('goals'),
     );
   }
 
@@ -98,6 +102,8 @@ class BackupService {
     await db.transaction(() async {
       // Hapus dari anak ke induk (foreign key aktif).
       await db.delete(db.transactions).go();
+      await db.delete(db.goalDeposits).go();
+      await db.delete(db.goals).go();
       await db.delete(db.debtPayments).go();
       await db.delete(db.debts).go();
       await db.delete(db.recurringTxs).go();
@@ -118,6 +124,9 @@ class BackupService {
         // Cadangan sebelum v5 tidak punya utang-piutang → kosong.
         b.insertAll(db.debts, [for (final r in rows('debts')) Debt.fromJson(r)]);
         b.insertAll(db.debtPayments, [for (final r in rows('debtPayments')) DebtPayment.fromJson(r)]);
+        // Cadangan sebelum v6 tidak punya target tabungan → kosong.
+        b.insertAll(db.goals, [for (final r in rows('goals')) Goal.fromJson(r)]);
+        b.insertAll(db.goalDeposits, [for (final r in rows('goalDeposits')) GoalDeposit.fromJson(r)]);
         b.insertAll(db.transactions, [for (final r in rows('transactions')) Txn.fromJson({'sub': '', ...r})]);
         // Cadangan sebelum v3 tidak punya fromMonth → berlaku sejak awal.
         b.insertAll(db.budgets, [

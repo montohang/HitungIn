@@ -18,6 +18,7 @@ IconData _iconOf(HomeCard c) => switch (c) {
       HomeCard.cepat => HiIcons.sparkle,
       HomeCard.favorit => HiIcons.star,
       HomeCard.budget => HiIcons.target,
+      HomeCard.target => HiIcons.jar,
       HomeCard.tagihan => HiIcons.calendar,
       HomeCard.terbaru => HiIcons.history,
     };

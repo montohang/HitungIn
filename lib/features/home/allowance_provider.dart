@@ -8,6 +8,9 @@ import '../bills/bills_screen.dart' show activeBillsProvider;
 import '../bills/data/bill_due.dart';
 import '../debts/data/debts_dao.dart';
 import '../debts/debts_provider.dart';
+import '../goals/data/goals.dart';
+import '../goals/data/goals_dao.dart';
+import '../goals/goals_provider.dart';
 import '../settings/data/settings_dao.dart';
 import '../transactions/data/transactions_dao.dart' show TxDetail;
 import '../wallets/data/wallets_dao.dart';
@@ -67,14 +70,17 @@ final allowanceProvider = Provider<Allowance?>((ref) {
   final List<RecurringTx>? rec = ref.watch(_recurringProvider).valueOrNull;
   final List<TxDetail>? today = ref.watch(_todayExpensesProvider).valueOrNull;
   final List<DebtWithPayments>? debts = ref.watch(debtsProvider).valueOrNull;
+  final List<GoalWithDeposits>? goals = ref.watch(goalsProvider).valueOrNull;
   final DateTime month = ref.watch(currentMonthProvider);
   final budgets = ref.watch(budgetProgressProvider(month)).valueOrNull;
-  if (wallets == null || payday == null || excluded == null || bills == null || rec == null || today == null || budgets == null || debts == null) {
+  if (wallets == null || payday == null || excluded == null || bills == null || rec == null || today == null || budgets == null || debts == null || goals == null) {
     return null;
   }
   ref.watch(currentDayProvider);
   final Set<int> counted = {for (final w in wallets) if (!excluded.contains(w.wallet.id)) w.wallet.id};
   final total = budgets.where((b) => b.category == null).firstOrNull;
+  // Target yang diarsipkan tidak lagi menahan uangnya.
+  final List<GoalWithDeposits> held = [for (final g in goals) if (!g.goal.archived) g];
   return computeAllowance(
     now: ref.read(clockProvider)(),
     payday: payday,
@@ -94,6 +100,11 @@ final allowanceProvider = Provider<Allowance?>((ref) {
       for (final d in debts)
         if (d.debt.direction == DebtDirection.utang && d.debt.dueDate != null && d.left > 0)
           (name: d.debt.name, amount: d.left, next: d.debt.dueDate!, repeat: BillRepeat.sekali, anchorDay: d.debt.dueDate!.day, times: 1),
+    ],
+    setAside: setAsideFrom(held.map((g) => g.facts), counted),
+    setAsideNames: [
+      for (final g in held)
+        if (setAsideFrom([g.facts], counted) > 0) g.goal.name,
     ],
     budgetLeft: total == null ? null : total.budget.limitAmount - total.spent,
   );

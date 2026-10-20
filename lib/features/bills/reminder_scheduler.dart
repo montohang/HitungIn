@@ -15,6 +15,7 @@ import '../security/app_gate.dart';
 import '../debts/data/debt_reminders.dart';
 import '../recap/data/recap_reminders.dart';
 import '../debts/data/debts_dao.dart';
+import '../goals/data/goal_reminders.dart';
 import 'data/bill_reminders.dart';
 
 export 'data/bill_reminders.dart' show billPayloadPrefix, debtPayloadPrefix;
@@ -24,6 +25,10 @@ String? routeForNotification(String payload) {
   if (payload.startsWith(billPayloadPrefix)) return Routes.tagihan;
   if (payload == '${recapPayloadPrefix}week') return '${Routes.rekap}?minggu=1';
   if (payload == '${recapPayloadPrefix}evening') return Routes.catat;
+  if (payload.startsWith(goalPayloadPrefix)) {
+    final int? id = int.tryParse(payload.substring(goalPayloadPrefix.length));
+    return id == null ? Routes.target : Routes.targetDetail(id);
+  }
   if (payload.startsWith(debtPayloadPrefix)) {
     final int? id = int.tryParse(payload.substring(debtPayloadPrefix.length));
     return id == null ? Routes.utang : Uri(path: Routes.utang, queryParameters: {'id': '$id'}).toString();
@@ -254,6 +259,7 @@ Future<int> syncBillReminders({
   List<DebtWithPayments> debts = const [],
   Color? color,
   List<ReminderPlan> recap = const [],
+  List<ReminderPlan> goals = const [],
   bool loggedToday = false,
 }) async {
   final bool on = settings.enabled && isPro;
@@ -264,12 +270,16 @@ Future<int> syncBillReminders({
     // Rekap Senin tetap; pengingat malam ditutup begitu hari ini sudah dicatat.
     recapWeeklyOwner,
     if (!loggedToday) recapEveningOwner,
+    // Pengingat setoran yang masih menyala tetap tampil sampai diketuk.
+    for (final ReminderPlan p in goals) billIdOfReminder(p.id),
   });
   final List<ReminderPlan> all = [
     if (on) ...planBillReminders(bills, now, hour: settings.hour),
     if (on) ...planDebtReminders(debts, now, hour: settings.hour),
     // Notifikasi rekap gratis: tidak bergantung Pro / pengingat tagihan.
     ...recap,
+    // Pengingat setoran target juga gratis (P3b).
+    ...goals,
   ]..sort((a, b) => a.at.compareTo(b.at));
   final List<ReminderPlan> plans = all.length > maxScheduledReminders ? all.sublist(0, maxScheduledReminders) : all;
   await scheduler.schedule(plans, color: color);

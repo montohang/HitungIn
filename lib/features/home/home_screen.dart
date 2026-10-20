@@ -36,6 +36,7 @@ import 'allowance_provider.dart';
 import 'data/allowance.dart';
 import 'widgets/allowance_card.dart';
 import '../favorites/widgets/favorite_chips.dart';
+import '../goals/widgets/goal_home_card.dart';
 
 /// Sapaan sesuai jam.
 String greetingFor(DateTime now) => switch (now.hour) {
@@ -189,6 +190,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ],
                     ],
+                  HomeCard.target => [GoalHomeCard(hidden: hidden)],
                   HomeCard.tagihan => [
                       if (dueBills.isNotEmpty) ...[
                         const SizedBox(height: AppSpace.x24),

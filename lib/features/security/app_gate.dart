@@ -102,6 +102,11 @@ abstract final class Routes {
   static const String kategori = '/pengaturan/kategori';
   static const String tagihan = '/tagihan';
   static const String utang = '/utang';
+
+  /// Daftar target (`?baru=1` langsung buka form), detail, dan layar perayaan.
+  static const String target = '/target';
+  static String targetDetail(int id) => '/target/$id';
+  static String targetTercapai(int id) => '/target/$id/tercapai';
   static const String widget = '/widget';
   static const String aturBeranda = '/pengaturan/beranda';
   static const String rekap = '/rekap';

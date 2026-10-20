@@ -17,10 +17,15 @@ class QuickEntry {
     this.categoryId,
     this.sub = '',
     this.debt,
+    this.goal,
   });
 
   /// Bukan transaksi biasa melainkan catatan/pembayaran utang-piutang.
   final DebtIntent? debt;
+
+  /// Setoran target tabungan ("nabung 100rb dana darurat", P3b): nama target
+  /// yang disebut (boleh kosong). Null = bukan setoran.
+  final String? goal;
 
   final TxKind kind;
   final int? amount;
@@ -107,6 +112,10 @@ class QuickEntryParser {
   static const Set<String> _repayWords = {'bayar', 'balikin', 'kembaliin', 'ngembaliin', 'lunasin', 'lunasi', 'nyicil', 'cicil'};
   static const Set<String> _debtFiller = {'dari', 'ke', 'sama', 'ama', 'sm', 'ya', 'udah', 'sudah', 'nya', 'buat', 'untuk'};
 
+  // Target tabungan (P3b).
+  static const Set<String> _saveWords = {'nabung', 'menabung', 'tabung', 'celengan', 'nyelengin', 'sisihkan', 'nyisihin', 'setor'};
+  static const Set<String> _saveFiller = {'ke', 'buat', 'untuk', 'utk', 'target', 'tabungan', 'dari', 'pakai', 'pake'};
+
   static final RegExp _amountRe = RegExp(
     r'^([+\-−])?(?:rp\.?)?(\d+(?:[.,]\d+)*)(k|rb|ribu|jt|juta|m|miliar|milyar)?$',
   );
@@ -168,6 +177,22 @@ class QuickEntryParser {
         walletHits.add((i, w));
         used[i] = true;
       }
+    }
+
+    // 3a. Setoran target tabungan? Kata sisa = nama target.
+    final int? save = [for (int i = 0; i < low.length; i++) if (!used[i] && _saveWords.contains(low[i])) i].firstOrNull;
+    if (save != null) {
+      final String name = [
+        for (int i = 0; i < low.length; i++)
+          if (!used[i] && i != save && !_saveWords.contains(low[i]) && !_saveFiller.contains(low[i])) raw[i],
+      ].join(' ');
+      return QuickEntry(
+        kind: TxKind.pengeluaran,
+        amount: amount,
+        walletId: walletHits.firstOrNull?.$2.id,
+        occurredAt: at,
+        goal: name,
+      );
     }
 
     // 3b. Utang-piutang? Dibaca sebelum transfer & kategori.

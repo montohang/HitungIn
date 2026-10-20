@@ -4,6 +4,7 @@ import '../../features/bills/data/bills_dao.dart';
 import '../../features/budget/data/budgets_dao.dart';
 import '../../features/categories/data/categories_dao.dart';
 import '../../features/debts/data/debts_dao.dart';
+import '../../features/goals/data/goals_dao.dart';
 import '../../features/recurring/data/recurring_dao.dart';
 import '../../features/settings/data/settings_dao.dart';
 import '../../features/transactions/data/transactions_dao.dart';
@@ -16,8 +17,8 @@ export 'tables.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [Wallets, Categories, Transactions, Budgets, Bills, Settings, RecurringTxs, Debts, DebtPayments],
-  daos: [WalletsDao, CategoriesDao, TransactionsDao, BudgetsDao, BillsDao, SettingsDao, RecurringDao, DebtsDao],
+  tables: [Wallets, Categories, Transactions, Budgets, Bills, Settings, RecurringTxs, Debts, DebtPayments, Goals, GoalDeposits],
+  daos: [WalletsDao, CategoriesDao, TransactionsDao, BudgetsDao, BillsDao, SettingsDao, RecurringDao, DebtsDao, GoalsDao],
 )
 class AppDatabase extends _$AppDatabase {
   /// [executor] dari `openEncryptedConnection()` di aplikasi, atau
@@ -30,8 +31,9 @@ class AppDatabase extends _$AppDatabase {
   /// batas 0 = dihapus mulai bulan itu). v4: warna dompet & kategori,
   /// sub-kategori (categories.subs, transactions.sub). v5: cicilan di tagihan
   /// (bills.installment_*), utang-piutang (debts, debt_payments,
-  /// transactions.debt_id/debt_payment_id).
-  int get schemaVersion => 5;
+  /// transactions.debt_id/debt_payment_id). v6: target tabungan (goals,
+  /// goal_deposits).
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -62,6 +64,10 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(debtPayments);
             await m.addColumn(transactions, transactions.debtId);
             await m.addColumn(transactions, transactions.debtPaymentId);
+          }
+          if (from < 6) {
+            await m.createTable(goals);
+            await m.createTable(goalDeposits);
           }
           // Pastikan relasi data tetap utuh sesudah migrasi.
           final List<QueryRow> broken = await customSelect('PRAGMA foreign_key_check').get();

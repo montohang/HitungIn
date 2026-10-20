@@ -7,6 +7,8 @@ import 'core/db/data_providers.dart';
 import 'core/db/app_database.dart';
 import 'core/utils/date_format.dart';
 import 'features/debts/debts_screen.dart';
+import 'features/goals/goal_achieved_screen.dart';
+import 'features/goals/goals_screen.dart';
 import 'features/recap/recap_screen.dart';
 import 'features/widgets/widget_settings_screen.dart';
 import 'features/home/home_layout_screen.dart';
@@ -114,6 +116,28 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.rekap,
         parentNavigatorKey: _rootKey,
         builder: (_, state) => RecapScreen(initialOffset: int.tryParse(state.uri.queryParameters['minggu'] ?? '') ?? 0),
+      ),
+      GoRoute(
+        path: Routes.target,
+        parentNavigatorKey: _rootKey,
+        builder: (_, state) => GoalsScreen(
+          draft: goalDraftFrom(state.uri.queryParameters),
+          openNew: state.uri.queryParameters['baru'] == '1',
+        ),
+        routes: [
+          GoRoute(
+            path: ':id',
+            parentNavigatorKey: _rootKey,
+            builder: (_, state) => GoalDetailScreen(id: int.parse(state.pathParameters['id']!)),
+            routes: [
+              GoRoute(
+                path: 'tercapai',
+                parentNavigatorKey: _rootKey,
+                builder: (_, state) => GoalAchievedScreen(id: int.parse(state.pathParameters['id']!)),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: Routes.utang,

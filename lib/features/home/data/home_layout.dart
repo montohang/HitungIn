@@ -7,6 +7,7 @@ enum HomeCard {
   cepat('Catat cepat', 'Kolom "kopi 25rb gopay"'),
   favorit('Sekali ketuk', 'Chip transaksi favorit'),
   budget('Budget', 'Progres budget bulan ini'),
+  target('Target tabungan', 'Progres target teratas'),
   tagihan('Tagihan mendatang', 'Termasuk sisa cicilan'),
   terbaru('Transaksi terbaru', '5 catatan terakhir');
 

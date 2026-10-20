@@ -232,6 +232,46 @@ class DebtPayments extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+/// Target tabungan (v6, P3b). Terkumpul = jumlah [GoalDeposits]. Uangnya
+/// tetap di dompet asal setoran; hanya "disisihkan" dari Jatah hari ini.
+@DataClassName('Goal')
+class Goals extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 40)();
+
+  /// Satu emoji (ikon target).
+  TextColumn get emoji => text().withDefault(const Constant('🎯'))();
+  IntColumn get target => integer().check(target.isBiggerThanValue(0))();
+
+  /// Tanggal target (tanggal saja), opsional.
+  DateTimeColumn get dueDate => dateTime().nullable()();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  /// Saat terkumpul pertama kali mencapai target.
+  DateTimeColumn get achievedAt => dateTime().nullable()();
+
+  /// Diarsipkan: tidak tampil di daftar aktif dan tidak lagi disisihkan dari Jatah.
+  BoolColumn get archived => boolean().withDefault(const Constant(false))();
+
+  /// Pengingat setoran mingguan (bawaan mati): hari (1 = Senin) & jam.
+  BoolColumn get remind => boolean().withDefault(const Constant(false))();
+  IntColumn get remindWeekday => integer().withDefault(const Constant(1)).check(remindWeekday.isBetweenValues(1, 7))();
+  IntColumn get remindHour => integer().withDefault(const Constant(19)).check(remindHour.isBetweenValues(0, 23))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Setoran (positif) atau ambil (negatif) satu target (v6). [walletId] =
+/// dompet tempat uangnya disisihkan; menentukan apakah Jatah ikut dipotong.
+@DataClassName('GoalDeposit')
+class GoalDeposits extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get goalId => integer().references(Goals, #id, onDelete: KeyAction.cascade)();
+  IntColumn get amount => integer().check(amount.equals(0).not())();
+  IntColumn get walletId => integer().nullable().references(Wallets, #id, onDelete: KeyAction.setNull)();
+  DateTimeColumn get at => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
 /// Transaksi berulang (Pro, v2): dicatat otomatis setiap jatuh tempo,
 /// mis. gaji tiap tanggal 25 atau langganan bulanan yang didebet otomatis.
 /// Berbeda dengan [Bills] yang hanya mengingatkan dan dibayar manual.

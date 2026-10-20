@@ -35,6 +35,8 @@ class Allowance {
     required this.recurringDue,
     this.debtsDue = 0,
     this.debtNames = const [],
+    this.setAside = 0,
+    this.setAsideNames = const [],
     required this.perSaldo,
     required this.perBudget,
     required this.useBudget,
@@ -63,6 +65,10 @@ class Allowance {
   final int debtsDue;
   final List<String> debtNames;
 
+  /// Uang yang disisihkan untuk target tabungan dari dompet yang dihitung (P3b).
+  final int setAside;
+  final List<String> setAsideNames;
+
   /// Jatah per hari menurut saldo, dan menurut sisa budget bulan ini (null
   /// bila budget total tidak diatur).
   final int perSaldo;
@@ -83,7 +89,7 @@ class Allowance {
 
   /// Uang yang tidak terikat tagihan/berulang sampai gajian (sudah dikurangi
   /// pengeluaran hari ini, karena saldo sekarang sudah termasuk itu).
-  int get free => balance - billsDue - recurringDue - debtsDue;
+  int get free => balance - billsDue - recurringDue - debtsDue - setAside;
 }
 
 /// Tanggal gajian berikutnya setelah [today] untuk tanggal [payday] (1–31;
@@ -125,6 +131,7 @@ int _floor100(int v) => v <= 0 ? 0 : (v ~/ 100) * 100;
 }
 
 /// Hitung jatah hari ini. [balance] = saldo dompet yang ikut dihitung,
+/// [setAside] = uang di dompet itu yang disisihkan untuk target tabungan,
 /// [spentToday] = pengeluaran hari ini dari dompet itu, [budgetLeft] =
 /// batas budget total bulan ini dikurangi pemakaiannya (null bila tidak
 /// diatur).
@@ -136,6 +143,8 @@ Allowance computeAllowance({
   required List<UpcomingDue> bills,
   required List<UpcomingDue> recurring,
   List<UpcomingDue> debts = const [],
+  int setAside = 0,
+  List<String> setAsideNames = const [],
   int? budgetLeft,
 }) {
   final DateTime today = Dates.day(now);
@@ -147,7 +156,7 @@ Allowance computeAllowance({
   final b = _dueUntil(bills, today, periodEnd, overdue: true);
   final r = _dueUntil(recurring, today, periodEnd, overdue: false);
   final d = _dueUntil(debts, today, periodEnd, overdue: true);
-  final int free = balance - b.total - r.total - d.total;
+  final int free = balance - b.total - r.total - d.total - setAside;
 
   final int perSaldo = _floor100((free + spentToday) ~/ daysPay);
   final int? perBudget = budgetLeft == null ? null : _floor100((budgetLeft + spentToday) ~/ daysMonth);
@@ -182,6 +191,8 @@ Allowance computeAllowance({
     recurringDue: r.total,
     debtsDue: d.total,
     debtNames: d.names,
+    setAside: setAside,
+    setAsideNames: setAsideNames,
     perSaldo: perSaldo,
     perBudget: perBudget,
     useBudget: useBudget,

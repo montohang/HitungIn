@@ -7,10 +7,15 @@ abstract final class FreeLimits {
   /// Tagihan aktif.
   static const int activeBills = 3;
 
+  /// Target tabungan aktif (belum tercapai & belum diarsipkan).
+  static const int activeGoals = 1;
+
   /// Laporan: bulan berjalan + sekian bulan sebelumnya.
   static const int reportMonthsBack = 1;
 
   static bool canAddCategoryBudget({required int existing, required bool isPro}) => isPro || existing < categoryBudgets;
+
+  static bool canAddGoal({required int active, required bool isPro}) => isPro || active < activeGoals;
 
   static bool canAddBill({required int active, required bool isPro}) => isPro || active < activeBills;
 
@@ -39,7 +44,8 @@ enum ProReason {
   berulang('Transaksi berulang otomatis'),
   tema('Aksen & ikon aplikasi tambahan'),
   notifikasi('Pengingat tagihan lewat notifikasi'),
-  personalisasi('Foto widget, warna bebas & Beranda sesukamu');
+  personalisasi('Foto widget, warna bebas & Beranda sesukamu'),
+  target('Menabung untuk banyak target sekaligus');
 
   const ProReason(this.headline);
   final String headline;

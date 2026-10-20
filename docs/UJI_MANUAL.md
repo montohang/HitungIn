@@ -217,3 +217,18 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [ ] Pengingat malam dinyalakan + streak ≥ 3 + belum mencatat → notifikasi 20.00; setelah mencatat, notifikasinya hilang.
 - [ ] Satu hari kosong dalam seminggu tidak memutus streak (☕ di lingkaran hari).
 - [ ] Kartu dengan "Tampilkan nominal" menyala memuat angka rupiah; mati → tidak ada rupiah sama sekali.
+
+## 13. Target tabungan (P3b, baru)
+- [x] Pasang ulang di atas versi lama: migrasi v5 → v6, data lama utuh.
+- [x] Lainnya › Target tabungan: tampilan kosong → "Buat target pertama" → form (ikon, nama, nominal, tanggal opsional, petunjuk per minggu).
+- [x] Setoran dari dompet yang dihitung Jatah: terkumpul naik, Jatah hari ini turun, rincian Jatah memuat "Disisihkan untuk target"; saldo dompet & Laporan tidak berubah.
+- [x] Lewat 25/50/75% → snackbar penyemangat; mencapai 100% → layar Target tercapai (konfeti, durasi, jumlah setoran).
+- [x] Bagikan pencapaian: kartu tanpa nominal bawaan → menu Bagikan berisi 1 gambar; kembali tanpa PIN.
+- [x] "Buat target baru" dari layar perayaan langsung membuka form.
+- [x] Arsipkan target → pindah ke Diarsipkan, total disisihkan & Jatah dilepas.
+- [x] Kartu kecil Target tabungan di Beranda (ikut Atur Beranda).
+- [ ] Pengingat setoran mingguan (bawaan mati) muncul pada hari & jam pilihan; ketuk → detail target.
+- [ ] Catat cepat "nabung 100rb bali" → lembar setoran Liburan Bali terisi.
+- [ ] Ambil: kembali jadi uang bebas; tidak bisa melebihi terkumpul. Tahan riwayat → hapus setoran.
+- [ ] Versi gratis: target aktif kedua → lembar Premium.
+- [ ] Backup & pulihkan membawa target dan setorannya.

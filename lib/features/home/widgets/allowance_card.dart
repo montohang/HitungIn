@@ -123,6 +123,8 @@ Future<void> showAllowanceDetails(BuildContext context, WidgetRef ref, Allowance
           if (a.recurringDue > 0)
             ('Transaksi berulang${names(a.recurringNames)}', '${Rupiah.minus}${Rupiah.format(a.recurringDue)}'),
           if (a.debtsDue > 0) ('Utang jatuh tempo${names(a.debtNames)}', '${Rupiah.minus}${Rupiah.format(a.debtsDue)}'),
+          if (a.setAside > 0)
+            ('Disisihkan untuk target${names(a.setAsideNames)}', '${Rupiah.minus}${Rupiah.format(a.setAside)}'),
           ('Pengeluaran hari ini', '+${Rupiah.format(a.spentToday)}'),
           ('Dibagi sisa hari', '÷ ${a.daysToPayday} hari (s.d. ${_dayMonth(periodEnd)})'),
           ('Jatah hari ini', Rupiah.format(a.jatah)),

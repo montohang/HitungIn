@@ -1,14 +1,9 @@
-import 'dart:io';
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../core/db/data_providers.dart';
 import '../../core/db/providers.dart';
-import '../../core/platform/share_text.dart';
+import '../../core/platform/share_capture.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/utils/date_format.dart';
@@ -568,19 +563,14 @@ class _ShareSheetState extends ConsumerState<_ShareSheet> {
   Future<void> _share() async {
     setState(() => _busy = true);
     try {
-      final RenderRepaintBoundary boundary = _card.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-      final ui.Image image = await boundary.toImage(pixelRatio: 3); // 1080×1350
-      final data = await image.toByteData(format: ui.ImageByteFormat.png);
-      image.dispose();
-      final Directory dir = Directory('${(await getTemporaryDirectory()).path}/share');
-      await dir.create(recursive: true);
-      final File f = File('${dir.path}/rekap-hitungin.png');
-      await f.writeAsBytes(data!.buffer.asUint8List(), flush: true);
-      if (!mounted) return;
       final NavigatorState nav = Navigator.of(context);
       final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
-      final bool ok = await withAutoLockPaused(ref, () => ShareText.image(f.path, title: 'Bagikan rekap lewat'));
-      if (await f.exists()) await f.delete();
+      final bool ok = await shareBoundaryPng(
+        _card,
+        fileName: 'rekap-hitungin.png',
+        title: 'Bagikan rekap lewat',
+        wrap: (share) => withAutoLockPaused(ref, share),
+      );
       nav.pop();
       if (!ok) messenger.showSnackBar(const SnackBar(content: Text('Menu Bagikan tidak tersedia di perangkat ini.')));
     } finally {

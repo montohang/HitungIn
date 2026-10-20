@@ -159,6 +159,29 @@ void main() {
       await target.close();
     });
 
+    test('target tabungan & setorannya ikut dicadangkan dan dipulihkan', () async {
+      final db = _db();
+      final bca = await db.walletsDao.add(name: 'BCA', type: WalletType.bank, initialBalance: 5000000);
+      final id = await db.goalsDao.add(name: 'Liburan Bali', target: 6000000, emoji: '🏝️', dueDate: DateTime(2027, 3, 31));
+      await db.goalsDao.deposit(id, amount: 500000, at: DateTime(2026, 10, 1), walletId: bca);
+      await db.goalsDao.withdraw(id, amount: 100000, at: DateTime(2026, 10, 5), walletId: bca);
+      await db.goalsDao.setReminder(id, on: true, weekday: 5, hour: 19);
+      final snap = await BackupService(db).snapshot();
+      final restored = await BackupCodec.decrypt(await BackupCodec.encrypt(snap, 'rahasia123', iterations: 1000), 'rahasia123');
+
+      final target = _db();
+      final service = BackupService(target);
+      expect(service.inspect(restored).goals, 1);
+      await service.restore(restored);
+      final g = (await target.goalsDao.watchAll().first).single;
+      expect((g.goal.name, g.goal.emoji, g.goal.target, g.goal.dueDate), ('Liburan Bali', '🏝️', 6000000, DateTime(2027, 3, 31)));
+      expect((g.goal.remind, g.goal.remindWeekday, g.goal.remindHour), (true, 5, 19));
+      expect([for (final d in g.deposits) d.amount], [500000, -100000]);
+      expect((await target.walletsDao.watchBalances().first).single.balance, 5000000);
+      await db.close();
+      await target.close();
+    });
+
     test('cadangan sebelum v5 (tanpa kolom cicilan & utang) → tagihan biasa', () async {
       final db = _db();
       await _seed(db);
