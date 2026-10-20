@@ -109,7 +109,7 @@ class _RecapScreenState extends ConsumerState<RecapScreen> {
             else if (r.isEmpty)
               _EmptyWeek(onCatat: () => Navigator.of(context).maybePop())
             else ...[
-              _Hero(recap: r, hidden: hidden),
+              _Hero(recap: r, hidden: hidden, current: _offset == 0),
               const SizedBox(height: AppSpace.x12),
               Row(
                 children: [
@@ -129,7 +129,8 @@ class _RecapScreenState extends ConsumerState<RecapScreen> {
               _TopCategories(recap: r, hidden: hidden),
             ],
             const SizedBox(height: AppSpace.x12),
-            if (streak != null && r != null) _StreakCard(streak: streak, weekStart: r.start, logged: logged),
+            // Streak berlaku hari ini, jadi lingkarannya selalu minggu berjalan.
+            if (streak != null) _StreakCard(streak: streak, weekStart: weekStart(DateTime.now()), logged: logged),
             const SizedBox(height: AppSpace.x12),
             const _NotifySettings(),
             if (r != null && !r.isEmpty) ...[
@@ -181,10 +182,13 @@ class _WeekSwitcher extends StatelessWidget {
 }
 
 class _Hero extends StatelessWidget {
-  const _Hero({required this.recap, required this.hidden});
+  const _Hero({required this.recap, required this.hidden, required this.current});
 
   final WeeklyRecap recap;
   final bool hidden;
+
+  /// Minggu berjalan (bukan minggu yang sudah lewat).
+  final bool current;
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +200,7 @@ class _Hero extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Pengeluaran minggu ini', style: t.caption.copyWith(color: Colors.white.withValues(alpha: 0.8))),
+          Text(current ? 'Pengeluaran minggu ini' : 'Pengeluaran minggu itu', style: t.caption.copyWith(color: Colors.white.withValues(alpha: 0.8))),
           const SizedBox(height: AppSpace.x4),
           Text(hidden ? 'Rp••••' : Rupiah.format(recap.out),
               style: t.amountXL.copyWith(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.white)),

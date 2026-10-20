@@ -206,3 +206,14 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] Wadah ikon Kotak / Lingkaran / Tanpa; tombol Catat Kotak / Bulat / "+ Catat"; ikon tombol +, pensil, koin; label tab disembunyikan.
 - [x] Notifikasi & widget ikut warna aksen yang dipilih.
 - [x] (Pro) Atur Beranda: seret kartu, sembunyikan kartu, "Bawaan" → Beranda mengikuti; versi gratis tetap susunan bawaan.
+
+## 12. Rekap mingguan & streak (P3a, baru)
+- [x] Senin–Rabu: kartu "Rekap minggu lalu" di Beranda; ✕ menutupnya sampai minggu berikutnya.
+- [x] Catat transaksi → chip "🔥 N hari" muncul di samping tanggal.
+- [x] Layar Rekap: pindah minggu, label "minggu ini/itu", per hari, kategori terbesar, insight, streak minggu berjalan.
+- [x] Notifikasi rekap terjadwal Senin 08.00 (bawaan menyala).
+- [x] Bagikan kartu (tanpa nominal) → menu Bagikan berisi 1 gambar; kembali tanpa PIN; berkas sementara terhapus.
+- [ ] Senin pukul 08.00 notifikasi "Rekap minggumu sudah siap" muncul; ketuk → rekap minggu lalu.
+- [ ] Pengingat malam dinyalakan + streak ≥ 3 + belum mencatat → notifikasi 20.00; setelah mencatat, notifikasinya hilang.
+- [ ] Satu hari kosong dalam seminggu tidak memutus streak (☕ di lingkaran hari).
+- [ ] Kartu dengan "Tampilkan nominal" menyala memuat angka rupiah; mati → tidak ada rupiah sama sekali.
