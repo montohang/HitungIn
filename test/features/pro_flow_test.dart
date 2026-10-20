@@ -148,18 +148,18 @@ void main() {
     await app.pump(tester);
     await tester.pump(const Duration(seconds: 1)); // jeda sinkronisasi
     final reminders = app.env.reminders;
-    expect(reminders.scheduled.map((p) => p.at), [DateTime(2026, 10, 17, 9), DateTime(2026, 10, 20, 9)]);
+    expect(reminders.scheduled.where((p) => p.payload.startsWith('bill:')).map((p) => p.at), [DateTime(2026, 10, 17, 9), DateTime(2026, 10, 20, 9)]);
 
     await app.push(tester, '/tagihan');
     await app.tap('19.00');
     await tester.pump(const Duration(seconds: 1));
-    expect(reminders.scheduled.map((p) => p.at.hour).toSet(), {19});
+    expect(reminders.scheduled.where((p) => p.payload.startsWith('bill:')).map((p) => p.at.hour).toSet(), {19});
     expect(await app.setting(SettingKeys.billReminderHour), '19');
 
     await tester.tap(find.byType(Switch).first);
     await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 1));
-    expect(reminders.scheduled, isEmpty);
+    expect(reminders.scheduled.where((p) => p.payload.startsWith('bill:')), isEmpty);
     expect(await app.setting(SettingKeys.billReminders), 'false');
 
     // Nyalakan lagi saat izin HP ditolak → minta izin & tampilkan peringatan.

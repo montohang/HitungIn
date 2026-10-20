@@ -19,4 +19,17 @@ abstract final class ShareText {
       return false;
     }
   }
+
+  /// Bagikan gambar PNG [path] (harus di folder cache `share/`). False bila
+  /// menu Bagikan tidak tersedia (tes / platform lain).
+  static Future<bool> image(String path, {String? text, String title = 'Bagikan lewat'}) async {
+    try {
+      await _channel.invokeMethod<void>('image', {'path': path, 'text': text, 'title': title});
+      return true;
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
+  }
 }

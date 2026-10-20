@@ -46,6 +46,12 @@ abstract final class SettingKeys {
 
   /// Urutan & kartu Beranda yang disembunyikan (JSON, P2b Pro).
   static const String homeLayout = 'home.layout';
+
+  /// Rekap mingguan (P3a): notifikasi Senin, pengingat malam, minggu yang
+  /// kartu rekapnya ditutup di Beranda (yyyy-mm-dd Senin).
+  static const String recapWeekly = 'recap.weekly';
+  static const String recapEvening = 'recap.evening';
+  static const String recapDismissed = 'recap.dismissed';
 }
 
 @DriftAccessor(tables: [Settings])

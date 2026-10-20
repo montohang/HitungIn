@@ -13,6 +13,7 @@ import '../../core/db/providers.dart';
 import '../../core/platform/launch_routes.dart';
 import '../security/app_gate.dart';
 import '../debts/data/debt_reminders.dart';
+import '../recap/data/recap_reminders.dart';
 import '../debts/data/debts_dao.dart';
 import 'data/bill_reminders.dart';
 
@@ -21,6 +22,8 @@ export 'data/bill_reminders.dart' show billPayloadPrefix, debtPayloadPrefix;
 /// Layar tujuan untuk payload notifikasi, atau null bila tidak dikenal.
 String? routeForNotification(String payload) {
   if (payload.startsWith(billPayloadPrefix)) return Routes.tagihan;
+  if (payload == '${recapPayloadPrefix}week') return '${Routes.rekap}?minggu=1';
+  if (payload == '${recapPayloadPrefix}evening') return Routes.catat;
   if (payload.startsWith(debtPayloadPrefix)) {
     final int? id = int.tryParse(payload.substring(debtPayloadPrefix.length));
     return id == null ? Routes.utang : Uri(path: Routes.utang, queryParameters: {'id': '$id'}).toString();
@@ -250,16 +253,23 @@ Future<int> syncBillReminders({
   required DateTime now,
   List<DebtWithPayments> debts = const [],
   Color? color,
+  List<ReminderPlan> recap = const [],
+  bool loggedToday = false,
 }) async {
   final bool on = settings.enabled && isPro;
   await scheduler.cancelPending();
-  await scheduler.dismissShown(
-    keepBillIds: on ? {...billsInReminderWindow(bills, now), ...debtsInReminderWindow(debts, now)} : const {},
-  );
-  if (!on) return 0;
+  await scheduler.dismissShown(keepBillIds: {
+    if (on) ...billsInReminderWindow(bills, now),
+    if (on) ...debtsInReminderWindow(debts, now),
+    // Rekap Senin tetap; pengingat malam ditutup begitu hari ini sudah dicatat.
+    recapWeeklyOwner,
+    if (!loggedToday) recapEveningOwner,
+  });
   final List<ReminderPlan> all = [
-    ...planBillReminders(bills, now, hour: settings.hour),
-    ...planDebtReminders(debts, now, hour: settings.hour),
+    if (on) ...planBillReminders(bills, now, hour: settings.hour),
+    if (on) ...planDebtReminders(debts, now, hour: settings.hour),
+    // Notifikasi rekap gratis: tidak bergantung Pro / pengingat tagihan.
+    ...recap,
   ]..sort((a, b) => a.at.compareTo(b.at));
   final List<ReminderPlan> plans = all.length > maxScheduledReminders ? all.sublist(0, maxScheduledReminders) : all;
   await scheduler.schedule(plans, color: color);

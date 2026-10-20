@@ -101,6 +101,18 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
       .watch()
       .map(_mapDetails);
 
+  /// Hari (00.00) yang punya catatan buatan pengguna — transaksi berulang
+  /// yang dicatat otomatis tidak dihitung (streak P3a).
+  Stream<Set<DateTime>> watchLoggedDays() {
+    final q = selectOnly(transactions)
+      ..addColumns([transactions.occurredAt])
+      ..where(transactions.recurringId.isNull());
+    return q.watch().map((rows) => {
+          for (final r in rows)
+            if (r.read(transactions.occurredAt) case final DateTime at) DateTime(at.year, at.month, at.day),
+        });
+  }
+
   /// Semua transaksi (terbaru dulu), untuk ekspor.
   Future<List<TxDetail>> allDetails() => _detailQuery().get().then(_mapDetails);
 

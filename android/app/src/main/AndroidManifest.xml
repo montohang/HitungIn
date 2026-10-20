@@ -61,6 +61,13 @@
             </intent-filter>
         </activity>
         <!-- Perantara widget/tile/pintasan (lihat Entry.kt): tidak tampil di Recents. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.share"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/share_paths" />
+        </provider>
         <activity
             android:name=".WidgetConfigActivity"
             android:exported="true"

@@ -149,6 +149,20 @@ class MainActivity : FlutterFragmentActivity() {
                 shareResult = result
                 @Suppress("DEPRECATION")
                 startActivityForResult(Intent.createChooser(send, call.argument<String>("title")), REQ_SHARE)
+            } else if (call.method == "image") {
+                // Gambar di cache/share (lihat res/xml/share_paths.xml), dibagikan lewat FileProvider.
+                val file = java.io.File(call.argument<String>("path") ?: "")
+                val uri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.share", file)
+                val send = Intent(Intent.ACTION_SEND).apply {
+                    type = "image/png"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    call.argument<String>("text")?.let { putExtra(Intent.EXTRA_TEXT, it) }
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                shareResult?.success(null)
+                shareResult = result
+                @Suppress("DEPRECATION")
+                startActivityForResult(Intent.createChooser(send, call.argument<String>("title")), REQ_SHARE)
             } else {
                 result.notImplemented()
             }

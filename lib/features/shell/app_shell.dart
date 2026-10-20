@@ -28,6 +28,8 @@ import '../../core/platform/system_accent.dart';
 import '../home/widget_sync.dart';
 import '../debts/data/debts_dao.dart';
 import '../debts/debts_provider.dart';
+import '../recap/data/recap_reminders.dart';
+import '../recap/recap_provider.dart';
 
 /// Kerangka 4 tab + tombol Catat di tengah. Banner iklan (versi gratis)
 /// tampil di atas navigasi pada tab yang diizinkan [AdPolicy].
@@ -85,6 +87,9 @@ class _AppShellState extends ConsumerState<AppShell> {
       final ReminderSettings? settings = ref.read(reminderSettingsProvider).valueOrNull;
       final List<DebtWithPayments>? debts = ref.read(debtsProvider).valueOrNull;
       if (bills == null || settings == null || debts == null || !mounted) return;
+      final DateTime now = ref.read(clockProvider)();
+      final Set<DateTime> logged = ref.read(loggedDaysProvider).valueOrNull ?? const {};
+      final bool loggedToday = logged.contains(DateTime(now.year, now.month, now.day));
       await syncBillReminders(
         scheduler: ref.read(reminderSchedulerProvider),
         bills: bills,
@@ -93,6 +98,14 @@ class _AppShellState extends ConsumerState<AppShell> {
         now: ref.read(clockProvider)(),
         debts: debts,
         color: ref.read(themeControllerProvider).accentLight,
+        loggedToday: loggedToday,
+        recap: planRecapReminders(
+          now: now,
+          weekly: ref.read(recapWeeklyProvider).valueOrNull ?? true,
+          evening: ref.read(recapEveningProvider).valueOrNull ?? false,
+          streak: ref.read(streakProvider)?.current ?? 0,
+          loggedToday: loggedToday,
+        ),
       );
     });
   }
@@ -165,6 +178,9 @@ class _AppShellState extends ConsumerState<AppShell> {
     });
     ref.listen(activeBillsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(debtsProvider, (_, __) => _scheduleReminderSync());
+    ref.listen(loggedDaysProvider, (_, __) => _scheduleReminderSync());
+    ref.listen(recapWeeklyProvider, (_, __) => _scheduleReminderSync());
+    ref.listen(recapEveningProvider, (_, __) => _scheduleReminderSync());
     // Warna notifikasi mengikuti aksen tema.
     ref.listen(themeControllerProvider.select((t) => t.accentLight), (_, __) => _scheduleReminderSync());
     ref.listen(reminderSettingsProvider, (_, __) => _scheduleReminderSync());

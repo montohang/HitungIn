@@ -22,6 +22,7 @@ import '../bills/bills_screen.dart';
 import '../bills/data/bill_due.dart';
 import 'data/home_layout.dart';
 import 'home_layout_provider.dart';
+import '../recap/widgets/recap_entry.dart';
 import '../budget/data/budget_insights.dart';
 import '../budget/data/budgets_dao.dart';
 import '../security/app_gate.dart';
@@ -88,7 +89,14 @@ class HomeScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(DateFmt.longDate(now, now: now), style: t.caption.copyWith(color: c.muted)),
+                      Row(children: [
+                        Flexible(
+                          child: Text(DateFmt.longDate(now, now: now),
+                              maxLines: 1, overflow: TextOverflow.ellipsis, style: t.caption.copyWith(color: c.muted)),
+                        ),
+                        const SizedBox(width: AppSpace.x8),
+                        const StreakChip(),
+                      ]),
                       const SizedBox(height: AppSpace.x4),
                       Text.rich(
                         TextSpan(
@@ -152,71 +160,77 @@ class HomeScreen extends ConsumerWidget {
                 hasTransaction: false,
                 hasBudget: budgets.isNotEmpty,
               ),
-            ] else
+            ] else ...[
+              RecapHomeCard(hidden: hidden),
               // Susunan kartu pilihan pengguna (P2b, Pro); bawaan untuk versi gratis.
-              for (final (int idx, HomeCard card) in ref.watch(homeLayoutProvider).visible.indexed) ...switch (card) {
-                HomeCard.jatah => [
-                    if (ref.watch(allowanceProvider) case final Allowance a) ...[
-                      AllowanceCard(allowance: a, hidden: hidden, now: now),
-                      const SizedBox(height: AppSpace.block),
+              for (final (int idx, HomeCard card) in ref.watch(homeLayoutProvider).visible.indexed)
+                ...switch (card) {
+                  HomeCard.jatah => [
+                      if (ref.watch(allowanceProvider) case final Allowance a) ...[
+                        AllowanceCard(allowance: a, hidden: hidden, now: now),
+                        const SizedBox(height: AppSpace.block),
+                      ],
                     ],
-                  ],
-                HomeCard.cepat => [
-                    _QuickEntry(onSubmit: (text) => _openCatat(context, text)),
-                  ],
-                HomeCard.favorit => [FavoriteChips(hidden: hidden)],
-                HomeCard.budget => [
-                    if (budgetOverview(budgets) case final BudgetOverview o) ...[
-                      const SizedBox(height: AppSpace.block),
-                      _BudgetGlance(
-                        overview: o,
-                        hottest:
-                            (ref.watch(budgetWarnProvider).valueOrNull ?? true) ? hottestCategory(budgets, now) : null,
-                        month: month,
-                        now: now,
-                        onTap: () => context.go(Routes.budget),
-                      ),
+                  HomeCard.cepat => [
+                      _QuickEntry(onSubmit: (text) => _openCatat(context, text)),
                     ],
-                  ],
-                HomeCard.tagihan => [
-                    if (dueBills.isNotEmpty) ...[
-                      const SizedBox(height: AppSpace.x24),
-                      SectionHeader('Tagihan mendatang',
-                          action: 'Semua tagihan', onAction: () => context.push(Routes.tagihan)),
-                      if (installments.count > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpace.x8),
-                          child: Text(
-                            hidden
-                                ? 'Sisa cicilan Rp•••• · ${installments.count} berjalan'
-                                : installmentSummaryLabel(installments.amount, installments.count),
-                            style: t.caption.copyWith(color: c.muted),
+                  HomeCard.favorit => [FavoriteChips(hidden: hidden)],
+                  HomeCard.budget => [
+                      if (budgetOverview(budgets) case final BudgetOverview o) ...[
+                        const SizedBox(height: AppSpace.block),
+                        _BudgetGlance(
+                          overview: o,
+                          hottest: (ref.watch(budgetWarnProvider).valueOrNull ?? true)
+                              ? hottestCategory(budgets, now)
+                              : null,
+                          month: month,
+                          now: now,
+                          onTap: () => context.go(Routes.budget),
+                        ),
+                      ],
+                    ],
+                  HomeCard.tagihan => [
+                      if (dueBills.isNotEmpty) ...[
+                        const SizedBox(height: AppSpace.x24),
+                        SectionHeader('Tagihan mendatang',
+                            action: 'Semua tagihan', onAction: () => context.push(Routes.tagihan)),
+                        if (installments.count > 0)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpace.x8),
+                            child: Text(
+                              hidden
+                                  ? 'Sisa cicilan Rp•••• · ${installments.count} berjalan'
+                                  : installmentSummaryLabel(installments.amount, installments.count),
+                              style: t.caption.copyWith(color: c.muted),
+                            ),
                           ),
-                        ),
-                      for (final b in dueBills.take(3))
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpace.x8),
-                          child: BillCard(bill: b, now: now),
-                        ),
-                      if (idx < ref.watch(homeLayoutProvider).visible.length - 1) const SizedBox(height: AppSpace.x16),
+                        for (final b in dueBills.take(3))
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpace.x8),
+                            child: BillCard(bill: b, now: now),
+                          ),
+                        if (idx < ref.watch(homeLayoutProvider).visible.length - 1)
+                          const SizedBox(height: AppSpace.x16),
+                      ],
                     ],
-                  ],
-                HomeCard.terbaru => [
-                    const SizedBox(height: AppSpace.x24),
-                    SectionHeader('Transaksi terbaru',
-                        action: 'Lihat semua', onAction: () => context.push(Routes.riwayat)),
-                    for (final TxDetail d in recent)
-                      TxRow(
-                        detail: d,
-                        showDate: true,
-                        masked: hidden,
-                        now: now,
-                        gap: AppSpace.x16,
-                        onTap: () => context.push(Routes.tx(d.tx.id)),
-                      ),
-                    if (idx < ref.watch(homeLayoutProvider).visible.length - 1) const SizedBox(height: AppSpace.block),
-                  ],
-              },
+                  HomeCard.terbaru => [
+                      const SizedBox(height: AppSpace.x24),
+                      SectionHeader('Transaksi terbaru',
+                          action: 'Lihat semua', onAction: () => context.push(Routes.riwayat)),
+                      for (final TxDetail d in recent)
+                        TxRow(
+                          detail: d,
+                          showDate: true,
+                          masked: hidden,
+                          now: now,
+                          gap: AppSpace.x16,
+                          onTap: () => context.push(Routes.tx(d.tx.id)),
+                        ),
+                      if (idx < ref.watch(homeLayoutProvider).visible.length - 1)
+                        const SizedBox(height: AppSpace.block),
+                    ],
+                },
+            ],
           ],
         ),
       ),

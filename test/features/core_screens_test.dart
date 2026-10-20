@@ -233,6 +233,7 @@ void main() {
     expect(find.text('Rp400rb'), findsNWidgets(2), reason: 'kartu Pengeluaran + tengah donat');
     expect(find.text('▲ 100% vs Sep'), findsOneWidget);
     expect(find.text('+Rp8.800.000'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Tertinggi 1 Okt · Rp300.000'), 200, scrollable: find.byType(Scrollable).first);
     expect(find.text('Tertinggi 1 Okt · Rp300.000'), findsOneWidget);
 
     await tester.scrollUntilVisible(find.text('Transportasi'), 200, scrollable: find.byType(Scrollable).first);

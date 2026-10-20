@@ -7,6 +7,7 @@ import 'core/db/data_providers.dart';
 import 'core/db/app_database.dart';
 import 'core/utils/date_format.dart';
 import 'features/debts/debts_screen.dart';
+import 'features/recap/recap_screen.dart';
 import 'features/widgets/widget_settings_screen.dart';
 import 'features/home/home_layout_screen.dart';
 import 'features/backup/backup_screen.dart';
@@ -108,6 +109,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.widget,
         parentNavigatorKey: _rootKey,
         builder: (_, state) => WidgetSettingsScreen(initialId: int.tryParse(state.uri.queryParameters['id'] ?? '')),
+      ),
+      GoRoute(
+        path: Routes.rekap,
+        parentNavigatorKey: _rootKey,
+        builder: (_, state) => RecapScreen(initialOffset: int.tryParse(state.uri.queryParameters['minggu'] ?? '') ?? 0),
       ),
       GoRoute(
         path: Routes.utang,

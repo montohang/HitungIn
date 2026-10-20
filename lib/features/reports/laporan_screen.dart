@@ -21,6 +21,7 @@ import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
 import '../security/app_gate.dart';
+import '../recap/widgets/recap_entry.dart';
 import '../transactions/data/transactions_dao.dart';
 import '../wallets/data/wallets_dao.dart';
 import 'widgets/daily_chart.dart';
@@ -111,6 +112,10 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
               ],
             ),
             const SizedBox(height: AppSpace.block),
+            if (!tooFew) ...[
+              const RecapReportRow(),
+              const SizedBox(height: AppSpace.block),
+            ],
             if (tooFew)
               _NotEnough(count: recent.length)
             else if (!FreeLimits.canViewReport(_month, now, isPro: isPro))
