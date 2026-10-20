@@ -61,6 +61,10 @@ class MainActivity : FlutterFragmentActivity() {
         current = java.lang.ref.WeakReference(this)
         super.onCreate(savedInstanceState)
         AppShortcuts.publish(this, enabledLauncher())
+        // Wallpaper diganti selama HitungIn hidup → widget langsung ikut (aksen "Wallpaper").
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            android.app.WallpaperManager.getInstance(this).addOnColorsChangedListener(wallpaperListener, android.os.Handler(mainLooper))
+        }
     }
 
     /** Seperti intent baru dari sistem: plugin (notifikasi) ikut menerimanya. */
@@ -83,28 +87,14 @@ class MainActivity : FlutterFragmentActivity() {
         }
     }
 
-    /**
-     * Warna utama wallpaper layar utama (tanpa izin). Dipakai langsung, bukan
-     * system_accent: di Samsung, aksen sistem hanya ikut wallpaper bila "Palet
-     * warna" dinyalakan. Null bila tidak tersedia (Android < 8.1).
-     */
-    private fun wallpaperAccent(): Int? {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) return null
-        val colors = try {
-            android.app.WallpaperManager.getInstance(this).getWallpaperColors(android.app.WallpaperManager.FLAG_SYSTEM)
-        } catch (e: Exception) {
-            null
-        } ?: return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) getColor(android.R.color.system_accent1_600) else null
-        // Pilih warna paling berwarna di antara 3 warna utama (abu-abu/hitam dilewati).
-        val candidates = listOfNotNull(colors.primaryColor, colors.secondaryColor, colors.tertiaryColor).map { it.toArgb() }
-        return candidates.maxByOrNull { c ->
-            val hsv = FloatArray(3)
-            android.graphics.Color.colorToHSV(c, hsv)
-            hsv[1] * minOf(hsv[2], 1f - kotlin.math.abs(hsv[2] - 0.6f))
-        } ?: candidates.firstOrNull()
+    private val wallpaperListener = android.app.WallpaperManager.OnColorsChangedListener { _, _ ->
+        HomeWidgets.refreshAll(this)
     }
 
     override fun onDestroy() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            android.app.WallpaperManager.getInstance(this).removeOnColorsChangedListener(wallpaperListener)
+        }
         if (current?.get() === this) current = null
         super.onDestroy()
     }
@@ -144,7 +134,7 @@ class MainActivity : FlutterFragmentActivity() {
         // Warna aksen sistem (Material You) untuk pilihan aksen "Wallpaper" (P2b).
         MethodChannel(messenger, "com.capt.hitungin/theme").setMethodCallHandler { call, result ->
             if (call.method == "systemAccent") {
-                result.success(wallpaperAccent())
+                result.success(WallpaperAccent.raw(this))
             } else {
                 result.notImplemented()
             }

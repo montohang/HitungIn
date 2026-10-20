@@ -22,6 +22,7 @@ import '../premium/pro_controller.dart';
 import '../security/app_gate.dart';
 import '../../core/widgets/hi_icons.dart';
 import '../../core/widgets/hi_icon.dart';
+import '../../core/widgets/catat_mark.dart';
 import '../../core/platform/launch_routes.dart';
 import '../../core/platform/system_accent.dart';
 import '../home/widget_sync.dart';
@@ -240,29 +241,19 @@ class _AppShellState extends ConsumerState<AppShell> {
                             child: Pressable(
                               onTap: () => context.push(Routes.catat),
                               semanticLabel: 'Catat transaksi',
-                              // Bentuk & ikon tombol pilihan pengguna (P2b).
+                              // Tanda khas HitungIn: bentuk tetap, warna ikut aksen.
                               child: Container(
-                                width: look.fabShape == FabShape.pil ? 104 : 58,
+                                width: 58,
                                 height: 58,
                                 decoration: BoxDecoration(
                                   color: c.accent,
-                                  borderRadius: look.fabShape == FabShape.kotak ? AppRadius.mdAll : AppRadius.pillAll,
+                                  borderRadius: AppRadius.mdAll,
                                   boxShadow: [
                                     BoxShadow(
                                         color: c.accent.withAlpha(0x55), blurRadius: 24, offset: const Offset(0, 10)),
                                   ],
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(look.fabIcon.icon, color: c.onAccent, size: look.fabShape == FabShape.pil ? 22 : 28),
-                                    if (look.fabShape == FabShape.pil) ...[
-                                      const SizedBox(width: AppSpace.x4),
-                                      Text('Catat',
-                                          style: context.text.title.copyWith(color: c.onAccent, fontSize: 15)),
-                                    ],
-                                  ],
-                                ),
+                                child: CatatMark(accent: c.accent),
                               ),
                             ),
                           ),

@@ -17,27 +17,6 @@ enum IconWrap {
   final String label;
 }
 
-/// Bentuk tombol Catat di nav bawah (P2b).
-enum FabShape {
-  kotak('Kotak'),
-  bulat('Bulat'),
-  pil('+ Catat');
-
-  const FabShape(this.label);
-  final String label;
-}
-
-/// Ikon tombol Catat (P2b).
-enum FabIcon {
-  plus('Tambah', HiIcons.plus),
-  pensil('Pensil', HiIcons.edit),
-  koin('Koin', HiIcons.coin);
-
-  const FabIcon(this.label, this.icon);
-  final String label;
-  final IconData icon;
-}
-
 /// Asal warna aksen (P2b).
 enum AccentSource {
   /// Salah satu [AccentPreset].
@@ -72,16 +51,12 @@ class ThemeSettings {
     this.wallpaper,
     this.iconStyle = HiIconStyle.garis,
     this.iconWrap = IconWrap.kotak,
-    this.fabShape = FabShape.kotak,
-    this.fabIcon = FabIcon.plus,
     this.tabLabels = true,
   });
 
   /// Ikon di dalam aplikasi (P2b).
   final HiIconStyle iconStyle;
   final IconWrap iconWrap;
-  final FabShape fabShape;
-  final FabIcon fabIcon;
   final bool tabLabels;
 
   /// Default HitungIn: GELAP.
@@ -136,8 +111,6 @@ class ThemeSettings {
     Color? wallpaper,
     HiIconStyle? iconStyle,
     IconWrap? iconWrap,
-    FabShape? fabShape,
-    FabIcon? fabIcon,
     bool? tabLabels,
   }) =>
       ThemeSettings(
@@ -149,8 +122,6 @@ class ThemeSettings {
         wallpaper: wallpaper ?? this.wallpaper,
         iconStyle: iconStyle ?? this.iconStyle,
         iconWrap: iconWrap ?? this.iconWrap,
-        fabShape: fabShape ?? this.fabShape,
-        fabIcon: fabIcon ?? this.fabIcon,
         tabLabels: tabLabels ?? this.tabLabels,
       );
 }
@@ -205,16 +176,6 @@ class ThemeController extends Notifier<ThemeSettings> {
     _repaintIcons();
   }
 
-  void setFabShape(FabShape v) {
-    state = state.copyWith(fabShape: v);
-    _save(SettingKeys.themeFabShape, v.name);
-  }
-
-  void setFabIcon(FabIcon v) {
-    state = state.copyWith(fabIcon: v);
-    _save(SettingKeys.themeFabIcon, v.name);
-  }
-
   void setTabLabels(bool v) {
     state = state.copyWith(tabLabels: v);
     _save(SettingKeys.themeTabLabels, '$v');
@@ -257,8 +218,6 @@ Future<ThemeSettings> loadThemeSettings(SettingsDao dao) async {
     source: byName(AccentSource.values, all[SettingKeys.themeAccentSource]) ?? AccentSource.preset,
     iconStyle: byName(HiIconStyle.values, all[SettingKeys.themeIconStyle]) ?? HiIconStyle.garis,
     iconWrap: byName(IconWrap.values, all[SettingKeys.themeIconWrap]) ?? IconWrap.kotak,
-    fabShape: byName(FabShape.values, all[SettingKeys.themeFabShape]) ?? FabShape.kotak,
-    fabIcon: byName(FabIcon.values, all[SettingKeys.themeFabIcon]) ?? FabIcon.plus,
     tabLabels: all[SettingKeys.themeTabLabels] != 'false',
     custom: switch (int.tryParse(all[SettingKeys.themeAccentCustom] ?? '')) {
       final int v => Color(v),

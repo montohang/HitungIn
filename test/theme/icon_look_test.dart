@@ -24,18 +24,16 @@ void main() {
     expect(HiIconStyle.values.where((s) => s.pro), [HiIconStyle.duotone, HiIconStyle.bulat]);
   });
 
-  test('pilihan ikon, wadah, tombol Catat & label tab tersimpan', () async {
+  test('pilihan wadah ikon & label tab tersimpan', () async {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
     final db = AppDatabase(NativeDatabase.memory());
     final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
     final ctl = container.read(themeControllerProvider.notifier);
     ctl.setIconWrap(IconWrap.tanpa);
-    ctl.setFabShape(FabShape.pil);
-    ctl.setFabIcon(FabIcon.koin);
     ctl.setTabLabels(false);
     await Future<void>.delayed(const Duration(milliseconds: 50));
     final s = await loadThemeSettings(db.settingsDao);
-    expect((s.iconWrap, s.fabShape, s.fabIcon, s.tabLabels), (IconWrap.tanpa, FabShape.pil, FabIcon.koin, false));
+    expect((s.iconWrap, s.tabLabels), (IconWrap.tanpa, false));
     expect(const ThemeSettings().tabLabels, isTrue, reason: 'bawaan: label tampil');
     container.dispose();
     await db.close();

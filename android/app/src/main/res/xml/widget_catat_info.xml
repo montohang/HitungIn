@@ -8,7 +8,7 @@
     android:targetCellWidth="2"
     android:targetCellHeight="1"
     android:resizeMode="horizontal"
-    android:updatePeriodMillis="21600000"
+    android:updatePeriodMillis="1800000"
     android:configure="com.capt.hitungin.WidgetConfigActivity"
-    android:widgetFeatures="reconfigurable"
+    android:widgetFeatures="reconfigurable|configuration_optional"
     android:widgetCategory="home_screen" />

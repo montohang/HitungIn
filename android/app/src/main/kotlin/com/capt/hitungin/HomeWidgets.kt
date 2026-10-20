@@ -71,7 +71,11 @@ object HomeWidgets {
     private fun lookOf(context: Context, id: Int): JSONObject? {
         val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null) ?: return null
         val json = try { JSONObject(raw) } catch (e: Exception) { return null }
-        return json.optJSONObject("looks")?.optJSONObject(id.toString()) ?: json.optJSONObject("look")
+        val look = json.optJSONObject("looks")?.optJSONObject(id.toString()) ?: json.optJSONObject("look") ?: return null
+        if (!json.optBoolean("accentFromWallpaper")) return look
+        // Aksen "Wallpaper": ambil warna wallpaper sekarang, bukan saat aplikasi terakhir dibuka.
+        val accent = WallpaperAccent.forWidget(context, json.optBoolean("darkTheme", true)) ?: return look
+        return WallpaperAccent.repaint(look, accent)
     }
 
     private fun dp(context: Context, v: Float): Float =

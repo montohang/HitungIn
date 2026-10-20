@@ -13,6 +13,7 @@ import '../favorites/favorites_provider.dart';
 import '../favorites/widgets/favorite_chips.dart' show favoriteLabel;
 import '../widgets/data/widget_style.dart';
 import '../widgets/widget_styles_provider.dart';
+import '../../core/theme/theme_controller.dart';
 import 'allowance_provider.dart';
 import 'data/allowance.dart';
 import 'widgets/allowance_card.dart' show allowanceAmount, allowanceLine;
@@ -28,6 +29,8 @@ Map<String, Object?> buildWidgetSnapshot({
   required bool hidden,
   WidgetLook? fallbackLook,
   Map<int, WidgetLook> looks = const {},
+  bool accentFromWallpaper = false,
+  bool darkTheme = true,
 }) {
   final Allowance? a = allowance;
   final bool warn = a != null &&
@@ -47,6 +50,9 @@ Map<String, Object?> buildWidgetSnapshot({
     'masked': {'jatah': 'Rp ••••', 'line': 'Angka disamarkan', 'fav': '••'},
     if (fallbackLook != null) 'look': fallbackLook.toJson(),
     'looks': {for (final e in looks.entries) '${e.key}': e.value.toJson()},
+    // Aksen "Wallpaper": widget mengambil ulang warna wallpaper sendiri.
+    'accentFromWallpaper': accentFromWallpaper,
+    'darkTheme': darkTheme,
     'favs': [
       for (final f in favorites.take(3))
         {
@@ -69,6 +75,8 @@ final widgetSnapshotProvider = Provider<Map<String, Object?>>((ref) {
     hidden: ref.watch(hideBalanceProvider).valueOrNull ?? false,
     fallbackLook: looks.fallback,
     looks: looks.byId,
+    accentFromWallpaper: ref.watch(themeControllerProvider.select((t) => t.source == AccentSource.wallpaper)),
+    darkTheme: ref.watch(widgetThemeProvider).dark,
   );
 });
 

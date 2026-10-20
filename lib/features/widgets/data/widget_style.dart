@@ -177,7 +177,16 @@ class WidgetLook {
     required this.bar,
     required this.warn,
     required this.hideAmounts,
+    this.accent = const Color(0xFF5B4BDB),
+    this.bgKind = WidgetBg.tema,
+    this.gradient = 0,
   });
+
+  /// Aksen yang dipakai & asal latarnya — supaya widget bisa menghitung ulang
+  /// warnanya sendiri dari wallpaper (aksen "Wallpaper") tanpa membuka aplikasi.
+  final Color accent;
+  final WidgetBg bgKind;
+  final int gradient;
 
   /// Satu warna = polos; dua warna = gradien diagonal. Diabaikan bila ada foto.
   final List<Color> colors;
@@ -211,6 +220,9 @@ class WidgetLook {
         'bar': bar.toARGB32(),
         'warn': warn.toARGB32(),
         'hide': hideAmounts,
+        'accent': accent.toARGB32(),
+        'bg': bgKind.name,
+        'gradient': gradient,
       };
 }
 
@@ -287,6 +299,9 @@ WidgetLook resolveWidgetLook(WidgetStyle style, {required Color accent, required
     bar: onAccent ? white : accent,
     warn: textLight ? const Color(0xFFF6C77E) : const Color(0xFFB45309),
     hideAmounts: style.hideAmounts,
+    accent: accent,
+    bgKind: bg,
+    gradient: style.gradient,
   );
 }
 

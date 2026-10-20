@@ -5,6 +5,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/context_ext.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/app_chip.dart';
+import '../../../core/widgets/catat_mark.dart';
 import '../../../core/widgets/hi_icons.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/segmented_control.dart';
@@ -13,7 +14,7 @@ import '../../premium/pro_controller.dart';
 import '../../premium/widgets/pro_teaser.dart';
 import 'settings_tile.dart';
 
-/// Ikon di dalam aplikasi (P2b): gaya set ikon, wadah, tombol Catat & label tab.
+/// Ikon di dalam aplikasi (P2b): gaya set ikon, wadah & label tab.
 class IconLookPicker extends ConsumerWidget {
   const IconLookPicker({super.key});
 
@@ -51,7 +52,7 @@ class IconLookPicker extends ConsumerWidget {
           labelOf: (v) => v.label,
           onChanged: ctl.setIconWrap,
         ),
-        const FieldLabel('Tombol Catat & tab bawah'),
+        const FieldLabel('Tab bawah'),
         Container(
           padding: const EdgeInsets.all(AppSpace.x12),
           decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
@@ -59,31 +60,17 @@ class IconLookPicker extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(children: [
-                Expanded(child: Text('Bentuk', style: t.item.copyWith(fontSize: 14))),
-                for (final FabShape v in FabShape.values) ...[
-                  const SizedBox(width: AppSpace.x4),
-                  AppChip(label: v.label, selected: s.fabShape == v, onTap: () => ctl.setFabShape(v)),
-                ],
-              ]),
-              const SizedBox(height: AppSpace.x8),
-              Row(children: [
-                Expanded(child: Text('Ikon tombol', style: t.item.copyWith(fontSize: 14))),
-                for (final FabIcon v in FabIcon.values) ...[
-                  const SizedBox(width: AppSpace.x4),
-                  Pressable(
-                    onTap: () => ctl.setFabIcon(v),
-                    semanticLabel: 'Ikon tombol ${v.label}',
-                    child: Container(
-                      width: 44,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: s.fabIcon == v ? c.accent : c.chip,
-                        borderRadius: AppRadius.smAll,
-                      ),
-                      child: Icon(v.icon, size: 20, color: s.fabIcon == v ? c.onAccent : c.sub2),
-                    ),
-                  ),
-                ],
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(color: c.accent, borderRadius: AppRadius.smAll),
+                  child: CatatMark(accent: c.accent, size: 44),
+                ),
+                const SizedBox(width: AppSpace.x12),
+                Expanded(
+                  child: Text('Tombol Catat adalah tanda khas HitungIn — bentuknya tetap, warnanya mengikuti aksen.',
+                      style: t.caption.copyWith(color: c.muted, height: 1.5)),
+                ),
               ]),
               SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
