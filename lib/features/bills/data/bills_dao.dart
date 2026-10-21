@@ -73,6 +73,7 @@ class BillsDao extends DatabaseAccessor<AppDatabase> with _$BillsDaoMixin {
           note: total == null ? bill.name : '${bill.name} · cicilan $paid/$total',
           occurredAt: paidAt ?? DateTime.now(),
           billId: bill.id,
+          billDue: bill.nextDue,
         );
         final bool finished = total != null && paid >= total;
         final DateTime? next = finished ? null : Dates.nextDue(bill.nextDue, bill.repeat, anchorDay: bill.anchorDay);

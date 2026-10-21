@@ -147,6 +147,10 @@ class Transactions extends Table {
   /// Tagihan asal, bila transaksi dibuat dari "Bayar tagihan".
   IntColumn get billId => integer().nullable().references(Bills, #id, onDelete: KeyAction.setNull)();
 
+  /// Jatuh tempo tagihan yang dibayar transaksi ini (v8), untuk menilai
+  /// ketepatan waktu di Rapor. Kosong untuk pembayaran sebelum v8.
+  DateTimeColumn get billDue => dateTime().nullable()();
+
   /// Jadwal asal, bila transaksi dicatat otomatis oleh transaksi berulang (v2).
   IntColumn get recurringId => integer().nullable().references(RecurringTxs, #id, onDelete: KeyAction.setNull)();
 

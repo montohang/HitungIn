@@ -9,6 +9,7 @@ import 'core/utils/date_format.dart';
 import 'features/debts/debts_screen.dart';
 import 'features/goals/goal_achieved_screen.dart';
 import 'features/goals/goals_screen.dart';
+import 'features/rapor/rapor_screen.dart';
 import 'features/splits/split_form_screen.dart';
 import 'features/splits/splits_screen.dart';
 import 'features/recap/recap_screen.dart';
@@ -118,6 +119,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.rekap,
         parentNavigatorKey: _rootKey,
         builder: (_, state) => RecapScreen(initialOffset: int.tryParse(state.uri.queryParameters['minggu'] ?? '') ?? 0),
+      ),
+      GoRoute(
+        path: Routes.rapor,
+        parentNavigatorKey: _rootKey,
+        builder: (_, state) => RaporScreen(month: DateFmt.parseMonthKey(state.uri.queryParameters['bulan'])),
+        routes: [
+          GoRoute(path: 'arsip', parentNavigatorKey: _rootKey, builder: (_, __) => const RaporArchiveScreen()),
+        ],
       ),
       GoRoute(
         path: Routes.patungan,

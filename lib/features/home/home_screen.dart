@@ -37,6 +37,7 @@ import 'data/allowance.dart';
 import 'widgets/allowance_card.dart';
 import '../favorites/widgets/favorite_chips.dart';
 import '../goals/widgets/goal_home_card.dart';
+import '../rapor/widgets/rapor_entry.dart';
 
 /// Sapaan sesuai jam.
 String greetingFor(DateTime now) => switch (now.hour) {
@@ -162,6 +163,7 @@ class HomeScreen extends ConsumerWidget {
                 hasBudget: budgets.isNotEmpty,
               ),
             ] else ...[
+              const RaporHomeCard(),
               RecapHomeCard(hidden: hidden),
               // Susunan kartu pilihan pengguna (P2b, Pro); bawaan untuk versi gratis.
               for (final (int idx, HomeCard card) in ref.watch(homeLayoutProvider).visible.indexed)
@@ -191,6 +193,7 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     ],
                   HomeCard.target => [GoalHomeCard(hidden: hidden)],
+                  HomeCard.prakiraan => [ForecastHomeCard(hidden: hidden)],
                   HomeCard.tagihan => [
                       if (dueBills.isNotEmpty) ...[
                         const SizedBox(height: AppSpace.x24),

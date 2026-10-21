@@ -15,6 +15,7 @@ import 'home_layout_provider.dart';
 
 IconData _iconOf(HomeCard c) => switch (c) {
       HomeCard.jatah => HiIcons.hourglass,
+      HomeCard.prakiraan => HiIcons.trendUp,
       HomeCard.cepat => HiIcons.sparkle,
       HomeCard.favorit => HiIcons.star,
       HomeCard.budget => HiIcons.target,

@@ -13,6 +13,7 @@ import '../../core/db/providers.dart';
 import '../../core/platform/launch_routes.dart';
 import '../security/app_gate.dart';
 import '../debts/data/debt_reminders.dart';
+import '../rapor/data/rapor_reminders.dart';
 import '../recap/data/recap_reminders.dart';
 import '../debts/data/debts_dao.dart';
 import '../goals/data/goal_reminders.dart';
@@ -25,6 +26,7 @@ String? routeForNotification(String payload) {
   if (payload.startsWith(billPayloadPrefix)) return Routes.tagihan;
   if (payload == '${recapPayloadPrefix}week') return '${Routes.rekap}?minggu=1';
   if (payload == '${recapPayloadPrefix}evening') return Routes.catat;
+  if (payload == raporPayload) return Routes.rapor;
   if (payload.startsWith(goalPayloadPrefix)) {
     final int? id = int.tryParse(payload.substring(goalPayloadPrefix.length));
     return id == null ? Routes.target : Routes.targetDetail(id);
@@ -269,6 +271,7 @@ Future<int> syncBillReminders({
     if (on) ...debtsInReminderWindow(debts, now),
     // Rekap Senin tetap; pengingat malam ditutup begitu hari ini sudah dicatat.
     recapWeeklyOwner,
+    raporMonthlyOwner,
     if (!loggedToday) recapEveningOwner,
     // Pengingat setoran yang masih menyala tetap tampil sampai diketuk.
     for (final ReminderPlan p in goals) billIdOfReminder(p.id),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../rapor/widgets/rapor_entry.dart' show RaporReportRow;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -114,6 +116,8 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
             const SizedBox(height: AppSpace.block),
             if (!tooFew) ...[
               const RecapReportRow(),
+              const SizedBox(height: AppSpace.x8),
+              const RaporReportRow(),
               const SizedBox(height: AppSpace.block),
             ],
             if (tooFew)

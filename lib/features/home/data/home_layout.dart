@@ -4,6 +4,7 @@ import 'dart:convert';
 /// selalu paling atas dan tidak termasuk di sini.
 enum HomeCard {
   jatah('Jatah hari ini', 'Angka aman dibelanjakan hari ini'),
+  prakiraan('Prakiraan bulan ini', 'Hanya muncul bila ada yang perlu diperhatikan'),
   cepat('Catat cepat', 'Kolom "kopi 25rb gopay"'),
   favorit('Sekali ketuk', 'Chip transaksi favorit'),
   budget('Budget', 'Progres budget bulan ini'),

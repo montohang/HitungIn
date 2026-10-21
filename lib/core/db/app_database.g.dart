@@ -3702,6 +3702,12 @@ class $TransactionsTable extends Transactions
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES bills (id) ON DELETE SET NULL'));
+  static const VerificationMeta _billDueMeta =
+      const VerificationMeta('billDue');
+  @override
+  late final GeneratedColumn<DateTime> billDue = GeneratedColumn<DateTime>(
+      'bill_due', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   static const VerificationMeta _recurringIdMeta =
       const VerificationMeta('recurringId');
   @override
@@ -3770,6 +3776,7 @@ class $TransactionsTable extends Transactions
         note,
         sub,
         billId,
+        billDue,
         recurringId,
         debtId,
         debtPaymentId,
@@ -3826,6 +3833,10 @@ class $TransactionsTable extends Transactions
     if (data.containsKey('bill_id')) {
       context.handle(_billIdMeta,
           billId.isAcceptableOrUnknown(data['bill_id']!, _billIdMeta));
+    }
+    if (data.containsKey('bill_due')) {
+      context.handle(_billDueMeta,
+          billDue.isAcceptableOrUnknown(data['bill_due']!, _billDueMeta));
     }
     if (data.containsKey('recurring_id')) {
       context.handle(
@@ -3891,6 +3902,8 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.string, data['${effectivePrefix}sub'])!,
       billId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}bill_id']),
+      billDue: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}bill_due']),
       recurringId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}recurring_id']),
       debtId: attachedDatabase.typeMapping
@@ -3940,6 +3953,10 @@ class Txn extends DataClass implements Insertable<Txn> {
   /// Tagihan asal, bila transaksi dibuat dari "Bayar tagihan".
   final int? billId;
 
+  /// Jatuh tempo tagihan yang dibayar transaksi ini (v8), untuk menilai
+  /// ketepatan waktu di Rapor. Kosong untuk pembayaran sebelum v8.
+  final DateTime? billDue;
+
   /// Jadwal asal, bila transaksi dicatat otomatis oleh transaksi berulang (v2).
   final int? recurringId;
 
@@ -3964,6 +3981,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       required this.note,
       required this.sub,
       this.billId,
+      this.billDue,
       this.recurringId,
       this.debtId,
       this.debtPaymentId,
@@ -3991,6 +4009,9 @@ class Txn extends DataClass implements Insertable<Txn> {
     map['sub'] = Variable<String>(sub);
     if (!nullToAbsent || billId != null) {
       map['bill_id'] = Variable<int>(billId);
+    }
+    if (!nullToAbsent || billDue != null) {
+      map['bill_due'] = Variable<DateTime>(billDue);
     }
     if (!nullToAbsent || recurringId != null) {
       map['recurring_id'] = Variable<int>(recurringId);
@@ -4026,6 +4047,9 @@ class Txn extends DataClass implements Insertable<Txn> {
       sub: Value(sub),
       billId:
           billId == null && nullToAbsent ? const Value.absent() : Value(billId),
+      billDue: billDue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(billDue),
       recurringId: recurringId == null && nullToAbsent
           ? const Value.absent()
           : Value(recurringId),
@@ -4057,6 +4081,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       note: serializer.fromJson<String>(json['note']),
       sub: serializer.fromJson<String>(json['sub']),
       billId: serializer.fromJson<int?>(json['billId']),
+      billDue: serializer.fromJson<DateTime?>(json['billDue']),
       recurringId: serializer.fromJson<int?>(json['recurringId']),
       debtId: serializer.fromJson<int?>(json['debtId']),
       debtPaymentId: serializer.fromJson<int?>(json['debtPaymentId']),
@@ -4080,6 +4105,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       'note': serializer.toJson<String>(note),
       'sub': serializer.toJson<String>(sub),
       'billId': serializer.toJson<int?>(billId),
+      'billDue': serializer.toJson<DateTime?>(billDue),
       'recurringId': serializer.toJson<int?>(recurringId),
       'debtId': serializer.toJson<int?>(debtId),
       'debtPaymentId': serializer.toJson<int?>(debtPaymentId),
@@ -4100,6 +4126,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           String? note,
           String? sub,
           Value<int?> billId = const Value.absent(),
+          Value<DateTime?> billDue = const Value.absent(),
           Value<int?> recurringId = const Value.absent(),
           Value<int?> debtId = const Value.absent(),
           Value<int?> debtPaymentId = const Value.absent(),
@@ -4117,6 +4144,7 @@ class Txn extends DataClass implements Insertable<Txn> {
         note: note ?? this.note,
         sub: sub ?? this.sub,
         billId: billId.present ? billId.value : this.billId,
+        billDue: billDue.present ? billDue.value : this.billDue,
         recurringId: recurringId.present ? recurringId.value : this.recurringId,
         debtId: debtId.present ? debtId.value : this.debtId,
         debtPaymentId:
@@ -4139,6 +4167,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       note: data.note.present ? data.note.value : this.note,
       sub: data.sub.present ? data.sub.value : this.sub,
       billId: data.billId.present ? data.billId.value : this.billId,
+      billDue: data.billDue.present ? data.billDue.value : this.billDue,
       recurringId:
           data.recurringId.present ? data.recurringId.value : this.recurringId,
       debtId: data.debtId.present ? data.debtId.value : this.debtId,
@@ -4165,6 +4194,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           ..write('note: $note, ')
           ..write('sub: $sub, ')
           ..write('billId: $billId, ')
+          ..write('billDue: $billDue, ')
           ..write('recurringId: $recurringId, ')
           ..write('debtId: $debtId, ')
           ..write('debtPaymentId: $debtPaymentId, ')
@@ -4187,6 +4217,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       note,
       sub,
       billId,
+      billDue,
       recurringId,
       debtId,
       debtPaymentId,
@@ -4207,6 +4238,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           other.note == this.note &&
           other.sub == this.sub &&
           other.billId == this.billId &&
+          other.billDue == this.billDue &&
           other.recurringId == this.recurringId &&
           other.debtId == this.debtId &&
           other.debtPaymentId == this.debtPaymentId &&
@@ -4226,6 +4258,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
   final Value<String> note;
   final Value<String> sub;
   final Value<int?> billId;
+  final Value<DateTime?> billDue;
   final Value<int?> recurringId;
   final Value<int?> debtId;
   final Value<int?> debtPaymentId;
@@ -4243,6 +4276,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     this.note = const Value.absent(),
     this.sub = const Value.absent(),
     this.billId = const Value.absent(),
+    this.billDue = const Value.absent(),
     this.recurringId = const Value.absent(),
     this.debtId = const Value.absent(),
     this.debtPaymentId = const Value.absent(),
@@ -4261,6 +4295,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     this.note = const Value.absent(),
     this.sub = const Value.absent(),
     this.billId = const Value.absent(),
+    this.billDue = const Value.absent(),
     this.recurringId = const Value.absent(),
     this.debtId = const Value.absent(),
     this.debtPaymentId = const Value.absent(),
@@ -4282,6 +4317,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     Expression<String>? note,
     Expression<String>? sub,
     Expression<int>? billId,
+    Expression<DateTime>? billDue,
     Expression<int>? recurringId,
     Expression<int>? debtId,
     Expression<int>? debtPaymentId,
@@ -4300,6 +4336,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       if (note != null) 'note': note,
       if (sub != null) 'sub': sub,
       if (billId != null) 'bill_id': billId,
+      if (billDue != null) 'bill_due': billDue,
       if (recurringId != null) 'recurring_id': recurringId,
       if (debtId != null) 'debt_id': debtId,
       if (debtPaymentId != null) 'debt_payment_id': debtPaymentId,
@@ -4320,6 +4357,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       Value<String>? note,
       Value<String>? sub,
       Value<int?>? billId,
+      Value<DateTime?>? billDue,
       Value<int?>? recurringId,
       Value<int?>? debtId,
       Value<int?>? debtPaymentId,
@@ -4337,6 +4375,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       note: note ?? this.note,
       sub: sub ?? this.sub,
       billId: billId ?? this.billId,
+      billDue: billDue ?? this.billDue,
       recurringId: recurringId ?? this.recurringId,
       debtId: debtId ?? this.debtId,
       debtPaymentId: debtPaymentId ?? this.debtPaymentId,
@@ -4378,6 +4417,9 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     if (billId.present) {
       map['bill_id'] = Variable<int>(billId.value);
     }
+    if (billDue.present) {
+      map['bill_due'] = Variable<DateTime>(billDue.value);
+    }
     if (recurringId.present) {
       map['recurring_id'] = Variable<int>(recurringId.value);
     }
@@ -4414,6 +4456,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
           ..write('note: $note, ')
           ..write('sub: $sub, ')
           ..write('billId: $billId, ')
+          ..write('billDue: $billDue, ')
           ..write('recurringId: $recurringId, ')
           ..write('debtId: $debtId, ')
           ..write('debtPaymentId: $debtPaymentId, ')
@@ -11289,6 +11332,7 @@ typedef $$TransactionsTableCreateCompanionBuilder = TransactionsCompanion
   Value<String> note,
   Value<String> sub,
   Value<int?> billId,
+  Value<DateTime?> billDue,
   Value<int?> recurringId,
   Value<int?> debtId,
   Value<int?> debtPaymentId,
@@ -11308,6 +11352,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
   Value<String> note,
   Value<String> sub,
   Value<int?> billId,
+  Value<DateTime?> billDue,
   Value<int?> recurringId,
   Value<int?> debtId,
   Value<int?> debtPaymentId,
@@ -11461,6 +11506,9 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<String> get sub => $composableBuilder(
       column: $table.sub, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get billDue => $composableBuilder(
+      column: $table.billDue, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get occurredAt => $composableBuilder(
       column: $table.occurredAt, builder: (column) => ColumnFilters(column));
@@ -11656,6 +11704,9 @@ class $$TransactionsTableOrderingComposer
   ColumnOrderings<String> get sub => $composableBuilder(
       column: $table.sub, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get billDue => $composableBuilder(
+      column: $table.billDue, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get occurredAt => $composableBuilder(
       column: $table.occurredAt, builder: (column) => ColumnOrderings(column));
 
@@ -11849,6 +11900,9 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<String> get sub =>
       $composableBuilder(column: $table.sub, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get billDue =>
+      $composableBuilder(column: $table.billDue, builder: (column) => column);
 
   GeneratedColumn<DateTime> get occurredAt => $composableBuilder(
       column: $table.occurredAt, builder: (column) => column);
@@ -12060,6 +12114,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<String> note = const Value.absent(),
             Value<String> sub = const Value.absent(),
             Value<int?> billId = const Value.absent(),
+            Value<DateTime?> billDue = const Value.absent(),
             Value<int?> recurringId = const Value.absent(),
             Value<int?> debtId = const Value.absent(),
             Value<int?> debtPaymentId = const Value.absent(),
@@ -12078,6 +12133,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             note: note,
             sub: sub,
             billId: billId,
+            billDue: billDue,
             recurringId: recurringId,
             debtId: debtId,
             debtPaymentId: debtPaymentId,
@@ -12096,6 +12152,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<String> note = const Value.absent(),
             Value<String> sub = const Value.absent(),
             Value<int?> billId = const Value.absent(),
+            Value<DateTime?> billDue = const Value.absent(),
             Value<int?> recurringId = const Value.absent(),
             Value<int?> debtId = const Value.absent(),
             Value<int?> debtPaymentId = const Value.absent(),
@@ -12114,6 +12171,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             note: note,
             sub: sub,
             billId: billId,
+            billDue: billDue,
             recurringId: recurringId,
             debtId: debtId,
             debtPaymentId: debtPaymentId,

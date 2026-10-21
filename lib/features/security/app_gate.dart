@@ -108,6 +108,10 @@ abstract final class Routes {
   static String targetDetail(int id) => '/target/$id';
   static String targetTercapai(int id) => '/target/$id/tercapai';
 
+  /// Rapor bulanan (P3d): `?bulan=yyyy-mm` (bawaan bulan lalu) & arsip.
+  static const String rapor = '/rapor';
+  static const String raporArsip = '/rapor/arsip';
+
   /// Patungan (P3c): daftar, form baru, detail, ubah.
   static const String patungan = '/patungan';
   static const String patunganBaru = '/patungan/baru';

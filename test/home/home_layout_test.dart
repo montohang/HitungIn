@@ -10,7 +10,7 @@ void main() {
   test('pindah & sembunyikan, lalu simpan-baca utuh', () {
     final l = HomeLayout.standard.move(HomeCard.terbaru.index, 0).toggle(HomeCard.budget, false);
     expect(l.visible,
-        [HomeCard.terbaru, HomeCard.jatah, HomeCard.cepat, HomeCard.favorit, HomeCard.target, HomeCard.tagihan]);
+        [HomeCard.terbaru, HomeCard.jatah, HomeCard.prakiraan, HomeCard.cepat, HomeCard.favorit, HomeCard.target, HomeCard.tagihan]);
     final back = HomeLayout.decode(l.encode());
     expect(back.order, l.order);
     expect(back.hidden, {HomeCard.budget});

@@ -34,8 +34,9 @@ class AppDatabase extends _$AppDatabase {
   /// (bills.installment_*), utang-piutang (debts, debt_payments,
   /// transactions.debt_id/debt_payment_id). v6: target tabungan (goals,
   /// goal_deposits). v7: patungan (splits, split_members, split_items,
-  /// transactions.split_id, debts.split_id).
-  int get schemaVersion => 7;
+  /// transactions.split_id, debts.split_id). v8: transactions.bill_due
+  /// (jatuh tempo tagihan yang dibayar, untuk Rapor).
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -78,6 +79,9 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(transactions, transactions.splitId);
             // Dari < v5 tabel debts baru saja dibuat lengkap (sudah ada split_id).
             if (from >= 5) await m.addColumn(debts, debts.splitId);
+          }
+          if (from < 8) {
+            await m.addColumn(transactions, transactions.billDue);
           }
           // Pastikan relasi data tetap utuh sesudah migrasi.
           final List<QueryRow> broken = await customSelect('PRAGMA foreign_key_check').get();

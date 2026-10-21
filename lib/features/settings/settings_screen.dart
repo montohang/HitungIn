@@ -21,6 +21,8 @@ import '../debts/data/debts_dao.dart';
 import '../debts/debts_provider.dart';
 import '../goals/data/goals_dao.dart';
 import '../goals/goals_provider.dart';
+import '../rapor/data/rapor.dart';
+import '../rapor/rapor_provider.dart';
 import '../splits/data/splits_dao.dart';
 import '../splits/splits_provider.dart';
 import '../../core/utils/rupiah.dart';
@@ -70,6 +72,9 @@ class SettingsScreen extends ConsumerWidget {
       for (final SplitFull s in ref.watch(splitsProvider).valueOrNull ?? const <SplitFull>[])
         if (splitProgress(s, ref.watch(debtsByIdProvider)) case final p when p.settled < p.count) s,
     ].length;
+    final DateTime raporMonth = lastCompletedMonth(now);
+    final Rapor? rapor = ref.watch(raporMonthsProvider).contains(raporMonth) ? ref.watch(raporProvider(raporMonth)) : null;
+    final String? raporValue = rapor?.overall == null ? null : '${raporMonthName(raporMonth)} · ${rapor!.overall!.emoji} ${rapor.overall!.label}';
     final int dueSoon = [
       for (final b in ref.watch(activeBillsProvider).valueOrNull ?? const <Bill>[])
         if (billNeedsAttention(b, now)) b,
@@ -120,6 +125,12 @@ class SettingsScreen extends ConsumerWidget {
                   title: 'Tagihan',
                   badge: dueSoon > 0 ? '$dueSoon segera' : null,
                   onTap: () => context.push(Routes.tagihan),
+                ),
+                SettingsTile(
+                  icon: HiIcons.fileCheck,
+                  title: 'Rapor bulanan',
+                  value: raporValue,
+                  onTap: () => context.push(Routes.rapor),
                 ),
                 SettingsTile(
                   icon: HiIcons.jar,

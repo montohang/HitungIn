@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../rapor/widgets/rapor_entry.dart' show ForecastBudgetCard;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -109,6 +111,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
               )
             else if (overview != null) ...[
               _Overview(overview: overview, now: now, isCurrent: isCurrent, days: days),
+              if (isCurrent) ...[
+                const SizedBox(height: AppSpace.x16),
+                const ForecastBudgetCard(),
+              ],
               if (hot != null) ...[
                 const SizedBox(height: AppSpace.x16),
                 _Warning(budget: hot, now: now),

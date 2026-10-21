@@ -247,3 +247,18 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] Hapus patungan: saldo kembali, piutang & pengeluaran ikut hilang.
 - [x] Detail transaksi bagianku: "bagianmu di patungan" + tombol Buka Patungan, tidak bisa diedit langsung.
 - [ ] Backup & pulihkan membawa patungan.
+
+## 15. Rapor bulanan (P3d, baru)
+- [x] Pasang di atas versi lama: migrasi v7 → v8, data lama utuh.
+- [x] Belum ada bulan selesai → "Rapor pertamamu terbit 1 November".
+- [x] Laporan › Rapor bulanan dan Lainnya › Rapor bulanan menampilkan nilai bulan lalu (👌 Aman ●●●○).
+- [x] Data minim: peringatan "datanya belum lengkap", Kata HitungIn mengajak mencatat, aspek tanpa data "❔ Belum dinilai".
+- [x] Ketuk aspek → "Dari mana nilai ini?": rumus, angkamu, 4 batas (posisi disorot), dasar acuan, saran.
+- [x] Ringkasan masuk/keluar/sisa, kategori terbesar, sorotan, saran bulan ini dengan tombol aksi.
+- [x] Bagikan rapor: kartu tanpa nominal bawaan; "Tampilkan nominal" menambah baris sisa; menu Bagikan berisi 1 gambar.
+- [x] Arsip: grafik nilai & daftar bulan.
+- [x] Notifikasi rapor terjadwal tanggal 1 pukul 08.00.
+- [ ] Tanggal 1–5: kartu "Rapor … terbit" di Beranda; ✕ menutupnya sampai bulan depan.
+- [ ] Notifikasi tanggal 1 muncul; ketuk → layar Rapor.
+- [ ] Bayar tagihan telat → bulan berikutnya aspek Tagihan tidak Juara.
+- [ ] Budget total diatur & belanja cepat → kartu Prakiraan di Beranda & Budget.

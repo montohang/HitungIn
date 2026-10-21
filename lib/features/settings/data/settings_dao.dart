@@ -56,6 +56,11 @@ abstract final class SettingKeys {
   /// Info transfer patungan terakhir ("BCA 123… a.n. …") dan apakah disertakan (P3c).
   static const String splitTransfer = 'split.transfer';
   static const String splitTransferOn = 'split.transferOn';
+
+  /// Rapor bulanan (P3d): notifikasi tanggal 1 (bawaan menyala) & bulan
+  /// yang kartu Rapor-nya ditutup di Beranda (yyyy-mm).
+  static const String raporMonthly = 'rapor.monthly';
+  static const String raporDismissed = 'rapor.dismissed';
 }
 
 @DriftAccessor(tables: [Settings])

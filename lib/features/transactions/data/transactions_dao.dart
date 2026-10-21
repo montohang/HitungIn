@@ -32,6 +32,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
     String sub = '',
     required DateTime occurredAt,
     int? billId,
+    DateTime? billDue,
   }) {
     _validate(kind: kind, amount: amount, walletId: walletId, toWalletId: toWalletId, categoryId: categoryId);
     return into(transactions).insert(TransactionsCompanion.insert(
@@ -44,6 +45,7 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
       sub: Value(kind == TxKind.transfer ? '' : sub.trim()),
       occurredAt: occurredAt,
       billId: Value(billId),
+      billDue: Value(billDue),
     ));
   }
 

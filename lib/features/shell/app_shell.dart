@@ -31,6 +31,8 @@ import '../debts/debts_provider.dart';
 import '../goals/data/goal_reminders.dart';
 import '../goals/data/goals_dao.dart';
 import '../goals/goals_provider.dart';
+import '../rapor/data/rapor_reminders.dart';
+import '../rapor/rapor_provider.dart' show raporMonthlyProvider;
 import '../recap/data/recap_reminders.dart';
 import '../recap/recap_provider.dart';
 
@@ -104,13 +106,16 @@ class _AppShellState extends ConsumerState<AppShell> {
         color: ref.read(themeControllerProvider).accentLight,
         loggedToday: loggedToday,
         goals: planGoalReminders(goals, now),
-        recap: planRecapReminders(
-          now: now,
-          weekly: ref.read(recapWeeklyProvider).valueOrNull ?? true,
-          evening: ref.read(recapEveningProvider).valueOrNull ?? false,
-          streak: ref.read(streakProvider)?.current ?? 0,
-          loggedToday: loggedToday,
-        ),
+        recap: [
+          ...planRecapReminders(
+            now: now,
+            weekly: ref.read(recapWeeklyProvider).valueOrNull ?? true,
+            evening: ref.read(recapEveningProvider).valueOrNull ?? false,
+            streak: ref.read(streakProvider)?.current ?? 0,
+            loggedToday: loggedToday,
+          ),
+          ...planRaporReminder(now: now, enabled: ref.read(raporMonthlyProvider).valueOrNull ?? true),
+        ],
       );
     });
   }
@@ -187,6 +192,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     ref.listen(loggedDaysProvider, (_, __) => _scheduleReminderSync());
     ref.listen(recapWeeklyProvider, (_, __) => _scheduleReminderSync());
     ref.listen(recapEveningProvider, (_, __) => _scheduleReminderSync());
+    ref.listen(raporMonthlyProvider, (_, __) => _scheduleReminderSync());
     // Warna notifikasi mengikuti aksen tema.
     ref.listen(themeControllerProvider.select((t) => t.accentLight), (_, __) => _scheduleReminderSync());
     ref.listen(reminderSettingsProvider, (_, __) => _scheduleReminderSync());
