@@ -27,6 +27,9 @@ import '../wallets/data/wallets_dao.dart' show WalletBalance;
 import 'data/splits.dart';
 import 'data/splits_dao.dart';
 import 'splits_provider.dart';
+import '../premium/pro_controller.dart';
+import '../scan/data/receipt_parser.dart';
+import '../scan/scan_screen.dart' show ScanResult, startReceiptScan;
 import 'splits_screen.dart' show SplitAvatar;
 
 class _Item {
@@ -77,6 +80,10 @@ class _SplitFormScreenState extends ConsumerState<SplitFormScreen> {
   SplitMode _mode = SplitMode.rata;
   bool _tax = true;
   bool _service = false;
+
+  /// Tarif pajak & service dalam permil (bawaan PB1 10%, service 5%; dari struk bila discan).
+  int _taxRate = 100;
+  int _serviceRate = 50;
   late DateTime _date = ref.read(clockProvider)();
   int? _walletId;
   int? _categoryId;
@@ -101,6 +108,8 @@ class _SplitFormScreenState extends ConsumerState<SplitFormScreen> {
       _mode = s.split.mode;
       _tax = s.split.taxPermille > 0;
       _service = s.split.servicePermille > 0;
+      if (_tax) _taxRate = s.split.taxPermille;
+      if (_service) _serviceRate = s.split.servicePermille;
       _fee.text = s.split.extraFee > 0 ? Rupiah.digits(s.split.extraFee) : '';
       _discount.text = s.split.discount > 0 ? Rupiah.digits(s.split.discount) : '';
       _names
@@ -130,8 +139,8 @@ class _SplitFormScreenState extends ConsumerState<SplitFormScreen> {
 
   MenuBill get _bill => menuBill(
         [for (final i in _items) (name: i.name, price: i.price, who: i.who)],
-        taxPermille: _tax ? 100 : 0,
-        servicePermille: _service ? 50 : 0,
+        taxPermille: _tax ? _taxRate : 0,
+        servicePermille: _service ? _serviceRate : 0,
         extraFee: RupiahInputFormatter.parse(_fee.text),
         discount: RupiahInputFormatter.parse(_discount.text),
       );
@@ -224,8 +233,8 @@ class _SplitFormScreenState extends ConsumerState<SplitFormScreen> {
           for (final (int i, String n) in _names.indexed) (name: n, isMe: i == 0, payer: i == _payer, share: shares[i]),
         ],
         items: _mode == SplitMode.menu ? [for (final i in _items) (name: i.name, price: i.price, who: i.who)] : const [],
-        taxPermille: _mode == SplitMode.menu && _tax ? 100 : 0,
-        servicePermille: _mode == SplitMode.menu && _service ? 50 : 0,
+        taxPermille: _mode == SplitMode.menu && _tax ? _taxRate : 0,
+        servicePermille: _mode == SplitMode.menu && _service ? _serviceRate : 0,
         extraFee: _mode == SplitMode.menu ? RupiahInputFormatter.parse(_fee.text) : 0,
         discount: _mode == SplitMode.menu ? RupiahInputFormatter.parse(_discount.text) : 0,
       );
@@ -240,6 +249,41 @@ class _SplitFormScreenState extends ConsumerState<SplitFormScreen> {
     } on StateError catch (e) {
       setState(() => _error = e.message);
     }
+  }
+
+  static String _pct(int permille) =>
+      '${(permille / 10).toStringAsFixed(permille % 10 == 0 ? 0 : 1).replaceAll('.', ',')}%';
+
+  /// Scan struk restoran (P3e): item, pajak, service, ongkir & diskon terisi.
+  Future<void> _scan() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final ScanResult? r = await startReceiptScan(context, ref, forSplit: true);
+    if (r == null || !mounted) return;
+    final ReceiptScan s = r.scan;
+    final int base = s.items.fold(0, (a, i) => a + i.price);
+    final int taxRate = s.taxPermille, serviceRate = s.servicePermille;
+    // Selisih pembulatan tarif masuk ke biaya supaya total sama persis dengan struk.
+    final int drift = (s.tax - (base * taxRate / 1000).round()) + (s.service - (base * serviceRate / 1000).round());
+    setState(() {
+      _mode = SplitMode.menu;
+      _error = null;
+      _items
+        ..clear()
+        ..addAll([
+          for (final it in s.items)
+            _Item(it.qty > 1 ? '${it.name} ×${it.qty}' : it.name, it.price, {for (int i = 0; i < _names.length; i++) i}),
+        ]);
+      _tax = taxRate > 0;
+      _service = serviceRate > 0;
+      if (taxRate > 0) _taxRate = taxRate;
+      if (serviceRate > 0) _serviceRate = serviceRate;
+      final int fee = s.extraFee + drift;
+      _fee.text = fee > 0 ? Rupiah.digits(fee) : '';
+      _discount.text = s.discount + (fee < 0 ? -fee : 0) > 0 ? Rupiah.digits(s.discount + (fee < 0 ? -fee : 0)) : '';
+      if (_title.text.trim().isEmpty && s.merchant != null) _title.text = s.merchant!;
+      if (r.date != null) _date = r.date!;
+      if (r.walletId != null) _walletId = r.walletId;
+    });
   }
 
   int? _defaultWallet() {
@@ -377,6 +421,9 @@ class _SplitFormScreenState extends ConsumerState<SplitFormScreen> {
                       bill: _bill,
                       tax: _tax,
                       service: _service,
+                      taxLabel: 'PB1 ${_pct(_taxRate)}',
+                      serviceLabel: 'Service ${_pct(_serviceRate)}',
+                      onScan: _scan,
                       fee: _fee,
                       discount: _discount,
                       onAdd: () => _openItem(),
@@ -551,6 +598,9 @@ class _MenuEditor extends StatelessWidget {
     required this.onToggle,
     required this.onTax,
     required this.onService,
+    required this.taxLabel,
+    required this.serviceLabel,
+    required this.onScan,
     required this.onChanged,
   });
 
@@ -567,6 +617,9 @@ class _MenuEditor extends StatelessWidget {
   final void Function(int item, int who) onToggle;
   final ValueChanged<bool> onTax;
   final ValueChanged<bool> onService;
+  final String taxLabel;
+  final String serviceLabel;
+  final VoidCallback onScan;
   final VoidCallback onChanged;
 
   @override
@@ -579,6 +632,10 @@ class _MenuEditor extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpace.x8, bottom: AppSpace.x4),
+            child: _ScanCard(onTap: onScan),
+          ),
           for (final (int i, _Item it) in items.indexed)
             Container(
               padding: const EdgeInsets.symmetric(vertical: AppSpace.x8 + 2),
@@ -620,8 +677,8 @@ class _MenuEditor extends StatelessWidget {
             spacing: AppSpace.x8,
             runSpacing: AppSpace.x8,
             children: [
-              AppChip(label: 'PB1 10%', selected: tax, onTap: () => onTax(!tax)),
-              AppChip(label: 'Service 5%', selected: service, onTap: () => onService(!service)),
+              AppChip(label: taxLabel, selected: tax, onTap: () => onTax(!tax)),
+              AppChip(label: serviceLabel, selected: service, onTap: () => onService(!service)),
             ],
           ),
           const SizedBox(height: AppSpace.x8),
@@ -653,8 +710,8 @@ class _MenuEditor extends StatelessWidget {
           const SizedBox(height: AppSpace.x8),
           for (final (String k, int v) in [
             ('Subtotal', bill.subtotal),
-            if (bill.tax > 0) ('PB1 10%', bill.tax),
-            if (bill.service > 0) ('Service 5%', bill.service),
+            if (bill.tax > 0) (taxLabel, bill.tax),
+            if (bill.service > 0) (serviceLabel, bill.service),
             if (bill.extraFee > 0) ('Ongkir/biaya', bill.extraFee),
             if (bill.discount > 0) ('Diskon', -bill.discount),
             ('Total', bill.total),
@@ -864,6 +921,42 @@ class _ItemSheetState extends State<_ItemSheet> {
           },
         ),
       ],
+    );
+  }
+}
+
+class _ScanCard extends ConsumerWidget {
+  const _ScanCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
+    final t = context.text;
+    return Pressable(
+      key: const Key('scan-struk-patungan'),
+      onTap: onTap,
+      semanticLabel: 'Scan struk',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12 + 2, vertical: AppSpace.x12),
+        decoration: BoxDecoration(
+          color: c.accentSoft,
+          borderRadius: AppRadius.mdAll,
+          border: Border.all(color: c.accent.withValues(alpha: 0.6)),
+        ),
+        child: Row(children: [
+          Icon(HiIcons.receipt, size: 22, color: c.accentText),
+          const SizedBox(width: AppSpace.x12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Scan struk', style: t.item.copyWith(fontSize: 14, fontWeight: FontWeight.w700)),
+              Text('Semua menu, PB1 & service langsung terisi', style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted)),
+            ]),
+          ),
+          if (!ref.watch(isProProvider)) const AppBadge.pro(),
+        ]),
+      ),
     );
   }
 }

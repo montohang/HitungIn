@@ -10,10 +10,15 @@ abstract final class FreeLimits {
   /// Target tabungan aktif (belum tercapai & belum diarsipkan).
   static const int activeGoals = 1;
 
+  /// Scan struk per bulan kalender.
+  static const int receiptScans = 3;
+
   /// Laporan: bulan berjalan + sekian bulan sebelumnya.
   static const int reportMonthsBack = 1;
 
   static bool canAddCategoryBudget({required int existing, required bool isPro}) => isPro || existing < categoryBudgets;
+
+  static bool canScanReceipt({required int usedThisMonth, required bool isPro}) => isPro || usedThisMonth < receiptScans;
 
   static bool canAddGoal({required int active, required bool isPro}) => isPro || active < activeGoals;
 
@@ -45,7 +50,8 @@ enum ProReason {
   tema('Aksen & ikon aplikasi tambahan'),
   notifikasi('Pengingat tagihan lewat notifikasi'),
   personalisasi('Foto widget, warna bebas & Beranda sesukamu'),
-  target('Menabung untuk banyak target sekaligus');
+  target('Menabung untuk banyak target sekaligus'),
+  scan('Scan struk tanpa batas');
 
   const ProReason(this.headline);
   final String headline;

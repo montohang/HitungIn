@@ -61,6 +61,10 @@ abstract final class SettingKeys {
   /// yang kartu Rapor-nya ditutup di Beranda (yyyy-mm).
   static const String raporMonthly = 'rapor.monthly';
   static const String raporDismissed = 'rapor.dismissed';
+
+  /// Kuota Scan struk versi gratis (P3e): bulan (yyyy-mm) & jumlah dipakai.
+  static const String scanMonth = 'scan.month';
+  static const String scanCount = 'scan.count';
 }
 
 @DriftAccessor(tables: [Settings])

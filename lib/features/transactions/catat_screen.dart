@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../debts/debts_screen.dart' show DebtDraft, debtDraftLink;
 import '../goals/goals_screen.dart' show GoalDraft, goalDraftLink;
+import '../scan/scan_screen.dart' show ScanResult, startReceiptScan;
 import '../../core/db/app_database.dart';
 import '../../core/db/data_providers.dart';
 import '../../core/db/providers.dart';
@@ -184,6 +185,28 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
       _toWalletId = e.toWalletId;
       _date = e.occurredAt;
       _note.text = e.note;
+    });
+  }
+
+  /// Scan struk (P3e): isi nominal, catatan, tanggal, dompet & kategori.
+  Future<void> _scanReceipt() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final ScanResult? r = await startReceiptScan(context, ref, forSplit: false);
+    if (r == null || !mounted) return;
+    setState(() {
+      _debt = null;
+      _goal = null;
+      _error = null;
+      _kind = TxKind.pengeluaran;
+      if (r.amount > 0) _amount = r.amount;
+      _note.text = r.note;
+      if (r.date != null) _date = r.date!;
+      if (r.walletId != null) _walletId = r.walletId;
+      if (r.categoryId != null) {
+        _categoryId = r.categoryId;
+        _pinnedCategory = r.categoryId;
+        _sub = '';
+      }
     });
   }
 
@@ -444,6 +467,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                         controller: _quick,
                                         autofocus: false,
                                         onChanged: _applyQuick,
+                                        onScan: _scanReceipt,
                                       ),
                                       if (_debt case final DebtDraft d?) ...[
                                         const SizedBox(height: AppSpace.x8),
@@ -731,11 +755,12 @@ InputDecoration _bare(String hint) => InputDecoration(
 
 /// Kolom Catat cepat (fitur app, dipertahankan di atas form).
 class _QuickField extends StatelessWidget {
-  const _QuickField({required this.controller, required this.autofocus, required this.onChanged});
+  const _QuickField({required this.controller, required this.autofocus, required this.onChanged, this.onScan});
 
   final TextEditingController controller;
   final bool autofocus;
   final ValueChanged<String> onChanged;
+  final VoidCallback? onScan;
 
   @override
   Widget build(BuildContext context) {
@@ -759,6 +784,18 @@ class _QuickField extends StatelessWidget {
               onChanged: onChanged,
             ),
           ),
+          if (onScan != null)
+            Pressable(
+              key: const Key('scan-struk'),
+              onTap: onScan,
+              semanticLabel: 'Scan struk',
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
+                child: Icon(HiIcons.receipt, size: 20, color: c.accentText),
+              ),
+            ),
         ],
       ),
     );
