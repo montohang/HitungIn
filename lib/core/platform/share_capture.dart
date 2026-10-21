@@ -9,11 +9,12 @@ import 'share_text.dart';
 
 /// Potret [boundary] (RepaintBoundary) jadi PNG lalu buka menu Bagikan.
 /// [pixelRatio] 3 untuk kartu 360×450 → 1080×1350. Berkas sementara dihapus
-/// sesudahnya. [wrap] membungkus pemanggilan menu (mis. menunda kunci otomatis).
+/// sesudahnya. [text] ikut dikirim bersama gambar bila diisi. [wrap] membungkus pemanggilan menu (mis. menunda kunci otomatis).
 Future<bool> shareBoundaryPng(
   GlobalKey boundary, {
   required String fileName,
   required String title,
+  String? text,
   required Future<bool> Function(Future<bool> Function() share) wrap,
   double pixelRatio = 3,
 }) async {
@@ -26,7 +27,7 @@ Future<bool> shareBoundaryPng(
   final File f = File('${dir.path}/$fileName');
   await f.writeAsBytes(data!.buffer.asUint8List(), flush: true);
   try {
-    return await wrap(() => ShareText.image(f.path, title: title));
+    return await wrap(() => ShareText.image(f.path, text: text, title: title));
   } finally {
     if (await f.exists()) await f.delete();
   }

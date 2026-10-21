@@ -21,6 +21,8 @@ import '../debts/data/debts_dao.dart';
 import '../debts/debts_provider.dart';
 import '../goals/data/goals_dao.dart';
 import '../goals/goals_provider.dart';
+import '../splits/data/splits_dao.dart';
+import '../splits/splits_provider.dart';
 import '../../core/utils/rupiah.dart';
 import '../security/pin_service.dart';
 import '../../core/widgets/app_chip.dart';
@@ -64,6 +66,10 @@ class SettingsScreen extends ConsumerWidget {
         .fold(0, (sum, d) => sum + d.left);
     final int goalsActive =
         (ref.watch(goalsProvider).valueOrNull ?? const <GoalWithDeposits>[]).where((g) => g.active).length;
+    final int splitsOpen = [
+      for (final SplitFull s in ref.watch(splitsProvider).valueOrNull ?? const <SplitFull>[])
+        if (splitProgress(s, ref.watch(debtsByIdProvider)) case final p when p.settled < p.count) s,
+    ].length;
     final int dueSoon = [
       for (final b in ref.watch(activeBillsProvider).valueOrNull ?? const <Bill>[])
         if (billNeedsAttention(b, now)) b,
@@ -120,6 +126,12 @@ class SettingsScreen extends ConsumerWidget {
                   title: 'Target tabungan',
                   value: goalsActive > 0 ? '$goalsActive aktif' : null,
                   onTap: () => context.push(Routes.target),
+                ),
+                SettingsTile(
+                  icon: HiIcons.people,
+                  title: 'Patungan',
+                  value: splitsOpen > 0 ? '$splitsOpen belum beres' : null,
+                  onTap: () => context.push(Routes.patungan),
                 ),
                 SettingsTile(
                   icon: HiIcons.people,

@@ -16,6 +16,7 @@ typedef BackupSummary = ({
   int recurring,
   int debts,
   int goals,
+  int splits,
 });
 
 /// Mengubah seluruh isi database menjadi peta JSON dan sebaliknya.
@@ -44,6 +45,9 @@ class BackupService {
         'categories': rows(await db.select(db.categories).get()),
         'bills': rows(await db.select(db.bills).get()),
         'recurring': rows(await db.select(db.recurringTxs).get()),
+        'splits': rows(await db.select(db.splits).get()),
+        'splitMembers': rows(await db.select(db.splitMembers).get()),
+        'splitItems': rows(await db.select(db.splitItems).get()),
         'debts': rows(await db.select(db.debts).get()),
         'debtPayments': rows(await db.select(db.debtPayments).get()),
         'goals': rows(await db.select(db.goals).get()),
@@ -74,6 +78,7 @@ class BackupService {
       recurring: count('recurring'),
       debts: count('debts'),
       goals: count('goals'),
+      splits: count('splits'),
     );
   }
 
@@ -104,8 +109,11 @@ class BackupService {
       await db.delete(db.transactions).go();
       await db.delete(db.goalDeposits).go();
       await db.delete(db.goals).go();
+      await db.delete(db.splitItems).go();
+      await db.delete(db.splitMembers).go();
       await db.delete(db.debtPayments).go();
       await db.delete(db.debts).go();
+      await db.delete(db.splits).go();
       await db.delete(db.recurringTxs).go();
       await db.delete(db.budgets).go();
       await db.delete(db.bills).go();
@@ -121,9 +129,14 @@ class BackupService {
         b.insertAll(db.bills, [for (final r in rows('bills')) Bill.fromJson({'installmentPaid': 0, ...r})]);
         // Cadangan v1 tidak punya 'recurring' → kosong.
         b.insertAll(db.recurringTxs, [for (final r in rows('recurring')) RecurringTx.fromJson(r)]);
+        // Cadangan sebelum v7 tidak punya patungan → kosong. Patungan dulu,
+        // karena utang-piutang & transaksinya merujuk ke sana.
+        b.insertAll(db.splits, [for (final r in rows('splits')) Split.fromJson(r)]);
         // Cadangan sebelum v5 tidak punya utang-piutang → kosong.
         b.insertAll(db.debts, [for (final r in rows('debts')) Debt.fromJson(r)]);
         b.insertAll(db.debtPayments, [for (final r in rows('debtPayments')) DebtPayment.fromJson(r)]);
+        b.insertAll(db.splitMembers, [for (final r in rows('splitMembers')) SplitMember.fromJson(r)]);
+        b.insertAll(db.splitItems, [for (final r in rows('splitItems')) SplitItem.fromJson(r)]);
         // Cadangan sebelum v6 tidak punya target tabungan → kosong.
         b.insertAll(db.goals, [for (final r in rows('goals')) Goal.fromJson(r)]);
         b.insertAll(db.goalDeposits, [for (final r in rows('goalDeposits')) GoalDeposit.fromJson(r)]);

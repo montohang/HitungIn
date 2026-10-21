@@ -7,6 +7,7 @@ import 'package:hitungin/core/db/app_database.dart';
 import 'package:hitungin/features/backup/data/backup_codec.dart';
 import 'package:hitungin/features/backup/data/backup_service.dart';
 import 'package:hitungin/features/backup/data/csv_export.dart';
+import 'package:hitungin/features/debts/data/debts_dao.dart';
 import 'package:hitungin/features/settings/data/settings_dao.dart';
 
 AppDatabase _db() {
@@ -178,6 +179,40 @@ void main() {
       expect((g.goal.remind, g.goal.remindWeekday, g.goal.remindHour), (true, 5, 19));
       expect([for (final d in g.deposits) d.amount], [500000, -100000]);
       expect((await target.walletsDao.watchBalances().first).single.balance, 5000000);
+      await db.close();
+      await target.close();
+    });
+
+    test('patungan: peserta, item, piutang & pembayarannya kembali utuh', () async {
+      final db = _db();
+      final bca = await db.walletsDao.add(name: 'BCA', type: WalletType.bank, initialBalance: 1000000);
+      final id = await db.splitsDao.save(
+        title: 'Pizza',
+        mode: SplitMode.menu,
+        total: 150000,
+        walletId: bca,
+        occurredAt: DateTime(2026, 10, 21),
+        members: [
+          (name: 'Aku', isMe: true, payer: true, share: 50000),
+          (name: 'Budi', isMe: false, payer: false, share: 100000),
+        ],
+        items: [(name: 'Pizza', price: 100000, who: {0, 1}), (name: 'Pasta', price: 50000, who: {1})],
+      );
+      final budiDebt = (await db.splitsDao.byId(id))!.members[1].debtId!;
+      await db.debtsDao.pay(budiDebt, amount: 40000, paidAt: DateTime(2026, 10, 22), walletId: bca);
+      final snap = await BackupService(db).snapshot();
+      final restored = await BackupCodec.decrypt(await BackupCodec.encrypt(snap, 'rahasia123', iterations: 1000), 'rahasia123');
+
+      final target = _db();
+      final service = BackupService(target);
+      expect(service.inspect(restored).splits, 1);
+      await service.restore(restored);
+      final s = (await target.splitsDao.watchAll().first).single;
+      expect([for (final m in s.members) (m.name, m.share, m.payer)], [('Aku', 50000, true), ('Budi', 100000, false)]);
+      expect([for (final i in s.items) i.who], ['0,1', '1']);
+      final d = (await target.debtsDao.byId(s.members[1].debtId!))!;
+      expect((d.debt.splitId, d.paid), (s.split.id, 40000));
+      expect((await target.walletsDao.watchBalances().first).single.balance, 890000);
       await db.close();
       await target.close();
     });

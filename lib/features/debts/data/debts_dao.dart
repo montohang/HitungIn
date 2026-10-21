@@ -61,6 +61,7 @@ class DebtsDao extends DatabaseAccessor<AppDatabase> with _$DebtsDaoMixin {
     int? walletId,
     DateTime? dueDate,
     String note = '',
+    int? splitId,
   }) =>
       transaction(() async {
         _validate(name, amount);
@@ -72,6 +73,7 @@ class DebtsDao extends DatabaseAccessor<AppDatabase> with _$DebtsDaoMixin {
           occurredAt: occurredAt,
           dueDate: Value(dueDate == null ? null : Dates.day(dueDate)),
           note: Value(note.trim()),
+          splitId: Value(splitId),
         ));
         if (walletId != null) {
           await _insertTx(direction, name.trim(), amount, walletId, occurredAt, debtId: id);

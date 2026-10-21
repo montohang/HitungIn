@@ -52,6 +52,10 @@ abstract final class SettingKeys {
   static const String recapWeekly = 'recap.weekly';
   static const String recapEvening = 'recap.evening';
   static const String recapDismissed = 'recap.dismissed';
+
+  /// Info transfer patungan terakhir ("BCA 123… a.n. …") dan apakah disertakan (P3c).
+  static const String splitTransfer = 'split.transfer';
+  static const String splitTransferOn = 'split.transferOn';
 }
 
 @DriftAccessor(tables: [Settings])

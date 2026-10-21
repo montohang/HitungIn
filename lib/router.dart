@@ -9,6 +9,8 @@ import 'core/utils/date_format.dart';
 import 'features/debts/debts_screen.dart';
 import 'features/goals/goal_achieved_screen.dart';
 import 'features/goals/goals_screen.dart';
+import 'features/splits/split_form_screen.dart';
+import 'features/splits/splits_screen.dart';
 import 'features/recap/recap_screen.dart';
 import 'features/widgets/widget_settings_screen.dart';
 import 'features/home/home_layout_screen.dart';
@@ -116,6 +118,30 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.rekap,
         parentNavigatorKey: _rootKey,
         builder: (_, state) => RecapScreen(initialOffset: int.tryParse(state.uri.queryParameters['minggu'] ?? '') ?? 0),
+      ),
+      GoRoute(
+        path: Routes.patungan,
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const SplitsScreen(),
+        routes: [
+          GoRoute(
+            path: 'baru',
+            parentNavigatorKey: _rootKey,
+            builder: (_, __) => const SplitFormScreen(),
+          ),
+          GoRoute(
+            path: ':id',
+            parentNavigatorKey: _rootKey,
+            builder: (_, state) => SplitDetailScreen(id: int.parse(state.pathParameters['id']!)),
+            routes: [
+              GoRoute(
+                path: 'ubah',
+                parentNavigatorKey: _rootKey,
+                builder: (_, state) => SplitFormScreen(editId: int.parse(state.pathParameters['id']!)),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: Routes.target,

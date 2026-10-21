@@ -11,11 +11,11 @@ void main() {
 
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  // AppDatabase selalu bermigrasi ke versi terbaru, jadi validasi ke v6.
-  test('v1 → v6: skema hasil migrasi sama dengan skema baru', () async {
+  // AppDatabase selalu bermigrasi ke versi terbaru, jadi validasi ke v7.
+  test('v1 → v7: skema hasil migrasi sama dengan skema baru', () async {
     final schema = await verifier.schemaAt(1);
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
     await db.close();
   });
 
@@ -49,10 +49,10 @@ void main() {
     await db.close();
   });
 
-  test('v2 → v6: skema hasil migrasi sama dengan skema baru', () async {
+  test('v2 → v7: skema hasil migrasi sama dengan skema baru', () async {
     final schema = await verifier.schemaAt(2);
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
     await db.close();
   });
 
@@ -80,7 +80,7 @@ void main() {
       ..execute("INSERT INTO categories (id, name, kind, icon, keywords, sort_order, archived) "
           "VALUES (1, 'Makan & Minum', 'pengeluaran', 'food', 'makan', 0, 0), (2, 'Kucing', 'pengeluaran', 'fun', '', 1, 0)");
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
     final cats = {for (final c in await db.select(db.categories).get()) c.name: c};
     expect((cats['Makan & Minum']!.color, cats['Makan & Minum']!.subs), (0, 'Kopi,Makan siang,Jajan'));
     expect((cats['Kucing']!.color, cats['Kucing']!.subs), (0, ''));
@@ -100,7 +100,7 @@ void main() {
           "VALUES ('pengeluaran', 25000, 1, 'Kopi', '', 1759300000, 1759300000, 1759300000)");
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
     final Bill kos = (await db.select(db.bills).get()).single;
     expect((kos.installmentTotal, kos.installmentPaid), (null, 0));
     expect((await db.walletsDao.watchBalances().first).single.balance, 475000);
@@ -120,12 +120,41 @@ void main() {
           "VALUES (1, 'piutang', 'Budi', 200000, 1, 1759300000, '', 1759300000)");
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 6);
+    await verifier.migrateAndValidate(db, 7);
     expect((await db.debtsDao.watchAll().first).single.debt.name, 'Budi');
     final int id = await db.goalsDao.add(name: 'Dana darurat', target: 1000000);
     await db.goalsDao.deposit(id, amount: 300000, at: DateTime(2026, 10, 20), walletId: 1);
     expect((await db.goalsDao.byId(id))!.deposits.single.amount, 300000);
     expect((await db.walletsDao.watchBalances().first).single.balance, 2000000);
+    await db.close();
+  });
+
+  test('v6 → v7: utang & transaksi lama utuh, patungan langsung bisa dipakai', () async {
+    final schema = await verifier.schemaAt(6);
+    schema.rawDatabase
+      ..execute("INSERT INTO wallets (id, name, type, initial_balance, icon, color, sort_order, archived, created_at) "
+          "VALUES (1, 'BCA', 'bank', 1000000, 'bank', 0, 0, 0, 1759000000)")
+      ..execute("INSERT INTO debts (id, direction, name, amount, wallet_id, occurred_at, note, created_at) "
+          "VALUES (1, 'piutang', 'Budi', 200000, 1, 1759300000, '', 1759300000)")
+      ..execute("INSERT INTO transactions (kind, amount, wallet_id, note, sub, occurred_at, created_at, updated_at, debt_id) "
+          "VALUES ('utangKeluar', 200000, 1, 'Dipinjamkan ke Budi', '', 1759300000, 1759300000, 1759300000, 1)");
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 7);
+    expect((await db.debtsDao.watchAll().first).single.debt.splitId, isNull);
+    expect((await db.walletsDao.watchBalances().first).single.balance, 800000);
+    await db.splitsDao.save(
+      title: 'Makan',
+      mode: SplitMode.rata,
+      total: 100000,
+      walletId: 1,
+      occurredAt: DateTime(2026, 10, 21),
+      members: [
+        (name: 'Aku', isMe: true, payer: true, share: 50000),
+        (name: 'Sinta', isMe: false, payer: false, share: 50000),
+      ],
+    );
+    expect((await db.walletsDao.watchBalances().first).single.balance, 700000);
     await db.close();
   });
 }

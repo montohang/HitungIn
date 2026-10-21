@@ -107,6 +107,12 @@ abstract final class Routes {
   static const String target = '/target';
   static String targetDetail(int id) => '/target/$id';
   static String targetTercapai(int id) => '/target/$id/tercapai';
+
+  /// Patungan (P3c): daftar, form baru, detail, ubah.
+  static const String patungan = '/patungan';
+  static const String patunganBaru = '/patungan/baru';
+  static String patunganDetail(int id) => '/patungan/$id';
+  static String patunganUbah(int id) => '/patungan/$id/ubah';
   static const String widget = '/widget';
   static const String aturBeranda = '/pengaturan/beranda';
   static const String rekap = '/rekap';

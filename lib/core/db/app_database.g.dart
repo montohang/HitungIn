@@ -2178,6 +2178,599 @@ class RecurringTxsCompanion extends UpdateCompanion<RecurringTx> {
   }
 }
 
+class $SplitsTable extends Splits with TableInfo<$SplitsTable, Split> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SplitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 60),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<SplitMode, String> mode =
+      GeneratedColumn<String>('mode', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<SplitMode>($SplitsTable.$convertermode);
+  static const VerificationMeta _totalMeta = const VerificationMeta('total');
+  @override
+  late final GeneratedColumn<int> total = GeneratedColumn<int>(
+      'total', aliasedName, false,
+      check: () => ComparableExpr(total).isBiggerThanValue(0),
+      type: DriftSqlType.int,
+      requiredDuringInsert: true);
+  static const VerificationMeta _walletIdMeta =
+      const VerificationMeta('walletId');
+  @override
+  late final GeneratedColumn<int> walletId = GeneratedColumn<int>(
+      'wallet_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES wallets (id)'));
+  static const VerificationMeta _categoryIdMeta =
+      const VerificationMeta('categoryId');
+  @override
+  late final GeneratedColumn<int> categoryId = GeneratedColumn<int>(
+      'category_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES categories (id) ON DELETE SET NULL'));
+  static const VerificationMeta _taxPermilleMeta =
+      const VerificationMeta('taxPermille');
+  @override
+  late final GeneratedColumn<int> taxPermille = GeneratedColumn<int>(
+      'tax_permille', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _servicePermilleMeta =
+      const VerificationMeta('servicePermille');
+  @override
+  late final GeneratedColumn<int> servicePermille = GeneratedColumn<int>(
+      'service_permille', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _extraFeeMeta =
+      const VerificationMeta('extraFee');
+  @override
+  late final GeneratedColumn<int> extraFee = GeneratedColumn<int>(
+      'extra_fee', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _discountMeta =
+      const VerificationMeta('discount');
+  @override
+  late final GeneratedColumn<int> discount = GeneratedColumn<int>(
+      'discount', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _occurredAtMeta =
+      const VerificationMeta('occurredAt');
+  @override
+  late final GeneratedColumn<DateTime> occurredAt = GeneratedColumn<DateTime>(
+      'occurred_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        title,
+        mode,
+        total,
+        walletId,
+        categoryId,
+        taxPermille,
+        servicePermille,
+        extraFee,
+        discount,
+        occurredAt,
+        createdAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'splits';
+  @override
+  VerificationContext validateIntegrity(Insertable<Split> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('total')) {
+      context.handle(
+          _totalMeta, total.isAcceptableOrUnknown(data['total']!, _totalMeta));
+    } else if (isInserting) {
+      context.missing(_totalMeta);
+    }
+    if (data.containsKey('wallet_id')) {
+      context.handle(_walletIdMeta,
+          walletId.isAcceptableOrUnknown(data['wallet_id']!, _walletIdMeta));
+    } else if (isInserting) {
+      context.missing(_walletIdMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+          _categoryIdMeta,
+          categoryId.isAcceptableOrUnknown(
+              data['category_id']!, _categoryIdMeta));
+    }
+    if (data.containsKey('tax_permille')) {
+      context.handle(
+          _taxPermilleMeta,
+          taxPermille.isAcceptableOrUnknown(
+              data['tax_permille']!, _taxPermilleMeta));
+    }
+    if (data.containsKey('service_permille')) {
+      context.handle(
+          _servicePermilleMeta,
+          servicePermille.isAcceptableOrUnknown(
+              data['service_permille']!, _servicePermilleMeta));
+    }
+    if (data.containsKey('extra_fee')) {
+      context.handle(_extraFeeMeta,
+          extraFee.isAcceptableOrUnknown(data['extra_fee']!, _extraFeeMeta));
+    }
+    if (data.containsKey('discount')) {
+      context.handle(_discountMeta,
+          discount.isAcceptableOrUnknown(data['discount']!, _discountMeta));
+    }
+    if (data.containsKey('occurred_at')) {
+      context.handle(
+          _occurredAtMeta,
+          occurredAt.isAcceptableOrUnknown(
+              data['occurred_at']!, _occurredAtMeta));
+    } else if (isInserting) {
+      context.missing(_occurredAtMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Split map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Split(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      mode: $SplitsTable.$convertermode.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mode'])!),
+      total: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}total'])!,
+      walletId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}wallet_id'])!,
+      categoryId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}category_id']),
+      taxPermille: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}tax_permille'])!,
+      servicePermille: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}service_permille'])!,
+      extraFee: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}extra_fee'])!,
+      discount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}discount'])!,
+      occurredAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}occurred_at'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $SplitsTable createAlias(String alias) {
+    return $SplitsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<SplitMode, String, String> $convertermode =
+      const EnumNameConverter<SplitMode>(SplitMode.values);
+}
+
+class Split extends DataClass implements Insertable<Split> {
+  final int id;
+  final String title;
+  final SplitMode mode;
+  final int total;
+
+  /// Dompet yang dipakai: membayar (aku yang bayar) atau tempat utangku dicatat.
+  final int walletId;
+  final int? categoryId;
+
+  /// Per menu: pajak & service dalam persen ×10 (100 = 10%), ongkir, diskon.
+  final int taxPermille;
+  final int servicePermille;
+  final int extraFee;
+  final int discount;
+  final DateTime occurredAt;
+  final DateTime createdAt;
+  const Split(
+      {required this.id,
+      required this.title,
+      required this.mode,
+      required this.total,
+      required this.walletId,
+      this.categoryId,
+      required this.taxPermille,
+      required this.servicePermille,
+      required this.extraFee,
+      required this.discount,
+      required this.occurredAt,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['title'] = Variable<String>(title);
+    {
+      map['mode'] = Variable<String>($SplitsTable.$convertermode.toSql(mode));
+    }
+    map['total'] = Variable<int>(total);
+    map['wallet_id'] = Variable<int>(walletId);
+    if (!nullToAbsent || categoryId != null) {
+      map['category_id'] = Variable<int>(categoryId);
+    }
+    map['tax_permille'] = Variable<int>(taxPermille);
+    map['service_permille'] = Variable<int>(servicePermille);
+    map['extra_fee'] = Variable<int>(extraFee);
+    map['discount'] = Variable<int>(discount);
+    map['occurred_at'] = Variable<DateTime>(occurredAt);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SplitsCompanion toCompanion(bool nullToAbsent) {
+    return SplitsCompanion(
+      id: Value(id),
+      title: Value(title),
+      mode: Value(mode),
+      total: Value(total),
+      walletId: Value(walletId),
+      categoryId: categoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryId),
+      taxPermille: Value(taxPermille),
+      servicePermille: Value(servicePermille),
+      extraFee: Value(extraFee),
+      discount: Value(discount),
+      occurredAt: Value(occurredAt),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory Split.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Split(
+      id: serializer.fromJson<int>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      mode: $SplitsTable.$convertermode
+          .fromJson(serializer.fromJson<String>(json['mode'])),
+      total: serializer.fromJson<int>(json['total']),
+      walletId: serializer.fromJson<int>(json['walletId']),
+      categoryId: serializer.fromJson<int?>(json['categoryId']),
+      taxPermille: serializer.fromJson<int>(json['taxPermille']),
+      servicePermille: serializer.fromJson<int>(json['servicePermille']),
+      extraFee: serializer.fromJson<int>(json['extraFee']),
+      discount: serializer.fromJson<int>(json['discount']),
+      occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'title': serializer.toJson<String>(title),
+      'mode':
+          serializer.toJson<String>($SplitsTable.$convertermode.toJson(mode)),
+      'total': serializer.toJson<int>(total),
+      'walletId': serializer.toJson<int>(walletId),
+      'categoryId': serializer.toJson<int?>(categoryId),
+      'taxPermille': serializer.toJson<int>(taxPermille),
+      'servicePermille': serializer.toJson<int>(servicePermille),
+      'extraFee': serializer.toJson<int>(extraFee),
+      'discount': serializer.toJson<int>(discount),
+      'occurredAt': serializer.toJson<DateTime>(occurredAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  Split copyWith(
+          {int? id,
+          String? title,
+          SplitMode? mode,
+          int? total,
+          int? walletId,
+          Value<int?> categoryId = const Value.absent(),
+          int? taxPermille,
+          int? servicePermille,
+          int? extraFee,
+          int? discount,
+          DateTime? occurredAt,
+          DateTime? createdAt}) =>
+      Split(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        mode: mode ?? this.mode,
+        total: total ?? this.total,
+        walletId: walletId ?? this.walletId,
+        categoryId: categoryId.present ? categoryId.value : this.categoryId,
+        taxPermille: taxPermille ?? this.taxPermille,
+        servicePermille: servicePermille ?? this.servicePermille,
+        extraFee: extraFee ?? this.extraFee,
+        discount: discount ?? this.discount,
+        occurredAt: occurredAt ?? this.occurredAt,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  Split copyWithCompanion(SplitsCompanion data) {
+    return Split(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      mode: data.mode.present ? data.mode.value : this.mode,
+      total: data.total.present ? data.total.value : this.total,
+      walletId: data.walletId.present ? data.walletId.value : this.walletId,
+      categoryId:
+          data.categoryId.present ? data.categoryId.value : this.categoryId,
+      taxPermille:
+          data.taxPermille.present ? data.taxPermille.value : this.taxPermille,
+      servicePermille: data.servicePermille.present
+          ? data.servicePermille.value
+          : this.servicePermille,
+      extraFee: data.extraFee.present ? data.extraFee.value : this.extraFee,
+      discount: data.discount.present ? data.discount.value : this.discount,
+      occurredAt:
+          data.occurredAt.present ? data.occurredAt.value : this.occurredAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Split(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('mode: $mode, ')
+          ..write('total: $total, ')
+          ..write('walletId: $walletId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('taxPermille: $taxPermille, ')
+          ..write('servicePermille: $servicePermille, ')
+          ..write('extraFee: $extraFee, ')
+          ..write('discount: $discount, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, title, mode, total, walletId, categoryId,
+      taxPermille, servicePermille, extraFee, discount, occurredAt, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Split &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.mode == this.mode &&
+          other.total == this.total &&
+          other.walletId == this.walletId &&
+          other.categoryId == this.categoryId &&
+          other.taxPermille == this.taxPermille &&
+          other.servicePermille == this.servicePermille &&
+          other.extraFee == this.extraFee &&
+          other.discount == this.discount &&
+          other.occurredAt == this.occurredAt &&
+          other.createdAt == this.createdAt);
+}
+
+class SplitsCompanion extends UpdateCompanion<Split> {
+  final Value<int> id;
+  final Value<String> title;
+  final Value<SplitMode> mode;
+  final Value<int> total;
+  final Value<int> walletId;
+  final Value<int?> categoryId;
+  final Value<int> taxPermille;
+  final Value<int> servicePermille;
+  final Value<int> extraFee;
+  final Value<int> discount;
+  final Value<DateTime> occurredAt;
+  final Value<DateTime> createdAt;
+  const SplitsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.total = const Value.absent(),
+    this.walletId = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.taxPermille = const Value.absent(),
+    this.servicePermille = const Value.absent(),
+    this.extraFee = const Value.absent(),
+    this.discount = const Value.absent(),
+    this.occurredAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  SplitsCompanion.insert({
+    this.id = const Value.absent(),
+    required String title,
+    required SplitMode mode,
+    required int total,
+    required int walletId,
+    this.categoryId = const Value.absent(),
+    this.taxPermille = const Value.absent(),
+    this.servicePermille = const Value.absent(),
+    this.extraFee = const Value.absent(),
+    this.discount = const Value.absent(),
+    required DateTime occurredAt,
+    this.createdAt = const Value.absent(),
+  })  : title = Value(title),
+        mode = Value(mode),
+        total = Value(total),
+        walletId = Value(walletId),
+        occurredAt = Value(occurredAt);
+  static Insertable<Split> custom({
+    Expression<int>? id,
+    Expression<String>? title,
+    Expression<String>? mode,
+    Expression<int>? total,
+    Expression<int>? walletId,
+    Expression<int>? categoryId,
+    Expression<int>? taxPermille,
+    Expression<int>? servicePermille,
+    Expression<int>? extraFee,
+    Expression<int>? discount,
+    Expression<DateTime>? occurredAt,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (mode != null) 'mode': mode,
+      if (total != null) 'total': total,
+      if (walletId != null) 'wallet_id': walletId,
+      if (categoryId != null) 'category_id': categoryId,
+      if (taxPermille != null) 'tax_permille': taxPermille,
+      if (servicePermille != null) 'service_permille': servicePermille,
+      if (extraFee != null) 'extra_fee': extraFee,
+      if (discount != null) 'discount': discount,
+      if (occurredAt != null) 'occurred_at': occurredAt,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  SplitsCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? title,
+      Value<SplitMode>? mode,
+      Value<int>? total,
+      Value<int>? walletId,
+      Value<int?>? categoryId,
+      Value<int>? taxPermille,
+      Value<int>? servicePermille,
+      Value<int>? extraFee,
+      Value<int>? discount,
+      Value<DateTime>? occurredAt,
+      Value<DateTime>? createdAt}) {
+    return SplitsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      mode: mode ?? this.mode,
+      total: total ?? this.total,
+      walletId: walletId ?? this.walletId,
+      categoryId: categoryId ?? this.categoryId,
+      taxPermille: taxPermille ?? this.taxPermille,
+      servicePermille: servicePermille ?? this.servicePermille,
+      extraFee: extraFee ?? this.extraFee,
+      discount: discount ?? this.discount,
+      occurredAt: occurredAt ?? this.occurredAt,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (mode.present) {
+      map['mode'] =
+          Variable<String>($SplitsTable.$convertermode.toSql(mode.value));
+    }
+    if (total.present) {
+      map['total'] = Variable<int>(total.value);
+    }
+    if (walletId.present) {
+      map['wallet_id'] = Variable<int>(walletId.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<int>(categoryId.value);
+    }
+    if (taxPermille.present) {
+      map['tax_permille'] = Variable<int>(taxPermille.value);
+    }
+    if (servicePermille.present) {
+      map['service_permille'] = Variable<int>(servicePermille.value);
+    }
+    if (extraFee.present) {
+      map['extra_fee'] = Variable<int>(extraFee.value);
+    }
+    if (discount.present) {
+      map['discount'] = Variable<int>(discount.value);
+    }
+    if (occurredAt.present) {
+      map['occurred_at'] = Variable<DateTime>(occurredAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SplitsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('mode: $mode, ')
+          ..write('total: $total, ')
+          ..write('walletId: $walletId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('taxPermille: $taxPermille, ')
+          ..write('servicePermille: $servicePermille, ')
+          ..write('extraFee: $extraFee, ')
+          ..write('discount: $discount, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $DebtsTable extends Debts with TableInfo<$DebtsTable, Debt> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -2240,6 +2833,15 @@ class $DebtsTable extends Debts with TableInfo<$DebtsTable, Debt> {
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant(''));
+  static const VerificationMeta _splitIdMeta =
+      const VerificationMeta('splitId');
+  @override
+  late final GeneratedColumn<int> splitId = GeneratedColumn<int>(
+      'split_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES splits (id) ON DELETE CASCADE'));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -2258,6 +2860,7 @@ class $DebtsTable extends Debts with TableInfo<$DebtsTable, Debt> {
         occurredAt,
         dueDate,
         note,
+        splitId,
         createdAt
       ];
   @override
@@ -2305,6 +2908,10 @@ class $DebtsTable extends Debts with TableInfo<$DebtsTable, Debt> {
       context.handle(
           _noteMeta, note.isAcceptableOrUnknown(data['note']!, _noteMeta));
     }
+    if (data.containsKey('split_id')) {
+      context.handle(_splitIdMeta,
+          splitId.isAcceptableOrUnknown(data['split_id']!, _splitIdMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -2335,6 +2942,8 @@ class $DebtsTable extends Debts with TableInfo<$DebtsTable, Debt> {
           .read(DriftSqlType.dateTime, data['${effectivePrefix}due_date']),
       note: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}note'])!,
+      splitId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}split_id']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -2360,6 +2969,9 @@ class Debt extends DataClass implements Insertable<Debt> {
   /// Jatuh tempo (tanggal saja), opsional.
   final DateTime? dueDate;
   final String note;
+
+  /// Patungan asal (v7); ikut terhapus bersama patungannya.
+  final int? splitId;
   final DateTime createdAt;
   const Debt(
       {required this.id,
@@ -2370,6 +2982,7 @@ class Debt extends DataClass implements Insertable<Debt> {
       required this.occurredAt,
       this.dueDate,
       required this.note,
+      this.splitId,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2389,6 +3002,9 @@ class Debt extends DataClass implements Insertable<Debt> {
       map['due_date'] = Variable<DateTime>(dueDate);
     }
     map['note'] = Variable<String>(note);
+    if (!nullToAbsent || splitId != null) {
+      map['split_id'] = Variable<int>(splitId);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -2407,6 +3023,9 @@ class Debt extends DataClass implements Insertable<Debt> {
           ? const Value.absent()
           : Value(dueDate),
       note: Value(note),
+      splitId: splitId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(splitId),
       createdAt: Value(createdAt),
     );
   }
@@ -2424,6 +3043,7 @@ class Debt extends DataClass implements Insertable<Debt> {
       occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
       dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
       note: serializer.fromJson<String>(json['note']),
+      splitId: serializer.fromJson<int?>(json['splitId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -2440,6 +3060,7 @@ class Debt extends DataClass implements Insertable<Debt> {
       'occurredAt': serializer.toJson<DateTime>(occurredAt),
       'dueDate': serializer.toJson<DateTime?>(dueDate),
       'note': serializer.toJson<String>(note),
+      'splitId': serializer.toJson<int?>(splitId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -2453,6 +3074,7 @@ class Debt extends DataClass implements Insertable<Debt> {
           DateTime? occurredAt,
           Value<DateTime?> dueDate = const Value.absent(),
           String? note,
+          Value<int?> splitId = const Value.absent(),
           DateTime? createdAt}) =>
       Debt(
         id: id ?? this.id,
@@ -2463,6 +3085,7 @@ class Debt extends DataClass implements Insertable<Debt> {
         occurredAt: occurredAt ?? this.occurredAt,
         dueDate: dueDate.present ? dueDate.value : this.dueDate,
         note: note ?? this.note,
+        splitId: splitId.present ? splitId.value : this.splitId,
         createdAt: createdAt ?? this.createdAt,
       );
   Debt copyWithCompanion(DebtsCompanion data) {
@@ -2476,6 +3099,7 @@ class Debt extends DataClass implements Insertable<Debt> {
           data.occurredAt.present ? data.occurredAt.value : this.occurredAt,
       dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
       note: data.note.present ? data.note.value : this.note,
+      splitId: data.splitId.present ? data.splitId.value : this.splitId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -2491,6 +3115,7 @@ class Debt extends DataClass implements Insertable<Debt> {
           ..write('occurredAt: $occurredAt, ')
           ..write('dueDate: $dueDate, ')
           ..write('note: $note, ')
+          ..write('splitId: $splitId, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -2498,7 +3123,7 @@ class Debt extends DataClass implements Insertable<Debt> {
 
   @override
   int get hashCode => Object.hash(id, direction, name, amount, walletId,
-      occurredAt, dueDate, note, createdAt);
+      occurredAt, dueDate, note, splitId, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2511,6 +3136,7 @@ class Debt extends DataClass implements Insertable<Debt> {
           other.occurredAt == this.occurredAt &&
           other.dueDate == this.dueDate &&
           other.note == this.note &&
+          other.splitId == this.splitId &&
           other.createdAt == this.createdAt);
 }
 
@@ -2523,6 +3149,7 @@ class DebtsCompanion extends UpdateCompanion<Debt> {
   final Value<DateTime> occurredAt;
   final Value<DateTime?> dueDate;
   final Value<String> note;
+  final Value<int?> splitId;
   final Value<DateTime> createdAt;
   const DebtsCompanion({
     this.id = const Value.absent(),
@@ -2533,6 +3160,7 @@ class DebtsCompanion extends UpdateCompanion<Debt> {
     this.occurredAt = const Value.absent(),
     this.dueDate = const Value.absent(),
     this.note = const Value.absent(),
+    this.splitId = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   DebtsCompanion.insert({
@@ -2544,6 +3172,7 @@ class DebtsCompanion extends UpdateCompanion<Debt> {
     required DateTime occurredAt,
     this.dueDate = const Value.absent(),
     this.note = const Value.absent(),
+    this.splitId = const Value.absent(),
     this.createdAt = const Value.absent(),
   })  : direction = Value(direction),
         name = Value(name),
@@ -2558,6 +3187,7 @@ class DebtsCompanion extends UpdateCompanion<Debt> {
     Expression<DateTime>? occurredAt,
     Expression<DateTime>? dueDate,
     Expression<String>? note,
+    Expression<int>? splitId,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -2569,6 +3199,7 @@ class DebtsCompanion extends UpdateCompanion<Debt> {
       if (occurredAt != null) 'occurred_at': occurredAt,
       if (dueDate != null) 'due_date': dueDate,
       if (note != null) 'note': note,
+      if (splitId != null) 'split_id': splitId,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -2582,6 +3213,7 @@ class DebtsCompanion extends UpdateCompanion<Debt> {
       Value<DateTime>? occurredAt,
       Value<DateTime?>? dueDate,
       Value<String>? note,
+      Value<int?>? splitId,
       Value<DateTime>? createdAt}) {
     return DebtsCompanion(
       id: id ?? this.id,
@@ -2592,6 +3224,7 @@ class DebtsCompanion extends UpdateCompanion<Debt> {
       occurredAt: occurredAt ?? this.occurredAt,
       dueDate: dueDate ?? this.dueDate,
       note: note ?? this.note,
+      splitId: splitId ?? this.splitId,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -2624,6 +3257,9 @@ class DebtsCompanion extends UpdateCompanion<Debt> {
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
+    if (splitId.present) {
+      map['split_id'] = Variable<int>(splitId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2641,6 +3277,7 @@ class DebtsCompanion extends UpdateCompanion<Debt> {
           ..write('occurredAt: $occurredAt, ')
           ..write('dueDate: $dueDate, ')
           ..write('note: $note, ')
+          ..write('splitId: $splitId, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -3091,6 +3728,15 @@ class $TransactionsTable extends Transactions
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES debt_payments (id) ON DELETE CASCADE'));
+  static const VerificationMeta _splitIdMeta =
+      const VerificationMeta('splitId');
+  @override
+  late final GeneratedColumn<int> splitId = GeneratedColumn<int>(
+      'split_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES splits (id) ON DELETE CASCADE'));
   static const VerificationMeta _occurredAtMeta =
       const VerificationMeta('occurredAt');
   @override
@@ -3127,6 +3773,7 @@ class $TransactionsTable extends Transactions
         recurringId,
         debtId,
         debtPaymentId,
+        splitId,
         occurredAt,
         createdAt,
         updatedAt
@@ -3196,6 +3843,10 @@ class $TransactionsTable extends Transactions
           debtPaymentId.isAcceptableOrUnknown(
               data['debt_payment_id']!, _debtPaymentIdMeta));
     }
+    if (data.containsKey('split_id')) {
+      context.handle(_splitIdMeta,
+          splitId.isAcceptableOrUnknown(data['split_id']!, _splitIdMeta));
+    }
     if (data.containsKey('occurred_at')) {
       context.handle(
           _occurredAtMeta,
@@ -3246,6 +3897,8 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.int, data['${effectivePrefix}debt_id']),
       debtPaymentId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}debt_payment_id']),
+      splitId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}split_id']),
       occurredAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}occurred_at'])!,
       createdAt: attachedDatabase.typeMapping
@@ -3295,6 +3948,9 @@ class Txn extends DataClass implements Insertable<Txn> {
 
   /// Pembayaran utang asal (v5); kosong = transaksi pinjaman awal.
   final int? debtPaymentId;
+
+  /// Patungan asal (v7): pengeluaran sebesar bagianku. Ikut terhapus bersama patungannya.
+  final int? splitId;
   final DateTime occurredAt;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -3311,6 +3967,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       this.recurringId,
       this.debtId,
       this.debtPaymentId,
+      this.splitId,
       required this.occurredAt,
       required this.createdAt,
       required this.updatedAt});
@@ -3344,6 +4001,9 @@ class Txn extends DataClass implements Insertable<Txn> {
     if (!nullToAbsent || debtPaymentId != null) {
       map['debt_payment_id'] = Variable<int>(debtPaymentId);
     }
+    if (!nullToAbsent || splitId != null) {
+      map['split_id'] = Variable<int>(splitId);
+    }
     map['occurred_at'] = Variable<DateTime>(occurredAt);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -3374,6 +4034,9 @@ class Txn extends DataClass implements Insertable<Txn> {
       debtPaymentId: debtPaymentId == null && nullToAbsent
           ? const Value.absent()
           : Value(debtPaymentId),
+      splitId: splitId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(splitId),
       occurredAt: Value(occurredAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -3397,6 +4060,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       recurringId: serializer.fromJson<int?>(json['recurringId']),
       debtId: serializer.fromJson<int?>(json['debtId']),
       debtPaymentId: serializer.fromJson<int?>(json['debtPaymentId']),
+      splitId: serializer.fromJson<int?>(json['splitId']),
       occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -3419,6 +4083,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       'recurringId': serializer.toJson<int?>(recurringId),
       'debtId': serializer.toJson<int?>(debtId),
       'debtPaymentId': serializer.toJson<int?>(debtPaymentId),
+      'splitId': serializer.toJson<int?>(splitId),
       'occurredAt': serializer.toJson<DateTime>(occurredAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -3438,6 +4103,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           Value<int?> recurringId = const Value.absent(),
           Value<int?> debtId = const Value.absent(),
           Value<int?> debtPaymentId = const Value.absent(),
+          Value<int?> splitId = const Value.absent(),
           DateTime? occurredAt,
           DateTime? createdAt,
           DateTime? updatedAt}) =>
@@ -3455,6 +4121,7 @@ class Txn extends DataClass implements Insertable<Txn> {
         debtId: debtId.present ? debtId.value : this.debtId,
         debtPaymentId:
             debtPaymentId.present ? debtPaymentId.value : this.debtPaymentId,
+        splitId: splitId.present ? splitId.value : this.splitId,
         occurredAt: occurredAt ?? this.occurredAt,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -3478,6 +4145,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       debtPaymentId: data.debtPaymentId.present
           ? data.debtPaymentId.value
           : this.debtPaymentId,
+      splitId: data.splitId.present ? data.splitId.value : this.splitId,
       occurredAt:
           data.occurredAt.present ? data.occurredAt.value : this.occurredAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -3500,6 +4168,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           ..write('recurringId: $recurringId, ')
           ..write('debtId: $debtId, ')
           ..write('debtPaymentId: $debtPaymentId, ')
+          ..write('splitId: $splitId, ')
           ..write('occurredAt: $occurredAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -3521,6 +4190,7 @@ class Txn extends DataClass implements Insertable<Txn> {
       recurringId,
       debtId,
       debtPaymentId,
+      splitId,
       occurredAt,
       createdAt,
       updatedAt);
@@ -3540,6 +4210,7 @@ class Txn extends DataClass implements Insertable<Txn> {
           other.recurringId == this.recurringId &&
           other.debtId == this.debtId &&
           other.debtPaymentId == this.debtPaymentId &&
+          other.splitId == this.splitId &&
           other.occurredAt == this.occurredAt &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -3558,6 +4229,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
   final Value<int?> recurringId;
   final Value<int?> debtId;
   final Value<int?> debtPaymentId;
+  final Value<int?> splitId;
   final Value<DateTime> occurredAt;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -3574,6 +4246,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     this.recurringId = const Value.absent(),
     this.debtId = const Value.absent(),
     this.debtPaymentId = const Value.absent(),
+    this.splitId = const Value.absent(),
     this.occurredAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -3591,6 +4264,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     this.recurringId = const Value.absent(),
     this.debtId = const Value.absent(),
     this.debtPaymentId = const Value.absent(),
+    this.splitId = const Value.absent(),
     required DateTime occurredAt,
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -3611,6 +4285,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     Expression<int>? recurringId,
     Expression<int>? debtId,
     Expression<int>? debtPaymentId,
+    Expression<int>? splitId,
     Expression<DateTime>? occurredAt,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -3628,6 +4303,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       if (recurringId != null) 'recurring_id': recurringId,
       if (debtId != null) 'debt_id': debtId,
       if (debtPaymentId != null) 'debt_payment_id': debtPaymentId,
+      if (splitId != null) 'split_id': splitId,
       if (occurredAt != null) 'occurred_at': occurredAt,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -3647,6 +4323,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       Value<int?>? recurringId,
       Value<int?>? debtId,
       Value<int?>? debtPaymentId,
+      Value<int?>? splitId,
       Value<DateTime>? occurredAt,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt}) {
@@ -3663,6 +4340,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
       recurringId: recurringId ?? this.recurringId,
       debtId: debtId ?? this.debtId,
       debtPaymentId: debtPaymentId ?? this.debtPaymentId,
+      splitId: splitId ?? this.splitId,
       occurredAt: occurredAt ?? this.occurredAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -3709,6 +4387,9 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
     if (debtPaymentId.present) {
       map['debt_payment_id'] = Variable<int>(debtPaymentId.value);
     }
+    if (splitId.present) {
+      map['split_id'] = Variable<int>(splitId.value);
+    }
     if (occurredAt.present) {
       map['occurred_at'] = Variable<DateTime>(occurredAt.value);
     }
@@ -3736,6 +4417,7 @@ class TransactionsCompanion extends UpdateCompanion<Txn> {
           ..write('recurringId: $recurringId, ')
           ..write('debtId: $debtId, ')
           ..write('debtPaymentId: $debtPaymentId, ')
+          ..write('splitId: $splitId, ')
           ..write('occurredAt: $occurredAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -5180,6 +5862,768 @@ class GoalDepositsCompanion extends UpdateCompanion<GoalDeposit> {
   }
 }
 
+class $SplitMembersTable extends SplitMembers
+    with TableInfo<$SplitMembersTable, SplitMember> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SplitMembersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _splitIdMeta =
+      const VerificationMeta('splitId');
+  @override
+  late final GeneratedColumn<int> splitId = GeneratedColumn<int>(
+      'split_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES splits (id) ON DELETE CASCADE'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 40),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _isMeMeta = const VerificationMeta('isMe');
+  @override
+  late final GeneratedColumn<bool> isMe = GeneratedColumn<bool>(
+      'is_me', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_me" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _payerMeta = const VerificationMeta('payer');
+  @override
+  late final GeneratedColumn<bool> payer = GeneratedColumn<bool>(
+      'payer', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("payer" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _shareMeta = const VerificationMeta('share');
+  @override
+  late final GeneratedColumn<int> share = GeneratedColumn<int>(
+      'share', aliasedName, false,
+      check: () => ComparableExpr(share).isBiggerOrEqualValue(0),
+      type: DriftSqlType.int,
+      requiredDuringInsert: true);
+  static const VerificationMeta _positionMeta =
+      const VerificationMeta('position');
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+      'position', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _debtIdMeta = const VerificationMeta('debtId');
+  @override
+  late final GeneratedColumn<int> debtId = GeneratedColumn<int>(
+      'debt_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES debts (id) ON DELETE SET NULL'));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, splitId, name, isMe, payer, share, position, debtId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'split_members';
+  @override
+  VerificationContext validateIntegrity(Insertable<SplitMember> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('split_id')) {
+      context.handle(_splitIdMeta,
+          splitId.isAcceptableOrUnknown(data['split_id']!, _splitIdMeta));
+    } else if (isInserting) {
+      context.missing(_splitIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('is_me')) {
+      context.handle(
+          _isMeMeta, isMe.isAcceptableOrUnknown(data['is_me']!, _isMeMeta));
+    }
+    if (data.containsKey('payer')) {
+      context.handle(
+          _payerMeta, payer.isAcceptableOrUnknown(data['payer']!, _payerMeta));
+    }
+    if (data.containsKey('share')) {
+      context.handle(
+          _shareMeta, share.isAcceptableOrUnknown(data['share']!, _shareMeta));
+    } else if (isInserting) {
+      context.missing(_shareMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(_positionMeta,
+          position.isAcceptableOrUnknown(data['position']!, _positionMeta));
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    if (data.containsKey('debt_id')) {
+      context.handle(_debtIdMeta,
+          debtId.isAcceptableOrUnknown(data['debt_id']!, _debtIdMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SplitMember map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SplitMember(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      splitId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}split_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      isMe: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_me'])!,
+      payer: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}payer'])!,
+      share: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}share'])!,
+      position: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}position'])!,
+      debtId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}debt_id']),
+    );
+  }
+
+  @override
+  $SplitMembersTable createAlias(String alias) {
+    return $SplitMembersTable(attachedDatabase, alias);
+  }
+}
+
+class SplitMember extends DataClass implements Insertable<SplitMember> {
+  final int id;
+  final int splitId;
+  final String name;
+  final bool isMe;
+  final bool payer;
+  final int share;
+  final int position;
+
+  /// Catatan utang-piutang untuk bagian ini (kosong untuk aku / bila tidak perlu).
+  final int? debtId;
+  const SplitMember(
+      {required this.id,
+      required this.splitId,
+      required this.name,
+      required this.isMe,
+      required this.payer,
+      required this.share,
+      required this.position,
+      this.debtId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['split_id'] = Variable<int>(splitId);
+    map['name'] = Variable<String>(name);
+    map['is_me'] = Variable<bool>(isMe);
+    map['payer'] = Variable<bool>(payer);
+    map['share'] = Variable<int>(share);
+    map['position'] = Variable<int>(position);
+    if (!nullToAbsent || debtId != null) {
+      map['debt_id'] = Variable<int>(debtId);
+    }
+    return map;
+  }
+
+  SplitMembersCompanion toCompanion(bool nullToAbsent) {
+    return SplitMembersCompanion(
+      id: Value(id),
+      splitId: Value(splitId),
+      name: Value(name),
+      isMe: Value(isMe),
+      payer: Value(payer),
+      share: Value(share),
+      position: Value(position),
+      debtId:
+          debtId == null && nullToAbsent ? const Value.absent() : Value(debtId),
+    );
+  }
+
+  factory SplitMember.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SplitMember(
+      id: serializer.fromJson<int>(json['id']),
+      splitId: serializer.fromJson<int>(json['splitId']),
+      name: serializer.fromJson<String>(json['name']),
+      isMe: serializer.fromJson<bool>(json['isMe']),
+      payer: serializer.fromJson<bool>(json['payer']),
+      share: serializer.fromJson<int>(json['share']),
+      position: serializer.fromJson<int>(json['position']),
+      debtId: serializer.fromJson<int?>(json['debtId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'splitId': serializer.toJson<int>(splitId),
+      'name': serializer.toJson<String>(name),
+      'isMe': serializer.toJson<bool>(isMe),
+      'payer': serializer.toJson<bool>(payer),
+      'share': serializer.toJson<int>(share),
+      'position': serializer.toJson<int>(position),
+      'debtId': serializer.toJson<int?>(debtId),
+    };
+  }
+
+  SplitMember copyWith(
+          {int? id,
+          int? splitId,
+          String? name,
+          bool? isMe,
+          bool? payer,
+          int? share,
+          int? position,
+          Value<int?> debtId = const Value.absent()}) =>
+      SplitMember(
+        id: id ?? this.id,
+        splitId: splitId ?? this.splitId,
+        name: name ?? this.name,
+        isMe: isMe ?? this.isMe,
+        payer: payer ?? this.payer,
+        share: share ?? this.share,
+        position: position ?? this.position,
+        debtId: debtId.present ? debtId.value : this.debtId,
+      );
+  SplitMember copyWithCompanion(SplitMembersCompanion data) {
+    return SplitMember(
+      id: data.id.present ? data.id.value : this.id,
+      splitId: data.splitId.present ? data.splitId.value : this.splitId,
+      name: data.name.present ? data.name.value : this.name,
+      isMe: data.isMe.present ? data.isMe.value : this.isMe,
+      payer: data.payer.present ? data.payer.value : this.payer,
+      share: data.share.present ? data.share.value : this.share,
+      position: data.position.present ? data.position.value : this.position,
+      debtId: data.debtId.present ? data.debtId.value : this.debtId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SplitMember(')
+          ..write('id: $id, ')
+          ..write('splitId: $splitId, ')
+          ..write('name: $name, ')
+          ..write('isMe: $isMe, ')
+          ..write('payer: $payer, ')
+          ..write('share: $share, ')
+          ..write('position: $position, ')
+          ..write('debtId: $debtId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, splitId, name, isMe, payer, share, position, debtId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SplitMember &&
+          other.id == this.id &&
+          other.splitId == this.splitId &&
+          other.name == this.name &&
+          other.isMe == this.isMe &&
+          other.payer == this.payer &&
+          other.share == this.share &&
+          other.position == this.position &&
+          other.debtId == this.debtId);
+}
+
+class SplitMembersCompanion extends UpdateCompanion<SplitMember> {
+  final Value<int> id;
+  final Value<int> splitId;
+  final Value<String> name;
+  final Value<bool> isMe;
+  final Value<bool> payer;
+  final Value<int> share;
+  final Value<int> position;
+  final Value<int?> debtId;
+  const SplitMembersCompanion({
+    this.id = const Value.absent(),
+    this.splitId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.isMe = const Value.absent(),
+    this.payer = const Value.absent(),
+    this.share = const Value.absent(),
+    this.position = const Value.absent(),
+    this.debtId = const Value.absent(),
+  });
+  SplitMembersCompanion.insert({
+    this.id = const Value.absent(),
+    required int splitId,
+    required String name,
+    this.isMe = const Value.absent(),
+    this.payer = const Value.absent(),
+    required int share,
+    required int position,
+    this.debtId = const Value.absent(),
+  })  : splitId = Value(splitId),
+        name = Value(name),
+        share = Value(share),
+        position = Value(position);
+  static Insertable<SplitMember> custom({
+    Expression<int>? id,
+    Expression<int>? splitId,
+    Expression<String>? name,
+    Expression<bool>? isMe,
+    Expression<bool>? payer,
+    Expression<int>? share,
+    Expression<int>? position,
+    Expression<int>? debtId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (splitId != null) 'split_id': splitId,
+      if (name != null) 'name': name,
+      if (isMe != null) 'is_me': isMe,
+      if (payer != null) 'payer': payer,
+      if (share != null) 'share': share,
+      if (position != null) 'position': position,
+      if (debtId != null) 'debt_id': debtId,
+    });
+  }
+
+  SplitMembersCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? splitId,
+      Value<String>? name,
+      Value<bool>? isMe,
+      Value<bool>? payer,
+      Value<int>? share,
+      Value<int>? position,
+      Value<int?>? debtId}) {
+    return SplitMembersCompanion(
+      id: id ?? this.id,
+      splitId: splitId ?? this.splitId,
+      name: name ?? this.name,
+      isMe: isMe ?? this.isMe,
+      payer: payer ?? this.payer,
+      share: share ?? this.share,
+      position: position ?? this.position,
+      debtId: debtId ?? this.debtId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (splitId.present) {
+      map['split_id'] = Variable<int>(splitId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (isMe.present) {
+      map['is_me'] = Variable<bool>(isMe.value);
+    }
+    if (payer.present) {
+      map['payer'] = Variable<bool>(payer.value);
+    }
+    if (share.present) {
+      map['share'] = Variable<int>(share.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (debtId.present) {
+      map['debt_id'] = Variable<int>(debtId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SplitMembersCompanion(')
+          ..write('id: $id, ')
+          ..write('splitId: $splitId, ')
+          ..write('name: $name, ')
+          ..write('isMe: $isMe, ')
+          ..write('payer: $payer, ')
+          ..write('share: $share, ')
+          ..write('position: $position, ')
+          ..write('debtId: $debtId')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SplitItemsTable extends SplitItems
+    with TableInfo<$SplitItemsTable, SplitItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SplitItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _splitIdMeta =
+      const VerificationMeta('splitId');
+  @override
+  late final GeneratedColumn<int> splitId = GeneratedColumn<int>(
+      'split_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES splits (id) ON DELETE CASCADE'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 60),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _priceMeta = const VerificationMeta('price');
+  @override
+  late final GeneratedColumn<int> price = GeneratedColumn<int>(
+      'price', aliasedName, false,
+      check: () => ComparableExpr(price).isBiggerThanValue(0),
+      type: DriftSqlType.int,
+      requiredDuringInsert: true);
+  static const VerificationMeta _whoMeta = const VerificationMeta('who');
+  @override
+  late final GeneratedColumn<String> who = GeneratedColumn<String>(
+      'who', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _positionMeta =
+      const VerificationMeta('position');
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+      'position', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, splitId, name, price, who, position];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'split_items';
+  @override
+  VerificationContext validateIntegrity(Insertable<SplitItem> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('split_id')) {
+      context.handle(_splitIdMeta,
+          splitId.isAcceptableOrUnknown(data['split_id']!, _splitIdMeta));
+    } else if (isInserting) {
+      context.missing(_splitIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('price')) {
+      context.handle(
+          _priceMeta, price.isAcceptableOrUnknown(data['price']!, _priceMeta));
+    } else if (isInserting) {
+      context.missing(_priceMeta);
+    }
+    if (data.containsKey('who')) {
+      context.handle(
+          _whoMeta, who.isAcceptableOrUnknown(data['who']!, _whoMeta));
+    } else if (isInserting) {
+      context.missing(_whoMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(_positionMeta,
+          position.isAcceptableOrUnknown(data['position']!, _positionMeta));
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SplitItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SplitItem(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      splitId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}split_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      price: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}price'])!,
+      who: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}who'])!,
+      position: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}position'])!,
+    );
+  }
+
+  @override
+  $SplitItemsTable createAlias(String alias) {
+    return $SplitItemsTable(attachedDatabase, alias);
+  }
+}
+
+class SplitItem extends DataClass implements Insertable<SplitItem> {
+  final int id;
+  final int splitId;
+  final String name;
+  final int price;
+  final String who;
+  final int position;
+  const SplitItem(
+      {required this.id,
+      required this.splitId,
+      required this.name,
+      required this.price,
+      required this.who,
+      required this.position});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['split_id'] = Variable<int>(splitId);
+    map['name'] = Variable<String>(name);
+    map['price'] = Variable<int>(price);
+    map['who'] = Variable<String>(who);
+    map['position'] = Variable<int>(position);
+    return map;
+  }
+
+  SplitItemsCompanion toCompanion(bool nullToAbsent) {
+    return SplitItemsCompanion(
+      id: Value(id),
+      splitId: Value(splitId),
+      name: Value(name),
+      price: Value(price),
+      who: Value(who),
+      position: Value(position),
+    );
+  }
+
+  factory SplitItem.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SplitItem(
+      id: serializer.fromJson<int>(json['id']),
+      splitId: serializer.fromJson<int>(json['splitId']),
+      name: serializer.fromJson<String>(json['name']),
+      price: serializer.fromJson<int>(json['price']),
+      who: serializer.fromJson<String>(json['who']),
+      position: serializer.fromJson<int>(json['position']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'splitId': serializer.toJson<int>(splitId),
+      'name': serializer.toJson<String>(name),
+      'price': serializer.toJson<int>(price),
+      'who': serializer.toJson<String>(who),
+      'position': serializer.toJson<int>(position),
+    };
+  }
+
+  SplitItem copyWith(
+          {int? id,
+          int? splitId,
+          String? name,
+          int? price,
+          String? who,
+          int? position}) =>
+      SplitItem(
+        id: id ?? this.id,
+        splitId: splitId ?? this.splitId,
+        name: name ?? this.name,
+        price: price ?? this.price,
+        who: who ?? this.who,
+        position: position ?? this.position,
+      );
+  SplitItem copyWithCompanion(SplitItemsCompanion data) {
+    return SplitItem(
+      id: data.id.present ? data.id.value : this.id,
+      splitId: data.splitId.present ? data.splitId.value : this.splitId,
+      name: data.name.present ? data.name.value : this.name,
+      price: data.price.present ? data.price.value : this.price,
+      who: data.who.present ? data.who.value : this.who,
+      position: data.position.present ? data.position.value : this.position,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SplitItem(')
+          ..write('id: $id, ')
+          ..write('splitId: $splitId, ')
+          ..write('name: $name, ')
+          ..write('price: $price, ')
+          ..write('who: $who, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, splitId, name, price, who, position);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SplitItem &&
+          other.id == this.id &&
+          other.splitId == this.splitId &&
+          other.name == this.name &&
+          other.price == this.price &&
+          other.who == this.who &&
+          other.position == this.position);
+}
+
+class SplitItemsCompanion extends UpdateCompanion<SplitItem> {
+  final Value<int> id;
+  final Value<int> splitId;
+  final Value<String> name;
+  final Value<int> price;
+  final Value<String> who;
+  final Value<int> position;
+  const SplitItemsCompanion({
+    this.id = const Value.absent(),
+    this.splitId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.price = const Value.absent(),
+    this.who = const Value.absent(),
+    this.position = const Value.absent(),
+  });
+  SplitItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required int splitId,
+    required String name,
+    required int price,
+    required String who,
+    required int position,
+  })  : splitId = Value(splitId),
+        name = Value(name),
+        price = Value(price),
+        who = Value(who),
+        position = Value(position);
+  static Insertable<SplitItem> custom({
+    Expression<int>? id,
+    Expression<int>? splitId,
+    Expression<String>? name,
+    Expression<int>? price,
+    Expression<String>? who,
+    Expression<int>? position,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (splitId != null) 'split_id': splitId,
+      if (name != null) 'name': name,
+      if (price != null) 'price': price,
+      if (who != null) 'who': who,
+      if (position != null) 'position': position,
+    });
+  }
+
+  SplitItemsCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? splitId,
+      Value<String>? name,
+      Value<int>? price,
+      Value<String>? who,
+      Value<int>? position}) {
+    return SplitItemsCompanion(
+      id: id ?? this.id,
+      splitId: splitId ?? this.splitId,
+      name: name ?? this.name,
+      price: price ?? this.price,
+      who: who ?? this.who,
+      position: position ?? this.position,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (splitId.present) {
+      map['split_id'] = Variable<int>(splitId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (price.present) {
+      map['price'] = Variable<int>(price.value);
+    }
+    if (who.present) {
+      map['who'] = Variable<String>(who.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SplitItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('splitId: $splitId, ')
+          ..write('name: $name, ')
+          ..write('price: $price, ')
+          ..write('who: $who, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5187,6 +6631,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $BillsTable bills = $BillsTable(this);
   late final $RecurringTxsTable recurringTxs = $RecurringTxsTable(this);
+  late final $SplitsTable splits = $SplitsTable(this);
   late final $DebtsTable debts = $DebtsTable(this);
   late final $DebtPaymentsTable debtPayments = $DebtPaymentsTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
@@ -5194,6 +6639,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SettingsTable settings = $SettingsTable(this);
   late final $GoalsTable goals = $GoalsTable(this);
   late final $GoalDepositsTable goalDeposits = $GoalDepositsTable(this);
+  late final $SplitMembersTable splitMembers = $SplitMembersTable(this);
+  late final $SplitItemsTable splitItems = $SplitItemsTable(this);
   late final Index txOccurredAt = Index('tx_occurred_at',
       'CREATE INDEX tx_occurred_at ON transactions (occurred_at)');
   late final Index txWallet =
@@ -5210,6 +6657,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final RecurringDao recurringDao = RecurringDao(this as AppDatabase);
   late final DebtsDao debtsDao = DebtsDao(this as AppDatabase);
   late final GoalsDao goalsDao = GoalsDao(this as AppDatabase);
+  late final SplitsDao splitsDao = SplitsDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5219,6 +6667,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         categories,
         bills,
         recurringTxs,
+        splits,
         debts,
         debtPayments,
         transactions,
@@ -5226,6 +6675,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         settings,
         goals,
         goalDeposits,
+        splitMembers,
+        splitItems,
         txOccurredAt,
         txWallet,
         txCategory
@@ -5255,10 +6706,24 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             ],
           ),
           WritePropagation(
+            on: TableUpdateQuery.onTableName('categories',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('splits', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
             on: TableUpdateQuery.onTableName('wallets',
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('debts', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('splits',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('debts', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(
@@ -5311,6 +6776,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
             ],
           ),
           WritePropagation(
+            on: TableUpdateQuery.onTableName('splits',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('transactions', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
             on: TableUpdateQuery.onTableName('categories',
                 limitUpdateKind: UpdateKind.delete),
             result: [
@@ -5329,6 +6801,27 @@ abstract class _$AppDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('goal_deposits', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('splits',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('split_members', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('debts',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('split_members', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('splits',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('split_items', kind: UpdateKind.delete),
             ],
           ),
         ],
@@ -5400,6 +6893,20 @@ final class $$WalletsTableReferences
         .filter((f) => f.toWalletId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_recurringTargetsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$SplitsTable, List<Split>> _splitsRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.splits,
+          aliasName: 'wallets__id__splits__wallet_id');
+
+  $$SplitsTableProcessedTableManager get splitsRefs {
+    final manager = $$SplitsTableTableManager($_db, $_db.splits)
+        .filter((f) => f.walletId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_splitsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -5569,6 +7076,27 @@ class $$WalletsTableFilterComposer
             $$RecurringTxsTableFilterComposer(
               $db: $db,
               $table: $db.recurringTxs,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> splitsRefs(
+      Expression<bool> Function($$SplitsTableFilterComposer f) f) {
+    final $$SplitsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.walletId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableFilterComposer(
+              $db: $db,
+              $table: $db.splits,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -5820,6 +7348,27 @@ class $$WalletsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> splitsRefs<T extends Object>(
+      Expression<T> Function($$SplitsTableAnnotationComposer a) f) {
+    final $$SplitsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.walletId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
   Expression<T> debtsRefs<T extends Object>(
       Expression<T> Function($$DebtsTableAnnotationComposer a) f) {
     final $$DebtsTableAnnotationComposer composer = $composerBuilder(
@@ -5941,6 +7490,7 @@ class $$WalletsTableTableManager extends RootTableManager<
         {bool billsRefs,
         bool recurringSources,
         bool recurringTargets,
+        bool splitsRefs,
         bool debtsRefs,
         bool debtPaymentsRefs,
         bool sourceTransactions,
@@ -6008,6 +7558,7 @@ class $$WalletsTableTableManager extends RootTableManager<
               {billsRefs = false,
               recurringSources = false,
               recurringTargets = false,
+              splitsRefs = false,
               debtsRefs = false,
               debtPaymentsRefs = false,
               sourceTransactions = false,
@@ -6019,6 +7570,7 @@ class $$WalletsTableTableManager extends RootTableManager<
                 if (billsRefs) db.bills,
                 if (recurringSources) db.recurringTxs,
                 if (recurringTargets) db.recurringTxs,
+                if (splitsRefs) db.splits,
                 if (debtsRefs) db.debts,
                 if (debtPaymentsRefs) db.debtPayments,
                 if (sourceTransactions) db.transactions,
@@ -6064,6 +7616,17 @@ class $$WalletsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.toWalletId == item.id),
+                        typedResults: items),
+                  if (splitsRefs)
+                    await $_getPrefetchedData<Wallet, $WalletsTable, Split>(
+                        currentTable: table,
+                        referencedTable:
+                            $$WalletsTableReferences._splitsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$WalletsTableReferences(db, table, p0).splitsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.walletId == item.id),
                         typedResults: items),
                   if (debtsRefs)
                     await $_getPrefetchedData<Wallet, $WalletsTable, Debt>(
@@ -6148,6 +7711,7 @@ typedef $$WalletsTableProcessedTableManager = ProcessedTableManager<
         {bool billsRefs,
         bool recurringSources,
         bool recurringTargets,
+        bool splitsRefs,
         bool debtsRefs,
         bool debtPaymentsRefs,
         bool sourceTransactions,
@@ -6204,6 +7768,20 @@ final class $$CategoriesTableReferences
         .filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_recurringTxsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$SplitsTable, List<Split>> _splitsRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.splits,
+          aliasName: 'categories__id__splits__category_id');
+
+  $$SplitsTableProcessedTableManager get splitsRefs {
+    final manager = $$SplitsTableTableManager($_db, $_db.splits)
+        .filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_splitsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -6309,6 +7887,27 @@ class $$CategoriesTableFilterComposer
             $$RecurringTxsTableFilterComposer(
               $db: $db,
               $table: $db.recurringTxs,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> splitsRefs(
+      Expression<bool> Function($$SplitsTableFilterComposer f) f) {
+    final $$SplitsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.categoryId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableFilterComposer(
+              $db: $db,
+              $table: $db.splits,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -6475,6 +8074,27 @@ class $$CategoriesTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> splitsRefs<T extends Object>(
+      Expression<T> Function($$SplitsTableAnnotationComposer a) f) {
+    final $$SplitsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.categoryId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
   Expression<T> transactionsRefs<T extends Object>(
       Expression<T> Function($$TransactionsTableAnnotationComposer a) f) {
     final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
@@ -6532,6 +8152,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
     PrefetchHooks Function(
         {bool billsRefs,
         bool recurringTxsRefs,
+        bool splitsRefs,
         bool transactionsRefs,
         bool budgetsRefs})> {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
@@ -6597,6 +8218,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
           prefetchHooksCallback: (
               {billsRefs = false,
               recurringTxsRefs = false,
+              splitsRefs = false,
               transactionsRefs = false,
               budgetsRefs = false}) {
             return PrefetchHooks(
@@ -6604,6 +8226,7 @@ class $$CategoriesTableTableManager extends RootTableManager<
               explicitlyWatchedTables: [
                 if (billsRefs) db.bills,
                 if (recurringTxsRefs) db.recurringTxs,
+                if (splitsRefs) db.splits,
                 if (transactionsRefs) db.transactions,
                 if (budgetsRefs) db.budgets
               ],
@@ -6631,6 +8254,19 @@ class $$CategoriesTableTableManager extends RootTableManager<
                         managerFromTypedResult: (p0) =>
                             $$CategoriesTableReferences(db, table, p0)
                                 .recurringTxsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.categoryId == item.id),
+                        typedResults: items),
+                  if (splitsRefs)
+                    await $_getPrefetchedData<Category, $CategoriesTable,
+                            Split>(
+                        currentTable: table,
+                        referencedTable:
+                            $$CategoriesTableReferences._splitsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CategoriesTableReferences(db, table, p0)
+                                .splitsRefs,
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.categoryId == item.id),
@@ -6681,6 +8317,7 @@ typedef $$CategoriesTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function(
         {bool billsRefs,
         bool recurringTxsRefs,
+        bool splitsRefs,
         bool transactionsRefs,
         bool budgetsRefs})>;
 typedef $$BillsTableCreateCompanionBuilder = BillsCompanion Function({
@@ -7831,6 +9468,748 @@ typedef $$RecurringTxsTableProcessedTableManager = ProcessedTableManager<
         bool toWalletId,
         bool categoryId,
         bool transactionsRefs})>;
+typedef $$SplitsTableCreateCompanionBuilder = SplitsCompanion Function({
+  Value<int> id,
+  required String title,
+  required SplitMode mode,
+  required int total,
+  required int walletId,
+  Value<int?> categoryId,
+  Value<int> taxPermille,
+  Value<int> servicePermille,
+  Value<int> extraFee,
+  Value<int> discount,
+  required DateTime occurredAt,
+  Value<DateTime> createdAt,
+});
+typedef $$SplitsTableUpdateCompanionBuilder = SplitsCompanion Function({
+  Value<int> id,
+  Value<String> title,
+  Value<SplitMode> mode,
+  Value<int> total,
+  Value<int> walletId,
+  Value<int?> categoryId,
+  Value<int> taxPermille,
+  Value<int> servicePermille,
+  Value<int> extraFee,
+  Value<int> discount,
+  Value<DateTime> occurredAt,
+  Value<DateTime> createdAt,
+});
+
+final class $$SplitsTableReferences
+    extends BaseReferences<_$AppDatabase, $SplitsTable, Split> {
+  $$SplitsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $WalletsTable _walletIdTable(_$AppDatabase db) =>
+      db.wallets.createAlias('splits__wallet_id__wallets__id');
+
+  $$WalletsTableProcessedTableManager get walletId {
+    final $_column = $_itemColumn<int>('wallet_id')!;
+
+    final manager = $$WalletsTableTableManager($_db, $_db.wallets)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_walletIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
+      db.categories.createAlias('splits__category_id__categories__id');
+
+  $$CategoriesTableProcessedTableManager? get categoryId {
+    final $_column = $_itemColumn<int>('category_id');
+    if ($_column == null) return null;
+    final manager = $$CategoriesTableTableManager($_db, $_db.categories)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$DebtsTable, List<Debt>> _debtsRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.debts,
+          aliasName: 'splits__id__debts__split_id');
+
+  $$DebtsTableProcessedTableManager get debtsRefs {
+    final manager = $$DebtsTableTableManager($_db, $_db.debts)
+        .filter((f) => f.splitId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_debtsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$TransactionsTable, List<Txn>>
+      _transactionsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.transactions,
+              aliasName: 'splits__id__transactions__split_id');
+
+  $$TransactionsTableProcessedTableManager get transactionsRefs {
+    final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
+        .filter((f) => f.splitId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_transactionsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$SplitMembersTable, List<SplitMember>>
+      _splitMembersRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.splitMembers,
+              aliasName: 'splits__id__split_members__split_id');
+
+  $$SplitMembersTableProcessedTableManager get splitMembersRefs {
+    final manager = $$SplitMembersTableTableManager($_db, $_db.splitMembers)
+        .filter((f) => f.splitId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_splitMembersRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$SplitItemsTable, List<SplitItem>>
+      _splitItemsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.splitItems,
+              aliasName: 'splits__id__split_items__split_id');
+
+  $$SplitItemsTableProcessedTableManager get splitItemsRefs {
+    final manager = $$SplitItemsTableTableManager($_db, $_db.splitItems)
+        .filter((f) => f.splitId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_splitItemsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$SplitsTableFilterComposer
+    extends Composer<_$AppDatabase, $SplitsTable> {
+  $$SplitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<SplitMode, SplitMode, String> get mode =>
+      $composableBuilder(
+          column: $table.mode,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<int> get total => $composableBuilder(
+      column: $table.total, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get taxPermille => $composableBuilder(
+      column: $table.taxPermille, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get servicePermille => $composableBuilder(
+      column: $table.servicePermille,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get extraFee => $composableBuilder(
+      column: $table.extraFee, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get discount => $composableBuilder(
+      column: $table.discount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get occurredAt => $composableBuilder(
+      column: $table.occurredAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  $$WalletsTableFilterComposer get walletId {
+    final $$WalletsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.walletId,
+        referencedTable: $db.wallets,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WalletsTableFilterComposer(
+              $db: $db,
+              $table: $db.wallets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableFilterComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<bool> debtsRefs(
+      Expression<bool> Function($$DebtsTableFilterComposer f) f) {
+    final $$DebtsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.debts,
+        getReferencedColumn: (t) => t.splitId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DebtsTableFilterComposer(
+              $db: $db,
+              $table: $db.debts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> transactionsRefs(
+      Expression<bool> Function($$TransactionsTableFilterComposer f) f) {
+    final $$TransactionsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.transactions,
+        getReferencedColumn: (t) => t.splitId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TransactionsTableFilterComposer(
+              $db: $db,
+              $table: $db.transactions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> splitMembersRefs(
+      Expression<bool> Function($$SplitMembersTableFilterComposer f) f) {
+    final $$SplitMembersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.splitMembers,
+        getReferencedColumn: (t) => t.splitId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitMembersTableFilterComposer(
+              $db: $db,
+              $table: $db.splitMembers,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> splitItemsRefs(
+      Expression<bool> Function($$SplitItemsTableFilterComposer f) f) {
+    final $$SplitItemsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.splitItems,
+        getReferencedColumn: (t) => t.splitId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitItemsTableFilterComposer(
+              $db: $db,
+              $table: $db.splitItems,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$SplitsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SplitsTable> {
+  $$SplitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mode => $composableBuilder(
+      column: $table.mode, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get total => $composableBuilder(
+      column: $table.total, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get taxPermille => $composableBuilder(
+      column: $table.taxPermille, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get servicePermille => $composableBuilder(
+      column: $table.servicePermille,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get extraFee => $composableBuilder(
+      column: $table.extraFee, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get discount => $composableBuilder(
+      column: $table.discount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get occurredAt => $composableBuilder(
+      column: $table.occurredAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  $$WalletsTableOrderingComposer get walletId {
+    final $$WalletsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.walletId,
+        referencedTable: $db.wallets,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WalletsTableOrderingComposer(
+              $db: $db,
+              $table: $db.wallets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableOrderingComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SplitsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SplitsTable> {
+  $$SplitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SplitMode, String> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
+
+  GeneratedColumn<int> get total =>
+      $composableBuilder(column: $table.total, builder: (column) => column);
+
+  GeneratedColumn<int> get taxPermille => $composableBuilder(
+      column: $table.taxPermille, builder: (column) => column);
+
+  GeneratedColumn<int> get servicePermille => $composableBuilder(
+      column: $table.servicePermille, builder: (column) => column);
+
+  GeneratedColumn<int> get extraFee =>
+      $composableBuilder(column: $table.extraFee, builder: (column) => column);
+
+  GeneratedColumn<int> get discount =>
+      $composableBuilder(column: $table.discount, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get occurredAt => $composableBuilder(
+      column: $table.occurredAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$WalletsTableAnnotationComposer get walletId {
+    final $$WalletsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.walletId,
+        referencedTable: $db.wallets,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WalletsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.wallets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.categoryId,
+        referencedTable: $db.categories,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CategoriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.categories,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  Expression<T> debtsRefs<T extends Object>(
+      Expression<T> Function($$DebtsTableAnnotationComposer a) f) {
+    final $$DebtsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.debts,
+        getReferencedColumn: (t) => t.splitId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DebtsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.debts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> transactionsRefs<T extends Object>(
+      Expression<T> Function($$TransactionsTableAnnotationComposer a) f) {
+    final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.transactions,
+        getReferencedColumn: (t) => t.splitId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TransactionsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.transactions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> splitMembersRefs<T extends Object>(
+      Expression<T> Function($$SplitMembersTableAnnotationComposer a) f) {
+    final $$SplitMembersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.splitMembers,
+        getReferencedColumn: (t) => t.splitId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitMembersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.splitMembers,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> splitItemsRefs<T extends Object>(
+      Expression<T> Function($$SplitItemsTableAnnotationComposer a) f) {
+    final $$SplitItemsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.splitItems,
+        getReferencedColumn: (t) => t.splitId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitItemsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.splitItems,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$SplitsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SplitsTable,
+    Split,
+    $$SplitsTableFilterComposer,
+    $$SplitsTableOrderingComposer,
+    $$SplitsTableAnnotationComposer,
+    $$SplitsTableCreateCompanionBuilder,
+    $$SplitsTableUpdateCompanionBuilder,
+    (Split, $$SplitsTableReferences),
+    Split,
+    PrefetchHooks Function(
+        {bool walletId,
+        bool categoryId,
+        bool debtsRefs,
+        bool transactionsRefs,
+        bool splitMembersRefs,
+        bool splitItemsRefs})> {
+  $$SplitsTableTableManager(_$AppDatabase db, $SplitsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SplitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SplitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SplitsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<SplitMode> mode = const Value.absent(),
+            Value<int> total = const Value.absent(),
+            Value<int> walletId = const Value.absent(),
+            Value<int?> categoryId = const Value.absent(),
+            Value<int> taxPermille = const Value.absent(),
+            Value<int> servicePermille = const Value.absent(),
+            Value<int> extraFee = const Value.absent(),
+            Value<int> discount = const Value.absent(),
+            Value<DateTime> occurredAt = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              SplitsCompanion(
+            id: id,
+            title: title,
+            mode: mode,
+            total: total,
+            walletId: walletId,
+            categoryId: categoryId,
+            taxPermille: taxPermille,
+            servicePermille: servicePermille,
+            extraFee: extraFee,
+            discount: discount,
+            occurredAt: occurredAt,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String title,
+            required SplitMode mode,
+            required int total,
+            required int walletId,
+            Value<int?> categoryId = const Value.absent(),
+            Value<int> taxPermille = const Value.absent(),
+            Value<int> servicePermille = const Value.absent(),
+            Value<int> extraFee = const Value.absent(),
+            Value<int> discount = const Value.absent(),
+            required DateTime occurredAt,
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              SplitsCompanion.insert(
+            id: id,
+            title: title,
+            mode: mode,
+            total: total,
+            walletId: walletId,
+            categoryId: categoryId,
+            taxPermille: taxPermille,
+            servicePermille: servicePermille,
+            extraFee: extraFee,
+            discount: discount,
+            occurredAt: occurredAt,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) =>
+                  (e.readTable(table), $$SplitsTableReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: (
+              {walletId = false,
+              categoryId = false,
+              debtsRefs = false,
+              transactionsRefs = false,
+              splitMembersRefs = false,
+              splitItemsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (debtsRefs) db.debts,
+                if (transactionsRefs) db.transactions,
+                if (splitMembersRefs) db.splitMembers,
+                if (splitItemsRefs) db.splitItems
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (walletId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.walletId,
+                    referencedTable: $$SplitsTableReferences._walletIdTable(db),
+                    referencedColumn:
+                        $$SplitsTableReferences._walletIdTable(db).id,
+                  ) as T;
+                }
+                if (categoryId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.categoryId,
+                    referencedTable:
+                        $$SplitsTableReferences._categoryIdTable(db),
+                    referencedColumn:
+                        $$SplitsTableReferences._categoryIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (debtsRefs)
+                    await $_getPrefetchedData<Split, $SplitsTable, Debt>(
+                        currentTable: table,
+                        referencedTable:
+                            $$SplitsTableReferences._debtsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$SplitsTableReferences(db, table, p0).debtsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.splitId == item.id),
+                        typedResults: items),
+                  if (transactionsRefs)
+                    await $_getPrefetchedData<Split, $SplitsTable, Txn>(
+                        currentTable: table,
+                        referencedTable:
+                            $$SplitsTableReferences._transactionsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$SplitsTableReferences(db, table, p0)
+                                .transactionsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.splitId == item.id),
+                        typedResults: items),
+                  if (splitMembersRefs)
+                    await $_getPrefetchedData<Split, $SplitsTable, SplitMember>(
+                        currentTable: table,
+                        referencedTable:
+                            $$SplitsTableReferences._splitMembersRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$SplitsTableReferences(db, table, p0)
+                                .splitMembersRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.splitId == item.id),
+                        typedResults: items),
+                  if (splitItemsRefs)
+                    await $_getPrefetchedData<Split, $SplitsTable, SplitItem>(
+                        currentTable: table,
+                        referencedTable:
+                            $$SplitsTableReferences._splitItemsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$SplitsTableReferences(db, table, p0)
+                                .splitItemsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.splitId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$SplitsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $SplitsTable,
+    Split,
+    $$SplitsTableFilterComposer,
+    $$SplitsTableOrderingComposer,
+    $$SplitsTableAnnotationComposer,
+    $$SplitsTableCreateCompanionBuilder,
+    $$SplitsTableUpdateCompanionBuilder,
+    (Split, $$SplitsTableReferences),
+    Split,
+    PrefetchHooks Function(
+        {bool walletId,
+        bool categoryId,
+        bool debtsRefs,
+        bool transactionsRefs,
+        bool splitMembersRefs,
+        bool splitItemsRefs})>;
 typedef $$DebtsTableCreateCompanionBuilder = DebtsCompanion Function({
   Value<int> id,
   required DebtDirection direction,
@@ -7840,6 +10219,7 @@ typedef $$DebtsTableCreateCompanionBuilder = DebtsCompanion Function({
   required DateTime occurredAt,
   Value<DateTime?> dueDate,
   Value<String> note,
+  Value<int?> splitId,
   Value<DateTime> createdAt,
 });
 typedef $$DebtsTableUpdateCompanionBuilder = DebtsCompanion Function({
@@ -7851,6 +10231,7 @@ typedef $$DebtsTableUpdateCompanionBuilder = DebtsCompanion Function({
   Value<DateTime> occurredAt,
   Value<DateTime?> dueDate,
   Value<String> note,
+  Value<int?> splitId,
   Value<DateTime> createdAt,
 });
 
@@ -7867,6 +10248,20 @@ final class $$DebtsTableReferences
     final manager = $$WalletsTableTableManager($_db, $_db.wallets)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_walletIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $SplitsTable _splitIdTable(_$AppDatabase db) =>
+      db.splits.createAlias('debts__split_id__splits__id');
+
+  $$SplitsTableProcessedTableManager? get splitId {
+    final $_column = $_itemColumn<int>('split_id');
+    if ($_column == null) return null;
+    final manager = $$SplitsTableTableManager($_db, $_db.splits)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_splitIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -7896,6 +10291,20 @@ final class $$DebtsTableReferences
         .filter((f) => f.debtId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_transactionsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$SplitMembersTable, List<SplitMember>>
+      _splitMembersRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.splitMembers,
+              aliasName: 'debts__id__split_members__debt_id');
+
+  $$SplitMembersTableProcessedTableManager get splitMembersRefs {
+    final manager = $$SplitMembersTableTableManager($_db, $_db.splitMembers)
+        .filter((f) => f.debtId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_splitMembersRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -7955,6 +10364,26 @@ class $$DebtsTableFilterComposer extends Composer<_$AppDatabase, $DebtsTable> {
     return composer;
   }
 
+  $$SplitsTableFilterComposer get splitId {
+    final $$SplitsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableFilterComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
   Expression<bool> debtPaymentsRefs(
       Expression<bool> Function($$DebtPaymentsTableFilterComposer f) f) {
     final $$DebtPaymentsTableFilterComposer composer = $composerBuilder(
@@ -7989,6 +10418,27 @@ class $$DebtsTableFilterComposer extends Composer<_$AppDatabase, $DebtsTable> {
             $$TransactionsTableFilterComposer(
               $db: $db,
               $table: $db.transactions,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> splitMembersRefs(
+      Expression<bool> Function($$SplitMembersTableFilterComposer f) f) {
+    final $$SplitMembersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.splitMembers,
+        getReferencedColumn: (t) => t.debtId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitMembersTableFilterComposer(
+              $db: $db,
+              $table: $db.splitMembers,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -8043,6 +10493,26 @@ class $$DebtsTableOrderingComposer
             $$WalletsTableOrderingComposer(
               $db: $db,
               $table: $db.wallets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$SplitsTableOrderingComposer get splitId {
+    final $$SplitsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableOrderingComposer(
+              $db: $db,
+              $table: $db.splits,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -8105,6 +10575,26 @@ class $$DebtsTableAnnotationComposer
     return composer;
   }
 
+  $$SplitsTableAnnotationComposer get splitId {
+    final $$SplitsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
   Expression<T> debtPaymentsRefs<T extends Object>(
       Expression<T> Function($$DebtPaymentsTableAnnotationComposer a) f) {
     final $$DebtPaymentsTableAnnotationComposer composer = $composerBuilder(
@@ -8146,6 +10636,27 @@ class $$DebtsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> splitMembersRefs<T extends Object>(
+      Expression<T> Function($$SplitMembersTableAnnotationComposer a) f) {
+    final $$SplitMembersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.splitMembers,
+        getReferencedColumn: (t) => t.debtId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitMembersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.splitMembers,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$DebtsTableTableManager extends RootTableManager<
@@ -8160,7 +10671,11 @@ class $$DebtsTableTableManager extends RootTableManager<
     (Debt, $$DebtsTableReferences),
     Debt,
     PrefetchHooks Function(
-        {bool walletId, bool debtPaymentsRefs, bool transactionsRefs})> {
+        {bool walletId,
+        bool splitId,
+        bool debtPaymentsRefs,
+        bool transactionsRefs,
+        bool splitMembersRefs})> {
   $$DebtsTableTableManager(_$AppDatabase db, $DebtsTable table)
       : super(TableManagerState(
           db: db,
@@ -8180,6 +10695,7 @@ class $$DebtsTableTableManager extends RootTableManager<
             Value<DateTime> occurredAt = const Value.absent(),
             Value<DateTime?> dueDate = const Value.absent(),
             Value<String> note = const Value.absent(),
+            Value<int?> splitId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               DebtsCompanion(
@@ -8191,6 +10707,7 @@ class $$DebtsTableTableManager extends RootTableManager<
             occurredAt: occurredAt,
             dueDate: dueDate,
             note: note,
+            splitId: splitId,
             createdAt: createdAt,
           ),
           createCompanionCallback: ({
@@ -8202,6 +10719,7 @@ class $$DebtsTableTableManager extends RootTableManager<
             required DateTime occurredAt,
             Value<DateTime?> dueDate = const Value.absent(),
             Value<String> note = const Value.absent(),
+            Value<int?> splitId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               DebtsCompanion.insert(
@@ -8213,6 +10731,7 @@ class $$DebtsTableTableManager extends RootTableManager<
             occurredAt: occurredAt,
             dueDate: dueDate,
             note: note,
+            splitId: splitId,
             createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0
@@ -8221,13 +10740,16 @@ class $$DebtsTableTableManager extends RootTableManager<
               .toList(),
           prefetchHooksCallback: (
               {walletId = false,
+              splitId = false,
               debtPaymentsRefs = false,
-              transactionsRefs = false}) {
+              transactionsRefs = false,
+              splitMembersRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (debtPaymentsRefs) db.debtPayments,
-                if (transactionsRefs) db.transactions
+                if (transactionsRefs) db.transactions,
+                if (splitMembersRefs) db.splitMembers
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -8249,6 +10771,15 @@ class $$DebtsTableTableManager extends RootTableManager<
                     referencedTable: $$DebtsTableReferences._walletIdTable(db),
                     referencedColumn:
                         $$DebtsTableReferences._walletIdTable(db).id,
+                  ) as T;
+                }
+                if (splitId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.splitId,
+                    referencedTable: $$DebtsTableReferences._splitIdTable(db),
+                    referencedColumn:
+                        $$DebtsTableReferences._splitIdTable(db).id,
                   ) as T;
                 }
 
@@ -8279,6 +10810,18 @@ class $$DebtsTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.debtId == item.id),
+                        typedResults: items),
+                  if (splitMembersRefs)
+                    await $_getPrefetchedData<Debt, $DebtsTable, SplitMember>(
+                        currentTable: table,
+                        referencedTable:
+                            $$DebtsTableReferences._splitMembersRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$DebtsTableReferences(db, table, p0)
+                                .splitMembersRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.debtId == item.id),
                         typedResults: items)
                 ];
               },
@@ -8299,7 +10842,11 @@ typedef $$DebtsTableProcessedTableManager = ProcessedTableManager<
     (Debt, $$DebtsTableReferences),
     Debt,
     PrefetchHooks Function(
-        {bool walletId, bool debtPaymentsRefs, bool transactionsRefs})>;
+        {bool walletId,
+        bool splitId,
+        bool debtPaymentsRefs,
+        bool transactionsRefs,
+        bool splitMembersRefs})>;
 typedef $$DebtPaymentsTableCreateCompanionBuilder = DebtPaymentsCompanion
     Function({
   Value<int> id,
@@ -8745,6 +11292,7 @@ typedef $$TransactionsTableCreateCompanionBuilder = TransactionsCompanion
   Value<int?> recurringId,
   Value<int?> debtId,
   Value<int?> debtPaymentId,
+  Value<int?> splitId,
   required DateTime occurredAt,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -8763,6 +11311,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
   Value<int?> recurringId,
   Value<int?> debtId,
   Value<int?> debtPaymentId,
+  Value<int?> splitId,
   Value<DateTime> occurredAt,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -8867,6 +11416,20 @@ final class $$TransactionsTableReferences
     final manager = $$DebtPaymentsTableTableManager($_db, $_db.debtPayments)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_debtPaymentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $SplitsTable _splitIdTable(_$AppDatabase db) =>
+      db.splits.createAlias('transactions__split_id__splits__id');
+
+  $$SplitsTableProcessedTableManager? get splitId {
+    final $_column = $_itemColumn<int>('split_id');
+    if ($_column == null) return null;
+    final manager = $$SplitsTableTableManager($_db, $_db.splits)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_splitIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
@@ -9040,6 +11603,26 @@ class $$TransactionsTableFilterComposer
             $$DebtPaymentsTableFilterComposer(
               $db: $db,
               $table: $db.debtPayments,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$SplitsTableFilterComposer get splitId {
+    final $$SplitsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableFilterComposer(
+              $db: $db,
+              $table: $db.splits,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -9221,6 +11804,26 @@ class $$TransactionsTableOrderingComposer
             ));
     return composer;
   }
+
+  $$SplitsTableOrderingComposer get splitId {
+    final $$SplitsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableOrderingComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$TransactionsTableAnnotationComposer
@@ -9395,6 +11998,26 @@ class $$TransactionsTableAnnotationComposer
             ));
     return composer;
   }
+
+  $$SplitsTableAnnotationComposer get splitId {
+    final $$SplitsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$TransactionsTableTableManager extends RootTableManager<
@@ -9415,7 +12038,8 @@ class $$TransactionsTableTableManager extends RootTableManager<
         bool billId,
         bool recurringId,
         bool debtId,
-        bool debtPaymentId})> {
+        bool debtPaymentId,
+        bool splitId})> {
   $$TransactionsTableTableManager(_$AppDatabase db, $TransactionsTable table)
       : super(TableManagerState(
           db: db,
@@ -9439,6 +12063,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<int?> recurringId = const Value.absent(),
             Value<int?> debtId = const Value.absent(),
             Value<int?> debtPaymentId = const Value.absent(),
+            Value<int?> splitId = const Value.absent(),
             Value<DateTime> occurredAt = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
@@ -9456,6 +12081,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             recurringId: recurringId,
             debtId: debtId,
             debtPaymentId: debtPaymentId,
+            splitId: splitId,
             occurredAt: occurredAt,
             createdAt: createdAt,
             updatedAt: updatedAt,
@@ -9473,6 +12099,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<int?> recurringId = const Value.absent(),
             Value<int?> debtId = const Value.absent(),
             Value<int?> debtPaymentId = const Value.absent(),
+            Value<int?> splitId = const Value.absent(),
             required DateTime occurredAt,
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
@@ -9490,6 +12117,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             recurringId: recurringId,
             debtId: debtId,
             debtPaymentId: debtPaymentId,
+            splitId: splitId,
             occurredAt: occurredAt,
             createdAt: createdAt,
             updatedAt: updatedAt,
@@ -9507,7 +12135,8 @@ class $$TransactionsTableTableManager extends RootTableManager<
               billId = false,
               recurringId = false,
               debtId = false,
-              debtPaymentId = false}) {
+              debtPaymentId = false,
+              splitId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -9595,6 +12224,16 @@ class $$TransactionsTableTableManager extends RootTableManager<
                         .id,
                   ) as T;
                 }
+                if (splitId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.splitId,
+                    referencedTable:
+                        $$TransactionsTableReferences._splitIdTable(db),
+                    referencedColumn:
+                        $$TransactionsTableReferences._splitIdTable(db).id,
+                  ) as T;
+                }
 
                 return state;
               },
@@ -9624,7 +12263,8 @@ typedef $$TransactionsTableProcessedTableManager = ProcessedTableManager<
         bool billId,
         bool recurringId,
         bool debtId,
-        bool debtPaymentId})>;
+        bool debtPaymentId,
+        bool splitId})>;
 typedef $$BudgetsTableCreateCompanionBuilder = BudgetsCompanion Function({
   Value<int> id,
   Value<int?> categoryId,
@@ -10715,6 +13355,675 @@ typedef $$GoalDepositsTableProcessedTableManager = ProcessedTableManager<
     (GoalDeposit, $$GoalDepositsTableReferences),
     GoalDeposit,
     PrefetchHooks Function({bool goalId, bool walletId})>;
+typedef $$SplitMembersTableCreateCompanionBuilder = SplitMembersCompanion
+    Function({
+  Value<int> id,
+  required int splitId,
+  required String name,
+  Value<bool> isMe,
+  Value<bool> payer,
+  required int share,
+  required int position,
+  Value<int?> debtId,
+});
+typedef $$SplitMembersTableUpdateCompanionBuilder = SplitMembersCompanion
+    Function({
+  Value<int> id,
+  Value<int> splitId,
+  Value<String> name,
+  Value<bool> isMe,
+  Value<bool> payer,
+  Value<int> share,
+  Value<int> position,
+  Value<int?> debtId,
+});
+
+final class $$SplitMembersTableReferences
+    extends BaseReferences<_$AppDatabase, $SplitMembersTable, SplitMember> {
+  $$SplitMembersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $SplitsTable _splitIdTable(_$AppDatabase db) =>
+      db.splits.createAlias('split_members__split_id__splits__id');
+
+  $$SplitsTableProcessedTableManager get splitId {
+    final $_column = $_itemColumn<int>('split_id')!;
+
+    final manager = $$SplitsTableTableManager($_db, $_db.splits)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_splitIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $DebtsTable _debtIdTable(_$AppDatabase db) =>
+      db.debts.createAlias('split_members__debt_id__debts__id');
+
+  $$DebtsTableProcessedTableManager? get debtId {
+    final $_column = $_itemColumn<int>('debt_id');
+    if ($_column == null) return null;
+    final manager = $$DebtsTableTableManager($_db, $_db.debts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_debtIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$SplitMembersTableFilterComposer
+    extends Composer<_$AppDatabase, $SplitMembersTable> {
+  $$SplitMembersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isMe => $composableBuilder(
+      column: $table.isMe, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get payer => $composableBuilder(
+      column: $table.payer, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get share => $composableBuilder(
+      column: $table.share, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnFilters(column));
+
+  $$SplitsTableFilterComposer get splitId {
+    final $$SplitsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableFilterComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$DebtsTableFilterComposer get debtId {
+    final $$DebtsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.debtId,
+        referencedTable: $db.debts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DebtsTableFilterComposer(
+              $db: $db,
+              $table: $db.debts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SplitMembersTableOrderingComposer
+    extends Composer<_$AppDatabase, $SplitMembersTable> {
+  $$SplitMembersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isMe => $composableBuilder(
+      column: $table.isMe, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get payer => $composableBuilder(
+      column: $table.payer, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get share => $composableBuilder(
+      column: $table.share, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnOrderings(column));
+
+  $$SplitsTableOrderingComposer get splitId {
+    final $$SplitsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableOrderingComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$DebtsTableOrderingComposer get debtId {
+    final $$DebtsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.debtId,
+        referencedTable: $db.debts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DebtsTableOrderingComposer(
+              $db: $db,
+              $table: $db.debts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SplitMembersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SplitMembersTable> {
+  $$SplitMembersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<bool> get isMe =>
+      $composableBuilder(column: $table.isMe, builder: (column) => column);
+
+  GeneratedColumn<bool> get payer =>
+      $composableBuilder(column: $table.payer, builder: (column) => column);
+
+  GeneratedColumn<int> get share =>
+      $composableBuilder(column: $table.share, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  $$SplitsTableAnnotationComposer get splitId {
+    final $$SplitsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$DebtsTableAnnotationComposer get debtId {
+    final $$DebtsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.debtId,
+        referencedTable: $db.debts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DebtsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.debts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SplitMembersTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SplitMembersTable,
+    SplitMember,
+    $$SplitMembersTableFilterComposer,
+    $$SplitMembersTableOrderingComposer,
+    $$SplitMembersTableAnnotationComposer,
+    $$SplitMembersTableCreateCompanionBuilder,
+    $$SplitMembersTableUpdateCompanionBuilder,
+    (SplitMember, $$SplitMembersTableReferences),
+    SplitMember,
+    PrefetchHooks Function({bool splitId, bool debtId})> {
+  $$SplitMembersTableTableManager(_$AppDatabase db, $SplitMembersTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SplitMembersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SplitMembersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SplitMembersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> splitId = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<bool> isMe = const Value.absent(),
+            Value<bool> payer = const Value.absent(),
+            Value<int> share = const Value.absent(),
+            Value<int> position = const Value.absent(),
+            Value<int?> debtId = const Value.absent(),
+          }) =>
+              SplitMembersCompanion(
+            id: id,
+            splitId: splitId,
+            name: name,
+            isMe: isMe,
+            payer: payer,
+            share: share,
+            position: position,
+            debtId: debtId,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int splitId,
+            required String name,
+            Value<bool> isMe = const Value.absent(),
+            Value<bool> payer = const Value.absent(),
+            required int share,
+            required int position,
+            Value<int?> debtId = const Value.absent(),
+          }) =>
+              SplitMembersCompanion.insert(
+            id: id,
+            splitId: splitId,
+            name: name,
+            isMe: isMe,
+            payer: payer,
+            share: share,
+            position: position,
+            debtId: debtId,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$SplitMembersTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({splitId = false, debtId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (splitId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.splitId,
+                    referencedTable:
+                        $$SplitMembersTableReferences._splitIdTable(db),
+                    referencedColumn:
+                        $$SplitMembersTableReferences._splitIdTable(db).id,
+                  ) as T;
+                }
+                if (debtId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.debtId,
+                    referencedTable:
+                        $$SplitMembersTableReferences._debtIdTable(db),
+                    referencedColumn:
+                        $$SplitMembersTableReferences._debtIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$SplitMembersTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $SplitMembersTable,
+    SplitMember,
+    $$SplitMembersTableFilterComposer,
+    $$SplitMembersTableOrderingComposer,
+    $$SplitMembersTableAnnotationComposer,
+    $$SplitMembersTableCreateCompanionBuilder,
+    $$SplitMembersTableUpdateCompanionBuilder,
+    (SplitMember, $$SplitMembersTableReferences),
+    SplitMember,
+    PrefetchHooks Function({bool splitId, bool debtId})>;
+typedef $$SplitItemsTableCreateCompanionBuilder = SplitItemsCompanion Function({
+  Value<int> id,
+  required int splitId,
+  required String name,
+  required int price,
+  required String who,
+  required int position,
+});
+typedef $$SplitItemsTableUpdateCompanionBuilder = SplitItemsCompanion Function({
+  Value<int> id,
+  Value<int> splitId,
+  Value<String> name,
+  Value<int> price,
+  Value<String> who,
+  Value<int> position,
+});
+
+final class $$SplitItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $SplitItemsTable, SplitItem> {
+  $$SplitItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $SplitsTable _splitIdTable(_$AppDatabase db) =>
+      db.splits.createAlias('split_items__split_id__splits__id');
+
+  $$SplitsTableProcessedTableManager get splitId {
+    final $_column = $_itemColumn<int>('split_id')!;
+
+    final manager = $$SplitsTableTableManager($_db, $_db.splits)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_splitIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$SplitItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $SplitItemsTable> {
+  $$SplitItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get price => $composableBuilder(
+      column: $table.price, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get who => $composableBuilder(
+      column: $table.who, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnFilters(column));
+
+  $$SplitsTableFilterComposer get splitId {
+    final $$SplitsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableFilterComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SplitItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SplitItemsTable> {
+  $$SplitItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get price => $composableBuilder(
+      column: $table.price, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get who => $composableBuilder(
+      column: $table.who, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnOrderings(column));
+
+  $$SplitsTableOrderingComposer get splitId {
+    final $$SplitsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableOrderingComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SplitItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SplitItemsTable> {
+  $$SplitItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get price =>
+      $composableBuilder(column: $table.price, builder: (column) => column);
+
+  GeneratedColumn<String> get who =>
+      $composableBuilder(column: $table.who, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  $$SplitsTableAnnotationComposer get splitId {
+    final $$SplitsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.splitId,
+        referencedTable: $db.splits,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$SplitsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.splits,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$SplitItemsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SplitItemsTable,
+    SplitItem,
+    $$SplitItemsTableFilterComposer,
+    $$SplitItemsTableOrderingComposer,
+    $$SplitItemsTableAnnotationComposer,
+    $$SplitItemsTableCreateCompanionBuilder,
+    $$SplitItemsTableUpdateCompanionBuilder,
+    (SplitItem, $$SplitItemsTableReferences),
+    SplitItem,
+    PrefetchHooks Function({bool splitId})> {
+  $$SplitItemsTableTableManager(_$AppDatabase db, $SplitItemsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SplitItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SplitItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SplitItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> splitId = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<int> price = const Value.absent(),
+            Value<String> who = const Value.absent(),
+            Value<int> position = const Value.absent(),
+          }) =>
+              SplitItemsCompanion(
+            id: id,
+            splitId: splitId,
+            name: name,
+            price: price,
+            who: who,
+            position: position,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int splitId,
+            required String name,
+            required int price,
+            required String who,
+            required int position,
+          }) =>
+              SplitItemsCompanion.insert(
+            id: id,
+            splitId: splitId,
+            name: name,
+            price: price,
+            who: who,
+            position: position,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$SplitItemsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({splitId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (splitId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.splitId,
+                    referencedTable:
+                        $$SplitItemsTableReferences._splitIdTable(db),
+                    referencedColumn:
+                        $$SplitItemsTableReferences._splitIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$SplitItemsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $SplitItemsTable,
+    SplitItem,
+    $$SplitItemsTableFilterComposer,
+    $$SplitItemsTableOrderingComposer,
+    $$SplitItemsTableAnnotationComposer,
+    $$SplitItemsTableCreateCompanionBuilder,
+    $$SplitItemsTableUpdateCompanionBuilder,
+    (SplitItem, $$SplitItemsTableReferences),
+    SplitItem,
+    PrefetchHooks Function({bool splitId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -10727,6 +14036,8 @@ class $AppDatabaseManager {
       $$BillsTableTableManager(_db, _db.bills);
   $$RecurringTxsTableTableManager get recurringTxs =>
       $$RecurringTxsTableTableManager(_db, _db.recurringTxs);
+  $$SplitsTableTableManager get splits =>
+      $$SplitsTableTableManager(_db, _db.splits);
   $$DebtsTableTableManager get debts =>
       $$DebtsTableTableManager(_db, _db.debts);
   $$DebtPaymentsTableTableManager get debtPayments =>
@@ -10741,4 +14052,8 @@ class $AppDatabaseManager {
       $$GoalsTableTableManager(_db, _db.goals);
   $$GoalDepositsTableTableManager get goalDeposits =>
       $$GoalDepositsTableTableManager(_db, _db.goalDeposits);
+  $$SplitMembersTableTableManager get splitMembers =>
+      $$SplitMembersTableTableManager(_db, _db.splitMembers);
+  $$SplitItemsTableTableManager get splitItems =>
+      $$SplitItemsTableTableManager(_db, _db.splitItems);
 }

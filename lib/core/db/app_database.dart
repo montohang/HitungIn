@@ -5,6 +5,7 @@ import '../../features/budget/data/budgets_dao.dart';
 import '../../features/categories/data/categories_dao.dart';
 import '../../features/debts/data/debts_dao.dart';
 import '../../features/goals/data/goals_dao.dart';
+import '../../features/splits/data/splits_dao.dart';
 import '../../features/recurring/data/recurring_dao.dart';
 import '../../features/settings/data/settings_dao.dart';
 import '../../features/transactions/data/transactions_dao.dart';
@@ -17,8 +18,8 @@ export 'tables.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [Wallets, Categories, Transactions, Budgets, Bills, Settings, RecurringTxs, Debts, DebtPayments, Goals, GoalDeposits],
-  daos: [WalletsDao, CategoriesDao, TransactionsDao, BudgetsDao, BillsDao, SettingsDao, RecurringDao, DebtsDao, GoalsDao],
+  tables: [Wallets, Categories, Transactions, Budgets, Bills, Settings, RecurringTxs, Debts, DebtPayments, Goals, GoalDeposits, Splits, SplitMembers, SplitItems],
+  daos: [WalletsDao, CategoriesDao, TransactionsDao, BudgetsDao, BillsDao, SettingsDao, RecurringDao, DebtsDao, GoalsDao, SplitsDao],
 )
 class AppDatabase extends _$AppDatabase {
   /// [executor] dari `openEncryptedConnection()` di aplikasi, atau
@@ -32,8 +33,9 @@ class AppDatabase extends _$AppDatabase {
   /// sub-kategori (categories.subs, transactions.sub). v5: cicilan di tagihan
   /// (bills.installment_*), utang-piutang (debts, debt_payments,
   /// transactions.debt_id/debt_payment_id). v6: target tabungan (goals,
-  /// goal_deposits).
-  int get schemaVersion => 6;
+  /// goal_deposits). v7: patungan (splits, split_members, split_items,
+  /// transactions.split_id, debts.split_id).
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -68,6 +70,14 @@ class AppDatabase extends _$AppDatabase {
           if (from < 6) {
             await m.createTable(goals);
             await m.createTable(goalDeposits);
+          }
+          if (from < 7) {
+            await m.createTable(splits);
+            await m.createTable(splitMembers);
+            await m.createTable(splitItems);
+            await m.addColumn(transactions, transactions.splitId);
+            // Dari < v5 tabel debts baru saja dibuat lengkap (sudah ada split_id).
+            if (from >= 5) await m.addColumn(debts, debts.splitId);
           }
           // Pastikan relasi data tetap utuh sesudah migrasi.
           final List<QueryRow> broken = await customSelect('PRAGMA foreign_key_check').get();

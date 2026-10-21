@@ -468,6 +468,33 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                       onChanged: _setKind,
                                       isLocked: _editing == null ? null : (k) => kindLockReason(_editing!, k) != null,
                                     ),
+                                    if (!_isEdit) ...[
+                                      const SizedBox(height: AppSpace.x8),
+                                      Center(
+                                        child: Pressable(
+                                          onTap: () => context.pushReplacement(Routes.patunganBaru),
+                                          semanticLabel: 'Bayar bareng teman? Buka Patungan',
+                                          child: Container(
+                                            height: 32,
+                                            padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12),
+                                            decoration: BoxDecoration(color: c.chip, borderRadius: AppRadius.pillAll),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(HiIcons.people, size: 16, color: c.accentText),
+                                                const SizedBox(width: AppSpace.x8 - 2),
+                                                Flexible(
+                                                  child: Text('Bayar bareng teman? Patungan ›',
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: t.caption.copyWith(color: c.accentText, fontWeight: FontWeight.w700)),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                                 Padding(

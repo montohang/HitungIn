@@ -28,6 +28,8 @@ import '../../core/widgets/hi_icons.dart';
 /// Asal transaksi untuk chip di bawah nominal (desain: "Pengeluaran · dicatat manual").
 String txOrigin(Txn tx) => tx.debtId != null
     ? 'tidak masuk laporan'
+    : tx.splitId != null
+    ? 'bagianmu di patungan'
     : tx.billId != null
     ? 'dari tagihan'
     : tx.recurringId != null
@@ -134,7 +136,7 @@ class TxDetailScreen extends ConsumerWidget {
             children: [
               ScreenHeader(
                 title: 'Detail transaksi',
-                trailing: d == null || d.tx.kind.isDebt
+                trailing: d == null || d.tx.kind.isDebt || d.tx.splitId != null
                     ? null
                     : Pressable(
                         onTap: () => context.push(Uri(path: Routes.catat, queryParameters: {'id': '$id'}).toString()),
@@ -256,6 +258,21 @@ class TxDetailScreen extends ConsumerWidget {
                   icon: HiIcons.people,
                   variant: AppButtonVariant.soft,
                   onPressed: () => context.push(Uri(path: Routes.utang, queryParameters: {'id': '${d.tx.debtId}'}).toString()),
+                ),
+              ] else if (d != null && d.tx.splitId != null) ...[
+                const SizedBox(height: AppSpace.x16),
+                Text(
+                  'Bagianmu di sebuah patungan. Ubah atau hapus dari layar Patungan supaya catatan teman ikut menyesuaikan.',
+                  textAlign: TextAlign.center,
+                  style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted, height: 1.5),
+                ),
+                const SizedBox(height: AppSpace.x12),
+                AppButton(
+                  key: const Key('buka-patungan'),
+                  label: 'Buka Patungan',
+                  icon: HiIcons.people,
+                  variant: AppButtonVariant.soft,
+                  onPressed: () => context.push(Routes.patunganDetail(d.tx.splitId!)),
                 ),
               ] else if (d != null) ...[
                 const SizedBox(height: AppSpace.x16),

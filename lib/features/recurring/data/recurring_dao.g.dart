@@ -8,6 +8,7 @@ mixin _$RecurringDaoMixin on DatabaseAccessor<AppDatabase> {
   $CategoriesTable get categories => attachedDatabase.categories;
   $RecurringTxsTable get recurringTxs => attachedDatabase.recurringTxs;
   $BillsTable get bills => attachedDatabase.bills;
+  $SplitsTable get splits => attachedDatabase.splits;
   $DebtsTable get debts => attachedDatabase.debts;
   $DebtPaymentsTable get debtPayments => attachedDatabase.debtPayments;
   $TransactionsTable get transactions => attachedDatabase.transactions;
@@ -25,6 +26,8 @@ class RecurringDaoManager {
       $$RecurringTxsTableTableManager(_db.attachedDatabase, _db.recurringTxs);
   $$BillsTableTableManager get bills =>
       $$BillsTableTableManager(_db.attachedDatabase, _db.bills);
+  $$SplitsTableTableManager get splits =>
+      $$SplitsTableTableManager(_db.attachedDatabase, _db.splits);
   $$DebtsTableTableManager get debts =>
       $$DebtsTableTableManager(_db.attachedDatabase, _db.debts);
   $$DebtPaymentsTableTableManager get debtPayments =>

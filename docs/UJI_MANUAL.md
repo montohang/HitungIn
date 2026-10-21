@@ -233,3 +233,17 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] Ambil: kembali jadi uang bebas; tidak bisa melebihi terkumpul. Tahan riwayat → hapus setoran.
 - [ ] Versi gratis: target aktif kedua → lembar Premium.
 - [ ] Backup & pulihkan membawa target dan setorannya.
+
+## 14. Patungan (P3c, baru)
+- [ ] Pasang di atas versi lama: migrasi v6 → v7, data lama utuh.
+- [ ] Lainnya › Patungan: tampilan kosong → Buat patungan; Catat › "Bayar bareng teman? Patungan ›" membuka form.
+- [ ] Rata 4 orang Rp450.000, aku yang bayar: pengeluaran Rp112.500 di Laporan, 3 piutang di Utang-piutang, saldo −Rp450.000.
+- [ ] Teman yang bayar: pengeluaran bagianku + utangku ke dia, saldo tidak berubah.
+- [ ] Custom: Simpan ditolak bila sisa ≠ Rp0.
+- [ ] Per menu: tambah item (jumlah ×n), ketuk inisial untuk pilih siapa ikut, PB1/service/ongkir/diskon; jumlah bagian = total.
+- [ ] Detail: Tandai lunas → status "n/3 sudah bayar"; semua lunas → perayaan.
+- [ ] Bagikan ke grup: gambar + teks / gambar / teks; info transfer diingat; kembali tanpa PIN.
+- [ ] Ubah patungan sebelum ada pembayaran; setelah ada pembayaran ditolak dengan pesan.
+- [ ] Hapus patungan: saldo kembali, piutang & pengeluaran ikut hilang.
+- [ ] Detail transaksi bagianku: "bagianmu di patungan" + tombol Buka Patungan, tidak bisa diedit langsung.
+- [ ] Backup & pulihkan membawa patungan.

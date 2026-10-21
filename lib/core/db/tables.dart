@@ -53,6 +53,16 @@ enum DebtDirection {
   final String label;
 }
 
+/// Cara bagi patungan (v7).
+enum SplitMode {
+  rata('Rata'),
+  custom('Custom'),
+  menu('Per menu');
+
+  const SplitMode(this.label);
+  final String label;
+}
+
 /// Pengulangan tagihan.
 enum BillRepeat {
   sekali('Sekali'),
@@ -145,6 +155,9 @@ class Transactions extends Table {
 
   /// Pembayaran utang asal (v5); kosong = transaksi pinjaman awal.
   IntColumn get debtPaymentId => integer().nullable().references(DebtPayments, #id, onDelete: KeyAction.cascade)();
+
+  /// Patungan asal (v7): pengeluaran sebesar bagianku. Ikut terhapus bersama patungannya.
+  IntColumn get splitId => integer().nullable().references(Splits, #id, onDelete: KeyAction.cascade)();
   DateTimeColumn get occurredAt => dateTime()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
@@ -218,6 +231,9 @@ class Debts extends Table {
   /// Jatuh tempo (tanggal saja), opsional.
   DateTimeColumn get dueDate => dateTime().nullable()();
   TextColumn get note => text().withDefault(const Constant(''))();
+
+  /// Patungan asal (v7); ikut terhapus bersama patungannya.
+  IntColumn get splitId => integer().nullable().references(Splits, #id, onDelete: KeyAction.cascade)();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -230,6 +246,55 @@ class DebtPayments extends Table {
   IntColumn get walletId => integer().nullable().references(Wallets, #id, onDelete: KeyAction.setNull)();
   DateTimeColumn get paidAt => dateTime()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Patungan (v7, P3c). Bagianku jadi pengeluaran ([Transactions.splitId]);
+/// bagian teman jadi catatan utang-piutang ([Debts.splitId]).
+@DataClassName('Split')
+class Splits extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get title => text().withLength(min: 1, max: 60)();
+  TextColumn get mode => textEnum<SplitMode>()();
+  IntColumn get total => integer().check(total.isBiggerThanValue(0))();
+
+  /// Dompet yang dipakai: membayar (aku yang bayar) atau tempat utangku dicatat.
+  IntColumn get walletId => integer().references(Wallets, #id)();
+  IntColumn get categoryId => integer().nullable().references(Categories, #id, onDelete: KeyAction.setNull)();
+
+  /// Per menu: pajak & service dalam persen ×10 (100 = 10%), ongkir, diskon.
+  IntColumn get taxPermille => integer().withDefault(const Constant(0))();
+  IntColumn get servicePermille => integer().withDefault(const Constant(0))();
+  IntColumn get extraFee => integer().withDefault(const Constant(0))();
+  IntColumn get discount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get occurredAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Peserta patungan beserta bagiannya (v7). Tepat satu [isMe]; [payer] =
+/// yang membayar ke kasir.
+@DataClassName('SplitMember')
+class SplitMembers extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get splitId => integer().references(Splits, #id, onDelete: KeyAction.cascade)();
+  TextColumn get name => text().withLength(min: 1, max: 40)();
+  BoolColumn get isMe => boolean().withDefault(const Constant(false))();
+  BoolColumn get payer => boolean().withDefault(const Constant(false))();
+  IntColumn get share => integer().check(share.isBiggerOrEqualValue(0))();
+  IntColumn get position => integer()();
+
+  /// Catatan utang-piutang untuk bagian ini (kosong untuk aku / bila tidak perlu).
+  IntColumn get debtId => integer().nullable().references(Debts, #id, onDelete: KeyAction.setNull)();
+}
+
+/// Item menu patungan (v7). [who] = posisi peserta yang ikut, dipisah koma.
+@DataClassName('SplitItem')
+class SplitItems extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get splitId => integer().references(Splits, #id, onDelete: KeyAction.cascade)();
+  TextColumn get name => text().withLength(min: 1, max: 60)();
+  IntColumn get price => integer().check(price.isBiggerThanValue(0))();
+  TextColumn get who => text()();
+  IntColumn get position => integer()();
 }
 
 /// Target tabungan (v6, P3b). Terkumpul = jumlah [GoalDeposits]. Uangnya
