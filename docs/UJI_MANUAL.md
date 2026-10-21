@@ -227,8 +227,9 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] "Buat target baru" dari layar perayaan langsung membuka form.
 - [x] Arsipkan target → pindah ke Diarsipkan, total disisihkan & Jatah dilepas.
 - [x] Kartu kecil Target tabungan di Beranda (ikut Atur Beranda).
-- [ ] Pengingat setoran mingguan (bawaan mati) muncul pada hari & jam pilihan; ketuk → detail target.
-- [ ] Catat cepat "nabung 100rb bali" → lembar setoran Liburan Bali terisi.
-- [ ] Ambil: kembali jadi uang bebas; tidak bisa melebihi terkumpul. Tahan riwayat → hapus setoran.
+- [x] Pengingat setoran mingguan (bawaan mati) terjadwal & terkirim pada hari/jam pilihan (Selasa 17.00, terkirim 17.04).
+- [ ] Ketuk notifikasi pengingat setoran → detail target.
+- [x] Catat cepat "nabung 100rb bali" → lembar setoran Liburan Bali terisi, dompet otomatis terpilih.
+- [x] Ambil: kembali jadi uang bebas; tidak bisa melebihi terkumpul. Tahan riwayat → hapus setoran.
 - [ ] Versi gratis: target aktif kedua → lembar Premium.
 - [ ] Backup & pulihkan membawa target dan setorannya.
