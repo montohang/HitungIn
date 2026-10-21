@@ -182,7 +182,7 @@ class _Empty extends StatelessWidget {
 }
 
 String splitStatusLabel(SplitFull s, SplitProgress p) {
-  if (!s.iPaid) return p.iOwe == 0 ? 'Utangmu lunas' : 'Utangmu ${Rupiah.compact(p.iOwe)}';
+  if (!s.iPaid) return p.iOwe == 0 ? 'Utangmu lunas' : 'Utangmu ${Rupiah.format(p.iOwe)}';
   if (p.count == 0) return 'Selesai';
   return p.settled == p.count ? 'Semua lunas' : '${p.settled}/${p.count} sudah bayar';
 }
@@ -440,7 +440,7 @@ class _MemberRow extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpace.x8 + 2, vertical: AppSpace.x4 + 1),
                     decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
-                    child: Text(s.iPaid ? 'Tandai lunas' : 'Bayar',
+                    child: Text(s.iPaid ? 'Tandai lunas' : 'Bayar ${Rupiah.format(status.left)}',
                         style: t.label.copyWith(color: c.accentText, fontWeight: FontWeight.w700)),
                   ),
                 )

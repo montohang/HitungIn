@@ -276,8 +276,8 @@ class _SplitFormScreenState extends ConsumerState<SplitFormScreen> {
     final List<String> effects = _payer == 0
         ? [
             'Pengeluaranmu ${Rupiah.format(shares[0])} · $catName (masuk Laporan)',
-            if (_names.length > 1)
-              'Piutang: ${[for (int i = 1; i < _names.length; i++) if (shares[i] > 0) '${_names[i]} ${Rupiah.compact(shares[i])}'].join(', ')}',
+            if (shares.skip(1).any((v) => v > 0))
+              'Piutang: ${[for (int i = 1; i < _names.length; i++) if (shares[i] > 0) '${_names[i]} ${Rupiah.format(shares[i])}'].join(', ')}',
             'Saldo $walletName berkurang ${Rupiah.format(total)}',
           ]
         : [
@@ -333,8 +333,7 @@ class _SplitFormScreenState extends ConsumerState<SplitFormScreen> {
                         semanticLabel: 'Tambah peserta',
                         child: Container(
                           height: 36,
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12),
-                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12, vertical: AppSpace.x8),
                           decoration: BoxDecoration(borderRadius: AppRadius.pillAll, border: Border.all(color: c.line)),
                           child: Text('+ Tambah', style: t.caption.copyWith(color: c.accentText, fontWeight: FontWeight.w700)),
                         ),
