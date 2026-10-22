@@ -164,7 +164,7 @@ void main() {
       '7×Ayam Goreng 1 Porsi=308000',
       '3×Sayur Asem=16500',
       '3×Kerupuk Udang Besar=60000',
-      '1×Nasi Porsi=5500',
+      '1×Nasi 1 Porsi=5500',
     ]);
     expect((r.subtotal, r.total, r.payment, r.itemsMatchTotal), (390000, 390000, 'GOPAY', true));
   });
@@ -216,12 +216,31 @@ void main() {
       'Gopay',
     ], now: now);
     expect([for (final i in r.items) '${i.qty}×${i.name}=${i.price}'], [
-      '7×Ayam Goreng Porsi=308000',
+      '7×Ayam Goreng 1 Porsi=308000',
       '3×Sayur Asem=16500',
       '3×Kerupuk Udang Besar=60000',
       '5×Teh Manis=82500',
     ]);
     expect((r.total, r.payment, r.itemsMatchTotal), (467000, 'GOPAY', true));
     expect(r.unsure, isEmpty);
+  });
+
+  test('OCR membaca angka TOTAL keliru (565 → 585) tapi rincian & subtotal sepakat → 565, cek lagi; "Kp 565.000" bukan item', () {
+    final ReceiptScan r = parseReceipt([
+      'Warung Contoh',
+      '25 Sep 2026  13:38',
+      'SAYUR ASEM',
+      '3x  @5.500  16.500',
+      'TEH MANIS  32.000',
+      '2x @16.000',
+      'Kp 48.500',
+      'Subtotal',
+      'Ru 46.500',
+      'Total',
+      'Gopay',
+    ], now: now);
+    expect([for (final i in r.items) '${i.qty}×${i.name}=${i.price}'], ['3×Sayur Asem=16500', '2×Teh Manis=32000']);
+    expect((r.subtotal, r.total, r.itemsMatchTotal), (48500, 48500, true));
+    expect(r.unsure, contains('total'));
   });
 }

@@ -351,7 +351,8 @@ ReceiptScan parseReceipt(List<String> rawRows, {DateTime? now}) {
     }
     final int? price = _lastAmount(row);
     final RegExpMatch? q = _qtyPattern.firstMatch(row);
-    final bool hasName = _hasName(row);
+    // "Kp 565.000": hanya nominal ("Rp" salah baca), bukan nama.
+    final bool hasName = _hasName(row) && !_bareAmount.hasMatch(row);
     // Baris "7x @44.000" / "@16.500" di bawah item: hanya harga satuan, jadi
     // qty = harga item terakhir ÷ harga satuan.
     final RegExpMatch? at = RegExp(r'@\s*(?:rp\.?\s*)?(\d{1,3}(?:[.,]\d{3})+|\d{3,7})', caseSensitive: false).firstMatch(row);
@@ -385,7 +386,7 @@ ReceiptScan parseReceipt(List<String> rawRows, {DateTime? now}) {
     final String name = !hasName
         ? _cleanName(near.join(' '))
         : descriptor
-            ? _cleanName('${near.last} ${row.replaceAll(RegExp(r'^\s*\d{1,3}\s+'), '')}')
+            ? _cleanName('${near.last} $row')
             : near.isNotEmpty && own.split(' ').length == 1 && _leadingQty(row) == null
                 // "Kerupuk Kulit Babi" / "Besar 60.000": sambungan nama di atasnya.
                 ? _cleanName('${near.join(' ')} $own')
@@ -409,6 +410,12 @@ ReceiptScan parseReceipt(List<String> rawRows, {DateTime? now}) {
     total = totalCandidates.contains(expected) && expected > 0
         ? expected
         : totalCandidates.reduce((a, b) => a > b ? a : b);
+    // Rincian & subtotal sepakat, tapi angka TOTAL beda (salah baca OCR, mis.
+    // 565 → 585): pakai rincian, tandai cek lagi.
+    if (total != expected && itemsSum > 0 && itemsSum == subtotal && tax + service + extraFee + discount == 0) {
+      total = expected;
+      totalUnsure = true;
+    }
   } else if (paymentAmount != null) {
     total = paymentAmount;
     totalUnsure = true;
