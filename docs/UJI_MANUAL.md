@@ -264,11 +264,11 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [ ] Budget total diatur & belanja cepat → kartu Prakiraan di Beranda & Budget.
 
 ## 16. Scan struk (P3e, baru)
-- [ ] Catat › ikon scan di Catat cepat → lembar Kamera/Galeri, lencana "offline, foto dihapus", sisa kuota (gratis).
-- [ ] Galeri › struk Indomaret uji → "Membaca struk…" → Periksa: Rp87.400, Indomaret, 18 Okt 19.42 (Cek lagi), GoPay, Belanja; "7 item cocok".
-- [ ] Pakai → Catat terisi (nominal, catatan, tanggal, dompet, kategori); simpan normal.
-- [ ] Patungan › Per menu › Scan struk resto uji → 6 item, PB1 10%, Service 5%, QRIS; Pakai 6 item → item & chip terisi, total Rp411.700.
+- [x] Catat › ikon scan di Catat cepat → lembar Kamera/Galeri, lencana "offline, foto dihapus", sisa kuota (gratis).
+- [x] Galeri › struk Indomaret uji → "Membaca struk…" → Periksa: Rp87.400, Indomaret, 18 Okt 19.42 (Cek lagi), GoPay, Belanja; "7 item cocok". (OCR nyata: spasi di tanggal & O→0 ditangani.)
+- [x] Pakai → Catat terisi (nominal, catatan, tanggal, dompet, kategori); simpan normal.
+- [x] Patungan › Per menu › Scan struk resto uji → 6 item, PB1 10%, Service 5%, QRIS; Pakai 6 item → item & chip terisi, total Rp411.700.
 - [ ] Ketuk item di layar periksa → ubah; tahan → hapus.
-- [ ] Kamera: aplikasi kamera bawaan terbuka; batal → kembali tanpa error.
-- [ ] Tidak ada foto tertinggal di folder cache aplikasi setelah scan / batal.
+- [x] Kamera: aplikasi kamera bawaan terbuka; batal → kembali tanpa error.
+- [x] Tidak ada foto tertinggal di folder cache aplikasi setelah scan / batal.
 - [ ] Versi gratis: scan ke-4 dalam sebulan → lembar "Jatah scan gratis bulan ini habis".

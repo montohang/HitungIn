@@ -163,7 +163,7 @@ const Map<String, int> _months = {
     y = int.parse(x.group(1)!);
     m = int.parse(x.group(2)!);
     d = int.parse(x.group(3)!);
-  } else if ((x = RegExp(r'(?<!\d)(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})(?!\d)').firstMatch(up)) != null) {
+  } else if ((x = RegExp(r'(?<!\d)(\d{1,2})\s?[-/.]\s?(\d{1,2})\s?[-/.]\s?(\d{2,4})(?!\d)').firstMatch(up)) != null) {
     d = int.parse(x!.group(1)!);
     m = int.parse(x.group(2)!);
     final String ys = x.group(3)!;
@@ -228,7 +228,13 @@ int? _leadingQty(String row) {
   return q >= 1 && q <= 99 ? q : null;
 }
 
-ReceiptScan parseReceipt(List<String> rows, {DateTime? now}) {
+/// Perbaiki salah baca OCR yang umum: huruf O di antara angka → 0.
+String normalizeOcrRow(String row) => row
+    .replaceAllMapped(RegExp(r'(?<=\d)[Oo](?=[\d.,]|[A-Za-z]{1,2}\b|$)'), (_) => '0')
+    .replaceAllMapped(RegExp(r'(?<=[\d.,])[Oo](?=\d)'), (_) => '0');
+
+ReceiptScan parseReceipt(List<String> rawRows, {DateTime? now}) {
+  final List<String> rows = [for (final r in rawRows) normalizeOcrRow(r)];
   final List<String> up = [for (final r in rows) r.toUpperCase()];
   final DateTime today = now ?? DateTime.now();
 

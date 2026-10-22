@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -38,8 +39,12 @@ typedef ScanResult = ({ReceiptScan scan, int amount, String note, DateTime? date
 ({int? walletId, int? categoryId}) guessFromReceipt(ReceiptScan s, List<Wallet> wallets, List<Category> categories) {
   final QuickEntryParser p = QuickEntryParser(wallets: wallets, categories: categories);
   final int? wallet = s.payment == null ? null : p.parse(s.payment!.toLowerCase()).walletId;
-  final String text = [s.merchant ?? '', for (final i in s.items.take(4)) i.name].join(' ').toLowerCase();
-  final int? cat = text.trim().isEmpty ? null : p.parse(text).categoryId;
+  // Nama toko lebih menentukan daripada nama item (Indomaret → Belanja walau ada "indomie").
+  int? cat = s.merchant == null ? null : p.parse(s.merchant!.toLowerCase()).categoryId;
+  if (cat == null) {
+    final String text = [for (final i in s.items.take(4)) i.name].join(' ').toLowerCase();
+    cat = text.trim().isEmpty ? null : p.parse(text).categoryId;
+  }
   return (walletId: wallet, categoryId: cat);
 }
 
@@ -219,7 +224,9 @@ class _ScanReviewScreenState extends ConsumerState<ScanReviewScreen> {
       _image = await f.readAsBytes();
       if (mounted) setState(() {});
       final List<OcrLine> lines = await ref.read(receiptOcrProvider).read(widget.path);
-      final ReceiptScan scan = parseReceipt(receiptRows(lines), now: ref.read(clockProvider)());
+      final List<String> rows = receiptRows(lines);
+      if (kDebugMode) debugPrint('SCAN rows:\n${rows.join('\n')}');
+      final ReceiptScan scan = parseReceipt(rows, now: ref.read(clockProvider)());
       if (!mounted) return;
       if (scan.isEmpty) {
         setState(() => _error = 'Teks struk tidak terbaca. Coba foto lebih terang dan lurus.');

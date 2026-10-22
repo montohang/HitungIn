@@ -119,4 +119,17 @@ void main() {
     expect((r.total, r.unsure.contains('total')), (23000, true));
     expect(parseReceipt(const [], now: now).isEmpty, isTrue);
   });
+
+  test('hasil OCR nyata: spasi di tengah tanggal & huruf O dibaca sebagai 0', () {
+    expect(parseReceiptDate('18.10. 26-19:42 2KM1-08')?.date, DateTime(2026, 10, 18, 19, 42));
+    expect(normalizeOcrRow('AQUA 60OML 2x3.500  7.0O0'), 'AQUA 600ML 2x3.500  7.000');
+    final ReceiptScan r = parseReceipt([
+      'INDOMARET',
+      'JL. KEMANG RAYA 12',
+      '18.10. 26-19:42 2KM1-08',
+      'AQUA 60OML 2x3.500  7.000',
+      'TOTAL BELANJA  7.000',
+    ], now: now);
+    expect((r.date, r.items.single.name), (DateTime(2026, 10, 18, 19, 42), 'Aqua 600ml'));
+  });
 }
