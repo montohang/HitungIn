@@ -190,4 +190,38 @@ void main() {
     expect([for (final i in r.items) '${i.qty}×${i.name}=${i.price}'], ['1×Es Kopi Aren=7000']);
     expect((r.total, r.payment, r.itemsMatchTotal), (7000, 'CASH', true));
   });
+
+  test('pola POS lain: harga di baris nama, "7y @44.000" / "@16.500" di bawahnya jadi qty, nama terpotong, "Total" setelah nominal', () {
+    final ReceiptScan r = parseReceipt([
+      'xkk',
+      'Warung Contoh Sejahtera',
+      '25 Sep 2026  13:38',
+      'Served By  Kasir',
+      '*Dine In*',
+      'AYAM GORENG',
+      '1 PORSI  308.000',
+      '7y  @44.000',
+      'SAYUR ASEM  16.500',
+      '3x @5.500',
+      'Kerupuk Udang',
+      'Besar  60.000',
+      '3x  @20.000',
+      'TEH MANIS  82.500',
+      '@16.500',
+      '5X',
+      'Rp 467.000',
+      'Subtota I  Rp 467.000',
+      'kp 467.000',
+      'Total',
+      'Gopay',
+    ], now: now);
+    expect([for (final i in r.items) '${i.qty}×${i.name}=${i.price}'], [
+      '7×Ayam Goreng Porsi=308000',
+      '3×Sayur Asem=16500',
+      '3×Kerupuk Udang Besar=60000',
+      '5×Teh Manis=82500',
+    ]);
+    expect((r.total, r.payment, r.itemsMatchTotal), (467000, 'GOPAY', true));
+    expect(r.unsure, isEmpty);
+  });
 }
