@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,5 +48,20 @@ void main() {
     expect((resto.walletId, cat(resto.categoryId)), (3, 'Makan & Minum'));
     final qris = guessFromReceipt(const ReceiptScan(merchant: 'Toko Abc', payment: 'QRIS'), wallets, categories);
     expect(qris.walletId, isNull, reason: 'QRIS bukan dompet');
+  });
+
+  test('sisa pemilih gambar & pemindai dihapus; folder lain di cache (share, file_picker) tidak disentuh', () async {
+    final Directory tmp = await Directory.systemTemp.createTemp('hitungin_scan_');
+    final Directory picked = await Directory('${tmp.path}/3f25223e-915c-4399-a78e-2764a872e056').create();
+    await File('${picked.path}/1000060957.png').writeAsBytes([1, 2, 3]);
+    await File('${tmp.path}/5675890d-988a-4073-a53d-6573025168e37093235097738630678.jpg').create();
+    final Directory scanner = await Directory('${tmp.path}/mlkit_docscan_ui_client').create();
+    await File('${scanner.path}/page_0.jpg').writeAsBytes([1]);
+    await Directory('${tmp.path}/share').create();
+    await File('${tmp.path}/share/rekap.png').writeAsBytes([1]);
+    await purgePickerTemp(tmp);
+    final List<String> left = [for (final e in tmp.listSync(recursive: true)) e.path.substring(tmp.path.length + 1)]..sort();
+    expect(left, ['mlkit_docscan_ui_client', 'share', 'share/rekap.png']);
+    await tmp.delete(recursive: true);
   });
 }

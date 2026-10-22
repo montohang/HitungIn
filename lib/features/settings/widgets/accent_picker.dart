@@ -251,7 +251,11 @@ class _PhotoColorSheetState extends ConsumerState<_PhotoColorSheet> {
   Future<void> _pick() async {
     final PlatformFile? f =
         await withAutoLockPaused(ref, () => FilePicker.pickFile(dialogTitle: 'Pilih foto', type: FileType.image));
-    if (f != null) await _load(await f.xFile.readAsBytes());
+    if (f == null) return;
+    final Uint8List bytes = await f.xFile.readAsBytes();
+    // Salinan sementara dari pemilih file tidak boleh tertinggal di HP.
+    await FilePicker.clearTemporaryFiles();
+    await _load(bytes);
   }
 
   @override

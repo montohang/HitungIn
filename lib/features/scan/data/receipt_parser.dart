@@ -137,10 +137,15 @@ const List<String> _paymentWords = [
   'QRIS', 'GOPAY', 'OVO', 'DANA', 'SHOPEEPAY', 'SPAY', 'LINKAJA', 'DEBIT', 'KREDIT', 'CREDIT', 'BCA', 'BRI', 'MANDIRI', 'BNI',
   'FLAZZ', 'E-MONEY', 'EMONEY', 'TUNAI', 'CASH',
 ];
+const List<String> _headerLabels = [
+  'RECEIPT', 'ORDER', 'BILL', 'SERVED', 'COLLECTED', 'KASIR', 'CASHIER', 'TABLE', 'MEJA', 'DINE IN', 'TAKE AWAY',
+  'TAKEAWAY', 'CUSTOMER', 'PELANGGAN', 'TRANSAKSI', 'STRUK', 'INVOICE',
+];
 const List<String> _headerNoise = ['JL', 'JL.', 'JALAN', 'TELP', 'TLP', 'TEL', 'NPWP', 'NO', 'NO.', 'KASIR', 'CASHIER', 'STRUK', 'MEJA', 'TABLE', 'ALAMAT', 'WA'];
 
 bool _isSummary(String up) =>
     _has(up, _subtotalWords) ||
+    up.replaceAll(' ', '').startsWith('SUBTOTA') ||
     (_has(up, _totalWords) && !_has(up, _notTotal)) ||
     _has(up, _taxWords) ||
     _has(up, _serviceWords) ||
@@ -193,7 +198,7 @@ const Map<String, int> _months = {
 
 // ---------------------------------------------------------------- utama
 
-final RegExp _qtyPattern = RegExp(r'(?<![\d.,])(\d{1,3})\s*[xX×@]\s*(?:rp\.?\s*)?(\d{1,3}(?:[.,]\d{3})+|\d{3,7})', caseSensitive: false);
+final RegExp _qtyPattern = RegExp(r'(?<![\d.,])(\d{1,3})\s*(?:[xX×]\s*@?|@)\s*(?:rp\.?\s*)?(\d{1,3}(?:[.,]\d{3})+|\d{3,7})', caseSensitive: false);
 final RegExp _letters = RegExp(r'[A-Za-z]{2,}');
 
 /// Nama item: buang pola "2 x 3.500", harga paling kanan, dan qty di depan.
@@ -202,7 +207,7 @@ String _cleanName(String s) {
   String t = s.replaceAll(_qtyPattern, ' ');
   final List<RegExpMatch> ms = _amountToken.allMatches(t).toList();
   if (ms.isNotEmpty && t.substring(ms.last.end).trim().isEmpty) t = t.substring(0, ms.last.start);
-  t = t.replaceAll(RegExp(r'^\s*\d{1,3}\s+(?=[A-Za-z])'), ''); // "2 NASI GORENG"
+  t = t.replaceAll(RegExp(r'^\s*\d{1,3}\s*(?:[xX×]\s+)?(?=[A-Za-z])'), ''); // "2 NASI GORENG", "1 x ICE LATTE"
   t = t.replaceAll(RegExp(r'[*#|]+'), ' ').replaceAll(RegExp(r'\s{2,}'), ' ').trim();
   return _titleCase(t);
 }
@@ -221,8 +226,20 @@ String _titleCase(String s) {
       .join(' ');
 }
 
+/// Baris acak dari logo (mis. "imukk", "1seoaII X ["): diawali huruf kecil,
+/// atau tidak punya satu pun kata huruf ≥ 4 / dua kata huruf ≥ 3.
+bool _looksLikeLogoNoise(String row) {
+  final String t = row.trim();
+  if (t.isEmpty) return true;
+  if (RegExp(r'^[a-z]').hasMatch(t)) return true;
+  final List<String> words = [for (final w in t.split(RegExp(r'[\s,]+'))) if (RegExp(r"^[A-Za-z&.'-]+$").hasMatch(w)) w];
+  final bool longWord = words.any((w) => w.replaceAll(RegExp(r'[^A-Za-z]'), '').length >= 4);
+  final bool twoWords = words.where((w) => w.length >= 3).length >= 2;
+  return !(longWord || twoWords);
+}
+
 int? _leadingQty(String row) {
-  final RegExpMatch? m = RegExp(r'^\s*(\d{1,3})\s+[A-Za-z]').firstMatch(row);
+  final RegExpMatch? m = RegExp(r'^\s*(\d{1,3})\s*(?:[xX×]\s+)?[A-Za-z]').firstMatch(row);
   if (m == null) return null;
   final int q = int.parse(m.group(1)!);
   return q >= 1 && q <= 99 ? q : null;
@@ -240,9 +257,10 @@ ReceiptScan parseReceipt(List<String> rawRows, {DateTime? now}) {
 
   // Toko: baris berhuruf pertama di bagian atas yang bukan alamat/telepon.
   String? merchant;
-  for (int i = 0; i < rows.length && i < 5; i++) {
+  for (int i = 0; i < rows.length && i < 6; i++) {
     final String u = up[i];
     if (!_letters.hasMatch(u) || _isSummary(u) || parseReceiptDate(u) != null) continue;
+    if (_looksLikeLogoNoise(rows[i])) continue;
     final List<String> words = u.split(RegExp(r'[\s,]+'));
     if (words.any(_headerNoise.contains)) continue;
     if (RegExp(r'\d{5,}').hasMatch(u)) continue;
@@ -275,7 +293,7 @@ ReceiptScan parseReceipt(List<String> rawRows, {DateTime? now}) {
     int? amt = _lastAmount(rows[i]);
     // Nominal di baris berikutnya ("TOTAL" lalu "87.400").
     if (amt == null && i + 1 < rows.length && !_letters.hasMatch(up[i + 1])) amt = _lastAmount(rows[i + 1]);
-    final bool isSub = _has(u, _subtotalWords);
+    final bool isSub = _has(u, _subtotalWords) || u.replaceAll(' ', '').startsWith('SUBTOTA');
     final bool isTotal = !isSub && _has(u, _totalWords) && !_has(u, _notTotal);
     if (isSub || isTotal || _has(u, _taxWords) || _has(u, _serviceWords)) firstSummary = i < firstSummary ? i : firstSummary;
     if (amt == null) continue;
@@ -311,20 +329,26 @@ ReceiptScan parseReceipt(List<String> rawRows, {DateTime? now}) {
   }
 
   // Item: baris sebelum ringkasan pertama yang punya harga & huruf.
-  String? pendingName;
+  // Baris nama tanpa harga sejak harga terakhir ("PANGGANG", "1 PORSI").
+  final List<String> pending = [];
   final int headerEnd = rows.indexWhere((r) => parseReceiptDate(r) != null);
   for (int i = headerEnd < 0 ? 0 : headerEnd + 1; i < firstSummary && i < rows.length; i++) {
     final String row = rows[i];
     final String u = up[i];
-    if (RegExp(r'^[-=_*.\s]{3,}$').hasMatch(row) || _has(u, _paymentWords) || _has(u, _discountWords)) {
-      pendingName = null;
+    if (RegExp(r'^[-=_*.\s]{3,}$').hasMatch(row) ||
+        _has(u, _paymentWords) ||
+        _has(u, _discountWords) ||
+        _has(u, _headerLabels) ||
+        RegExp(r'^\*.*\*$').hasMatch(row.trim()) ||
+        row.contains(':')) {
+      pending.clear();
       continue;
     }
     final int? price = _lastAmount(row);
     final RegExpMatch? q = _qtyPattern.firstMatch(row);
     final bool hasName = _hasName(row);
     if (price == null) {
-      if (hasName && i > 0) pendingName = _cleanName(row);
+      if (hasName && i > 0) pending.add(row);
       continue;
     }
     int qty = 1;
@@ -335,14 +359,22 @@ ReceiptScan parseReceipt(List<String> rawRows, {DateTime? now}) {
     } else {
       qty = _leadingQty(row) ?? 1;
     }
-    final String name = hasName ? _cleanName(row) : (pendingName ?? '');
-    if (name.isEmpty || name.length < 2) {
-      pendingName = null;
-      continue;
-    }
+    // Nama di baris sebelumnya (maks. 2 baris terdekat); baris "1 PORSI 5.500"
+    // melengkapi nama di atasnya.
+    final List<String> near = pending.length > 2 ? pending.sublist(pending.length - 2) : pending;
+    final String own = hasName ? _cleanName(row) : '';
+    final bool descriptor = hasName && near.isNotEmpty && own.split(' ').length <= 2 && _leadingQty(row) != null;
+    final String name = !hasName
+        ? _cleanName(near.join(' '))
+        : descriptor
+            ? _cleanName('${near.last} ${row.replaceAll(RegExp(r'^\s*\d{1,3}\s+'), '')}')
+            : own;
+    pending.clear();
+    // Baris varian/topping ("- Original 7.000") yang mengulang harga item di atasnya.
+    if (RegExp(r'^\s*[-+]').hasMatch(row) && items.isNotEmpty && items.last.price == price) continue;
+    if (name.isEmpty || name.length < 2) continue;
     if (merchant != null && name.toLowerCase() == merchant.toLowerCase()) continue;
     items.add(ReceiptItem(name: name, qty: qty, price: price));
-    pendingName = null;
   }
 
   // Total: kandidat yang cocok dengan rincian, lalu yang terbesar; tanpa kata

@@ -32,6 +32,8 @@ Future<bool> runRestoreFlow(BuildContext context, WidgetRef ref, {bool onboardin
   );
   if (file == null || !context.mounted) return false;
   final Uint8List bytes = await file.xFile.readAsBytes();
+  // Salinan sementara berkas cadangan tidak boleh tertinggal di HP.
+  await FilePicker.clearTemporaryFiles();
   if (!context.mounted) return false;
   final String? password = await askBackupPassword(context, confirm: false);
   if (password == null || !context.mounted) return false;

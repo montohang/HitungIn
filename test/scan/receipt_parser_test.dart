@@ -132,4 +132,62 @@ void main() {
     ], now: now);
     expect((r.date, r.items.single.name), (DateTime(2026, 10, 18, 19, 42), 'Aqua 600ml'));
   });
+
+  test('pola struk POS resto: logo jadi teks acak, nama item beberapa baris, "7x @44.000", "Subtota l", header kunci-nilai', () {
+    final ReceiptScan r = parseReceipt([
+      'xukk',
+      '1seoaII X [',
+      'Warung Contoh Sejahtera',
+      'Jl. Fiktif No. 1, Kota Contoh',
+      '081200000000',
+      '25 Sep 2026  13:38',
+      'Receipt Number  ABC123',
+      'Served By  Kasir',
+      '*Dine In*',
+      'AYAM GORENG',
+      '1 PORSI',
+      '7x @44.000  308.000',
+      'SAYUR ASEM',
+      '3x @5.500  16.500',
+      'Kerupuk Udang',
+      'Besar',
+      '3x 020.000  60.000',
+      'NASI',
+      '1 PORSI  5.500',
+      'Subtota l  Rp 390.000',
+      'Total  Ru 390.000',
+      'Gopay  kp 390.000',
+    ], now: now);
+    expect(r.merchant, 'Warung Contoh Sejahtera');
+    expect(r.date, DateTime(2026, 9, 25, 13, 38));
+    expect([for (final i in r.items) '${i.qty}×${i.name}=${i.price}'], [
+      '7×Ayam Goreng 1 Porsi=308000',
+      '3×Sayur Asem=16500',
+      '3×Kerupuk Udang Besar=60000',
+      '1×Nasi Porsi=5500',
+    ]);
+    expect((r.subtotal, r.total, r.payment, r.itemsMatchTotal), (390000, 390000, 'GOPAY', true));
+  });
+
+  test('"1 x Nama" di depan: qty terbaca, nama tanpa "x"', () {
+    final ReceiptScan r = parseReceipt(['Kedai Contoh', '1 x Es Kopi Susu  18.000', '2 x Roti Bakar  30.000', 'Total  48.000'], now: now);
+    expect([for (final i in r.items) '${i.qty}×${i.name}'], ['1×Es Kopi Susu', '2×Roti Bakar']);
+  });
+
+  test('baris varian "- Original" yang mengulang harga tidak jadi item kedua; Cash terbaca', () {
+    final ReceiptScan r = parseReceipt([
+      'Kopi Contoh',
+      'Tanggal: 26/09/2026, 14:03',
+      'Take away',
+      '1 x Es Kopi Aren  7.000',
+      'Shot',
+      '- 1x (Original)  7.000',
+      'Subtotal  7.000',
+      'Total  7.000',
+      'Cash  7.000',
+      'Change  0',
+    ], now: now);
+    expect([for (final i in r.items) '${i.qty}×${i.name}=${i.price}'], ['1×Es Kopi Aren=7000']);
+    expect((r.total, r.payment, r.itemsMatchTotal), (7000, 'CASH', true));
+  });
 }

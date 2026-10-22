@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -101,8 +102,10 @@ class _WidgetSettingsScreenState extends ConsumerState<WidgetSettingsScreen> wit
     setState(() => _busy = true);
     try {
       final Directory dir = Directory('${(await getApplicationSupportDirectory()).path}/widget_photos');
-      final ({String path, double luma}) saved =
-          await saveWidgetPhoto(await file.xFile.readAsBytes(), dir: dir, widgetId: id);
+      final Uint8List bytes = await file.xFile.readAsBytes();
+      // Salinan sementara dari pemilih file tidak boleh tertinggal di HP.
+      await FilePicker.clearTemporaryFiles();
+      final ({String path, double luma}) saved = await saveWidgetPhoto(bytes, dir: dir, widgetId: id);
       final String? old = _draft[id]?.photoPath;
       final String? stored = (ref.read(widgetStylesProvider).valueOrNull ?? const {})[id]?.photoPath;
       // Foto draf sebelumnya (belum disimpan) tidak dipakai lagi.

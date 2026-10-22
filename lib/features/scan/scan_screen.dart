@@ -4,7 +4,10 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart' show MissingPluginException, PlatformException;
+import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../core/db/app_database.dart';
 import '../../core/db/data_providers.dart';
@@ -58,20 +61,86 @@ Future<ScanResult?> startReceiptScan(BuildContext context, WidgetRef ref, {requi
     await showAppSheet<void>(context, title: 'Jatah scan gratis bulan ini habis', builder: (_) => const _QuotaSheet());
     return null;
   }
-  final ImageSource? source = await showAppSheet<ImageSource>(
+  final _Source? source = await showAppSheet<_Source>(
     context,
     title: 'Scan struk',
     builder: (_) => _SourceSheet(forSplit: forSplit, left: isPro ? null : FreeLimits.receiptScans - used),
   );
   if (source == null || !context.mounted) return null;
-  final XFile? file = await withAutoLockPaused(
-    ref,
-    () => ImagePicker().pickImage(source: source, maxWidth: 2200, imageQuality: 92, requestFullMetadata: false),
-  );
-  if (file == null || !context.mounted) return null;
+  final String? path = source == _Source.pindai
+      ? await withAutoLockPaused(ref, scanWithDocumentScanner)
+      : await withAutoLockPaused(ref, () => _pick(ImageSource.gallery));
+  if (path == null || !context.mounted) return null;
   return Navigator.of(context, rootNavigator: true).push<ScanResult>(
-    MaterialPageRoute(builder: (_) => ScanReviewScreen(path: file.path, forSplit: forSplit)),
+    MaterialPageRoute(builder: (_) => ScanReviewScreen(path: path, forSplit: forSplit)),
   );
+}
+
+enum _Source { pindai, galeri }
+
+Future<String?> _pick(ImageSource source) async {
+  final String? path =
+      (await ImagePicker().pickImage(source: source, maxWidth: 2200, imageQuality: 92, requestFullMetadata: false))?.path;
+  // Batal dari kamera tetap meninggalkan berkas kosong.
+  if (path == null) await purgePickerTemp();
+  return path;
+}
+
+final RegExp _uuidName = RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+
+/// Hapus salinan sementara dari pemilih gambar & pemindai (folder/berkas
+/// bernama UUID di cache, dan isi folder pemindai ML Kit). Foto struk tidak
+/// boleh tertinggal di HP.
+Future<void> purgePickerTemp([Directory? dir]) async {
+  try {
+    final Directory tmp = dir ?? await getTemporaryDirectory();
+    if (!await tmp.exists()) return;
+    await for (final FileSystemEntity e in tmp.list()) {
+      final String name = e.uri.pathSegments.where((x) => x.isNotEmpty).last;
+      if (_uuidName.hasMatch(name) || name == 'mlkit_docscan_ui_client') {
+        if (e is Directory && name == 'mlkit_docscan_ui_client') {
+          await for (final FileSystemEntity c in e.list()) {
+            await c.delete(recursive: true);
+          }
+        } else if (e is Directory) {
+          await e.delete(recursive: true);
+        } else if (e is File) {
+          await e.delete();
+        }
+      }
+    }
+  } catch (_) {
+    // Pembersihan tidak boleh menggagalkan scan.
+  }
+}
+
+/// Pemindai dokumen ML Kit (Google Play Services): tepi struk dideteksi,
+/// dipotong & diluruskan. Dibatalkan → null. Pemindai tidak tersedia (tanpa
+/// Play Services / modul belum terunduh) → kamera bawaan.
+Future<String?> scanWithDocumentScanner() async {
+  final DocumentScanner scanner = DocumentScanner(
+    options: DocumentScannerOptions(
+      documentFormats: const {DocumentFormat.jpeg},
+      mode: ScannerMode.filter,
+      pageLimit: 1,
+      isGalleryImport: false,
+    ),
+  );
+  try {
+    final DocumentScanningResult r = await scanner.scanDocument();
+    final String? uri = r.images?.firstOrNull;
+    return uri == null ? null : Uri.parse(uri).isScheme('file') ? Uri.parse(uri).toFilePath() : uri;
+  } on PlatformException catch (e) {
+    if ((e.message ?? '').toLowerCase().contains('cancel')) {
+      await purgePickerTemp();
+      return null;
+    }
+    return _pick(ImageSource.camera);
+  } on MissingPluginException {
+    return _pick(ImageSource.camera);
+  } finally {
+    await scanner.close();
+  }
 }
 
 class _SourceSheet extends StatelessWidget {
@@ -86,17 +155,22 @@ class _SourceSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    Widget source(IconData icon, String label, ImageSource s) => Expanded(
+    Widget source(IconData icon, String label, _Source s, {String? hint, bool primary = false}) => Expanded(
           child: Pressable(
             onTap: () => Navigator.pop(context, s),
             semanticLabel: label,
             child: Container(
               height: 96,
-              decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
+              decoration: BoxDecoration(
+                color: primary ? c.accentSoft : c.bg,
+                borderRadius: AppRadius.lgAll,
+                border: Border.all(color: primary ? c.accent : c.line),
+              ),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Icon(icon, size: 28, color: c.accent),
-                const SizedBox(height: AppSpace.x8),
+                const SizedBox(height: AppSpace.x4),
                 Text(label, style: t.title.copyWith(fontSize: 14)),
+                if (hint != null) Text(hint, style: t.label.copyWith(fontSize: 11, fontWeight: FontWeight.w600, color: c.muted)),
               ]),
             ),
           ),
@@ -112,9 +186,9 @@ class _SourceSheet extends StatelessWidget {
         ),
         const SizedBox(height: AppSpace.x16),
         Row(children: [
-          source(HiIcons.camera, 'Kamera', ImageSource.camera),
+          source(HiIcons.receipt, 'Pindai', _Source.pindai, hint: 'potong & luruskan otomatis', primary: true),
           const SizedBox(width: AppSpace.x12),
-          source(HiIcons.grid, 'Galeri', ImageSource.gallery),
+          source(HiIcons.grid, 'Galeri', _Source.galeri),
         ]),
         const SizedBox(height: AppSpace.x16),
         Container(
@@ -138,7 +212,7 @@ class _SourceSheet extends StatelessWidget {
           ]),
         ],
         const SizedBox(height: AppSpace.x12),
-        Text('Tips: letakkan struk di permukaan rata, terang, tidak terlipat, dan seluruh struk masuk bingkai.',
+        Text('Pindai memakai pemindai dokumen Google di HP-mu (gratis, diproses di HP). Bila belum tersedia, kamera bawaan yang dipakai.',
             style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted, height: 1.5)),
       ],
     );
@@ -253,8 +327,9 @@ class _ScanReviewScreenState extends ConsumerState<ScanReviewScreen> {
     } catch (_) {
       if (mounted) setState(() => _error = 'Struk gagal dibaca di HP ini. Coba lagi atau ketik manual.');
     } finally {
-      // Foto tidak disimpan: hapus begitu selesai dibaca.
+      // Foto tidak disimpan: hapus begitu selesai dibaca, beserta salinan sementaranya.
       if (await f.exists()) await f.delete();
+      await purgePickerTemp();
     }
   }
 
