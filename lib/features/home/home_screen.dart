@@ -16,6 +16,7 @@ import '../../core/widgets/app_button.dart';
 import '../../core/widgets/count_up_text.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/pressable.dart';
+import '../scan/widgets/scan_intro_card.dart';
 import '../../core/widgets/progress_bar.dart';
 import '../backup/data/backup_age.dart';
 import '../bills/bills_screen.dart';
@@ -175,7 +176,11 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     ],
                   HomeCard.cepat => [
-                      _QuickEntry(onSubmit: (text) => _openCatat(context, text)),
+                      _QuickEntry(
+                        onSubmit: (text) => _openCatat(context, text),
+                        onScan: () => openReceiptScan(context),
+                      ),
+                      const ScanIntroCard(),
                     ],
                   HomeCard.favorit => [FavoriteChips(hidden: hidden)],
                   HomeCard.budget => [
@@ -468,9 +473,10 @@ class _Mini extends StatelessWidget {
 
 /// Kolom Catat cepat: ikon kilau + tombol panah (desain).
 class _QuickEntry extends StatefulWidget {
-  const _QuickEntry({required this.onSubmit});
+  const _QuickEntry({required this.onSubmit, required this.onScan});
 
   final ValueChanged<String> onSubmit;
+  final VoidCallback onScan;
 
   @override
   State<_QuickEntry> createState() => _QuickEntryState();
@@ -522,6 +528,18 @@ class _QuickEntryState extends State<_QuickEntry> {
               ),
             ),
           ),
+          Pressable(
+            key: const Key('home-scan-struk'),
+            onTap: widget.onScan,
+            semanticLabel: 'Scan struk',
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
+              child: Icon(HiIcons.receipt, size: 20, color: c.accentText),
+            ),
+          ),
+          const SizedBox(width: AppSpace.x8),
           Pressable(
             onTap: _submit,
             semanticLabel: 'Lanjut catat',

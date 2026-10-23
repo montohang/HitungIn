@@ -274,3 +274,8 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] Struk nyata POS resto: nama toko tidak tertukar teks logo, nama item beberapa baris, "7x @harga", item cocok total.
 - [x] Tidak ada foto tertinggal di cache aplikasi (image_picker, pemindai, file_picker) setelah scan / batal / pilih file.
 - [ ] Versi gratis: scan ke-4 dalam sebulan → lembar "Jatah scan gratis bulan ini habis".
+- [x] Beranda › ikon struk di kolom Ketik cepat → Catat terbuka & lembar Pindai/Galeri langsung muncul.
+- [x] Catat › tombol berlabel "Scan struk" (bukan ikon saja).
+- [x] Kartu "BARU · Foto struk, langsung tercatat" di bawah Ketik cepat; ✕ → hilang & tidak muncul lagi setelah buka ulang. (Coba scan / scan berhasil juga menutupnya.)
+- [x] Pintasan ikon: Catat pengeluaran, Scan struk, Catat pemasukan, Pindah saldo (Riwayat dikeluarkan); Scan struk dari aplikasi tertutup → PIN → lembar scan langsung muncul.
+- [ ] Tahan ikon HitungIn di layar utama → 4 pintasan dengan ikon Scan struk tampil benar.

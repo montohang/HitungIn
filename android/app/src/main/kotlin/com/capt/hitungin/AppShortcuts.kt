@@ -34,10 +34,11 @@ object AppShortcuts {
             // ID berversi: launcher menyimpan gambar ikon per ID, jadi ganti versi bila ikon berubah.
             sm.removeAllDynamicShortcuts()
             sm.dynamicShortcuts = listOf(
+                // Maks. 4: kebanyakan launcher hanya menampilkan 4 pintasan.
                 item("catat_keluar_v3", context.getString(R.string.shortcut_out), R.drawable.ic_sc_out, "/catat"),
+                item("scan_struk_v3", context.getString(R.string.shortcut_scan), R.drawable.ic_sc_scan, "/catat?scan=1"),
                 item("catat_masuk_v3", context.getString(R.string.shortcut_in), R.drawable.ic_sc_in, "/catat?kind=pemasukan"),
                 item("pindah_saldo_v3", context.getString(R.string.shortcut_tf), R.drawable.ic_sc_tf, "/catat?kind=transfer"),
-                item("riwayat_v3", context.getString(R.string.shortcut_hist), R.drawable.ic_sc_hist, "/riwayat"),
             )
         } catch (e: Exception) {
             // Launcher tanpa dukungan pintasan: abaikan.

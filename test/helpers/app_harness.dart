@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hitungin/app.dart';
 import 'package:hitungin/core/db/app_database.dart';
 import 'package:hitungin/features/security/app_gate.dart';
+import 'package:hitungin/features/settings/data/settings_dao.dart';
 import 'package:hitungin/router.dart';
 
 import 'fakes.dart';
@@ -32,6 +33,8 @@ class AppHarness {
         gopay = await db.walletsDao.add(name: 'GoPay', type: WalletType.ewallet, initialBalance: 100000);
         bca = await db.walletsDao.add(name: 'BCA', type: WalletType.bank, initialBalance: 1000000);
         cat = {for (final c in await db.categoriesDao.active()) '${c.name}/${c.kind.name}': c.id};
+        // Kartu kenalan Scan struk sudah lewat, supaya tata letak Beranda di tes tetap.
+        await db.settingsDao.write(SettingKeys.scanIntro, 'done');
       });
 
   Future<int> addTx(TxKind kind, int amount, int wallet, DateTime at, {int? category, String note = ''}) => run(

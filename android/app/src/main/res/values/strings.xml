@@ -20,5 +20,5 @@
     <string name="shortcut_out">Catat pengeluaran</string>
     <string name="shortcut_in">Catat pemasukan</string>
     <string name="shortcut_tf">Pindah saldo</string>
-    <string name="shortcut_hist">Riwayat</string>
+    <string name="shortcut_scan">Scan struk</string>
 </resources>

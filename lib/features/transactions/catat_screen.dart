@@ -32,7 +32,7 @@ import '../../core/widgets/hi_icons.dart';
 /// Catat atau ubah transaksi. Kolom "Catat cepat" di atas membaca kalimat
 /// bebas ("kopi 25rb gopay") dan mengisi form di bawahnya.
 class CatatScreen extends ConsumerStatefulWidget {
-  const CatatScreen({super.key, this.initialText, this.editId, this.copyId, this.transfer = false, this.income = false});
+  const CatatScreen({super.key, this.initialText, this.editId, this.copyId, this.transfer = false, this.income = false, this.scan = false});
 
   final String? initialText;
 
@@ -47,6 +47,9 @@ class CatatScreen extends ConsumerStatefulWidget {
 
   /// Mulai di tab Pemasukan (pintasan ikon "Catat pemasukan").
   final bool income;
+
+  /// Langsung buka Scan struk (kamera di Beranda, pintasan ikon, kartu kenalan).
+  final bool scan;
 
   @override
   ConsumerState<CatatScreen> createState() => _CatatScreenState();
@@ -131,6 +134,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
       }
       _loaded = true;
     });
+    if (widget.scan && editing == null && copy == null) _autoScan();
     final String text = widget.initialText?.trim() ?? '';
     if (text.isNotEmpty && editing == null) {
       _quick.text = text;
@@ -186,6 +190,20 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
       _date = e.occurredAt;
       _note.text = e.note;
     });
+  }
+
+  /// Dibuka dari kamera Beranda / pintasan ikon: tunggu halaman selesai masuk
+  /// & berada paling depan (mis. baru lewat layar kunci), baru buka scan.
+  Future<void> _autoScan() async {
+    for (int i = 0; i < 40; i++) {
+      if (!mounted) return;
+      final ModalRoute<Object?>? route = ModalRoute.of(context);
+      if (route != null && route.isCurrent && route.animation?.status == AnimationStatus.completed) {
+        await _scanReceipt();
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
   }
 
   /// Scan struk (P3e): isi nominal, catatan, tanggal, dompet & kategori.
@@ -767,7 +785,7 @@ class _QuickField extends StatelessWidget {
     final c = context.colors;
     return Container(
       height: 50,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16),
+      padding: EdgeInsets.only(left: AppSpace.x16, right: onScan == null ? AppSpace.x16 : AppSpace.x8),
       decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.mdAll),
       child: Row(
         children: [
@@ -790,10 +808,14 @@ class _QuickField extends StatelessWidget {
               onTap: onScan,
               semanticLabel: 'Scan struk',
               child: Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
-                child: Icon(HiIcons.receipt, size: 20, color: c.accentText),
+                height: 36,
+                padding: const EdgeInsets.only(left: 10, right: AppSpace.x12),
+                decoration: BoxDecoration(color: c.accent, borderRadius: AppRadius.smAll),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(HiIcons.receipt, size: 18, color: c.onAccent),
+                  const SizedBox(width: 6),
+                  Text('Scan struk', style: context.text.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: c.onAccent)),
+                ]),
               ),
             ),
         ],

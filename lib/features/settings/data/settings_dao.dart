@@ -65,6 +65,9 @@ abstract final class SettingKeys {
   /// Kuota Scan struk versi gratis (P3e): bulan (yyyy-mm) & jumlah dipakai.
   static const String scanMonth = 'scan.month';
   static const String scanCount = 'scan.count';
+
+  /// Kartu kenalan Scan struk di Beranda sudah ditutup / scan pernah dipakai.
+  static const String scanIntro = 'scan.intro';
 }
 
 @DriftAccessor(tables: [Settings])

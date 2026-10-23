@@ -48,3 +48,10 @@ final scansUsedProvider = FutureProvider.autoDispose<int>((ref) {
   final dao = ref.watch(appDatabaseProvider).settingsDao;
   return scansUsed(dao, ref.read(clockProvider)());
 });
+
+/// Kartu kenalan Scan struk sudah selesai (ditutup, dicoba, atau pernah scan).
+final scanIntroDoneProvider = StreamProvider<bool>(
+  (ref) => ref.watch(appDatabaseProvider).settingsDao.watch(SettingKeys.scanIntro).map((v) => v == 'done'),
+);
+
+Future<void> markScanIntroDone(SettingsDao dao) => dao.write(SettingKeys.scanIntro, 'done');

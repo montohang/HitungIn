@@ -2,13 +2,16 @@ import 'dart:io';
 
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hitungin/core/db/app_database.dart';
 import 'package:hitungin/core/db/default_data.dart';
+import 'package:hitungin/core/db/providers.dart';
 import 'package:hitungin/features/premium/data/pro_limits.dart';
 import 'package:hitungin/features/scan/data/receipt_parser.dart';
 import 'package:hitungin/features/scan/receipt_ocr.dart';
 import 'package:hitungin/features/scan/scan_screen.dart';
+import 'package:hitungin/features/scan/widgets/scan_intro_card.dart';
 
 Wallet _w(int id, String name, WalletType type) => Wallet(
       id: id, name: name, type: type, initialBalance: 0, icon: 'wallet', color: 0, sortOrder: id, archived: false, createdAt: DateTime(2026));
@@ -63,5 +66,20 @@ void main() {
     final List<String> left = [for (final e in tmp.listSync(recursive: true)) e.path.substring(tmp.path.length + 1)]..sort();
     expect(left, ['mlkit_docscan_ui_client', 'share', 'share/rekap.png']);
     await tmp.delete(recursive: true);
+  });
+
+  test('kartu kenalan scan: tampil sampai ditutup/dicoba, lalu hilang permanen; rute langsung ke scan', () async {
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+    final db = AppDatabase(NativeDatabase.memory());
+    final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    final sub = container.listen(scanIntroDoneProvider, (_, __) {});
+    expect(await container.read(scanIntroDoneProvider.future), isFalse);
+    await markScanIntroDone(db.settingsDao);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(container.read(scanIntroDoneProvider).value, isTrue);
+    expect(receiptScanRoute, '/catat?scan=1');
+    sub.close();
+    container.dispose();
+    await db.close();
   });
 }

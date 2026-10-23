@@ -306,6 +306,7 @@ class _ScanReviewScreenState extends ConsumerState<ScanReviewScreen> {
         setState(() => _error = 'Teks struk tidak terbaca. Coba foto lebih terang dan lurus.');
         return;
       }
+      await markScanIntroDone(ref.read(appDatabaseProvider).settingsDao);
       if (!ref.read(isProProvider)) {
         await countScan(ref.read(appDatabaseProvider).settingsDao, ref.read(clockProvider)());
         _countedLeft = true;
