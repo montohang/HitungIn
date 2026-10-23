@@ -17,14 +17,14 @@ const String fallbackProPrice = 'Rp59.000';
 /// Daftar keuntungan Pro. `true` = sudah ada, `false` = segera hadir.
 const List<(IconData, String, String, bool)> proBenefits = [
   (HiIcons.noAds, 'Tanpa iklan', 'Selamanya, di semua layar', true),
-  (HiIcons.jar, 'Budget tanpa batas', 'Gratis: total + ${FreeLimits.categoryBudgets} kategori', true),
+  (HiIcons.target, 'Budget tanpa batas', 'Gratis: total + ${FreeLimits.categoryBudgets} kategori', true),
   (HiIcons.calendar, 'Tagihan tanpa batas', 'Gratis: ${FreeLimits.activeBills} tagihan aktif', true),
   (HiIcons.bell, 'Notifikasi pengingat tagihan', 'Tagihan, cicilan & utang diingatkan walau aplikasi tertutup', true),
-  (HiIcons.bars, 'Laporan semua bulan', 'Gratis: bulan ini & bulan lalu', true),
+  (HiIcons.report, 'Laporan semua bulan', 'Gratis: bulan ini & bulan lalu', true),
   (HiIcons.table, 'Ekspor CSV kapan saja', 'Gratis: sekali per iklan berhadiah', true),
   (HiIcons.trendUp, 'Arus kas 12 bulan & filter dompet', 'Gratis: arus kas 6 bulan', true),
   (HiIcons.repeat, 'Transaksi berulang', 'Gaji & langganan tercatat otomatis', true),
-  (HiIcons.palette, 'Aksen warna tambahan', 'Plum, Laut, Kopi, Arang', true),
+  (HiIcons.paletteAlt, 'Aksen warna tambahan', 'Plum, Laut, Kopi, Arang', true),
   (HiIcons.grid, 'Ikon aplikasi alternatif', 'Gelap, Emas, Terang', true),
 ];
 

@@ -521,7 +521,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                       if (_goal case final GoalDraft g?) ...[
                                         const SizedBox(height: AppSpace.x8),
                                         _OpenHint(
-                                          icon: HiIcons.jar,
+                                          icon: HiIcons.piggy,
                                           text: 'Target tabungan: sisihkan${g.amount == null ? '' : ' ${Rupiah.format(g.amount!)}'}'
                                               '${g.name.isEmpty ? '' : ' untuk ${g.name}'}',
                                           onOpen: () => context.pushReplacement(goalDraftLink(g)),
@@ -550,7 +550,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                Icon(HiIcons.people, size: 16, color: c.accentText),
+                                                Icon(HiIcons.friends, size: 16, color: c.accentText),
                                                 const SizedBox(width: AppSpace.x8 - 2),
                                                 Flexible(
                                                   child: Text('Bayar bareng teman? Patungan ›',

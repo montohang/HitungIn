@@ -86,7 +86,7 @@ class _RecapScreenState extends ConsumerState<RecapScreen> {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
-                        child: Icon(HiIcons.upload, size: 20, color: c.accentText),
+                        child: Icon(HiIcons.shareAlt, size: 20, color: c.accentText),
                       ),
                     ),
             ),

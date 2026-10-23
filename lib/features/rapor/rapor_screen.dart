@@ -10,6 +10,7 @@ import '../../core/theme/context_ext.dart';
 import '../../core/utils/date_format.dart';
 import '../../core/utils/rupiah.dart';
 import '../../core/widgets/app_button.dart';
+import '../../core/widgets/hi_icons.dart';
 import '../../core/widgets/logo_mark.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/screen_header.dart';
@@ -357,7 +358,7 @@ class _AspectRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpace.x8),
-            Icon(Icons.chevron_right, size: 18, color: c.muted),
+            Icon(HiIcons.forward, size: 18, color: c.muted),
           ],
         ),
       ),
@@ -734,7 +735,7 @@ class RaporArchiveScreen extends ConsumerWidget {
                               Text(r.headline, style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted)),
                             ]),
                           ),
-                          Icon(Icons.chevron_right, size: 18, color: c.muted),
+                          Icon(HiIcons.forward, size: 18, color: c.muted),
                         ]),
                       ),
                     ),

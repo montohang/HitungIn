@@ -213,6 +213,42 @@ abstract final class HiIcons {
   static const HiIconData coin = HiIconData(0xe057);
   /// scan (desain).
   static const HiIconData scan = HiIconData(0xe058);
+  /// image (desain).
+  static const HiIconData image = HiIconData(0xe059);
+  /// padlock (desain).
+  static const HiIconData padlock = HiIconData(0xe05a);
+  /// clock (desain).
+  static const HiIconData clock = HiIconData(0xe05b);
+  /// trendLine (desain).
+  static const HiIconData trendLine = HiIconData(0xe05c);
+  /// sparkleAlt (desain).
+  static const HiIconData sparkleAlt = HiIconData(0xe05d);
+  /// piggy (desain).
+  static const HiIconData piggy = HiIconData(0xe05e);
+  /// downArrow (desain).
+  static const HiIconData downArrow = HiIconData(0xe05f);
+  /// friends (desain).
+  static const HiIconData friends = HiIconData(0xe060);
+  /// starAlt (desain).
+  static const HiIconData starAlt = HiIconData(0xe061);
+  /// docCheck (desain).
+  static const HiIconData docCheck = HiIconData(0xe062);
+  /// debtSwap (desain).
+  static const HiIconData debtSwap = HiIconData(0xe063);
+  /// layout (desain).
+  static const HiIconData layout = HiIconData(0xe064);
+  /// listPlus (desain).
+  static const HiIconData listPlus = HiIconData(0xe065);
+  /// share (desain).
+  static const HiIconData share = HiIconData(0xe066);
+  /// shareAlt (desain).
+  static const HiIconData shareAlt = HiIconData(0xe067);
+  /// paletteAlt (desain).
+  static const HiIconData paletteAlt = HiIconData(0xe068);
+  /// bellAlt (desain).
+  static const HiIconData bellAlt = HiIconData(0xe069);
+  /// whatsapp (desain).
+  static const HiIconData whatsapp = HiIconData(0xe06a);
 
   /// Semua ikon (galeri desain).
   static const Map<String, HiIconData> all = {
@@ -305,5 +341,23 @@ abstract final class HiIcons {
     'installment': installment,
     'coin': coin,
     'scan': scan,
+    'image': image,
+    'padlock': padlock,
+    'clock': clock,
+    'trendLine': trendLine,
+    'sparkleAlt': sparkleAlt,
+    'piggy': piggy,
+    'downArrow': downArrow,
+    'friends': friends,
+    'starAlt': starAlt,
+    'docCheck': docCheck,
+    'debtSwap': debtSwap,
+    'layout': layout,
+    'listPlus': listPlus,
+    'share': share,
+    'shareAlt': shareAlt,
+    'paletteAlt': paletteAlt,
+    'bellAlt': bellAlt,
+    'whatsapp': whatsapp,
   };
 }

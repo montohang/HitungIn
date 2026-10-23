@@ -188,7 +188,7 @@ class _SourceSheet extends StatelessWidget {
         Row(children: [
           source(HiIcons.scan, 'Pindai', _Source.pindai, hint: 'potong & luruskan otomatis', primary: true),
           const SizedBox(width: AppSpace.x12),
-          source(HiIcons.grid, 'Galeri', _Source.galeri),
+          source(HiIcons.image, 'Galeri', _Source.galeri),
         ]),
         const SizedBox(height: AppSpace.x16),
         Container(

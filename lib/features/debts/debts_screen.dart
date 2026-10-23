@@ -495,7 +495,7 @@ class _DebtDetail extends ConsumerWidget {
             AppButton(
               key: const Key('tagih-wa'),
               label: 'Tagih lewat WhatsApp',
-              icon: HiIcons.phone,
+              icon: HiIcons.whatsapp,
               variant: AppButtonVariant.soft,
               onPressed: () =>
                   showAppSheet<void>(context, title: 'Pesan pengingat', builder: (_) => _RemindSheet(d: d)),
@@ -767,7 +767,7 @@ class _RemindSheetState extends ConsumerState<_RemindSheet> {
         Text('Bisa diubah dulu. Dikirim lewat menu Bagikan — HitungIn tidak membaca kontakmu.',
             style: t.caption.copyWith(color: c.muted, height: 1.5)),
         const SizedBox(height: AppSpace.x16),
-        AppButton(label: 'Kirim lewat WhatsApp', large: true, icon: HiIcons.phone, onPressed: _send),
+        AppButton(label: 'Kirim lewat WhatsApp', large: true, icon: HiIcons.whatsapp, onPressed: _send),
       ],
     );
   }

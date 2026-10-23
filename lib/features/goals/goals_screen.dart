@@ -253,7 +253,7 @@ class _Empty extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(color: c.accentSoft, shape: BoxShape.circle),
-            child: Icon(HiIcons.jar, size: 30, color: c.accent),
+            child: Icon(HiIcons.piggy, size: 30, color: c.accent),
           ),
           const SizedBox(height: AppSpace.x16),
           Text('Menabung untuk apa?', style: t.section),
@@ -705,7 +705,7 @@ class _ReminderTile extends ConsumerWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
-              child: Icon(HiIcons.bell, size: 18, color: c.accent),
+              child: Icon(HiIcons.bellAlt, size: 18, color: c.accent),
             ),
             const SizedBox(width: AppSpace.x12),
             Expanded(

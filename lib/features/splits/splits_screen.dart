@@ -163,7 +163,7 @@ class _Empty extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(color: c.accentSoft, shape: BoxShape.circle),
-            child: Icon(HiIcons.people, size: 30, color: c.accent),
+            child: Icon(HiIcons.friends, size: 30, color: c.accent),
           ),
           const SizedBox(height: AppSpace.x16),
           Text('Bayar bareng teman?', style: t.section),
@@ -213,7 +213,7 @@ class _SplitCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
-              child: Icon(HiIcons.people, size: 22, color: c.accent),
+              child: Icon(HiIcons.friends, size: 22, color: c.accent),
             ),
             const SizedBox(width: AppSpace.x12),
             Expanded(
@@ -375,7 +375,7 @@ class SplitDetailScreen extends ConsumerWidget {
               child: AppButton(
                 key: const Key('bagikan-patungan'),
                 label: 'Bagikan ke grup',
-                icon: HiIcons.upload,
+                icon: HiIcons.share,
                 large: true,
                 onPressed: () => showAppSheet<void>(context, title: 'Bagikan ke grup', builder: (_) => SplitShareSheet(s: s)),
               ),

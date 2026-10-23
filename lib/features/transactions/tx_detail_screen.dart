@@ -270,7 +270,7 @@ class TxDetailScreen extends ConsumerWidget {
                 AppButton(
                   key: const Key('buka-patungan'),
                   label: 'Buka Patungan',
-                  icon: HiIcons.people,
+                  icon: HiIcons.friends,
                   variant: AppButtonVariant.soft,
                   onPressed: () => context.push(Routes.patunganDetail(d.tx.splitId!)),
                 ),
@@ -410,7 +410,7 @@ class _FavoriteButton extends ConsumerWidget {
     return AppButton(
       key: const Key('jadikan-favorit'),
       label: pinned ? 'Favorit · ketuk untuk melepas' : 'Jadikan favorit',
-      icon: HiIcons.star,
+      icon: HiIcons.starAlt,
       variant: pinned ? AppButtonVariant.soft : AppButtonVariant.outline,
       onPressed: () async {
         await setPinned(ref.read(appDatabaseProvider).settingsDao, tx, !pinned);

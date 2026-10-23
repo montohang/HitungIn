@@ -149,7 +149,7 @@ class ForecastHomeCard extends ConsumerWidget {
                     style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.sub, height: 1.4)),
               ]),
             ),
-            Icon(Icons.chevron_right, size: 18, color: c.muted),
+            Icon(HiIcons.forward, size: 18, color: c.muted),
           ]),
         ),
       ),
