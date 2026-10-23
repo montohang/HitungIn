@@ -42,7 +42,7 @@ class ScanIntroCard extends ConsumerWidget {
                   height: 44,
                   decoration: const BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(14)))
                       .copyWith(color: c.accent),
-                  child: Icon(HiIcons.receipt, size: 22, color: c.onAccent),
+                  child: Icon(HiIcons.scan, size: 22, color: c.onAccent),
                 ),
                 const SizedBox(width: AppSpace.x12),
                 Expanded(

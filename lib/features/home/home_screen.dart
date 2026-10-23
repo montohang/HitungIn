@@ -559,7 +559,7 @@ class _QuickEntryState extends State<_QuickEntry> {
                 ),
                 child: _typing
                     ? Icon(HiIcons.arrowRight, key: const ValueKey('arrow'), size: 18, color: c.onAccent)
-                    : Icon(HiIcons.receipt, key: const ValueKey('scan'), size: 20, color: c.onAccent),
+                    : Icon(HiIcons.scan, key: const ValueKey('scan'), size: 20, color: c.onAccent),
               ),
             ),
           ),

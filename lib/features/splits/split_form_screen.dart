@@ -946,7 +946,7 @@ class _ScanCard extends ConsumerWidget {
           border: Border.all(color: c.accent.withValues(alpha: 0.6)),
         ),
         child: Row(children: [
-          Icon(HiIcons.receipt, size: 22, color: c.accentText),
+          Icon(HiIcons.scan, size: 22, color: c.accentText),
           const SizedBox(width: AppSpace.x12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

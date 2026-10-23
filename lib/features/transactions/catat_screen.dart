@@ -480,7 +480,7 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                             padding: const EdgeInsets.only(left: 10, right: AppSpace.x12),
                             decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.pillAll),
                             child: Row(mainAxisSize: MainAxisSize.min, children: [
-                              Icon(HiIcons.receipt, size: 18, color: c.accentText),
+                              Icon(HiIcons.scan, size: 18, color: c.accentText),
                               const SizedBox(width: 6),
                               Text('Scan', style: t.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: c.accentText)),
                             ]),

@@ -124,6 +124,8 @@ G = {
     'installment': ('M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 15l2 2 4-4', 1.8, True),
     # Tombol Catat berikon koin (P2b › Tema › Ikon tombol).
     'coin': ('M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zM12 7v10M14.5 9.5h-3.5a1.5 1.5 0 0 0 0 3h2a1.5 1.5 0 0 1 0 3H9.5', 1.8, False),
+    # Scan struk (P3e): bingkai pindai + baris teks — tombol scan, Pindai, pintasan ikon.
+    'scan': ('M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5', 1.8, True),
 }
 
 UPM = 960

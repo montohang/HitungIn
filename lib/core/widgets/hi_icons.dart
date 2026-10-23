@@ -211,6 +211,8 @@ abstract final class HiIcons {
   static const HiIconData installment = HiIconData(0xe056);
   /// coin (gaya desain).
   static const HiIconData coin = HiIconData(0xe057);
+  /// scan (desain).
+  static const HiIconData scan = HiIconData(0xe058);
 
   /// Semua ikon (galeri desain).
   static const Map<String, HiIconData> all = {
@@ -302,5 +304,6 @@ abstract final class HiIcons {
     'signal': signal,
     'installment': installment,
     'coin': coin,
+    'scan': scan,
   };
 }
