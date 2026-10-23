@@ -294,7 +294,7 @@ class _StatusCard extends StatelessWidget {
                   );
     final bool ok = done || (lastAt != null && age.fresh);
     final Color badge = running ? c.accent : (ok ? c.good : c.warnBar);
-    final IconData badgeIcon = running ? HiIcons.downArrow : (ok ? HiIcons.check : HiIcons.warning);
+    final IconData badgeIcon = running ? HiIcons.download : (ok ? HiIcons.check : HiIcons.warning);
     final String art = '<svg width="96" height="96" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">'
         '<ellipse cx="60" cy="108" rx="40" ry="5" fill="${_hex(c.track)}"/>'
         '<rect x="30" y="14" width="60" height="86" rx="12" fill="${_hex(c.accentSoft)}" stroke="${_hex(c.accent)}" stroke-width="3"/>'

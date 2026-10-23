@@ -410,7 +410,7 @@ class _FavoriteButton extends ConsumerWidget {
     return AppButton(
       key: const Key('jadikan-favorit'),
       label: pinned ? 'Favorit · ketuk untuk melepas' : 'Jadikan favorit',
-      icon: HiIcons.starAlt,
+      icon: HiIcons.star,
       variant: pinned ? AppButtonVariant.soft : AppButtonVariant.outline,
       onPressed: () async {
         await setPinned(ref.read(appDatabaseProvider).settingsDao, tx, !pinned);

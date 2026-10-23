@@ -24,7 +24,7 @@ const List<(IconData, String, String, bool)> proBenefits = [
   (HiIcons.table, 'Ekspor CSV kapan saja', 'Gratis: sekali per iklan berhadiah', true),
   (HiIcons.trendUp, 'Arus kas 12 bulan & filter dompet', 'Gratis: arus kas 6 bulan', true),
   (HiIcons.repeat, 'Transaksi berulang', 'Gaji & langganan tercatat otomatis', true),
-  (HiIcons.paletteAlt, 'Aksen warna tambahan', 'Plum, Laut, Kopi, Arang', true),
+  (HiIcons.palette, 'Aksen warna tambahan', 'Plum, Laut, Kopi, Arang', true),
   (HiIcons.grid, 'Ikon aplikasi alternatif', 'Gelap, Emas, Terang', true),
 ];
 

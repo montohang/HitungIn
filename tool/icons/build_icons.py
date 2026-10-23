@@ -128,22 +128,14 @@ G = {
     'scan': ('M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9h8M8 12h8M8 15h5', 1.8, True),
     # Audit ikon 23 Okt 2026: ikon kanvas yang belum ada (path persis dari desain).
     'image': ('M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4M15 9h.01', 1.8, True),  # Scan › Galeri
-    'padlock': ('M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3', 2.0, True),  # Atur Beranda: kartu terkunci
     'clock': ('M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zM12 7v5l3 2', 1.8, True),  # Atur Beranda: Jatah
-    'trendLine': ('M4 18l6-6 4 4 6-8M14 8h6v6', 1.8, True),  # Atur Beranda: Prakiraan
-    'sparkleAlt': ('M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z', 1.8, True),  # Atur Beranda: Catat cepat
     'piggy': ('M5 11a7 6 0 0 1 14 0v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM9 8h6M12 5v3M16 13h.01', 1.8, True),  # Target tabungan
-    'downArrow': ('M12 5v9M8 10l4 4 4-4', 2.4, True),  # Backup: lencana sedang berjalan
     'friends': ('M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20a5 5 0 0 1 10 0M11 20a5 5 0 0 1 10 0', 1.8, True),  # Patungan
-    'starAlt': ('M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z', 1.8, True),  # Detail › Jadikan favorit
     'docCheck': ('M6 3h9l4 4v14H6zM9 12l2 2 4-4', 1.8, True),  # Rapor bulanan
     'debtSwap': ('M7 7h11l-3-3M17 17H6l3 3M4 7h.01M20 17h.01', 1.8, True),  # Utang-piutang
     'layout': ('M4 4h7v7H4zM13 4h7v7h-7zM4 13h16v7H4z', 1.8, True),  # Widget
     'listPlus': ('M4 6h16M4 12h16M4 18h10M18 16v4M16 18h4', 1.8, True),  # Atur Beranda
     'share': ('M12 15V4M7 9l5-5 5 5M5 14v5h14v-5', 1.8, True),  # Patungan › Bagikan
-    'shareAlt': ('M12 15V3M7 8l5-5 5 5M5 13v7h14v-7', 1.8, True),  # Rekap › Bagikan
-    'paletteAlt': ('M12 21a9 9 0 1 1 9-9c0 2-1.5 3-3 3h-2a2 2 0 0 0-1 3.7A2 2 0 0 1 12 21z', 1.8, True),  # Premium › Aksen
-    'bellAlt': ('M6 16V11a6 6 0 1 1 12 0v5l2 2H4zM10 21h4', 1.8, True),  # Target › Pengingat setoran
     'whatsapp': ('M4 20l1.5-4.5A8 8 0 1 1 8.5 18.5zM9 10h.01M12 10h.01M15 10h.01', 1.8, True),  # Tagih lewat WhatsApp
 }
 

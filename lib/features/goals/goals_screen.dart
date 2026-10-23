@@ -705,7 +705,7 @@ class _ReminderTile extends ConsumerWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
-              child: Icon(HiIcons.bellAlt, size: 18, color: c.accent),
+              child: Icon(HiIcons.bell, size: 18, color: c.accent),
             ),
             const SizedBox(width: AppSpace.x12),
             Expanded(

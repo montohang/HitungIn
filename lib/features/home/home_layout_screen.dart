@@ -15,8 +15,8 @@ import 'home_layout_provider.dart';
 
 IconData _iconOf(HomeCard c) => switch (c) {
       HomeCard.jatah => HiIcons.clock,
-      HomeCard.prakiraan => HiIcons.trendLine,
-      HomeCard.cepat => HiIcons.sparkleAlt,
+      HomeCard.prakiraan => HiIcons.trendUp,
+      HomeCard.cepat => HiIcons.sparkle,
       HomeCard.favorit => HiIcons.star,
       HomeCard.budget => HiIcons.target,
       HomeCard.target => HiIcons.piggy,
@@ -63,7 +63,7 @@ class HomeLayoutScreen extends ConsumerWidget {
                 icon: HiIcons.wallet,
                 title: 'Total saldo',
                 subtitle: 'Selalu paling atas',
-                leading: Icon(HiIcons.padlock, size: 16, color: c.muted),
+                leading: Icon(HiIcons.lock, size: 16, color: c.muted),
               ),
               const SizedBox(height: AppSpace.x8),
               Expanded(
