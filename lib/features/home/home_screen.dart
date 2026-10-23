@@ -484,6 +484,16 @@ class _QuickEntry extends StatefulWidget {
 
 class _QuickEntryState extends State<_QuickEntry> {
   final TextEditingController _text = TextEditingController();
+  bool _typing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _text.addListener(() {
+      final bool typing = _text.text.trim().isNotEmpty;
+      if (typing != _typing) setState(() => _typing = typing);
+    });
+  }
 
   void _submit() {
     final String value = _text.text.trim();
@@ -528,26 +538,29 @@ class _QuickEntryState extends State<_QuickEntry> {
               ),
             ),
           ),
+          // Satu tombol yang berganti fungsi: kosong = Scan struk, mengetik = lanjut catat.
           Pressable(
             key: const Key('home-scan-struk'),
-            onTap: widget.onScan,
-            semanticLabel: 'Scan struk',
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
-              child: Icon(HiIcons.receipt, size: 20, color: c.accentText),
-            ),
-          ),
-          const SizedBox(width: AppSpace.x8),
-          Pressable(
-            onTap: _submit,
-            semanticLabel: 'Lanjut catat',
+            onTap: _typing ? _submit : widget.onScan,
+            semanticLabel: _typing ? 'Lanjut catat' : 'Scan struk',
             child: Container(
               width: 40,
               height: 40,
               decoration: BoxDecoration(color: c.accent, borderRadius: AppRadius.smAll),
-              child: Icon(HiIcons.arrowRight, size: 18, color: c.onAccent),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: AppMotion.easeOut,
+                transitionBuilder: (child, anim) => FadeTransition(
+                  opacity: anim,
+                  child: RotationTransition(
+                    turns: Tween<double>(begin: -0.125, end: 0).animate(anim),
+                    child: ScaleTransition(scale: Tween<double>(begin: 0.6, end: 1).animate(anim), child: child),
+                  ),
+                ),
+                child: _typing
+                    ? Icon(HiIcons.arrowRight, key: const ValueKey('arrow'), size: 18, color: c.onAccent)
+                    : Icon(HiIcons.receipt, key: const ValueKey('scan'), size: 20, color: c.onAccent),
+              ),
             ),
           ),
         ],

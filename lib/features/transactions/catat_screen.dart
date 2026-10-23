@@ -439,28 +439,56 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
           padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.x16, AppSpace.screenH, AppSpace.x16),
           child: Column(
             children: [
-              // ✕ · judul · ruang kosong (desain).
-              Row(
-                children: [
-                  Pressable(
-                    onTap: close,
-                    semanticLabel: 'Tutup',
-                    child: Container(
-                      width: AppSpace.touch,
-                      height: AppSpace.touch,
-                      decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.smAll),
-                      child: Icon(HiIcons.close, size: 20, color: c.ink),
+              // ✕ · judul · Scan (desain). Judul selalu di tengah layar.
+              SizedBox(
+                height: AppSpace.touch,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 96),
+                      child: Text(
+                        _isEdit ? 'Ubah transaksi' : 'Catat transaksi',
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.title.copyWith(fontSize: 17),
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      _isEdit ? 'Ubah transaksi' : 'Catat transaksi',
-                      textAlign: TextAlign.center,
-                      style: t.title.copyWith(fontSize: 17),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Pressable(
+                        onTap: close,
+                        semanticLabel: 'Tutup',
+                        child: Container(
+                          width: AppSpace.touch,
+                          height: AppSpace.touch,
+                          decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.smAll),
+                          child: Icon(HiIcons.close, size: 20, color: c.ink),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpace.touch),
-                ],
+                    if (!_isEdit)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Pressable(
+                          key: const Key('scan-struk'),
+                          onTap: _scanReceipt,
+                          semanticLabel: 'Scan struk',
+                          child: Container(
+                            height: 36,
+                            padding: const EdgeInsets.only(left: 10, right: AppSpace.x12),
+                            decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.pillAll),
+                            child: Row(mainAxisSize: MainAxisSize.min, children: [
+                              Icon(HiIcons.receipt, size: 18, color: c.accentText),
+                              const SizedBox(width: 6),
+                              Text('Scan', style: t.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: c.accentText)),
+                            ]),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpace.x16),
               Expanded(
@@ -485,7 +513,6 @@ class _CatatScreenState extends ConsumerState<CatatScreen> {
                                         controller: _quick,
                                         autofocus: false,
                                         onChanged: _applyQuick,
-                                        onScan: _scanReceipt,
                                       ),
                                       if (_debt case final DebtDraft d?) ...[
                                         const SizedBox(height: AppSpace.x8),
@@ -773,19 +800,18 @@ InputDecoration _bare(String hint) => InputDecoration(
 
 /// Kolom Catat cepat (fitur app, dipertahankan di atas form).
 class _QuickField extends StatelessWidget {
-  const _QuickField({required this.controller, required this.autofocus, required this.onChanged, this.onScan});
+  const _QuickField({required this.controller, required this.autofocus, required this.onChanged});
 
   final TextEditingController controller;
   final bool autofocus;
   final ValueChanged<String> onChanged;
-  final VoidCallback? onScan;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     return Container(
       height: 50,
-      padding: EdgeInsets.only(left: AppSpace.x16, right: onScan == null ? AppSpace.x16 : AppSpace.x8),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16),
       decoration: BoxDecoration(color: c.bg, borderRadius: AppRadius.mdAll),
       child: Row(
         children: [
@@ -802,22 +828,6 @@ class _QuickField extends StatelessWidget {
               onChanged: onChanged,
             ),
           ),
-          if (onScan != null)
-            Pressable(
-              key: const Key('scan-struk'),
-              onTap: onScan,
-              semanticLabel: 'Scan struk',
-              child: Container(
-                height: 36,
-                padding: const EdgeInsets.only(left: 10, right: AppSpace.x12),
-                decoration: BoxDecoration(color: c.accent, borderRadius: AppRadius.smAll),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(HiIcons.receipt, size: 18, color: c.onAccent),
-                  const SizedBox(width: 6),
-                  Text('Scan struk', style: context.text.label.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: c.onAccent)),
-                ]),
-              ),
-            ),
         ],
       ),
     );
