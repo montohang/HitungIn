@@ -28,6 +28,13 @@ abstract final class SettingKeys {
 
   /// Peringatan budget di 80% (kartu peringatan & chip di Beranda). Default aktif.
   static const String budgetWarn80 = 'budget.warn80';
+
+  /// Template budget (P3f): pilihan terakhir (JSON [TemplateChoice]), saran
+  /// setoran tabungan per bulan dari template, dan bulan (yyyy-mm) yang
+  /// sisanya sudah diproses.
+  static const String budgetTemplate = 'budget.template';
+  static const String budgetSavingPlan = 'budget.savingPlan';
+  static const String budgetLeftoverDone = 'budget.leftoverDone';
   static const String billReminderHour = 'bills.reminderHour';
 
   /// Tanggal gajian 1–31 untuk Jatah hari ini (bawaan 1 = bulan kalender).

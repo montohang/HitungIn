@@ -20,6 +20,8 @@ import '../../core/widgets/progress_bar.dart';
 import '../security/app_gate.dart';
 import 'data/budget_insights.dart';
 import 'data/budgets_dao.dart';
+import 'template_budget_screen.dart' show templateBudgetLink;
+import 'widgets/leftover_card.dart';
 import '../transactions/riwayat_screen.dart' show riwayatLink;
 import '../../core/widgets/hi_icons.dart';
 
@@ -104,10 +106,12 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
               child: MonthPill(month: _month, now: now, onChanged: (m) => setState(() => _month = m)),
             ),
             const SizedBox(height: AppSpace.block),
+            if (isCurrent) LeftoverCard(month: _month),
             if (async.hasValue && all.isEmpty)
               _Empty(
                 onManual: _atur,
                 onSuggest: () => _atur(saran: true),
+                onTemplate: () => context.push(templateBudgetLink(_month)),
               )
             else if (overview != null) ...[
               _Overview(overview: overview, now: now, isCurrent: isCurrent, days: days),
@@ -125,12 +129,14 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   padding: const EdgeInsets.only(bottom: AppSpace.x4),
                   child: Text('Per kategori', style: t.section.copyWith(fontSize: 17)),
                 ),
-                for (final (int i, BudgetProgress b) in perCategory.indexed)
+                for (final (int i, BudgetProgress b) in perCategory.indexed) ...[
                   _CategoryRow(
                     budget: b,
                     delay: AppMotion.stagger * i,
                     onTap: () => context.push(riwayatLink(month: _month, category: b.category!.id)),
                   ),
+                  if (isCurrent && b.spent > b.budget.limitAmount) MoveOfferCard(over: b, all: perCategory, month: _month),
+                ],
               ],
             ],
           ],
@@ -379,10 +385,11 @@ class _CategoryRow extends StatelessWidget {
 
 /// Budget · kosong: ilustrasi + pilihan "Mulai dari".
 class _Empty extends StatelessWidget {
-  const _Empty({required this.onManual, required this.onSuggest});
+  const _Empty({required this.onManual, required this.onSuggest, required this.onTemplate});
 
   final VoidCallback onManual;
   final VoidCallback onSuggest;
+  final VoidCallback onTemplate;
 
   @override
   Widget build(BuildContext context) {
@@ -431,6 +438,13 @@ class _Empty extends StatelessWidget {
           title: 'Saran dari kebiasaanmu',
           body: 'Dari rata-rata pengeluaran 3 bulan terakhir',
           onTap: onSuggest,
+        ),
+        const SizedBox(height: AppSpace.x8),
+        _Option(
+          icon: HiIcons.target,
+          title: 'Pakai template',
+          body: '50/30/20, 40/30/20/10, atau persentase sendiri dari pemasukanmu',
+          onTap: onTemplate,
         ),
       ],
     );

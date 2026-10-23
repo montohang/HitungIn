@@ -19,6 +19,7 @@ import 'features/backup/backup_screen.dart';
 import 'features/bills/bills_screen.dart';
 import 'features/budget/atur_budget_screen.dart';
 import 'features/budget/budget_screen.dart';
+import 'features/budget/template_budget_screen.dart';
 import 'features/categories/categories_screen.dart';
 import 'features/dev/design_gallery_screen.dart';
 import 'features/home/home_screen.dart';
@@ -104,6 +105,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           month: DateFmt.parseMonthKey(state.uri.queryParameters['month']) ??
               ProviderScope.containerOf(context).read(currentMonthProvider),
           suggest: state.uri.queryParameters['saran'] == '1',
+          preset: state.extra is BudgetPreset ? state.extra! as BudgetPreset : null,
+        ),
+      ),
+      GoRoute(
+        path: Routes.templateBudget,
+        parentNavigatorKey: _rootKey,
+        builder: (context, state) => TemplateBudgetScreen(
+          month: DateFmt.parseMonthKey(state.uri.queryParameters['month']) ??
+              ProviderScope.containerOf(context).read(currentMonthProvider),
         ),
       ),
       GoRoute(

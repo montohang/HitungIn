@@ -6,6 +6,8 @@ part of 'budgets_dao.dart';
 mixin _$BudgetsDaoMixin on DatabaseAccessor<AppDatabase> {
   $CategoriesTable get categories => attachedDatabase.categories;
   $BudgetsTable get budgets => attachedDatabase.budgets;
+  $BudgetAdjustmentsTable get budgetAdjustments =>
+      attachedDatabase.budgetAdjustments;
   $WalletsTable get wallets => attachedDatabase.wallets;
   $BillsTable get bills => attachedDatabase.bills;
   $RecurringTxsTable get recurringTxs => attachedDatabase.recurringTxs;
@@ -23,6 +25,9 @@ class BudgetsDaoManager {
       $$CategoriesTableTableManager(_db.attachedDatabase, _db.categories);
   $$BudgetsTableTableManager get budgets =>
       $$BudgetsTableTableManager(_db.attachedDatabase, _db.budgets);
+  $$BudgetAdjustmentsTableTableManager get budgetAdjustments =>
+      $$BudgetAdjustmentsTableTableManager(
+          _db.attachedDatabase, _db.budgetAdjustments);
   $$WalletsTableTableManager get wallets =>
       $$WalletsTableTableManager(_db.attachedDatabase, _db.wallets);
   $$BillsTableTableManager get bills =>

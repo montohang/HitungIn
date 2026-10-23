@@ -77,7 +77,8 @@ final raporInputProvider = FutureProvider<RaporInput?>((ref) async {
   final Map<DateTime, List<RaporBudget>> budgets = {};
   for (int k = 0; k <= 13; k++) {
     final DateTime m = DateTime(now.year, now.month - k);
-    budgets[m] = [for (final b in await budgetsDao.effective(m)) (categoryId: b.categoryId, limit: b.limitAmount)];
+    // Batas sesudah penyesuaian bulan itu (sisa dibawa, pindah batas).
+    budgets[m] = [for (final e in (await budgetsDao.limitsFor(m)).entries) (categoryId: e.key, limit: e.value)];
   }
   return RaporInput(
     txs: raporTxs,

@@ -174,6 +174,28 @@ class TransactionsDao extends DatabaseAccessor<AppDatabase> with _$TransactionsD
     ]);
   }
 
+  /// Rata-rata pemasukan per bulan selama [months] bulan penuh sebelum
+  /// [month], dari bulan-bulan yang ada pemasukannya (pengguna baru tidak
+  /// terhitung nol). 0 bila belum ada.
+  Future<int> incomeAverage(DateTime month, {int months = 3}) async {
+    final DateTime to = DateTime(month.year, month.month);
+    final DateTime from = DateTime(month.year, month.month - months);
+    final rows = await (selectOnly(transactions)
+          ..addColumns([transactions.amount, transactions.occurredAt])
+          ..where(transactions.kind.equalsValue(TxKind.pemasukan) &
+              transactions.occurredAt.isBiggerOrEqualValue(from) &
+              transactions.occurredAt.isSmallerThanValue(to)))
+        .get();
+    final Map<int, int> perMonth = {};
+    for (final r in rows) {
+      final DateTime at = r.read(transactions.occurredAt)!;
+      final int key = at.year * 12 + at.month;
+      perMonth[key] = (perMonth[key] ?? 0) + r.read(transactions.amount)!;
+    }
+    if (perMonth.isEmpty) return 0;
+    return perMonth.values.fold(0, (s, v) => s + v) ~/ perMonth.length;
+  }
+
   /// Pengeluaran per hari (kunci = tanggal 00.00) untuk grafik laporan.
   Stream<Map<DateTime, int>> watchDailyExpense(DateTime from, DateTime to, {int? walletId}) {
     final q = selectOnly(transactions)

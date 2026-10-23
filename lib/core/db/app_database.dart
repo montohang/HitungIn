@@ -18,7 +18,7 @@ export 'tables.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [Wallets, Categories, Transactions, Budgets, Bills, Settings, RecurringTxs, Debts, DebtPayments, Goals, GoalDeposits, Splits, SplitMembers, SplitItems],
+  tables: [Wallets, Categories, Transactions, Budgets, Bills, Settings, RecurringTxs, Debts, DebtPayments, Goals, GoalDeposits, Splits, SplitMembers, SplitItems, BudgetAdjustments],
   daos: [WalletsDao, CategoriesDao, TransactionsDao, BudgetsDao, BillsDao, SettingsDao, RecurringDao, DebtsDao, GoalsDao, SplitsDao],
 )
 class AppDatabase extends _$AppDatabase {
@@ -36,7 +36,7 @@ class AppDatabase extends _$AppDatabase {
   /// goal_deposits). v7: patungan (splits, split_members, split_items,
   /// transactions.split_id, debts.split_id). v8: transactions.bill_due
   /// (jatuh tempo tagihan yang dibayar, untuk Rapor).
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -82,6 +82,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 8) {
             await m.addColumn(transactions, transactions.billDue);
+          }
+          if (from < 9) {
+            await m.createTable(budgetAdjustments);
           }
           // Pastikan relasi data tetap utuh sesudah migrasi.
           final List<QueryRow> broken = await customSelect('PRAGMA foreign_key_check').get();

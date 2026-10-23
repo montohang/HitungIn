@@ -24,6 +24,8 @@ import '../../core/widgets/rupiah_prefix.dart';
 import '../../core/widgets/screen_header.dart';
 import '../../core/widgets/segmented_control.dart';
 import '../home/allowance_provider.dart' show allowanceExcludedProvider;
+import '../budget/data/budget_template.dart' show splitSavings;
+import '../settings/data/settings_dao.dart' show SettingKeys;
 import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
@@ -57,6 +59,24 @@ GoalWithDeposits? findGoal(List<GoalWithDeposits> all, String name) {
   return open.where((g) => g.goal.name.toLowerCase() == n).firstOrNull ??
       open.where((g) => g.goal.name.toLowerCase().startsWith(n)).firstOrNull ??
       open.where((g) => g.goal.name.toLowerCase().contains(n) || n.contains(g.goal.name.toLowerCase())).firstOrNull;
+}
+
+/// Saran setoran bulanan dari Template budget (P3f).
+final _savingPlanProvider = StreamProvider<int>(
+  (ref) => ref.watch(appDatabaseProvider).settingsDao.watch(SettingKeys.budgetSavingPlan).map((v) => int.tryParse(v ?? '') ?? 0),
+);
+
+/// "Saran setoran bulan ini dari template budget: Rp1,6 jt — Liburan Bali Rp1,1 jt · …".
+String? _savingPlan(WidgetRef ref, List<GoalWithDeposits> active, DateTime now) {
+  final int amount = ref.watch(_savingPlanProvider).valueOrNull ?? 0;
+  final split = splitSavings(
+    amount,
+    [for (final g in active) (id: g.goal.id, name: g.goal.name, left: g.left, due: g.goal.dueDate)],
+    now,
+  );
+  if (split.isEmpty) return null;
+  return 'Saran setoran bulan ini dari template budget: ${Rupiah.format(amount)} — '
+      '${split.map((s) => '${s.goal.name} ${Rupiah.format(s.amount)}').join(' · ')}';
 }
 
 /// Dompet yang ikut Jatah (untuk keterangan "disisihkan").
@@ -159,6 +179,22 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
             else ...[
               _TotalHero(total: total, fromJatah: fromJatah),
               const SizedBox(height: AppSpace.x16),
+              if (_savingPlan(ref, active, now) case final String plan?) ...[
+                Container(
+                  key: const Key('saran-setoran'),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x12),
+                  decoration: BoxDecoration(color: c.goodSoft, borderRadius: AppRadius.mdAll),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(HiIcons.sparkle, size: 18, color: c.goodInk),
+                      const SizedBox(width: AppSpace.x8),
+                      Expanded(child: Text(plan, style: t.caption.copyWith(color: c.ink, height: 1.5))),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpace.x16),
+              ],
               if (active.isNotEmpty) ...[
                 const _SectionLabel('Aktif'),
                 for (final g in active) ...[

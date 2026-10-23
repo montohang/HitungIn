@@ -8,7 +8,7 @@ part 'budgets_dao.g.dart';
 /// Budget beserta pemakaiannya di satu bulan. [category] kosong = budget total.
 typedef BudgetProgress = ({Budget budget, Category? category, int spent});
 
-@DriftAccessor(tables: [Budgets, Categories, Transactions])
+@DriftAccessor(tables: [Budgets, BudgetAdjustments, Categories, Transactions])
 class BudgetsDao extends DatabaseAccessor<AppDatabase> with _$BudgetsDaoMixin {
   BudgetsDao(super.attachedDatabase);
 
@@ -29,12 +29,22 @@ class BudgetsDao extends DatabaseAccessor<AppDatabase> with _$BudgetsDaoMixin {
         createdAt: row.read<DateTime>('b_created_at'),
       );
 
-  /// Budget total tampil paling atas, lalu urutan kategori.
-  Stream<List<BudgetProgress>> watchProgress(DateTime month) {
+  /// Budget total tampil paling atas, lalu urutan kategori. Batas = target +
+  /// penyesuaian bulan itu (sisa yang dibawa, pindah batas).
+  Stream<List<BudgetProgress>> watchProgress(DateTime month) => _progress(month).watch().map(_toProgress);
+
+  /// Sama dengan [watchProgress], sekali baca.
+  Future<List<BudgetProgress>> progress(DateTime month) => _progress(month).get().then(_toProgress);
+
+  Selectable<QueryRow> _progress(DateTime month) {
     final (DateTime from, DateTime to) = Dates.monthRange(month);
     return customSelect(
       '''
-      SELECT b.id AS b_id, b.category_id AS b_category_id, b.limit_amount AS b_limit_amount,
+      SELECT b.id AS b_id, b.category_id AS b_category_id,
+             MAX(0, b.limit_amount + COALESCE((
+               SELECT SUM(a.amount) FROM budget_adjustments a
+               WHERE a.month = ?3 AND a.category_id IS b.category_id
+             ), 0)) AS b_limit_amount,
              b.from_month AS b_from_month, b.created_at AS b_created_at, c.*,
              COALESCE((
                SELECT SUM(t.amount) FROM transactions t
@@ -48,16 +58,80 @@ class BudgetsDao extends DatabaseAccessor<AppDatabase> with _$BudgetsDaoMixin {
       ORDER BY b.category_id IS NOT NULL, c.sort_order, b.id
       ''',
       variables: [Variable.withDateTime(from), Variable.withDateTime(to), Variable.withDateTime(from)],
-      readsFrom: {budgets, categories, transactions},
-    ).watch().map((rows) => [
-          for (final row in rows)
-            (
-              budget: _budget(row),
-              category: row.readNullable<int>('b_category_id') == null ? null : categories.map(row.data),
-              spent: row.read<int>('spent'),
-            ),
-        ]);
+      readsFrom: {budgets, budgetAdjustments, categories, transactions},
+    );
   }
+
+  List<BudgetProgress> _toProgress(List<QueryRow> rows) => [
+        for (final row in rows)
+          (
+            budget: _budget(row),
+            category: row.readNullable<int>('b_category_id') == null ? null : categories.map(row.data),
+            spent: row.read<int>('spent'),
+          ),
+      ];
+
+  /// Jumlah penyesuaian bulan [month] per kategori (null = total).
+  Future<Map<int?, int>> adjustments(DateTime month) async {
+    final rows = await (select(budgetAdjustments)..where((a) => a.month.equals(DateTime(month.year, month.month)))).get();
+    final Map<int?, int> out = {};
+    for (final BudgetAdjustment a in rows) {
+      out[a.categoryId] = (out[a.categoryId] ?? 0) + a.amount;
+    }
+    return out;
+  }
+
+  /// Batas yang berlaku di [month] sesudah penyesuaian (untuk Rapor).
+  Future<Map<int?, int>> limitsFor(DateTime month) async {
+    final Map<int?, int> adj = await adjustments(month);
+    return {
+      for (final Budget b in await effective(month)) b.categoryId: (b.limitAmount + (adj[b.categoryId] ?? 0)).clamp(0, 1 << 62),
+    };
+  }
+
+  Future<void> _adjust(DateTime month, int? categoryId, int amount, BudgetAdjustReason reason) async {
+    if (amount == 0) return;
+    await into(budgetAdjustments).insert(BudgetAdjustmentsCompanion.insert(
+      month: DateTime(month.year, month.month),
+      categoryId: Value(categoryId),
+      amount: amount,
+      reason: reason,
+    ));
+  }
+
+  /// Bawa sisa bulan lalu ke [month] (bulan itu saja). Budget total, bila ada,
+  /// ikut bertambah sebesar jumlahnya.
+  Future<void> carryOver(DateTime month, Map<int, int> perCategory) => transaction(() async {
+        int sum = 0;
+        for (final MapEntry<int, int> e in perCategory.entries) {
+          if (e.value <= 0) continue;
+          await _adjust(month, e.key, e.value, BudgetAdjustReason.carry);
+          sum += e.value;
+        }
+        final bool hasTotal = (await effective(month)).any((b) => b.categoryId == null);
+        if (hasTotal) await _adjust(month, null, sum, BudgetAdjustReason.carry);
+      });
+
+  /// Pindah [amount] batas dari kategori [from] ke [to] untuk [month] saja;
+  /// budget total tidak berubah.
+  Future<void> moveLimit(DateTime month, {required int from, required int to, required int amount}) =>
+      transaction(() async {
+        if (amount <= 0 || from == to) return;
+        await _adjust(month, to, amount, BudgetAdjustReason.move);
+        await _adjust(month, from, -amount, BudgetAdjustReason.move);
+      });
+
+  /// Urungkan pindah batas terakhir di [month] (dua baris move terakhir).
+  Future<void> undoLastMove(DateTime month) => transaction(() async {
+        final rows = await (select(budgetAdjustments)
+              ..where((a) => a.month.equals(DateTime(month.year, month.month)) & a.reason.equalsValue(BudgetAdjustReason.move))
+              ..orderBy([(a) => OrderingTerm.desc(a.id)])
+              ..limit(2))
+            .get();
+        for (final BudgetAdjustment a in rows) {
+          await (delete(budgetAdjustments)..where((x) => x.id.equals(a.id))).go();
+        }
+      });
 
   /// Target yang berlaku di [month] (untuk mengisi Atur budget).
   Future<List<Budget>> effective(DateTime month) {

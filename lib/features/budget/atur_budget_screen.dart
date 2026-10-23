@@ -23,17 +23,24 @@ import '../premium/widgets/pro_teaser.dart' show openPremium;
 import '../settings/data/settings_dao.dart';
 import '../settings/widgets/settings_tile.dart' show showAppSheet;
 import 'data/budget_insights.dart';
+import 'template_budget_screen.dart' show templateBudgetLink;
 import '../../core/widgets/hi_icons.dart';
 
 /// Atur budget satu halaman (Claude Design › Atur Budget): total + pembagian,
 /// −/+ per kategori dengan rata-rata 3 bulan, peringatan 80%.
 /// [suggest] = isi awal dari kebiasaan (rata-rata 3 bulan).
+/// Isian awal dari Template budget (P3f).
+typedef BudgetPreset = ({int total, Map<int, int> perCategory, String note, int savings});
+
 class AturBudgetScreen extends ConsumerStatefulWidget {
-  const AturBudgetScreen({super.key, required this.month, this.suggest = false});
+  const AturBudgetScreen({super.key, required this.month, this.suggest = false, this.preset});
 
   /// Bulan (tanggal 1) yang diatur; target berlaku mulai bulan ini dan sesudahnya.
   final DateTime month;
   final bool suggest;
+
+  /// Hasil template: total, batas per kategori, catatan, saran setoran.
+  final BudgetPreset? preset;
 
   @override
   ConsumerState<AturBudgetScreen> createState() => _AturBudgetScreenState();
@@ -74,6 +81,13 @@ class _AturBudgetScreenState extends ConsumerState<AturBudgetScreen> {
         }
       }
       if (widget.suggest) _applySuggestion();
+      if (widget.preset case final BudgetPreset p?) {
+        _total = p.total;
+        _amounts
+          ..clear()
+          ..addAll(p.perCategory);
+        _note = p.note;
+      }
       _loaded = true;
     });
   }
@@ -128,6 +142,9 @@ class _AturBudgetScreenState extends ConsumerState<AturBudgetScreen> {
       for (final Category c in _categories) c.id: _amounts[c.id] ?? 0,
     });
     await db.settingsDao.write(SettingKeys.budgetWarn80, '$_warn');
+    if (widget.preset case final BudgetPreset p?) {
+      await db.settingsDao.write(SettingKeys.budgetSavingPlan, '${p.savings}');
+    }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Budget disimpan')));
     context.pop();
@@ -168,6 +185,35 @@ class _AturBudgetScreenState extends ConsumerState<AturBudgetScreen> {
                               style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted),
                             ),
                           ),
+                          if (widget.preset == null) ...[
+                            Pressable(
+                              key: const Key('pakai-template'),
+                              onTap: () => context.pushReplacement(templateBudgetLink(widget.month)),
+                              semanticLabel: 'Pakai template budget',
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: AppSpace.x12),
+                                decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.mdAll),
+                                child: Row(
+                                  children: [
+                                    Icon(HiIcons.sparkle, size: 20, color: c.accentText),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Pakai template', style: t.title.copyWith(fontSize: 14, color: c.accentText)),
+                                          Text('50/30/20, 40/30/20/10, atau persentase sendiri',
+                                              style: t.label.copyWith(fontWeight: FontWeight.w500, color: c.muted)),
+                                        ],
+                                      ),
+                                    ),
+                                    Icon(HiIcons.forward, size: 16, color: c.accentText),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: AppSpace.x16),
+                          ],
                           if (_note != null) ...[
                             Container(
                               padding: const EdgeInsets.all(AppSpace.x12),

@@ -63,6 +63,15 @@ enum SplitMode {
   final String label;
 }
 
+/// Asal penyesuaian batas budget satu bulan (v9).
+enum BudgetAdjustReason {
+  /// Sisa bulan lalu yang dibawa.
+  carry,
+
+  /// Batas dipindah dari/ke kategori lain.
+  move,
+}
+
 /// Pengulangan tagihan.
 enum BillRepeat {
   sekali('Sekali'),
@@ -192,6 +201,24 @@ class Budgets extends Table {
   List<Set<Column>> get uniqueKeys => [
         {categoryId, fromMonth},
       ];
+}
+
+/// Penyesuaian batas budget untuk SATU bulan saja (v9, P3f): sisa bulan lalu
+/// yang dibawa ([BudgetAdjustReason.carry]) atau batas yang dipindah antar-
+/// kategori saat lewat batas ([BudgetAdjustReason.move]). [categoryId] kosong =
+/// budget total. Batas efektif bulan M = target + jumlah penyesuaian bulan M.
+@DataClassName('BudgetAdjustment')
+class BudgetAdjustments extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// Tanggal 1 bulan yang disesuaikan.
+  DateTimeColumn get month => dateTime()();
+  IntColumn get categoryId => integer().nullable().references(Categories, #id, onDelete: KeyAction.cascade)();
+
+  /// Bisa negatif (kategori asal pindah batas). Tidak boleh 0.
+  IntColumn get amount => integer().check(amount.equals(0).not())();
+  TextColumn get reason => textEnum<BudgetAdjustReason>()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
 @DataClassName('Bill')

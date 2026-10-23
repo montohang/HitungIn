@@ -279,3 +279,16 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] Kartu "BARU · Foto struk, langsung tercatat" di bawah Ketik cepat; ✕ → hilang & tidak muncul lagi setelah buka ulang. (Coba scan / scan berhasil juga menutupnya.)
 - [x] Pintasan ikon: Catat pengeluaran, Scan struk, Catat pemasukan, Pindah saldo (Riwayat dikeluarkan); Scan struk dari aplikasi tertutup → PIN → lembar scan langsung muncul.
 - [ ] Tahan ikon HitungIn di layar utama → 4 pintasan dengan ikon Scan struk tampil benar.
+
+## 17. Template budget (P3f, baru)
+- [ ] Budget kosong › "Pakai template" → layar Template budget; 50/30/20 · 40/30/20/10 · Sendiri berganti dengan jatah per kelompok.
+- [ ] Pemasukan bulanan terisi dari rata-rata 3 bulan; −/+ Rp500rb menghitung ulang semua kelompok.
+- [ ] Ketuk kategori → pindah kelompok; pilihan tetap sama saat layar dibuka lagi.
+- [ ] Sendiri: −/+ 5% per kelompok, "Total 100% · Pas" / "Kurang/Lebih"; tombol simpan terkunci bila bukan 100%.
+- [ ] Tabungan: saran setoran per target aktif (tanpa target → ajakan membuat target).
+- [ ] Pro: "Lanjut ke Atur budget" → total & semua kategori terisi, catatan "Diisi dari template…"; simpan → kembali ke Budget.
+- [ ] Gratis: catatan versi gratis; "Simpan versi gratis" → total + 2 kategori terbesar; tombol emas → Premium.
+- [ ] Atur budget › kartu "Pakai template" → Template budget.
+- [ ] Target tabungan: kartu "Saran setoran bulan ini dari template budget…".
+- [ ] Tanggal 1–5: kartu "Sisa budget <bulan lalu>" di Budget → lembar Bawa / Setor ke target / Hangus (+ "… semua"); simpan → batas bulan ini bertambah, setoran masuk target, kartu hilang.
+- [ ] Kategori lewat batas (bulan berjalan): tawaran "Ambil Rp… dari <kategori>"; "Kategori lain" mengganti sumber; Ambil → batas bergeser bulan itu saja; Urungkan mengembalikan.

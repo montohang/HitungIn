@@ -54,6 +54,7 @@ class BackupService {
         'goalDeposits': rows(await db.select(db.goalDeposits).get()),
         'transactions': rows(await db.select(db.transactions).get()),
         'budgets': rows(await db.select(db.budgets).get()),
+        'budgetAdjustments': rows(await db.select(db.budgetAdjustments).get()),
         'settings': rows([
           for (final s in await db.select(db.settings).get())
             if (!_localOnlySettings.contains(s.key))
@@ -115,6 +116,7 @@ class BackupService {
       await db.delete(db.debts).go();
       await db.delete(db.splits).go();
       await db.delete(db.recurringTxs).go();
+      await db.delete(db.budgetAdjustments).go();
       await db.delete(db.budgets).go();
       await db.delete(db.bills).go();
       await db.delete(db.categories).go();
@@ -146,6 +148,8 @@ class BackupService {
           for (final r in rows('budgets'))
             Budget.fromJson({'fromMonth': DateTime(2000).millisecondsSinceEpoch, ...r}),
         ]);
+        // Cadangan sebelum v9 tidak punya penyesuaian budget → kosong.
+        b.insertAll(db.budgetAdjustments, [for (final r in rows('budgetAdjustments')) BudgetAdjustment.fromJson(r)]);
         b.insertAll(
           db.settings,
           [for (final r in rows('settings')) Setting.fromJson(r)].where((s) => !_localOnlySettings.contains(s.key)),
