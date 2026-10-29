@@ -115,6 +115,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
               )
             else if (overview != null) ...[
               _Overview(overview: overview, now: now, isCurrent: isCurrent, days: days),
+              CarryOverNote(month: _month, all: all),
               if (isCurrent) ...[
                 const SizedBox(height: AppSpace.x16),
                 const ForecastBudgetCard(),

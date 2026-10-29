@@ -99,18 +99,20 @@ class BudgetsDao extends DatabaseAccessor<AppDatabase> with _$BudgetsDaoMixin {
     ));
   }
 
-  /// Bawa sisa bulan lalu ke [month] (bulan itu saja). Budget total, bila ada,
-  /// ikut bertambah sebesar jumlahnya.
+  /// Bawa sisa bulan lalu ke [month] (bulan itu saja): hanya batas kategori
+  /// yang naik; budget total tetap jadi batas utama (keputusan 29 Okt 2026).
   Future<void> carryOver(DateTime month, Map<int, int> perCategory) => transaction(() async {
-        int sum = 0;
         for (final MapEntry<int, int> e in perCategory.entries) {
-          if (e.value <= 0) continue;
-          await _adjust(month, e.key, e.value, BudgetAdjustReason.carry);
-          sum += e.value;
+          if (e.value > 0) await _adjust(month, e.key, e.value, BudgetAdjustReason.carry);
         }
-        final bool hasTotal = (await effective(month)).any((b) => b.categoryId == null);
-        if (hasTotal) await _adjust(month, null, sum, BudgetAdjustReason.carry);
       });
+
+  /// Jumlah sisa bulan lalu yang dibawa ke [month].
+  Stream<int> watchCarried(DateTime month) =>
+      (select(budgetAdjustments)
+            ..where((a) => a.month.equals(DateTime(month.year, month.month)) & a.reason.equalsValue(BudgetAdjustReason.carry)))
+          .watch()
+          .map((rows) => rows.fold(0, (s, a) => s + a.amount));
 
   /// Pindah [amount] batas dari kategori [from] ke [to] untuk [month] saja;
   /// budget total tidak berubah.

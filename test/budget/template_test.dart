@@ -130,7 +130,7 @@ void main() {
     await db.close();
   });
 
-  test('sisa akhir bulan: bawa menambah batas bulan depan (dan total), setor jadi setoran target, hangus diabaikan, ditandai selesai', () async {
+  test('sisa akhir bulan: bawa menambah batas kategori bulan depan (total tetap), setor jadi setoran target, hangus diabaikan, ditandai selesai', () async {
     final db = _db();
     final w = await db.walletsDao.add(name: 'BCA', type: WalletType.bank, initialBalance: 5000000);
     final cats = await db.categoriesDao.active();
@@ -157,7 +157,8 @@ void main() {
     expect((r.carried, r.deposited), (150000, 120000));
     final novP = await db.budgetsDao.progress(nov);
     expect(novP.firstWhere((b) => b.category?.name == 'Makan & Minum').budget.limitAmount, 1550000);
-    expect(novP.firstWhere((b) => b.category == null).budget.limitAmount, 3150000, reason: 'total ikut bertambah');
+    expect(novP.firstWhere((b) => b.category == null).budget.limitAmount, 3000000, reason: 'total tetap jadi batas utama');
+    expect(await db.budgetsDao.watchCarried(nov).first, 150000);
     expect(novP.firstWhere((b) => b.category?.name == 'Belanja').budget.limitAmount, 1000000);
     final g = (await db.goalsDao.watchAll().first).single;
     expect(g.deposits.single.amount, 120000);

@@ -22,6 +22,50 @@ import '../../settings/widgets/settings_tile.dart' show showAppSheet;
 import '../data/budget_template.dart';
 import '../data/budgets_dao.dart';
 
+/// Sisa bulan lalu yang dibawa ke bulan ini.
+final carriedProvider = StreamProvider.family<int, DateTime>(
+  (ref, month) => ref.watch(appDatabaseProvider).budgetsDao.watchCarried(month),
+);
+
+/// Catatan di Budget bila batas kategori melebihi total karena sisa dibawa.
+class CarryOverNote extends ConsumerWidget {
+  const CarryOverNote({super.key, required this.month, required this.all});
+
+  final DateTime month;
+  final List<BudgetProgress> all;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if ((ref.watch(carriedProvider(month)).valueOrNull ?? 0) <= 0) return const SizedBox.shrink();
+    final BudgetProgress? total = all.where((b) => b.category == null).firstOrNull;
+    if (total == null) return const SizedBox.shrink();
+    final int categories = all.where((b) => b.category != null).fold(0, (s, b) => s + b.budget.limitAmount);
+    final int over = categories - total.budget.limitAmount;
+    if (over <= 0) return const SizedBox.shrink();
+    final c = context.colors;
+    return Container(
+      key: const Key('catatan-sisa-dibawa'),
+      margin: const EdgeInsets.only(top: AppSpace.x12),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12, vertical: 10),
+      decoration: BoxDecoration(color: c.chip, borderRadius: AppRadius.smAll),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(HiIcons.info, size: 16, color: c.muted),
+          const SizedBox(width: AppSpace.x8),
+          Expanded(
+            child: Text(
+              'Batas kategori bulan ini lebih ${Rupiah.format(over)} dari total karena ada sisa yang dibawa. '
+              'Total tetap jadi batas utama.',
+              style: context.text.label.copyWith(fontWeight: FontWeight.w500, color: c.sub, height: 1.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Bulan (yyyy-mm) yang sisanya sudah diproses.
 final leftoverDoneProvider = StreamProvider<String?>(
   (ref) => ref.watch(appDatabaseProvider).settingsDao.watch(SettingKeys.budgetLeftoverDone),
@@ -171,8 +215,9 @@ class _LeftoverSheet extends StatefulWidget {
 }
 
 class _LeftoverSheetState extends State<_LeftoverSheet> {
+  // Pilihan awal: setor ke target bila ada target aktif, selain itu bawa.
   late final Map<int, LeftoverChoice> _choice = {
-    for (final l in widget.items) l.categoryId: LeftoverChoice.bawa,
+    for (final l in widget.items) l.categoryId: widget.goal != null ? LeftoverChoice.setor : LeftoverChoice.bawa,
   };
 
   List<LeftoverChoice> get _options => [

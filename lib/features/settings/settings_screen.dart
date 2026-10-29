@@ -12,6 +12,7 @@ import '../../core/widgets/app_button.dart';
 import '../dev/sample_data.dart';
 import '../security/app_gate.dart';
 import '../../core/security/secure_store.dart';
+import '../../core/utils/date_format.dart';
 import '../../core/widgets/logo_mark.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/db/app_database.dart';
@@ -251,16 +252,20 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Lompat ke tanggal 1 bulan depan',
                     subtitle: ref.watch(debugClockShiftProvider) == Duration.zero
                         ? 'Debug: menggeser jam aplikasi saja, tanggal HP tetap'
-                        : 'Aktif · ketuk untuk kembali ke hari ini',
+                        : 'Aktif · jam aplikasi ${DateFmt.dayKey(ref.watch(clockProvider)())} · ketuk lagi untuk maju sebulan',
                     onTap: () {
                       final notifier = ref.read(debugClockShiftProvider.notifier);
-                      if (notifier.state != Duration.zero) {
-                        notifier.state = Duration.zero;
-                        return;
-                      }
-                      final DateTime now = DateTime.now();
-                      notifier.state = DateTime(now.year, now.month + 1, 1, 9).difference(now);
+                      final DateTime real = DateTime.now();
+                      final DateTime app = real.add(notifier.state);
+                      notifier.state = DateTime(app.year, app.month + 1, 1, 9).difference(real);
                     },
+                  ),
+                if (kDebugMode && ref.watch(debugClockShiftProvider) != Duration.zero)
+                  SettingsTile(
+                    icon: HiIcons.history,
+                    title: 'Kembali ke hari ini',
+                    subtitle: 'Debug: jam aplikasi kembali normal',
+                    onTap: () => ref.read(debugClockShiftProvider.notifier).state = Duration.zero,
                   ),
                 if (kDebugMode)
                   SettingsTile(

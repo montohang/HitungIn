@@ -291,8 +291,9 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [ ] Gratis: catatan versi gratis; "Simpan versi gratis" → total + 2 kategori terbesar; tombol emas → Premium.
 - [x] Atur budget › kartu "Pakai template" → Template budget.
 - [x] Target tabungan: kartu "Saran setoran bulan ini dari template budget…".
-- [x] Tanggal 1–5: kartu "Sisa budget <bulan lalu>" di Budget → lembar Bawa / Setor ke target / Hangus (+ "… semua"); simpan → batas bulan ini bertambah, setoran masuk target, kartu hilang.
+- [x] Tanggal 1–5: kartu "Sisa budget <bulan lalu>" di Budget → lembar (di atas navigasi) Bawa / Setor ke target / Hangus (+ "… semua"), pilihan awal Setor bila ada target; simpan → batas kategori naik, **total tetap**, setoran masuk target, kartu hilang.
+- [x] Sesudah sisa dibawa: catatan "Batas kategori bulan ini lebih Rp… dari total… Total tetap jadi batas utama."
 - [x] Kategori lewat batas (bulan berjalan): tawaran "Ambil Rp… dari <kategori>"; Ambil → batas bergeser bulan itu saja; Urungkan mengembalikan.
 - [ ] "Kategori lain" mengganti sumber (muncul bila ada ≥ 2 kategori sumber).
 - [x] Kelompok tanpa kategori (mis. Cicilan di kategori bawaan): petunjuk "Belum ada kategori di sini", jatah tetap masuk total.
-- [x] Debug: Lainnya › Isi data uji & Lompat ke tanggal 1 bulan depan (jam aplikasi saja).
+- [x] Debug: Lainnya › Isi data uji, Lompat ke tanggal 1 bulan depan (bisa berulang) & Kembali ke hari ini (jam aplikasi saja).
