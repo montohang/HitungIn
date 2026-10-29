@@ -297,3 +297,14 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [ ] "Kategori lain" mengganti sumber (muncul bila ada ≥ 2 kategori sumber).
 - [x] Kelompok tanpa kategori (mis. Cicilan di kategori bawaan): petunjuk "Belum ada kategori di sini", jatah tetap masuk total.
 - [x] Debug: Lainnya › Isi data uji, Lompat ke tanggal 1 bulan depan (bisa berulang) & Kembali ke hari ini (jam aplikasi saja).
+
+## 18. Export Excel & PDF (P3g, baru)
+- [x] Laporan › "Unduh laporan PDF" → pratinjau halaman putih: Ringkasan (angka, tingkat menabung, kategori, budget), Posisi keuangan (saldo, utang, tagihan, target), Lampiran transaksi.
+- [x] Pratinjau › Bagikan → menu Bagikan Android dengan berkas PDF; berkas sementara di cache/share terhapus sesudahnya.
+- [ ] Pratinjau › Simpan → pilih folder → PDF tersimpan, dibuka di aplikasi PDF lain.
+- [x] Lainnya › Export data → format PDF / Excel / CSV, periode, dompet, lampiran (PDF), daftar sheet (Excel), peringatan tidak terenkripsi.
+- [x] Excel 3 bulan › Buat & bagikan → berkas .xlsx (hanya sheet yang ada datanya); terhapus dari cache sesudahnya.
+- [ ] Buka .xlsx di Google Sheets / Excel: baris judul beku, filter otomatis, nominal angka Rupiah.
+- [ ] Pilih sendiri → kalender rentang tanggal; Dompet → hanya transaksi dompet itu.
+- [x] Gratis: label GRATIS BULAN INI / GRATIS LEWAT IKLAN, periode lain bergembok untuk PDF, Excel → tombol emas "Buka dengan Pro".
+- [ ] Gratis: CSV → iklan berhadiah / Pro (sama dengan tombol Export CSV di Backup).

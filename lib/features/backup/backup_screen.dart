@@ -13,17 +13,12 @@ import '../../core/theme/context_ext.dart';
 import '../../core/utils/date_format.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_chip.dart';
-import '../ads/ad_policy.dart';
-import '../ads/ads_service.dart';
-import '../premium/data/pro_limits.dart';
-import '../premium/pro_controller.dart';
-import '../premium/widgets/pro_teaser.dart';
 import '../security/app_gate.dart';
 import '../settings/data/settings_dao.dart';
-import '../settings/widgets/settings_tile.dart';
 import 'data/backup_codec.dart';
 import 'data/backup_service.dart';
 import 'data/csv_export.dart';
+import '../export/export_actions.dart' show unlockCsvExport;
 import 'restore_flow.dart';
 import 'widgets/backup_password_form.dart';
 import '../../core/widgets/bottom_note_scroll_view.dart';
@@ -107,48 +102,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     }
   }
 
-  /// Versi gratis: tawarkan iklan berhadiah (1× ekspor) atau Pro.
-  Future<bool> _unlockCsv() async {
-    if (ref.read(isProProvider)) return true;
-    final bool canAd = AdPolicy.offerRewarded(isPro: false, adsReady: ref.read(adsReadyProvider));
-    final String? choice = await showAppSheet<String>(
-      context,
-      title: 'Ekspor CSV',
-      builder: (context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            canAd
-                ? 'Ekspor CSV adalah fitur Pro. Tonton satu iklan singkat untuk ekspor sekali, atau upgrade ke Pro.'
-                : 'Ekspor CSV adalah fitur Pro. Iklan sedang tidak tersedia — coba lagi nanti atau upgrade ke Pro.',
-            style: context.text.body.copyWith(color: context.colors.sub),
-          ),
-          const SizedBox(height: AppSpace.x16),
-          if (canAd) ...[
-            AppButton(
-                label: 'Tonton iklan & ekspor',
-                icon: HiIcons.play,
-                large: true,
-                onPressed: () => Navigator.pop(context, 'ad')),
-            const SizedBox(height: AppSpace.x8),
-          ],
-          AppButton(
-              label: 'Lihat HitungIn Pro',
-              variant: AppButtonVariant.soft,
-              onPressed: () => Navigator.pop(context, 'pro')),
-        ],
-      ),
-    );
-    if (!mounted) return false;
-    if (choice == 'pro') openPremium(context, ProReason.csv);
-    if (choice != 'ad') return false;
-    final bool earned = await withAutoLockPaused(ref, () => ref.read(adsServiceProvider).showRewarded());
-    if (!earned && mounted) _toast('Iklan belum selesai ditonton, ekspor dibatalkan.');
-    return FreeLimits.canExportCsv(isPro: false, rewardEarned: earned);
-  }
-
   Future<void> _exportCsv() async {
-    if (!await _unlockCsv()) return;
+    if (!await unlockCsvExport(context, ref)) return;
     await _run(() async {
       final items = await ref.read(appDatabaseProvider).transactionsDao.allDetails();
       if (items.isEmpty) {

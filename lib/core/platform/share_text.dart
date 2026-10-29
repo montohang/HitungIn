@@ -32,4 +32,17 @@ abstract final class ShareText {
       return false;
     }
   }
+
+  /// Bagikan berkas [path] (harus di folder cache `share/`) dengan [mime].
+  /// False bila menu Bagikan tidak tersedia (tes / platform lain).
+  static Future<bool> file(String path, {required String mime, String title = 'Bagikan lewat'}) async {
+    try {
+      await _channel.invokeMethod<void>('file', {'path': path, 'mime': mime, 'title': title});
+      return true;
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
+  }
 }

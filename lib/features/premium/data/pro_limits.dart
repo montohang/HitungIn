@@ -51,7 +51,8 @@ enum ProReason {
   notifikasi('Pengingat tagihan lewat notifikasi'),
   personalisasi('Foto widget, warna bebas & Beranda sesukamu'),
   target('Menabung untuk banyak target sekaligus'),
-  scan('Scan struk tanpa batas');
+  scan('Scan struk tanpa batas'),
+  export('Export Excel & PDF semua periode');
 
   const ProReason(this.headline);
   final String headline;

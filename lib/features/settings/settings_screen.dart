@@ -180,8 +180,8 @@ class SettingsScreen extends ConsumerWidget {
                 SettingsTile(
                   icon: HiIcons.upload,
                   title: 'Export data',
-                  value: 'CSV',
-                  onTap: () => context.push(Routes.cadangan),
+                  value: 'PDF · Excel · CSV',
+                  onTap: () => context.push(Routes.export),
                 ),
                 if (!isPro && adPrivacy)
                   SettingsTile(

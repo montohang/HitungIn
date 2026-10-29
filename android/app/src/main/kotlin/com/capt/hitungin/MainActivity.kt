@@ -163,6 +163,20 @@ class MainActivity : FlutterFragmentActivity() {
                 shareResult = result
                 @Suppress("DEPRECATION")
                 startActivityForResult(Intent.createChooser(send, call.argument<String>("title")), REQ_SHARE)
+            } else if (call.method == "file") {
+                // Berkas export (PDF/Excel/CSV) di cache/share, dibagikan lewat FileProvider lalu dihapus Dart.
+                val file = java.io.File(call.argument<String>("path") ?: "")
+                val uri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.share", file)
+                val send = Intent(Intent.ACTION_SEND).apply {
+                    type = call.argument<String>("mime") ?: "application/octet-stream"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    putExtra(Intent.EXTRA_SUBJECT, file.name)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                shareResult?.success(null)
+                shareResult = result
+                @Suppress("DEPRECATION")
+                startActivityForResult(Intent.createChooser(send, call.argument<String>("title")), REQ_SHARE)
             } else {
                 result.notImplemented()
             }

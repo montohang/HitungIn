@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../rapor/widgets/rapor_entry.dart' show RaporReportRow;
+import '../export/export_actions.dart' show openPdfReport;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -118,6 +119,38 @@ class _LaporanScreenState extends ConsumerState<LaporanScreen> {
               const RecapReportRow(),
               const SizedBox(height: AppSpace.x8),
               const RaporReportRow(),
+              const SizedBox(height: AppSpace.x8),
+              Pressable.card(
+                key: const Key('unduh-pdf'),
+                onTap: () => openPdfReport(
+                  context,
+                  ref,
+                  range: (from: _month, to: DateTime(_month.year, _month.month + 1)),
+                  walletId: wallet,
+                ),
+                semanticLabel: 'Unduh laporan PDF ${DateFmt.month(_month)}',
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x12),
+                  decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
+                  child: Row(children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(color: c.accentSoft, borderRadius: AppRadius.smAll),
+                      child: Icon(HiIcons.download, size: 18, color: c.accentText),
+                    ),
+                    const SizedBox(width: AppSpace.x12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text('Unduh laporan PDF', style: t.item.copyWith(fontSize: 14)),
+                        Text('${DateFmt.months[_month.month - 1]} · ringkasan, posisi keuangan & transaksi',
+                            style: t.caption.copyWith(color: c.muted)),
+                      ]),
+                    ),
+                    if (!isPro && !isCurrent) const AppBadge.pro() else Icon(HiIcons.forward, size: 16, color: c.muted),
+                  ]),
+                ),
+              ),
               const SizedBox(height: AppSpace.block),
             ],
             if (tooFew)
