@@ -392,7 +392,9 @@ class _GroupCard extends StatelessWidget {
     final bool isSaving = plan.group == BudgetGroup.tabungan;
     final String sub = isSaving
         ? 'Saran setoran ke Target tabungan · bukan batas belanja'
-        : '${plan.items.length} kategori · dibagi sebanding kebiasaan';
+        : plan.items.isEmpty
+            ? 'Belum ada kategori · tetap masuk total budget'
+            : '${plan.items.length} kategori · dibagi sebanding kebiasaan';
     return Container(
       padding: const EdgeInsets.fromLTRB(AppSpace.x16, 14, AppSpace.x16, 6),
       decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
@@ -446,6 +448,14 @@ class _GroupCard extends StatelessWidget {
                   hint: 'Sisa ${Rupiah.format(s.goal.left)}',
                   amount: Rupiah.format(s.amount),
                 )
+          else if (plan.items.isEmpty)
+            _Row(
+              leading: Icon(HiIcons.info, size: 18, color: c.muted),
+              soft: c.chip,
+              title: 'Belum ada kategori di sini',
+              hint: 'Ketuk kategori di kelompok lain untuk memindahkannya ke ${plan.group.label}',
+              amount: '',
+            )
           else
             for (final TemplateItem i in plan.items)
               _Row(

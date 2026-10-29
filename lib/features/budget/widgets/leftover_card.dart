@@ -129,6 +129,7 @@ class LeftoverCard extends ConsumerWidget {
     final Map<int, LeftoverChoice>? choices = await showAppSheet<Map<int, LeftoverChoice>>(
       context,
       title: 'Sisa budget ${DateFmt.months[prev.month - 1]}',
+      aboveNav: true,
       builder: (_) => _LeftoverSheet(items: items, goal: goal, nextMonth: DateFmt.months[month.month - 1]),
     );
     if (choices == null || !context.mounted) return;

@@ -9,6 +9,7 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/theme/context_ext.dart';
 import '../../core/theme/theme_controller.dart';
 import '../../core/widgets/app_button.dart';
+import '../dev/sample_data.dart';
 import '../security/app_gate.dart';
 import '../../core/security/secure_store.dart';
 import '../../core/widgets/logo_mark.dart';
@@ -232,6 +233,34 @@ class SettingsScreen extends ConsumerWidget {
                       onChanged: (on) => ref.read(proControllerProvider.notifier).debugSetPro(on),
                     ),
                     onTap: () => ref.read(proControllerProvider.notifier).debugSetPro(!isPro),
+                  ),
+                if (kDebugMode)
+                  SettingsTile(
+                    icon: HiIcons.document,
+                    title: 'Isi data uji',
+                    subtitle: 'Debug: dompet, ±3 bulan transaksi fiktif, budget, 2 target',
+                    onTap: () async {
+                      final int n = await seedSampleData(ref.read(appDatabaseProvider), ref.read(clockProvider)());
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data uji ditambahkan · $n transaksi')));
+                    },
+                  ),
+                if (kDebugMode)
+                  SettingsTile(
+                    icon: HiIcons.calendar,
+                    title: 'Lompat ke tanggal 1 bulan depan',
+                    subtitle: ref.watch(debugClockShiftProvider) == Duration.zero
+                        ? 'Debug: menggeser jam aplikasi saja, tanggal HP tetap'
+                        : 'Aktif · ketuk untuk kembali ke hari ini',
+                    onTap: () {
+                      final notifier = ref.read(debugClockShiftProvider.notifier);
+                      if (notifier.state != Duration.zero) {
+                        notifier.state = Duration.zero;
+                        return;
+                      }
+                      final DateTime now = DateTime.now();
+                      notifier.state = DateTime(now.year, now.month + 1, 1, 9).difference(now);
+                    },
                   ),
                 if (kDebugMode)
                   SettingsTile(

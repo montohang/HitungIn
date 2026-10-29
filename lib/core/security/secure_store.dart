@@ -41,4 +41,11 @@ class MemorySecureStore implements SecureStore {
 final secureStoreProvider = Provider<SecureStore>((ref) => const FlutterSecureStore());
 
 /// Jam yang bisa diganti di tes.
-final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+final clockProvider = Provider<DateTime Function()>((ref) {
+  final Duration shift = ref.watch(debugClockShiftProvider);
+  return shift == Duration.zero ? DateTime.now : () => DateTime.now().add(shift);
+});
+
+/// Geser jam aplikasi untuk uji di HP (menu debug "Lompat ke tanggal 1 bulan
+/// depan"). Tanggal HP tidak diubah. Selalu nol di build rilis.
+final debugClockShiftProvider = StateProvider<Duration>((ref) => Duration.zero);

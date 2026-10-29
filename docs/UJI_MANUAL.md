@@ -282,13 +282,17 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 
 ## 17. Template budget (P3f, baru)
 - [ ] Budget kosong › "Pakai template" → layar Template budget; 50/30/20 · 40/30/20/10 · Sendiri berganti dengan jatah per kelompok.
-- [ ] Pemasukan bulanan terisi dari rata-rata 3 bulan; −/+ Rp500rb menghitung ulang semua kelompok.
-- [ ] Ketuk kategori → pindah kelompok; pilihan tetap sama saat layar dibuka lagi.
-- [ ] Sendiri: −/+ 5% per kelompok, "Total 100% · Pas" / "Kurang/Lebih"; tombol simpan terkunci bila bukan 100%.
-- [ ] Tabungan: saran setoran per target aktif (tanpa target → ajakan membuat target).
-- [ ] Pro: "Lanjut ke Atur budget" → total & semua kategori terisi, catatan "Diisi dari template…"; simpan → kembali ke Budget.
+- [x] Pemasukan bulanan terisi dari rata-rata 3 bulan.
+- [ ] Pemasukan −/+ Rp500rb menghitung ulang semua kelompok.
+- [x] Ketuk kategori → pindah kelompok; pilihan tetap sama saat layar dibuka lagi.
+- [x] Sendiri: −/+ 5% per kelompok, "Total 100% · Pas" / "Kurang/Lebih"; tombol simpan terkunci bila bukan 100%.
+- [x] Tabungan: saran setoran per target aktif (tanpa target → ajakan membuat target).
+- [x] Pro: "Lanjut ke Atur budget" → total & semua kategori terisi, catatan "Diisi dari template…"; simpan → kembali ke Budget.
 - [ ] Gratis: catatan versi gratis; "Simpan versi gratis" → total + 2 kategori terbesar; tombol emas → Premium.
-- [ ] Atur budget › kartu "Pakai template" → Template budget.
-- [ ] Target tabungan: kartu "Saran setoran bulan ini dari template budget…".
-- [ ] Tanggal 1–5: kartu "Sisa budget <bulan lalu>" di Budget → lembar Bawa / Setor ke target / Hangus (+ "… semua"); simpan → batas bulan ini bertambah, setoran masuk target, kartu hilang.
-- [ ] Kategori lewat batas (bulan berjalan): tawaran "Ambil Rp… dari <kategori>"; "Kategori lain" mengganti sumber; Ambil → batas bergeser bulan itu saja; Urungkan mengembalikan.
+- [x] Atur budget › kartu "Pakai template" → Template budget.
+- [x] Target tabungan: kartu "Saran setoran bulan ini dari template budget…".
+- [x] Tanggal 1–5: kartu "Sisa budget <bulan lalu>" di Budget → lembar Bawa / Setor ke target / Hangus (+ "… semua"); simpan → batas bulan ini bertambah, setoran masuk target, kartu hilang.
+- [x] Kategori lewat batas (bulan berjalan): tawaran "Ambil Rp… dari <kategori>"; Ambil → batas bergeser bulan itu saja; Urungkan mengembalikan.
+- [ ] "Kategori lain" mengganti sumber (muncul bila ada ≥ 2 kategori sumber).
+- [x] Kelompok tanpa kategori (mis. Cicilan di kategori bawaan): petunjuk "Belum ada kategori di sini", jatah tetap masuk total.
+- [x] Debug: Lainnya › Isi data uji & Lompat ke tanggal 1 bulan depan (jam aplikasi saja).

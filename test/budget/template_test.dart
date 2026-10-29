@@ -5,6 +5,7 @@ import 'package:hitungin/core/db/app_database.dart';
 import 'package:hitungin/features/backup/data/backup_service.dart';
 import 'package:hitungin/features/budget/data/budget_template.dart';
 import 'package:hitungin/features/budget/widgets/leftover_card.dart' show applyLeftovers;
+import 'package:hitungin/features/dev/sample_data.dart';
 import 'package:hitungin/features/settings/data/settings_dao.dart';
 
 AppDatabase _db() {
@@ -183,5 +184,18 @@ void main() {
     expect((await target.budgetsDao.adjustments(DateTime(2026, 11)))[makan], 150000);
     await db.close();
     await target.close();
+  });
+
+  test('data uji debug: bulan lalu ada sisa, bulan ini Makan lewat batas, pemasukan rata-rata terisi', () async {
+    final db = _db();
+    await db.walletsDao.add(name: 'Tunai', type: WalletType.tunai, initialBalance: 200000);
+    final now = DateTime(2026, 10, 29, 14);
+    expect(await seedSampleData(db, now), greaterThan(100));
+    expect(leftovers(await db.budgetsDao.progress(DateTime(2026, 9))), isNotEmpty);
+    final oct = await db.budgetsDao.progress(DateTime(2026, 10));
+    final makan = oct.firstWhere((b) => b.category?.name == 'Makan & Minum');
+    expect(makan.spent > makan.budget.limitAmount, isTrue);
+    expect(await db.transactionsDao.incomeAverage(DateTime(2026, 10)), 8500000);
+    await db.close();
   });
 }
