@@ -27,6 +27,7 @@ String? routeForNotification(String payload) {
   if (payload == '${recapPayloadPrefix}week') return '${Routes.rekap}?minggu=1';
   if (payload == '${recapPayloadPrefix}evening') return Routes.catat;
   if (payload == raporPayload) return Routes.rapor;
+  if (payload == 'backup') return Routes.cadangan;
   if (payload.startsWith(goalPayloadPrefix)) {
     final int? id = int.tryParse(payload.substring(goalPayloadPrefix.length));
     return id == null ? Routes.target : Routes.targetDetail(id);

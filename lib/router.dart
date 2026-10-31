@@ -15,6 +15,7 @@ import 'features/splits/splits_screen.dart';
 import 'features/recap/recap_screen.dart';
 import 'features/widgets/widget_settings_screen.dart';
 import 'features/home/home_layout_screen.dart';
+import 'features/backup/auto_backup_screen.dart';
 import 'features/backup/backup_screen.dart';
 import 'features/bills/bills_screen.dart';
 import 'features/budget/atur_budget_screen.dart';
@@ -220,6 +221,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         (Routes.keamanan, SecurityScreen()),
         (Routes.gantiPin, ChangePinScreen()),
         (Routes.cadangan, BackupScreen()),
+        (Routes.backupOtomatis, AutoBackupScreen()),
         (Routes.tampilan, AppearanceScreen()),
         (Routes.berulang, RecurringScreen()),
         (Routes.aturBeranda, HomeLayoutScreen()),

@@ -16,6 +16,7 @@ import '../../core/utils/date_format.dart';
 import '../../core/widgets/logo_mark.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/db/app_database.dart';
+import '../backup/auto_backup_worker.dart';
 import '../backup/data/backup_age.dart';
 import '../bills/bills_screen.dart' show activeBillsProvider;
 import '../bills/data/bill_due.dart';
@@ -85,7 +86,7 @@ class SettingsScreen extends ConsumerWidget {
     final bool bio = ref.watch(_biometricOnProvider).valueOrNull ?? false;
     final bool isPro = ref.watch(isProProvider);
     final bool adPrivacy = ref.watch(_adPrivacyRequiredProvider).valueOrNull ?? false;
-    final ({String label, bool fresh}) backup = backupAge(ref.watch(lastBackupProvider).valueOrNull, now);
+    final ({String label, bool fresh}) backup = backupAge(ref.watch(effectiveLastBackupProvider), now);
 
     return Scaffold(
       body: SafeArea(
@@ -250,6 +251,13 @@ class SettingsScreen extends ConsumerWidget {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data uji ditambahkan · $n transaksi')));
                     },
+                  ),
+                if (kDebugMode)
+                  SettingsTile(
+                    icon: HiIcons.folder,
+                    title: 'Jalankan tugas backup otomatis',
+                    subtitle: 'Debug: tugas latar belakang sekali, sekarang',
+                    onTap: () => ref.read(autoBackupSchedulerProvider).runNow(),
                   ),
                 if (kDebugMode)
                   SettingsTile(

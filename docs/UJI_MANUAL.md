@@ -328,3 +328,22 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] Export satu dompet: tanpa blok & sheet Kekayaan bersih.
 - [x] Backup lalu pulihkan: aset manual kembali; ringkasan "Ganti semua data?" menyebut jumlah aset & pinjaman.
 - [ ] Sesudah pulihkan dari HP lain: batang tren bulan-bulan lalu ikut kembali.
+
+## 20. Backup otomatis (P3i, baru)
+- [x] Versi gratis: baris Backup otomatis berlabel PRO → Premium.
+- [x] Pro: penyiapan → pilih folder, password, centang → Nyalakan; salinan pertama langsung dibuat dan bisa dipulihkan dengan password itu.
+- [x] Akar penyimpanan ditolak Android ("Can't use this folder").
+- [ ] Folder Download & folder Google Drive tidak bisa dipilih (buktikan di HP yang ada Drive-nya).
+- [x] Tugas latar belakang berjalan saat aplikasi tertutup (Lainnya › Jalankan tugas backup otomatis di build debug).
+- [ ] Data tidak berubah → tidak ada salinan baru; data berubah → salinan baru.
+- [ ] Tersisa 7 salinan terbaru; backup manual di folder yang sama tidak tersentuh.
+- [x] Mencatat transaksi saat tugas latar belakang berjalan: tidak ada galat database.
+- [x] Folder dihapus → banner "Backup otomatis berhenti", kartu "Perlu backup lagi", notifikasi; Pilih folder lagi memulihkan.
+- [x] Lihat password perlu PIN (PIN salah ditolak, aturan percobaan sama dengan layar kunci).
+- [ ] Ganti password: peringatan salinan lama, salinan baru memakai password baru.
+- [x] Matikan → konfirmasi, jadwal berhenti, password terhapus, salinan tetap di folder.
+- [x] Lewat 30 hari sejak backup manual: kartu "Buat salinan ke luar HP"; Nanti menyembunyikannya.
+- [ ] Notifikasi "Buat salinan ke luar HP" muncul saat waktunya.
+- [x] Lebih dari 3 hari terlewat: backup jalan saat aplikasi dibuka.
+- [ ] Mengisi daya sungguhan di Samsung A52: jadwal harian benar-benar jalan (pengaturan baterai bisa menunda).
+- [ ] Excel: sheet "Tren kekayaan" (P3h).

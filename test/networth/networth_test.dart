@@ -107,6 +107,12 @@ void main() {
     final List<String> hints = [for (int r = 1; r < sheet.maxRows; r++) '${sheet.row(r)[2]?.value}'];
     expect(hints, contains(startsWith('10,5 g × Rp1.350.000')), reason: 'keterangan emas sama dengan di layar');
     expect(sheet.maxRows, 1 + x.netWorth!.assets.length + x.netWorth!.liabilities.length + 1);
+    expect(XlsxExport.sheetNames(x), isNot(contains('Tren kekayaan')), reason: 'belum ada catatan');
+    await db.netWorthDao.saveSnapshot(DateTime(2026, 9), assets: 10, liabilities: 3, now: now);
+    final withTrend = await loadExportInput(db, range: range, now: now);
+    final trend = Excel.decodeBytes(XlsxExport.build(withTrend)).tables['Tren kekayaan']!;
+    expect(trend.row(1).first?.value.toString(), '2026-09');
+    expect(trend.row(1)[3]?.value, isA<IntCellValue>());
     final free = await loadExportInput(db, range: range, now: now, includeManualNet: false);
     expect(free.netWorth!.assets.any((l) => l.item != null), isFalse);
     final oneWallet = await loadExportInput(db, range: range, now: now, walletId: 1);

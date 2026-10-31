@@ -18,6 +18,7 @@ import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/pressable.dart';
 import '../scan/widgets/scan_intro_card.dart';
 import '../../core/widgets/progress_bar.dart';
+import '../backup/auto_backup_worker.dart';
 import '../backup/data/backup_age.dart';
 import '../bills/bills_screen.dart';
 import '../bills/data/bill_due.dart';
@@ -68,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
     final bool hasPin = ref.watch(appGateProvider.select((g) => g.hasPin));
     final bool gradient = ref.watch(themeControllerProvider.select((s) => s.gradientBalanceCard));
     final bool hidden = ref.watch(hideBalanceProvider).valueOrNull ?? false;
-    final ({String label, bool fresh}) backup = backupAge(ref.watch(lastBackupProvider).valueOrNull, now);
+    final ({String label, bool fresh}) backup = backupAge(ref.watch(effectiveLastBackupProvider), now);
     final List<Bill> activeBills = ref.watch(activeBillsProvider).valueOrNull ?? const <Bill>[];
     final List<Bill> dueBills = [
       for (final b in activeBills)

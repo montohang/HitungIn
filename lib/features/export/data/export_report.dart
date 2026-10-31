@@ -90,6 +90,7 @@ class ExportInput {
     required this.splits,
     required this.recurring,
     this.netWorth,
+    this.netSnapshots = const [],
   });
 
   final DateRange range;
@@ -113,6 +114,9 @@ class ExportInput {
 
   /// Kekayaan bersih saat export (hanya untuk semua dompet).
   final NetWorth? netWorth;
+
+  /// Catatan kekayaan bersih per bulan (lama ke baru).
+  final List<NetSnapshot> netSnapshots;
 
   String get periodLabel => rangeLabel(range, createdAt);
   Map<int, String> get walletNames => {for (final w in wallets) w.id: w.name};
@@ -322,6 +326,7 @@ Future<ExportInput> loadExportInput(
     splits: splits,
     recurring: await db.recurringDao.watchAll().first,
     netWorth: netWorth,
+    netSnapshots: netWorth != null && includeManualNet ? await db.netWorthDao.snapshots() : const [],
   );
 }
 

@@ -126,6 +126,7 @@ abstract final class Routes {
   static const String keamanan = '/pengaturan/keamanan';
   static const String gantiPin = '/pengaturan/keamanan/ganti-pin';
   static const String cadangan = '/pengaturan/cadangan';
+  static const String backupOtomatis = '/pengaturan/backup-otomatis';
   static const String tampilan = '/pengaturan/tampilan';
   static const String berulang = '/pengaturan/berulang';
 

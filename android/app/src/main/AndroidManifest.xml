@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Sidik jari / wajah untuk membuka aplikasi. -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
@@ -10,6 +11,11 @@
          Sengaja TIDAK memakai izin alarm tepat waktu (dibatasi Play Store);
          pengingat boleh meleset beberapa menit. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Backup otomatis berjalan sebagai tugas biasa, tanpa layanan latar depan;
+         izin bawaan plugin WorkManager ini tidak dipakai. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:node="remove" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SHORT_SERVICE" tools:node="remove" />
 
     <!-- allowBackup=false: database tidak boleh ikut dicadangkan otomatis
          ke Google Drive (HitungIn 100% offline, dan kunci Keystore tidak

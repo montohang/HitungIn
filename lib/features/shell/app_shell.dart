@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../backup/auto_backup_worker.dart';
+import '../backup/data/auto_backup.dart';
 import '../networth/data/net_worth.dart';
 import '../networth/networth_provider.dart';
 import '../../core/db/data_providers.dart' show currentDayProvider, currentMonthProvider;
@@ -135,6 +137,20 @@ class _AppShellState extends ConsumerState<AppShell> {
     });
   }
 
+  /// Pasang ulang jadwal backup otomatis & jalankan bila sudah lama terlewat (P3i).
+  Future<void> _checkAutoBackup() async {
+    try {
+      ref.invalidate(autoBackupProvider);
+      final AutoBackupState s = await ref.read(autoBackupStoreProvider).read();
+      if (!s.enabled || !ref.read(isProProvider) || !mounted) return;
+      await ref.read(autoBackupSchedulerProvider).enable();
+      if (!mounted) return;
+      if (autoBackupNeedsCatchUp(s, ref.read(clockProvider)())) await ref.read(autoBackupRunnerProvider)();
+    } on Object catch (e) {
+      debugPrint('Backup otomatis: $e');
+    }
+  }
+
   Timer? _netDebounce;
 
   /// Catat kekayaan bersih bulan berjalan (P3h); catatan terakhir tiap bulan
@@ -165,6 +181,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     _dayTimer = Timer.periodic(const Duration(minutes: 1), (_) => _refreshToday());
     Future.microtask(_runRecurring);
     Future.microtask(_openPendingNotification);
+    Future.microtask(_checkAutoBackup);
     Future.microtask(() async {
       await ref.read(reminderSchedulerProvider).init(onTap: ref.read(notificationTapHandlerProvider));
       await LaunchRoutes.init(ref.read(launchRouteHandlerProvider));

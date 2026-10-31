@@ -1,0 +1,19 @@
+name: saf_folder
+description: Akses folder pilihan pengguna lewat Storage Access Framework, tersedia juga di tugas latar belakang.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.capt.saffolder
+        pluginClass: SafFolderPlugin

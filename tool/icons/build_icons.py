@@ -137,6 +137,7 @@ G = {
     'listPlus': ('M4 6h16M4 12h16M4 18h10M18 16v4M16 18h4', 1.8, True),  # Atur Beranda
     'share': ('M12 15V4M7 9l5-5 5 5M5 14v5h14v-5', 1.8, True),  # Patungan › Bagikan
     'whatsapp': ('M4 20l1.5-4.5A8 8 0 1 1 8.5 18.5zM9 10h.01M12 10h.01M15 10h.01', 1.8, True),  # Tagih lewat WhatsApp
+    'folder': ('M3 6h6l2 2h10v11H3z', 1.8, True),  # Backup otomatis
 }
 
 UPM = 960

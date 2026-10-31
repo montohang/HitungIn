@@ -233,6 +233,8 @@ abstract final class HiIcons {
   static const HiIconData share = HiIconData(0xe061);
   /// whatsapp (desain).
   static const HiIconData whatsapp = HiIconData(0xe062);
+  /// folder (desain).
+  static const HiIconData folder = HiIconData(0xe063);
 
   /// Semua ikon (galeri desain).
   static const Map<String, HiIconData> all = {
@@ -335,5 +337,6 @@ abstract final class HiIcons {
     'listPlus': listPlus,
     'share': share,
     'whatsapp': whatsapp,
+    'folder': folder,
   };
 }

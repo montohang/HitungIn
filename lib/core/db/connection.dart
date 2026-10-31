@@ -34,4 +34,6 @@ void applyCipherKey(Database db, String hexKey) {
   db.execute('PRAGMA key = "x\'$hexKey\'"');
   // Gagal di sini berarti kunci salah atau file rusak.
   db.select('SELECT count(*) FROM sqlite_master');
+  // Backup otomatis membuka koneksi kedua dari latar belakang; tunggu giliran, jangan langsung gagal.
+  db.execute('PRAGMA busy_timeout = 5000');
 }
