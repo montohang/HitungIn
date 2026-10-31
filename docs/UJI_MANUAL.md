@@ -301,6 +301,7 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 ## 18. Export Excel & PDF (P3g, baru)
 - [x] Laporan › "Unduh laporan PDF" → pratinjau halaman putih: Ringkasan (angka, tingkat menabung, kategori, budget), Posisi keuangan (saldo, utang, tagihan, target), Lampiran transaksi.
 - [x] Pratinjau › Bagikan → menu Bagikan Android dengan berkas PDF; berkas sementara di cache/share terhapus sesudahnya.
+- [x] Excel › Simpan ke folder → berkas tersimpan di folder pilihan (build rilis).
 - [ ] Pratinjau › Simpan → pilih folder → PDF tersimpan, dibuka di aplikasi PDF lain.
 - [x] Lainnya › Export data → format PDF / Excel / CSV, periode, dompet, lampiran (PDF), daftar sheet (Excel), peringatan tidak terenkripsi.
 - [x] Excel 3 bulan › Buat & bagikan → berkas .xlsx (hanya sheet yang ada datanya); terhapus dari cache sesudahnya.
@@ -347,3 +348,4 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] Lebih dari 3 hari terlewat: backup jalan saat aplikasi dibuka.
 - [ ] Mengisi daya sungguhan di Samsung A52: jadwal harian benar-benar jalan (pengaturan baterai bisa menunda).
 - [ ] Excel: sheet "Tren kekayaan" (P3h).
+- [x] Build rilis (kode dipangkas R8): pembaruan dari 0.1.0 ke 0.2.0 dengan kunci yang sama → PIN & data utuh; scan struk dari galeri, PDF, Excel, backup otomatis & tugas latar belakang berjalan.
