@@ -22,7 +22,7 @@ import '../../core/widgets/screen_header.dart';
 import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart' show openPremium;
-import '../settings/widgets/settings_tile.dart' show showAppSheet;
+import '../settings/widgets/settings_tile.dart' show confirmDialog, showAppSheet;
 import 'data/net_worth.dart';
 import 'networth_provider.dart';
 
@@ -597,7 +597,17 @@ class _NetItemFormState extends State<_NetItemForm> {
           AppButton(
             label: 'Hapus',
             variant: AppButtonVariant.danger,
-            onPressed: () => Navigator.pop(context, (kind: item.kind, name: item.name, value: 0, mg: null, price: null, delete: true)),
+            onPressed: () async {
+              final NavigatorState nav = Navigator.of(context);
+              final bool ok = await confirmDialog(
+                context,
+                title: 'Hapus ${item.name}?',
+                body: 'Nilainya keluar dari kekayaan bersih. Catatan bulan-bulan lalu tidak berubah.',
+                confirm: 'Hapus',
+                danger: true,
+              );
+              if (ok) nav.pop((kind: item.kind, name: item.name, value: 0, mg: null, price: null, delete: true));
+            },
           ),
         ],
       ],

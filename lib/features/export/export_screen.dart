@@ -214,7 +214,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                         selected: f == _format,
                         badge: switch (f) {
                           ExportFormat.pdf => isPro ? null : 'GRATIS BULAN INI',
-                          ExportFormat.xlsx => 'PRO',
+                          ExportFormat.xlsx => isPro ? null : 'PRO',
                           ExportFormat.csv => isPro ? null : 'GRATIS LEWAT IKLAN',
                         },
                         pro: f == ExportFormat.xlsx,

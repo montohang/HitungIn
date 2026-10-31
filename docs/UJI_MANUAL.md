@@ -314,7 +314,9 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] Gratis: hanya komponen OTOMATIS (dompet, piutang, utang, sisa cicilan); tren buram dengan PRO; Tambah aset / pinjaman → Premium.
 - [x] Pro: Tambah aset › Emas: berat (boleh koma) × harga per gram, Nilai sekarang langsung terhitung; total & komposisi ikut berubah.
 - [x] Pro: Tambah pinjaman lain → lembar "Tambah pinjaman" (Nama, Sisa pokok); nama kosong → pesan "Nama wajib diisi".
-- [x] Perbarui: harga sebelumnya tampil, simpan → nilai & "diperbarui hari ini" berubah; Hapus → baris hilang.
+- [x] Perbarui: harga sebelumnya tampil, simpan → nilai & "diperbarui hari ini" berubah.
+- [x] Hapus → dialog konfirmasi; Batal kembali ke lembar, Hapus → baris hilang.
+- [x] Export data saat Pro: tanpa label di PDF, Excel, maupun CSV.
 - [ ] Tambah aset Investasi, Properti & kendaraan, Lainnya (nilai langsung).
 - [ ] Lebih dari 30 hari tidak diperbarui: keterangan aset berwarna peringatan.
 - [x] Lompat ke bulan berikut: tren bertambah batang, "Sama dengan bulan lalu" / ▲▼ selisih dari bulan lalu.
