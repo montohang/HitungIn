@@ -30,7 +30,7 @@ String exportLink({ExportFormat? format}) =>
 /// Nama sheet Excel yang mungkin dibuat (untuk chip "Isi file").
 const List<String> excelSheetNames = [
   'Ringkasan', 'Transaksi', 'Bulanan', 'Per kategori', 'Sub-kategori', 'Per dompet', 'Harian', 'Budget',
-  'Utang-piutang', 'Tagihan & cicilan', 'Target tabungan', 'Patungan', 'Transaksi berulang',
+  'Kekayaan bersih', 'Utang-piutang', 'Tagihan & cicilan', 'Target tabungan', 'Patungan', 'Transaksi berulang',
 ];
 
 /// Export data (P3g, Claude Design › Export data): format, periode, dompet.
@@ -143,7 +143,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
     if (_format == ExportFormat.csv && !await unlockCsvExport(context, ref)) return;
     setState(() => _busy = true);
     try {
-      final ExportInput x = await loadExportInput(ref.read(appDatabaseProvider), range: _range, now: _now, walletId: _wallet?.id);
+      final ExportInput x = await loadExportInput(ref.read(appDatabaseProvider), range: _range, now: _now, walletId: _wallet?.id, includeManualNet: ref.read(isProProvider));
       if (_format != ExportFormat.pdf && x.txs.isEmpty && _format == ExportFormat.csv) {
         _toast('Belum ada transaksi di periode ini.');
         return;
@@ -391,7 +391,7 @@ class _FormatCard extends StatelessWidget {
     final t = context.text;
     final (IconData icon, String desc) = switch (format) {
       ExportFormat.pdf => (HiIcons.document, 'Ringkasan, posisi keuangan & lampiran transaksi. Siap dikirim atau diarsipkan.'),
-      ExportFormat.xlsx => (HiIcons.table, 'Sampai 13 sheet: transaksi, bulanan, kategori, dompet, budget, utang, target…'),
+      ExportFormat.xlsx => (HiIcons.table, 'Sampai 14 sheet: transaksi, bulanan, kategori, dompet, budget, utang, target…'),
       ExportFormat.csv => (HiIcons.document, 'Daftar transaksi mentah untuk aplikasi lain.'),
     };
     return Pressable.card(

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../networth/data/net_worth.dart';
+import '../networth/networth_provider.dart';
 import '../../core/db/data_providers.dart' show currentDayProvider, currentMonthProvider;
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/theme_controller.dart';
@@ -133,8 +135,23 @@ class _AppShellState extends ConsumerState<AppShell> {
     });
   }
 
+  Timer? _netDebounce;
+
+  /// Catat kekayaan bersih bulan berjalan (P3h); catatan terakhir tiap bulan
+  /// menjadi titik tren bulan itu.
+  void _scheduleNetSnapshot(NetWorth? w) {
+    if (w == null) return;
+    _netDebounce?.cancel();
+    _netDebounce = Timer(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      final NetWorth? latest = ref.read(netWorthProvider);
+      if (latest != null) recordNetSnapshot(ref.read(appDatabaseProvider), latest, ref.read(clockProvider)());
+    });
+  }
+
   @override
   void dispose() {
+    _netDebounce?.cancel();
     _reminderDebounce?.cancel();
     _dayTimer?.cancel();
     _lifecycle.dispose();
@@ -186,6 +203,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     ref.listen(pendingNotificationRouteProvider, (_, next) {
       if (next != null) _openPendingNotification();
     });
+    ref.listen(netWorthProvider, (_, next) => _scheduleNetSnapshot(next));
     ref.listen(activeBillsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(debtsProvider, (_, __) => _scheduleReminderSync());
     ref.listen(goalsProvider, (_, __) => _scheduleReminderSync());

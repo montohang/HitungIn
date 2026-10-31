@@ -8,9 +8,10 @@ import '../../../core/db/app_database.dart';
 import '../../../core/utils/date_format.dart';
 import '../../debts/data/debts_dao.dart';
 import '../../goals/data/goals_dao.dart';
+import '../../networth/data/net_worth.dart';
 import 'export_report.dart';
 
-/// Excel (.xlsx) P3g: sampai 13 sheet, hanya yang ada datanya. Nominal
+/// Excel (.xlsx) P3g: sampai 14 sheet, hanya yang ada datanya. Nominal
 /// berupa angka berformat Rupiah; baris judul dibekukan & diberi filter.
 abstract final class XlsxExport {
   static final CellStyle _head = CellStyle(
@@ -176,6 +177,17 @@ abstract final class XlsxExport {
             ]);
           }
         }
+      }));
+    }
+    if (x.netWorth case final NetWorth w) {
+      out.add(_SheetDef('Kekayaan bersih', true, (s) {
+        _header(s, ['Jenis', 'Nama', 'Keterangan', 'Nilai', 'Sumber'], [12, 24, 36, 16, 12]);
+        for (final (String kind, List<NetLine> lines) in [('Aset', w.assets), ('Kewajiban', w.liabilities)]) {
+          for (final l in lines) {
+            _row(s, [kind, l.name, l.hint, _Rp(kind == 'Aset' ? l.value : -l.value), l.item == null ? 'Otomatis' : 'Diisi sendiri']);
+          }
+        }
+        _row(s, ['Total', 'Kekayaan bersih', 'Aset dikurangi kewajiban', _Rp(w.net), '']);
       }));
     }
     if (x.debts.isNotEmpty) {

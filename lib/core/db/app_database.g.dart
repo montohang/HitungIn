@@ -7020,6 +7020,706 @@ class BudgetAdjustmentsCompanion extends UpdateCompanion<BudgetAdjustment> {
   }
 }
 
+class $NetItemsTable extends NetItems with TableInfo<$NetItemsTable, NetItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NetItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  @override
+  late final GeneratedColumnWithTypeConverter<NetItemKind, String> kind =
+      GeneratedColumn<String>('kind', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<NetItemKind>($NetItemsTable.$converterkind);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 40),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<int> value = GeneratedColumn<int>(
+      'value', aliasedName, false,
+      check: () => ComparableExpr(value).isBiggerOrEqualValue(0),
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _milligramsMeta =
+      const VerificationMeta('milligrams');
+  @override
+  late final GeneratedColumn<int> milligrams = GeneratedColumn<int>(
+      'milligrams', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _pricePerGramMeta =
+      const VerificationMeta('pricePerGram');
+  @override
+  late final GeneratedColumn<int> pricePerGram = GeneratedColumn<int>(
+      'price_per_gram', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, kind, name, value, milligrams, pricePerGram, updatedAt, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'net_items';
+  @override
+  VerificationContext validateIntegrity(Insertable<NetItem> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+          _valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+    }
+    if (data.containsKey('milligrams')) {
+      context.handle(
+          _milligramsMeta,
+          milligrams.isAcceptableOrUnknown(
+              data['milligrams']!, _milligramsMeta));
+    }
+    if (data.containsKey('price_per_gram')) {
+      context.handle(
+          _pricePerGramMeta,
+          pricePerGram.isAcceptableOrUnknown(
+              data['price_per_gram']!, _pricePerGramMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  NetItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NetItem(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      kind: $NetItemsTable.$converterkind.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!),
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      value: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}value'])!,
+      milligrams: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}milligrams']),
+      pricePerGram: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}price_per_gram']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $NetItemsTable createAlias(String alias) {
+    return $NetItemsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<NetItemKind, String, String> $converterkind =
+      const EnumNameConverter<NetItemKind>(NetItemKind.values);
+}
+
+class NetItem extends DataClass implements Insertable<NetItem> {
+  final int id;
+  final NetItemKind kind;
+  final String name;
+  final int value;
+
+  /// Berat emas dalam miligram (10 g = 10000).
+  final int? milligrams;
+  final int? pricePerGram;
+
+  /// Terakhir nilai/harga diperbarui (untuk pengingat > 30 hari).
+  final DateTime updatedAt;
+  final DateTime createdAt;
+  const NetItem(
+      {required this.id,
+      required this.kind,
+      required this.name,
+      required this.value,
+      this.milligrams,
+      this.pricePerGram,
+      required this.updatedAt,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    {
+      map['kind'] = Variable<String>($NetItemsTable.$converterkind.toSql(kind));
+    }
+    map['name'] = Variable<String>(name);
+    map['value'] = Variable<int>(value);
+    if (!nullToAbsent || milligrams != null) {
+      map['milligrams'] = Variable<int>(milligrams);
+    }
+    if (!nullToAbsent || pricePerGram != null) {
+      map['price_per_gram'] = Variable<int>(pricePerGram);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  NetItemsCompanion toCompanion(bool nullToAbsent) {
+    return NetItemsCompanion(
+      id: Value(id),
+      kind: Value(kind),
+      name: Value(name),
+      value: Value(value),
+      milligrams: milligrams == null && nullToAbsent
+          ? const Value.absent()
+          : Value(milligrams),
+      pricePerGram: pricePerGram == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pricePerGram),
+      updatedAt: Value(updatedAt),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory NetItem.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NetItem(
+      id: serializer.fromJson<int>(json['id']),
+      kind: $NetItemsTable.$converterkind
+          .fromJson(serializer.fromJson<String>(json['kind'])),
+      name: serializer.fromJson<String>(json['name']),
+      value: serializer.fromJson<int>(json['value']),
+      milligrams: serializer.fromJson<int?>(json['milligrams']),
+      pricePerGram: serializer.fromJson<int?>(json['pricePerGram']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'kind':
+          serializer.toJson<String>($NetItemsTable.$converterkind.toJson(kind)),
+      'name': serializer.toJson<String>(name),
+      'value': serializer.toJson<int>(value),
+      'milligrams': serializer.toJson<int?>(milligrams),
+      'pricePerGram': serializer.toJson<int?>(pricePerGram),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  NetItem copyWith(
+          {int? id,
+          NetItemKind? kind,
+          String? name,
+          int? value,
+          Value<int?> milligrams = const Value.absent(),
+          Value<int?> pricePerGram = const Value.absent(),
+          DateTime? updatedAt,
+          DateTime? createdAt}) =>
+      NetItem(
+        id: id ?? this.id,
+        kind: kind ?? this.kind,
+        name: name ?? this.name,
+        value: value ?? this.value,
+        milligrams: milligrams.present ? milligrams.value : this.milligrams,
+        pricePerGram:
+            pricePerGram.present ? pricePerGram.value : this.pricePerGram,
+        updatedAt: updatedAt ?? this.updatedAt,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  NetItem copyWithCompanion(NetItemsCompanion data) {
+    return NetItem(
+      id: data.id.present ? data.id.value : this.id,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      name: data.name.present ? data.name.value : this.name,
+      value: data.value.present ? data.value.value : this.value,
+      milligrams:
+          data.milligrams.present ? data.milligrams.value : this.milligrams,
+      pricePerGram: data.pricePerGram.present
+          ? data.pricePerGram.value
+          : this.pricePerGram,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NetItem(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('name: $name, ')
+          ..write('value: $value, ')
+          ..write('milligrams: $milligrams, ')
+          ..write('pricePerGram: $pricePerGram, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, kind, name, value, milligrams, pricePerGram, updatedAt, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NetItem &&
+          other.id == this.id &&
+          other.kind == this.kind &&
+          other.name == this.name &&
+          other.value == this.value &&
+          other.milligrams == this.milligrams &&
+          other.pricePerGram == this.pricePerGram &&
+          other.updatedAt == this.updatedAt &&
+          other.createdAt == this.createdAt);
+}
+
+class NetItemsCompanion extends UpdateCompanion<NetItem> {
+  final Value<int> id;
+  final Value<NetItemKind> kind;
+  final Value<String> name;
+  final Value<int> value;
+  final Value<int?> milligrams;
+  final Value<int?> pricePerGram;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime> createdAt;
+  const NetItemsCompanion({
+    this.id = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.name = const Value.absent(),
+    this.value = const Value.absent(),
+    this.milligrams = const Value.absent(),
+    this.pricePerGram = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  NetItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required NetItemKind kind,
+    required String name,
+    this.value = const Value.absent(),
+    this.milligrams = const Value.absent(),
+    this.pricePerGram = const Value.absent(),
+    required DateTime updatedAt,
+    this.createdAt = const Value.absent(),
+  })  : kind = Value(kind),
+        name = Value(name),
+        updatedAt = Value(updatedAt);
+  static Insertable<NetItem> custom({
+    Expression<int>? id,
+    Expression<String>? kind,
+    Expression<String>? name,
+    Expression<int>? value,
+    Expression<int>? milligrams,
+    Expression<int>? pricePerGram,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (kind != null) 'kind': kind,
+      if (name != null) 'name': name,
+      if (value != null) 'value': value,
+      if (milligrams != null) 'milligrams': milligrams,
+      if (pricePerGram != null) 'price_per_gram': pricePerGram,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  NetItemsCompanion copyWith(
+      {Value<int>? id,
+      Value<NetItemKind>? kind,
+      Value<String>? name,
+      Value<int>? value,
+      Value<int?>? milligrams,
+      Value<int?>? pricePerGram,
+      Value<DateTime>? updatedAt,
+      Value<DateTime>? createdAt}) {
+    return NetItemsCompanion(
+      id: id ?? this.id,
+      kind: kind ?? this.kind,
+      name: name ?? this.name,
+      value: value ?? this.value,
+      milligrams: milligrams ?? this.milligrams,
+      pricePerGram: pricePerGram ?? this.pricePerGram,
+      updatedAt: updatedAt ?? this.updatedAt,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (kind.present) {
+      map['kind'] =
+          Variable<String>($NetItemsTable.$converterkind.toSql(kind.value));
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<int>(value.value);
+    }
+    if (milligrams.present) {
+      map['milligrams'] = Variable<int>(milligrams.value);
+    }
+    if (pricePerGram.present) {
+      map['price_per_gram'] = Variable<int>(pricePerGram.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NetItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('name: $name, ')
+          ..write('value: $value, ')
+          ..write('milligrams: $milligrams, ')
+          ..write('pricePerGram: $pricePerGram, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $NetSnapshotsTable extends NetSnapshots
+    with TableInfo<$NetSnapshotsTable, NetSnapshot> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NetSnapshotsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _monthMeta = const VerificationMeta('month');
+  @override
+  late final GeneratedColumn<DateTime> month = GeneratedColumn<DateTime>(
+      'month', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _assetsMeta = const VerificationMeta('assets');
+  @override
+  late final GeneratedColumn<int> assets = GeneratedColumn<int>(
+      'assets', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _liabilitiesMeta =
+      const VerificationMeta('liabilities');
+  @override
+  late final GeneratedColumn<int> liabilities = GeneratedColumn<int>(
+      'liabilities', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [month, assets, liabilities, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'net_snapshots';
+  @override
+  VerificationContext validateIntegrity(Insertable<NetSnapshot> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('month')) {
+      context.handle(
+          _monthMeta, month.isAcceptableOrUnknown(data['month']!, _monthMeta));
+    } else if (isInserting) {
+      context.missing(_monthMeta);
+    }
+    if (data.containsKey('assets')) {
+      context.handle(_assetsMeta,
+          assets.isAcceptableOrUnknown(data['assets']!, _assetsMeta));
+    } else if (isInserting) {
+      context.missing(_assetsMeta);
+    }
+    if (data.containsKey('liabilities')) {
+      context.handle(
+          _liabilitiesMeta,
+          liabilities.isAcceptableOrUnknown(
+              data['liabilities']!, _liabilitiesMeta));
+    } else if (isInserting) {
+      context.missing(_liabilitiesMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {month};
+  @override
+  NetSnapshot map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NetSnapshot(
+      month: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}month'])!,
+      assets: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}assets'])!,
+      liabilities: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}liabilities'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $NetSnapshotsTable createAlias(String alias) {
+    return $NetSnapshotsTable(attachedDatabase, alias);
+  }
+}
+
+class NetSnapshot extends DataClass implements Insertable<NetSnapshot> {
+  /// Tanggal 1 bulan itu.
+  final DateTime month;
+  final int assets;
+  final int liabilities;
+  final DateTime updatedAt;
+  const NetSnapshot(
+      {required this.month,
+      required this.assets,
+      required this.liabilities,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['month'] = Variable<DateTime>(month);
+    map['assets'] = Variable<int>(assets);
+    map['liabilities'] = Variable<int>(liabilities);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  NetSnapshotsCompanion toCompanion(bool nullToAbsent) {
+    return NetSnapshotsCompanion(
+      month: Value(month),
+      assets: Value(assets),
+      liabilities: Value(liabilities),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory NetSnapshot.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NetSnapshot(
+      month: serializer.fromJson<DateTime>(json['month']),
+      assets: serializer.fromJson<int>(json['assets']),
+      liabilities: serializer.fromJson<int>(json['liabilities']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'month': serializer.toJson<DateTime>(month),
+      'assets': serializer.toJson<int>(assets),
+      'liabilities': serializer.toJson<int>(liabilities),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  NetSnapshot copyWith(
+          {DateTime? month,
+          int? assets,
+          int? liabilities,
+          DateTime? updatedAt}) =>
+      NetSnapshot(
+        month: month ?? this.month,
+        assets: assets ?? this.assets,
+        liabilities: liabilities ?? this.liabilities,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  NetSnapshot copyWithCompanion(NetSnapshotsCompanion data) {
+    return NetSnapshot(
+      month: data.month.present ? data.month.value : this.month,
+      assets: data.assets.present ? data.assets.value : this.assets,
+      liabilities:
+          data.liabilities.present ? data.liabilities.value : this.liabilities,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NetSnapshot(')
+          ..write('month: $month, ')
+          ..write('assets: $assets, ')
+          ..write('liabilities: $liabilities, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(month, assets, liabilities, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NetSnapshot &&
+          other.month == this.month &&
+          other.assets == this.assets &&
+          other.liabilities == this.liabilities &&
+          other.updatedAt == this.updatedAt);
+}
+
+class NetSnapshotsCompanion extends UpdateCompanion<NetSnapshot> {
+  final Value<DateTime> month;
+  final Value<int> assets;
+  final Value<int> liabilities;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const NetSnapshotsCompanion({
+    this.month = const Value.absent(),
+    this.assets = const Value.absent(),
+    this.liabilities = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  NetSnapshotsCompanion.insert({
+    required DateTime month,
+    required int assets,
+    required int liabilities,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  })  : month = Value(month),
+        assets = Value(assets),
+        liabilities = Value(liabilities),
+        updatedAt = Value(updatedAt);
+  static Insertable<NetSnapshot> custom({
+    Expression<DateTime>? month,
+    Expression<int>? assets,
+    Expression<int>? liabilities,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (month != null) 'month': month,
+      if (assets != null) 'assets': assets,
+      if (liabilities != null) 'liabilities': liabilities,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  NetSnapshotsCompanion copyWith(
+      {Value<DateTime>? month,
+      Value<int>? assets,
+      Value<int>? liabilities,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return NetSnapshotsCompanion(
+      month: month ?? this.month,
+      assets: assets ?? this.assets,
+      liabilities: liabilities ?? this.liabilities,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (month.present) {
+      map['month'] = Variable<DateTime>(month.value);
+    }
+    if (assets.present) {
+      map['assets'] = Variable<int>(assets.value);
+    }
+    if (liabilities.present) {
+      map['liabilities'] = Variable<int>(liabilities.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NetSnapshotsCompanion(')
+          ..write('month: $month, ')
+          ..write('assets: $assets, ')
+          ..write('liabilities: $liabilities, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7039,6 +7739,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SplitItemsTable splitItems = $SplitItemsTable(this);
   late final $BudgetAdjustmentsTable budgetAdjustments =
       $BudgetAdjustmentsTable(this);
+  late final $NetItemsTable netItems = $NetItemsTable(this);
+  late final $NetSnapshotsTable netSnapshots = $NetSnapshotsTable(this);
   late final Index txOccurredAt = Index('tx_occurred_at',
       'CREATE INDEX tx_occurred_at ON transactions (occurred_at)');
   late final Index txWallet =
@@ -7056,6 +7758,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final DebtsDao debtsDao = DebtsDao(this as AppDatabase);
   late final GoalsDao goalsDao = GoalsDao(this as AppDatabase);
   late final SplitsDao splitsDao = SplitsDao(this as AppDatabase);
+  late final NetWorthDao netWorthDao = NetWorthDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7076,6 +7779,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         splitMembers,
         splitItems,
         budgetAdjustments,
+        netItems,
+        netSnapshots,
         txOccurredAt,
         txWallet,
         txCategory
@@ -14810,6 +15515,371 @@ typedef $$BudgetAdjustmentsTableProcessedTableManager = ProcessedTableManager<
     (BudgetAdjustment, $$BudgetAdjustmentsTableReferences),
     BudgetAdjustment,
     PrefetchHooks Function({bool categoryId})>;
+typedef $$NetItemsTableCreateCompanionBuilder = NetItemsCompanion Function({
+  Value<int> id,
+  required NetItemKind kind,
+  required String name,
+  Value<int> value,
+  Value<int?> milligrams,
+  Value<int?> pricePerGram,
+  required DateTime updatedAt,
+  Value<DateTime> createdAt,
+});
+typedef $$NetItemsTableUpdateCompanionBuilder = NetItemsCompanion Function({
+  Value<int> id,
+  Value<NetItemKind> kind,
+  Value<String> name,
+  Value<int> value,
+  Value<int?> milligrams,
+  Value<int?> pricePerGram,
+  Value<DateTime> updatedAt,
+  Value<DateTime> createdAt,
+});
+
+class $$NetItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $NetItemsTable> {
+  $$NetItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<NetItemKind, NetItemKind, String> get kind =>
+      $composableBuilder(
+          column: $table.kind,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get value => $composableBuilder(
+      column: $table.value, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get milligrams => $composableBuilder(
+      column: $table.milligrams, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get pricePerGram => $composableBuilder(
+      column: $table.pricePerGram, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$NetItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $NetItemsTable> {
+  $$NetItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get value => $composableBuilder(
+      column: $table.value, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get milligrams => $composableBuilder(
+      column: $table.milligrams, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get pricePerGram => $composableBuilder(
+      column: $table.pricePerGram,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$NetItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NetItemsTable> {
+  $$NetItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<NetItemKind, String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  GeneratedColumn<int> get milligrams => $composableBuilder(
+      column: $table.milligrams, builder: (column) => column);
+
+  GeneratedColumn<int> get pricePerGram => $composableBuilder(
+      column: $table.pricePerGram, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$NetItemsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $NetItemsTable,
+    NetItem,
+    $$NetItemsTableFilterComposer,
+    $$NetItemsTableOrderingComposer,
+    $$NetItemsTableAnnotationComposer,
+    $$NetItemsTableCreateCompanionBuilder,
+    $$NetItemsTableUpdateCompanionBuilder,
+    (NetItem, BaseReferences<_$AppDatabase, $NetItemsTable, NetItem>),
+    NetItem,
+    PrefetchHooks Function()> {
+  $$NetItemsTableTableManager(_$AppDatabase db, $NetItemsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NetItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NetItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NetItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<NetItemKind> kind = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<int> value = const Value.absent(),
+            Value<int?> milligrams = const Value.absent(),
+            Value<int?> pricePerGram = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              NetItemsCompanion(
+            id: id,
+            kind: kind,
+            name: name,
+            value: value,
+            milligrams: milligrams,
+            pricePerGram: pricePerGram,
+            updatedAt: updatedAt,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required NetItemKind kind,
+            required String name,
+            Value<int> value = const Value.absent(),
+            Value<int?> milligrams = const Value.absent(),
+            Value<int?> pricePerGram = const Value.absent(),
+            required DateTime updatedAt,
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              NetItemsCompanion.insert(
+            id: id,
+            kind: kind,
+            name: name,
+            value: value,
+            milligrams: milligrams,
+            pricePerGram: pricePerGram,
+            updatedAt: updatedAt,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$NetItemsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $NetItemsTable,
+    NetItem,
+    $$NetItemsTableFilterComposer,
+    $$NetItemsTableOrderingComposer,
+    $$NetItemsTableAnnotationComposer,
+    $$NetItemsTableCreateCompanionBuilder,
+    $$NetItemsTableUpdateCompanionBuilder,
+    (NetItem, BaseReferences<_$AppDatabase, $NetItemsTable, NetItem>),
+    NetItem,
+    PrefetchHooks Function()>;
+typedef $$NetSnapshotsTableCreateCompanionBuilder = NetSnapshotsCompanion
+    Function({
+  required DateTime month,
+  required int assets,
+  required int liabilities,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$NetSnapshotsTableUpdateCompanionBuilder = NetSnapshotsCompanion
+    Function({
+  Value<DateTime> month,
+  Value<int> assets,
+  Value<int> liabilities,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+class $$NetSnapshotsTableFilterComposer
+    extends Composer<_$AppDatabase, $NetSnapshotsTable> {
+  $$NetSnapshotsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<DateTime> get month => $composableBuilder(
+      column: $table.month, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get assets => $composableBuilder(
+      column: $table.assets, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get liabilities => $composableBuilder(
+      column: $table.liabilities, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$NetSnapshotsTableOrderingComposer
+    extends Composer<_$AppDatabase, $NetSnapshotsTable> {
+  $$NetSnapshotsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<DateTime> get month => $composableBuilder(
+      column: $table.month, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get assets => $composableBuilder(
+      column: $table.assets, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get liabilities => $composableBuilder(
+      column: $table.liabilities, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$NetSnapshotsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NetSnapshotsTable> {
+  $$NetSnapshotsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<DateTime> get month =>
+      $composableBuilder(column: $table.month, builder: (column) => column);
+
+  GeneratedColumn<int> get assets =>
+      $composableBuilder(column: $table.assets, builder: (column) => column);
+
+  GeneratedColumn<int> get liabilities => $composableBuilder(
+      column: $table.liabilities, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$NetSnapshotsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $NetSnapshotsTable,
+    NetSnapshot,
+    $$NetSnapshotsTableFilterComposer,
+    $$NetSnapshotsTableOrderingComposer,
+    $$NetSnapshotsTableAnnotationComposer,
+    $$NetSnapshotsTableCreateCompanionBuilder,
+    $$NetSnapshotsTableUpdateCompanionBuilder,
+    (
+      NetSnapshot,
+      BaseReferences<_$AppDatabase, $NetSnapshotsTable, NetSnapshot>
+    ),
+    NetSnapshot,
+    PrefetchHooks Function()> {
+  $$NetSnapshotsTableTableManager(_$AppDatabase db, $NetSnapshotsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NetSnapshotsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NetSnapshotsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NetSnapshotsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<DateTime> month = const Value.absent(),
+            Value<int> assets = const Value.absent(),
+            Value<int> liabilities = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              NetSnapshotsCompanion(
+            month: month,
+            assets: assets,
+            liabilities: liabilities,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required DateTime month,
+            required int assets,
+            required int liabilities,
+            required DateTime updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              NetSnapshotsCompanion.insert(
+            month: month,
+            assets: assets,
+            liabilities: liabilities,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$NetSnapshotsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $NetSnapshotsTable,
+    NetSnapshot,
+    $$NetSnapshotsTableFilterComposer,
+    $$NetSnapshotsTableOrderingComposer,
+    $$NetSnapshotsTableAnnotationComposer,
+    $$NetSnapshotsTableCreateCompanionBuilder,
+    $$NetSnapshotsTableUpdateCompanionBuilder,
+    (
+      NetSnapshot,
+      BaseReferences<_$AppDatabase, $NetSnapshotsTable, NetSnapshot>
+    ),
+    NetSnapshot,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -14844,4 +15914,8 @@ class $AppDatabaseManager {
       $$SplitItemsTableTableManager(_db, _db.splitItems);
   $$BudgetAdjustmentsTableTableManager get budgetAdjustments =>
       $$BudgetAdjustmentsTableTableManager(_db, _db.budgetAdjustments);
+  $$NetItemsTableTableManager get netItems =>
+      $$NetItemsTableTableManager(_db, _db.netItems);
+  $$NetSnapshotsTableTableManager get netSnapshots =>
+      $$NetSnapshotsTableTableManager(_db, _db.netSnapshots);
 }

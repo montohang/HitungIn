@@ -8,6 +8,7 @@ import '../../../core/utils/date_format.dart';
 import '../../budget/data/budgets_dao.dart';
 import '../../debts/data/debts_dao.dart';
 import '../../goals/data/goals_dao.dart';
+import '../../networth/data/net_worth.dart';
 import 'export_report.dart';
 
 /// Font PDF (berkas TTF Plus Jakarta Sans & Bricolage dari aset aplikasi).
@@ -128,6 +129,7 @@ abstract final class PdfReport {
           numeric: {2},
           boldLast: true,
         ),
+        ..._netWorth(x, accent),
         ..._debts(x, section),
         ..._bills(x, section),
         ..._goals(x, section),
@@ -247,6 +249,33 @@ abstract final class PdfReport {
           final double r = b.budget.limitAmount == 0 ? 0 : b.spent / b.budget.limitAmount;
           return r > 1 ? _danger : r >= 0.8 ? _warn : null;
         },
+      ),
+    ];
+  }
+
+  static List<pw.Widget> _netWorth(ExportInput x, PdfColor accent) {
+    final NetWorth? w = x.netWorth;
+    if (w == null) return const [];
+    final List<String> manual = {for (final l in w.assets) if (l.item != null) l.group!.label.toLowerCase()}.toList();
+    return [
+      pw.SizedBox(height: 8),
+      pw.Container(
+        padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: const pw.BoxDecoration(color: _soft, borderRadius: pw.BorderRadius.all(pw.Radius.circular(8))),
+        child: pw.Row(children: [
+          pw.Expanded(
+            child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+              pw.Text('Kekayaan bersih', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: _ink)),
+              pw.Text(
+                'Aset ${rp(w.totalAssets)} - kewajiban ${rp(w.totalLiabilities)}'
+                '${manual.isEmpty ? '' : ' · ${manual.join(', ')} diisi sendiri'}',
+                style: const pw.TextStyle(fontSize: 7.5, color: _muted),
+              ),
+            ]),
+          ),
+          pw.SizedBox(width: 8),
+          pw.Text(rp(w.net), style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: accent)),
+        ]),
       ),
     ];
   }

@@ -38,6 +38,7 @@ import 'data/allowance.dart';
 import 'widgets/allowance_card.dart';
 import '../favorites/widgets/favorite_chips.dart';
 import '../goals/widgets/goal_home_card.dart';
+import '../networth/widgets/networth_home_card.dart';
 import '../rapor/widgets/rapor_entry.dart';
 
 /// Sapaan sesuai jam.
@@ -198,6 +199,7 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     ],
                   HomeCard.target => [GoalHomeCard(hidden: hidden)],
+                  HomeCard.kekayaan => [NetWorthHomeCard(hidden: hidden)],
                   HomeCard.prakiraan => [ForecastHomeCard(hidden: hidden)],
                   HomeCard.tagihan => [
                       if (dueBills.isNotEmpty) ...[

@@ -52,7 +52,8 @@ enum ProReason {
   personalisasi('Foto widget, warna bebas & Beranda sesukamu'),
   target('Menabung untuk banyak target sekaligus'),
   scan('Scan struk tanpa batas'),
-  export('Export Excel & PDF semua periode');
+  export('Export Excel & PDF semua periode'),
+  kekayaan('Kekayaan bersih lengkap: emas, investasi & tren');
 
   const ProReason(this.headline);
   final String headline;

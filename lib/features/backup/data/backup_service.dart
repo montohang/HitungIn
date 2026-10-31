@@ -55,6 +55,8 @@ class BackupService {
         'transactions': rows(await db.select(db.transactions).get()),
         'budgets': rows(await db.select(db.budgets).get()),
         'budgetAdjustments': rows(await db.select(db.budgetAdjustments).get()),
+        'netItems': rows(await db.select(db.netItems).get()),
+        'netSnapshots': rows(await db.select(db.netSnapshots).get()),
         'settings': rows([
           for (final s in await db.select(db.settings).get())
             if (!_localOnlySettings.contains(s.key))
@@ -117,6 +119,8 @@ class BackupService {
       await db.delete(db.splits).go();
       await db.delete(db.recurringTxs).go();
       await db.delete(db.budgetAdjustments).go();
+      await db.delete(db.netItems).go();
+      await db.delete(db.netSnapshots).go();
       await db.delete(db.budgets).go();
       await db.delete(db.bills).go();
       await db.delete(db.categories).go();
@@ -150,6 +154,9 @@ class BackupService {
         ]);
         // Cadangan sebelum v9 tidak punya penyesuaian budget → kosong.
         b.insertAll(db.budgetAdjustments, [for (final r in rows('budgetAdjustments')) BudgetAdjustment.fromJson(r)]);
+        // Cadangan sebelum v10 tidak punya Kekayaan bersih → kosong.
+        b.insertAll(db.netItems, [for (final r in rows('netItems')) NetItem.fromJson(r)]);
+        b.insertAll(db.netSnapshots, [for (final r in rows('netSnapshots')) NetSnapshot.fromJson(r)]);
         b.insertAll(
           db.settings,
           [for (final r in rows('settings')) Setting.fromJson(r)].where((s) => !_localOnlySettings.contains(s.key)),

@@ -22,6 +22,7 @@ IconData _iconOf(HomeCard c) => switch (c) {
       HomeCard.target => HiIcons.piggy,
       HomeCard.tagihan => HiIcons.calendar,
       HomeCard.terbaru => HiIcons.history,
+      HomeCard.kekayaan => HiIcons.bars,
     };
 
 /// Atur Beranda (P2b, Pro; Claude Design › Atur Beranda): seret untuk

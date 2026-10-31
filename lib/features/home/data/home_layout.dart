@@ -10,6 +10,7 @@ enum HomeCard {
   budget('Budget', 'Progres budget bulan ini'),
   target('Target tabungan', 'Progres target teratas'),
   tagihan('Tagihan mendatang', 'Termasuk sisa cicilan'),
+  kekayaan('Kekayaan bersih', 'Aset dikurangi kewajiban'),
   terbaru('Transaksi terbaru', '5 catatan terakhir');
 
   const HomeCard(this.label, this.hint);
@@ -18,7 +19,10 @@ enum HomeCard {
 }
 
 class HomeLayout {
-  const HomeLayout({this.order = HomeCard.values, this.hidden = const {}});
+  const HomeLayout({this.order = HomeCard.values, this.hidden = defaultHidden});
+
+  /// Kartu yang bawaannya mati (P3h: Kekayaan bersih).
+  static const Set<HomeCard> defaultHidden = {HomeCard.kekayaan};
 
   final List<HomeCard> order;
   final Set<HomeCard> hidden;
@@ -28,7 +32,8 @@ class HomeLayout {
   /// Kartu yang tampil, berurutan.
   List<HomeCard> get visible => [for (final c in order) if (!hidden.contains(c)) c];
 
-  bool get isStandard => _same(order, HomeCard.values) && hidden.isEmpty;
+  bool get isStandard =>
+      _same(order, HomeCard.values) && hidden.length == defaultHidden.length && hidden.containsAll(defaultHidden);
 
   HomeLayout move(int from, int to) {
     final List<HomeCard> o = [...order];
@@ -57,14 +62,20 @@ class HomeLayout {
         for (final n in (j['order'] as List? ?? const []))
           if (byName(n) case final HomeCard c) c,
       ];
+      // Kartu baru yang belum ada di tata letak tersimpan: bawaannya mati tetap mati.
+      final Set<HomeCard> added = {};
       for (final c in HomeCard.values) {
-        if (!order.contains(c)) order.insert(c.index.clamp(0, order.length), c);
+        if (!order.contains(c)) {
+          order.insert(c.index.clamp(0, order.length), c);
+          added.add(c);
+        }
       }
       return HomeLayout(
         order: order.toSet().toList(),
         hidden: {
           for (final n in (j['hidden'] as List? ?? const []))
             if (byName(n) case final HomeCard c) c,
+          ...added.intersection(defaultHidden),
         },
       );
     } on FormatException {

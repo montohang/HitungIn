@@ -11,11 +11,11 @@ void main() {
 
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  // AppDatabase selalu bermigrasi ke versi terbaru, jadi validasi ke v9.
-  test('v1 → v9: skema hasil migrasi sama dengan skema baru', () async {
+  // AppDatabase selalu bermigrasi ke versi terbaru, jadi validasi ke v10.
+  test('v1 → v10: skema hasil migrasi sama dengan skema baru', () async {
     final schema = await verifier.schemaAt(1);
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     await db.close();
   });
 
@@ -49,10 +49,10 @@ void main() {
     await db.close();
   });
 
-  test('v2 → v9: skema hasil migrasi sama dengan skema baru', () async {
+  test('v2 → v10: skema hasil migrasi sama dengan skema baru', () async {
     final schema = await verifier.schemaAt(2);
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     await db.close();
   });
 
@@ -80,7 +80,7 @@ void main() {
       ..execute("INSERT INTO categories (id, name, kind, icon, keywords, sort_order, archived) "
           "VALUES (1, 'Makan & Minum', 'pengeluaran', 'food', 'makan', 0, 0), (2, 'Kucing', 'pengeluaran', 'fun', '', 1, 0)");
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     final cats = {for (final c in await db.select(db.categories).get()) c.name: c};
     expect((cats['Makan & Minum']!.color, cats['Makan & Minum']!.subs), (0, 'Kopi,Makan siang,Jajan'));
     expect((cats['Kucing']!.color, cats['Kucing']!.subs), (0, ''));
@@ -100,7 +100,7 @@ void main() {
           "VALUES ('pengeluaran', 25000, 1, 'Kopi', '', 1759300000, 1759300000, 1759300000)");
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     final Bill kos = (await db.select(db.bills).get()).single;
     expect((kos.installmentTotal, kos.installmentPaid), (null, 0));
     expect((await db.walletsDao.watchBalances().first).single.balance, 475000);
@@ -120,7 +120,7 @@ void main() {
           "VALUES (1, 'piutang', 'Budi', 200000, 1, 1759300000, '', 1759300000)");
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     expect((await db.debtsDao.watchAll().first).single.debt.name, 'Budi');
     final int id = await db.goalsDao.add(name: 'Dana darurat', target: 1000000);
     await db.goalsDao.deposit(id, amount: 300000, at: DateTime(2026, 10, 20), walletId: 1);
@@ -140,7 +140,7 @@ void main() {
           "VALUES ('utangKeluar', 200000, 1, 'Dipinjamkan ke Budi', '', 1759300000, 1759300000, 1759300000, 1)");
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     expect((await db.debtsDao.watchAll().first).single.debt.splitId, isNull);
     expect((await db.walletsDao.watchBalances().first).single.balance, 800000);
     await db.splitsDao.save(
@@ -158,7 +158,7 @@ void main() {
     await db.close();
   });
 
-  test('v7 → v9: pembayaran tagihan lama tetap ada, jatuh temponya kosong', () async {
+  test('v7 → v10: pembayaran tagihan lama tetap ada, jatuh temponya kosong', () async {
     final schema = await verifier.schemaAt(7);
     schema.rawDatabase
       ..execute("INSERT INTO wallets (id, name, type, initial_balance, icon, color, sort_order, archived, created_at) "
@@ -166,7 +166,7 @@ void main() {
       ..execute("INSERT INTO transactions (kind, amount, wallet_id, note, sub, occurred_at, created_at, updated_at) "
           "VALUES ('pengeluaran', 350000, 1, 'Internet', '', 1759300000, 1759300000, 1759300000)");
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 9);
+    await verifier.migrateAndValidate(db, 10);
     final tx = (await db.select(db.transactions).get()).single;
     expect((tx.amount, tx.billDue), (350000, null));
     await db.close();

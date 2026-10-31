@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hitungin/features/home/data/home_layout.dart';
 
 void main() {
-  test('bawaan = urutan Beranda sekarang, semua tampil', () {
-    expect(HomeLayout.standard.visible, HomeCard.values);
+  test('bawaan = urutan Beranda sekarang, semua tampil kecuali Kekayaan bersih (bawaan mati)', () {
+    expect(HomeLayout.standard.visible, [for (final c in HomeCard.values) if (c != HomeCard.kekayaan) c]);
     expect(HomeLayout.standard.isStandard, isTrue);
   });
 
@@ -13,9 +13,9 @@ void main() {
         [HomeCard.terbaru, HomeCard.jatah, HomeCard.prakiraan, HomeCard.cepat, HomeCard.favorit, HomeCard.target, HomeCard.tagihan]);
     final back = HomeLayout.decode(l.encode());
     expect(back.order, l.order);
-    expect(back.hidden, {HomeCard.budget});
+    expect(back.hidden, {HomeCard.budget, HomeCard.kekayaan});
     expect(back.isStandard, isFalse);
-    expect(back.toggle(HomeCard.budget, true).hidden, isEmpty);
+    expect(back.toggle(HomeCard.budget, true).hidden, {HomeCard.kekayaan});
   });
 
   test('nilai rusak → bawaan; kartu yang belum tersimpan ditambahkan, nama asing diabaikan', () {
@@ -24,6 +24,8 @@ void main() {
     expect(l.order.first, HomeCard.terbaru);
     expect(l.order.toSet(), HomeCard.values.toSet());
     expect(l.order, hasLength(HomeCard.values.length));
-    expect(l.hidden, {HomeCard.cepat});
+    expect(l.hidden, {HomeCard.cepat, HomeCard.kekayaan}, reason: 'kartu baru yang bawaannya mati tetap mati');
+    final shown = HomeLayout.decode(HomeLayout.standard.toggle(HomeCard.kekayaan, true).encode());
+    expect(shown.hidden, isEmpty, reason: 'pilihan pengguna menyalakan tetap tersimpan');
   });
 }

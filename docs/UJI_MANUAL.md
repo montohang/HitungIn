@@ -308,3 +308,19 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [ ] Pilih sendiri → kalender rentang tanggal; Dompet → hanya transaksi dompet itu.
 - [x] Gratis: label GRATIS BULAN INI / GRATIS LEWAT IKLAN, periode lain bergembok untuk PDF, Excel → tombol emas "Buka dengan Pro".
 - [ ] Gratis: CSV → iklan berhadiah / Pro (sama dengan tombol Export CSV di Backup).
+
+## 19. Kekayaan bersih (P3h, baru)
+- [x] Lainnya › Kekayaan bersih (ikon batang, sebelum Patungan) → nilai bersih, Aset, Kewajiban, tren 12 bulan, komposisi, daftar aset & kewajiban.
+- [x] Gratis: hanya komponen OTOMATIS (dompet, piutang, utang, sisa cicilan); tren buram dengan PRO; Tambah aset / pinjaman → Premium.
+- [x] Pro: Tambah aset › Emas: berat (boleh koma) × harga per gram, Nilai sekarang langsung terhitung; total & komposisi ikut berubah.
+- [x] Pro: Tambah pinjaman lain → lembar "Tambah pinjaman" (Nama, Sisa pokok); nama kosong → pesan "Nama wajib diisi".
+- [x] Perbarui: harga sebelumnya tampil, simpan → nilai & "diperbarui hari ini" berubah; Hapus → baris hilang.
+- [ ] Tambah aset Investasi, Properti & kendaraan, Lainnya (nilai langsung).
+- [ ] Lebih dari 30 hari tidak diperbarui: keterangan aset berwarna peringatan.
+- [x] Lompat ke bulan berikut: tren bertambah batang, "Sama dengan bulan lalu" / ▲▼ selisih dari bulan lalu.
+- [x] Atur Beranda: kartu Kekayaan bersih bawaannya mati; nyalakan → kartu tampil di Beranda, ketuk → layar Kekayaan bersih.
+- [ ] Sembunyikan saldo: nominal kartu Beranda jadi Rp••••.
+- [x] PDF: blok Kekayaan bersih di halaman Posisi keuangan.
+- [ ] Excel: sheet "Kekayaan bersih" (Jenis, Nama, Keterangan, Nilai, Sumber) dibuka di Google Sheets / Excel.
+- [ ] Export satu dompet: tanpa blok & sheet Kekayaan bersih.
+- [ ] Backup lalu pulihkan: aset manual & catatan bulanan ikut kembali.

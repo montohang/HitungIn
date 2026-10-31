@@ -115,6 +115,7 @@ abstract final class Routes {
   static const String raporArsip = '/rapor/arsip';
 
   /// Patungan (P3c): daftar, form baru, detail, ubah.
+  static const String kekayaan = '/kekayaan';
   static const String patungan = '/patungan';
   static const String patunganBaru = '/patungan/baru';
   static String patunganDetail(int id) => '/patungan/$id';

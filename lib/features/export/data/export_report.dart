@@ -4,6 +4,7 @@ import '../../budget/data/budgets_dao.dart';
 import '../../debts/data/debts_dao.dart';
 import '../../goals/data/goals.dart';
 import '../../goals/data/goals_dao.dart';
+import '../../networth/data/net_worth.dart';
 import '../../splits/data/splits_dao.dart';
 import '../../transactions/data/transactions_dao.dart';
 
@@ -88,6 +89,7 @@ class ExportInput {
     required this.goals,
     required this.splits,
     required this.recurring,
+    this.netWorth,
   });
 
   final DateRange range;
@@ -108,6 +110,9 @@ class ExportInput {
   final List<GoalWithDeposits> goals;
   final List<SplitFull> splits;
   final List<RecurringTx> recurring;
+
+  /// Kekayaan bersih saat export (hanya untuk semua dompet).
+  final NetWorth? netWorth;
 
   String get periodLabel => rangeLabel(range, createdAt);
   Map<int, String> get walletNames => {for (final w in wallets) w.id: w.name};
@@ -269,6 +274,7 @@ Future<ExportInput> loadExportInput(
   required DateRange range,
   required DateTime now,
   int? walletId,
+  bool includeManualNet = true,
 }) async {
   final List<TxDetail> all = await db.transactionsDao.allDetails();
   final List<Wallet> allWallets = await db.walletsDao.all();
@@ -290,6 +296,17 @@ Future<ExportInput> loadExportInput(
     for (final s in await db.splitsDao.watchAll().first)
       if (!s.split.occurredAt.isBefore(range.from) && s.split.occurredAt.isBefore(range.to)) s,
   ];
+  final List<DebtWithPayments> debts = await db.debtsDao.watchAll().first;
+  final List<Bill> bills = await db.billsDao.watchActive().first;
+  final NetWorth? netWorth = walletId != null
+      ? null
+      : computeNetWorth(
+          wallets: await db.walletsDao.watchBalances().first,
+          debts: debts,
+          bills: bills,
+          items: await db.netWorthDao.items(),
+          includeManual: includeManualNet,
+        );
   return ExportInput(
     range: range,
     createdAt: now,
@@ -298,11 +315,12 @@ Future<ExportInput> loadExportInput(
     wallets: wallets,
     balancesAtEnd: balancesAt(allWallets, all, range.to.isAfter(now) ? now.add(const Duration(seconds: 1)) : range.to),
     budgets: budgets,
-    debts: await db.debtsDao.watchAll().first,
-    bills: await db.billsDao.watchActive().first,
+    debts: debts,
+    bills: bills,
     goals: [for (final g in await db.goalsDao.watchAll().first) if (!g.goal.archived) g],
     splits: splits,
     recurring: await db.recurringDao.watchAll().first,
+    netWorth: netWorth,
   );
 }
 

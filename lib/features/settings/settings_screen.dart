@@ -141,6 +141,11 @@ class SettingsScreen extends ConsumerWidget {
                   onTap: () => context.push(Routes.target),
                 ),
                 SettingsTile(
+                  icon: HiIcons.bars,
+                  title: 'Kekayaan bersih',
+                  onTap: () => context.push(Routes.kekayaan),
+                ),
+                SettingsTile(
                   icon: HiIcons.friends,
                   title: 'Patungan',
                   value: splitsOpen > 0 ? '$splitsOpen belum beres' : null,

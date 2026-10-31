@@ -128,7 +128,7 @@ Future<void> openPdfReport(
     return;
   }
   final Color accent = context.colors.accent;
-  final ExportInput x = await loadExportInput(ref.read(appDatabaseProvider), range: range, now: now, walletId: walletId);
+  final ExportInput x = await loadExportInput(ref.read(appDatabaseProvider), range: range, now: now, walletId: walletId, includeManualNet: ref.read(isProProvider));
   final Uint8List bytes = await buildPdfBytes(x, attachment: attachment, accent: accent, fonts: await loadPdfFonts());
   if (!context.mounted) return;
   await Navigator.of(context, rootNavigator: true).push(MaterialPageRoute<void>(

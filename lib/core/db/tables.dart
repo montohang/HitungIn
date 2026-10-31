@@ -63,6 +63,22 @@ enum SplitMode {
   final String label;
 }
 
+/// Jenis aset/kewajiban manual di Kekayaan bersih (v10).
+enum NetItemKind {
+  emas('Emas'),
+  investasi('Investasi'),
+  properti('Properti & kendaraan'),
+  lainnya('Lainnya'),
+
+  /// Kewajiban: pinjaman lain di luar Utang-piutang & Tagihan (KPR, KTA, …).
+  pinjaman('Pinjaman lain');
+
+  const NetItemKind(this.label);
+  final String label;
+
+  bool get isLiability => this == pinjaman;
+}
+
 /// Asal penyesuaian batas budget satu bulan (v9).
 enum BudgetAdjustReason {
   /// Sisa bulan lalu yang dibawa.
@@ -219,6 +235,38 @@ class BudgetAdjustments extends Table {
   IntColumn get amount => integer().check(amount.equals(0).not())();
   TextColumn get reason => textEnum<BudgetAdjustReason>()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Aset/kewajiban yang diisi sendiri (v10, P3h). Emas: [grams] (miligram)
+/// × [pricePerGram]; jenis lain: [value]. Nominal Rupiah bulat.
+@DataClassName('NetItem')
+class NetItems extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get kind => textEnum<NetItemKind>()();
+  TextColumn get name => text().withLength(min: 1, max: 40)();
+  IntColumn get value => integer().withDefault(const Constant(0)).check(value.isBiggerOrEqualValue(0))();
+
+  /// Berat emas dalam miligram (10 g = 10000).
+  IntColumn get milligrams => integer().nullable()();
+  IntColumn get pricePerGram => integer().nullable()();
+
+  /// Terakhir nilai/harga diperbarui (untuk pengingat > 30 hari).
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Catatan kekayaan bersih per bulan (v10): diperbarui setiap kali dihitung
+/// di bulan itu, jadi nilai terakhir = kondisi akhir bulan.
+@DataClassName('NetSnapshot')
+class NetSnapshots extends Table {
+  /// Tanggal 1 bulan itu.
+  DateTimeColumn get month => dateTime()();
+  IntColumn get assets => integer()();
+  IntColumn get liabilities => integer()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {month};
 }
 
 @DataClassName('Bill')
