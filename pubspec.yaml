@@ -1,7 +1,7 @@
 name: hitungin
 description: "HitungIn — pencatat keuangan pribadi 100% offline, data milik pengguna."
 publish_to: 'none'
-version: 0.1.0+1
+version: 0.2.0+2
 
 environment:
   sdk: ^3.5.0

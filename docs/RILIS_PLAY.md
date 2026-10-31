@@ -30,8 +30,11 @@ File ini sudah di-`.gitignore` — jangan di-commit.
 ## 2. Build AAB
 
 ```bash
-flutter build appbundle --release
+flutter build appbundle --release --no-tree-shake-icons
 ```
+
+`--no-tree-shake-icons` wajib: gaya ikon (Garis, Isi, Bulat) dipilih saat aplikasi berjalan, jadi tidak ada glyph yang boleh dipangkas.
+Versi di `pubspec.yaml` harus dinaikkan tiap unggah (`0.2.0+2` → nama 0.2.0, kode versi 2).
 
 Hasil: `build/app/outputs/bundle/release/app-release.aab`.
 Tanpa `android/key.properties`, AAB ditandatangani kunci debug dan **ditolak** Play Console.
