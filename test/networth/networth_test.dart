@@ -66,6 +66,23 @@ void main() {
     await db.close();
   });
 
+  test('urutan jenis mengikuti bawaan; lewat 30 hari dihitung per tanggal seperti keterangannya', () async {
+    final db = _db();
+    await db.netWorthDao.add(kind: NetItemKind.lainnya, name: 'Jam', value: 1, now: now);
+    await db.netWorthDao.add(kind: NetItemKind.properti, name: 'Motor', value: 1, now: now);
+    await db.netWorthDao.add(kind: NetItemKind.investasi, name: 'RDPU', value: 1, now: now);
+    final w = await compute(db, manual: true);
+    expect([for (final l in w.assets.skip(1)) l.name], ['RDPU', 'Motor', 'Jam']);
+    expect(w.composition.keys.toList(), [NetGroup.investasi, NetGroup.properti, NetGroup.lainnya]);
+    final NetItem i = (await db.netWorthDao.items()).first;
+    final DateTime updated = DateTime(2026, 10, 31, 14, 47);
+    final NetItem old = i.copyWith(updatedAt: updated);
+    expect(netItemStale(old, DateTime(2026, 11, 30, 23)), isFalse, reason: '30 hari belum lewat');
+    expect(netItemStale(old, DateTime(2026, 12, 1)), isTrue, reason: 'tertulis 31 hari lalu');
+    expect(netItemHint(old, DateTime(2026, 12, 1)), contains('31 hari lalu'));
+    await db.close();
+  });
+
   test('catatan bulanan ditimpa dalam bulan yang sama; selisih dari bulan lalu', () async {
     final db = await seeded();
     final w = await compute(db, manual: true);
@@ -87,6 +104,8 @@ void main() {
     expect(XlsxExport.sheetNames(x), contains('Kekayaan bersih'));
     final sheet = Excel.decodeBytes(XlsxExport.build(x)).tables['Kekayaan bersih']!;
     expect(sheet.row(0).first?.value.toString(), 'Jenis');
+    final List<String> hints = [for (int r = 1; r < sheet.maxRows; r++) '${sheet.row(r)[2]?.value}'];
+    expect(hints, contains(startsWith('10,5 g × Rp1.350.000')), reason: 'keterangan emas sama dengan di layar');
     expect(sheet.maxRows, 1 + x.netWorth!.assets.length + x.netWorth!.liabilities.length + 1);
     final free = await loadExportInput(db, range: range, now: now, includeManualNet: false);
     expect(free.netWorth!.assets.any((l) => l.item != null), isFalse);

@@ -21,40 +21,6 @@ final netSnapshotsProvider = StreamProvider<List<NetSnapshot>>(
   (ref) => ref.watch(appDatabaseProvider).netWorthDao.watchSnapshots(),
 );
 
-/// "10 g × Rp1.350.000 · diperbarui 34 hari lalu".
-String netItemHint(NetItem i, DateTime now) {
-  final int days = DateTime(now.year, now.month, now.day)
-      .difference(DateTime(i.updatedAt.year, i.updatedAt.month, i.updatedAt.day))
-      .inDays;
-  final String when = days <= 0
-      ? 'diperbarui hari ini'
-      : days == 1
-          ? 'diperbarui kemarin'
-          : 'diperbarui $days hari lalu';
-  final String what = switch (i.kind) {
-    NetItemKind.emas => '${formatGrams(i.milligrams ?? 0)} g × ${_rp(i.pricePerGram ?? 0)}',
-    NetItemKind.properti => 'Taksiran',
-    NetItemKind.pinjaman => 'Sisa pokok',
-    _ => i.kind.label,
-  };
-  return '$what · $when';
-}
-
-String _rp(int v) => 'Rp${v.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.')}';
-
-/// 10500 mg → "10,5".
-String formatGrams(int mg) {
-  final String s = (mg / 1000).toStringAsFixed(3).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
-  return s.replaceAll('.', ',');
-}
-
-/// "10,5" / "10.5" → 10500 mg; null bila tidak valid.
-int? parseGrams(String text) {
-  final double? g = double.tryParse(text.trim().replaceAll(',', '.'));
-  if (g == null || g < 0) return null;
-  return (g * 1000).round();
-}
-
 /// Kekayaan bersih saat ini. Versi gratis: hanya komponen otomatis.
 final netWorthProvider = Provider<NetWorth?>((ref) {
   final List<WalletBalance>? wallets = ref.watch(walletBalancesProvider).valueOrNull;

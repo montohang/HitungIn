@@ -17,6 +17,7 @@ typedef BackupSummary = ({
   int debts,
   int goals,
   int splits,
+  int netItems,
 });
 
 /// Mengubah seluruh isi database menjadi peta JSON dan sebaliknya.
@@ -82,6 +83,7 @@ class BackupService {
       debts: count('debts'),
       goals: count('goals'),
       splits: count('splits'),
+      netItems: count('netItems'),
     );
   }
 

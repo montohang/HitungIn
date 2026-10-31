@@ -10,7 +10,44 @@ int netItemValue(NetItem i) => i.kind == NetItemKind.emas
 /// Pengingat perbarui nilai: lebih dari 30 hari.
 const int netItemStaleDays = 30;
 
-bool netItemStale(NetItem i, DateTime now) => now.difference(i.updatedAt).inDays > netItemStaleDays;
+/// Umur nilai dalam hari kalender (sama dengan yang tertulis di keterangan).
+int netItemAgeDays(NetItem i, DateTime now) => DateTime(now.year, now.month, now.day)
+    .difference(DateTime(i.updatedAt.year, i.updatedAt.month, i.updatedAt.day))
+    .inDays;
+
+bool netItemStale(NetItem i, DateTime now) => netItemAgeDays(i, now) > netItemStaleDays;
+
+/// "10 g × Rp1.350.000 · diperbarui 34 hari lalu".
+String netItemHint(NetItem i, DateTime now) {
+  final int days = netItemAgeDays(i, now);
+  final String when = days <= 0
+      ? 'diperbarui hari ini'
+      : days == 1
+          ? 'diperbarui kemarin'
+          : 'diperbarui $days hari lalu';
+  final String what = switch (i.kind) {
+    NetItemKind.emas => '${formatGrams(i.milligrams ?? 0)} g × ${_rp(i.pricePerGram ?? 0)}',
+    NetItemKind.properti => 'Taksiran',
+    NetItemKind.pinjaman => 'Sisa pokok',
+    _ => i.kind.label,
+  };
+  return '$what · $when';
+}
+
+String _rp(int v) => 'Rp${v.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.')}';
+
+/// 10500 mg → "10,5".
+String formatGrams(int mg) {
+  final String s = (mg / 1000).toStringAsFixed(3).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+  return s.replaceAll('.', ',');
+}
+
+/// "10,5" / "10.5" → 10500 mg; null bila tidak valid.
+int? parseGrams(String text) {
+  final double? g = double.tryParse(text.trim().replaceAll(',', '.'));
+  if (g == null || g < 0) return null;
+  return (g * 1000).round();
+}
 
 /// Kelompok komposisi aset.
 enum NetGroup {
@@ -67,6 +104,11 @@ NetWorth computeNetWorth({
   int setAside = 0,
   String Function(NetItem)? hintOf,
 }) {
+  // Urutan jenis mengikuti NetItemKind (daftar & komposisi), bukan abjad.
+  final List<NetItem> sorted = [...items]..sort((a, b) {
+      final int byKind = a.kind.index.compareTo(b.kind.index);
+      return byKind != 0 ? byKind : a.id.compareTo(b.id);
+    });
   final List<WalletBalance> active = [for (final w in wallets) if (!w.wallet.archived) w];
   final int walletTotal = active.fold(0, (s, w) => s + w.balance);
   final List<DebtWithPayments> receivable = [
@@ -100,7 +142,7 @@ NetWorth computeNetWorth({
         icon: 'debtSwap',
       ),
     if (includeManual)
-      for (final i in items)
+      for (final i in sorted)
         if (!i.kind.isLiability)
           (name: i.name, hint: hintOf?.call(i) ?? i.kind.label, value: netItemValue(i), group: _groupOf(i.kind), item: i, icon: i.kind.name),
   ];
@@ -117,7 +159,7 @@ NetWorth computeNetWorth({
         icon: 'installment',
       ),
     if (includeManual)
-      for (final i in items)
+      for (final i in sorted)
         if (i.kind.isLiability)
           (name: i.name, hint: hintOf?.call(i) ?? i.kind.label, value: netItemValue(i), group: null, item: i, icon: 'pinjaman'),
   ];

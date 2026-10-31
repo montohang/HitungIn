@@ -306,6 +306,7 @@ Future<ExportInput> loadExportInput(
           bills: bills,
           items: await db.netWorthDao.items(),
           includeManual: includeManualNet,
+          hintOf: (i) => netItemHint(i, now),
         );
   return ExportInput(
     range: range,

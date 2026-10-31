@@ -63,7 +63,8 @@ Future<bool> runRestoreFlow(BuildContext context, WidgetRef ref, {bool onboardin
       '${s.bills} tagihan, ${s.recurring} transaksi berulang'
       '${s.debts > 0 ? ', ${s.debts} catatan utang-piutang' : ''}'
       '${s.goals > 0 ? ', ${s.goals} target tabungan' : ''}'
-      '${s.splits > 0 ? ', ${s.splits} patungan' : ''}';
+      '${s.splits > 0 ? ', ${s.splits} patungan' : ''}'
+      '${s.netItems > 0 ? ', ${s.netItems} aset & pinjaman' : ''}';
   final bool ok = await confirmDialog(
     context,
     title: onboarding ? 'Pulihkan data ini?' : 'Ganti semua data?',

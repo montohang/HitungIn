@@ -317,12 +317,14 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [x] Perbarui: harga sebelumnya tampil, simpan → nilai & "diperbarui hari ini" berubah.
 - [x] Hapus → dialog konfirmasi; Batal kembali ke lembar, Hapus → baris hilang.
 - [x] Export data saat Pro: tanpa label di PDF, Excel, maupun CSV.
-- [ ] Tambah aset Investasi, Properti & kendaraan, Lainnya (nilai langsung).
-- [ ] Lebih dari 30 hari tidak diperbarui: keterangan aset berwarna peringatan.
+- [x] Tambah aset Investasi, Properti & kendaraan, Lainnya (nilai langsung); urutan daftar & komposisi: Emas, Investasi, Properti, Lainnya.
+- [x] Lebih dari 30 hari tidak diperbarui: keterangan aset berwarna peringatan (dihitung per tanggal, sama dengan "31 hari lalu").
 - [x] Lompat ke bulan berikut: tren bertambah batang, "Sama dengan bulan lalu" / ▲▼ selisih dari bulan lalu.
 - [x] Atur Beranda: kartu Kekayaan bersih bawaannya mati; nyalakan → kartu tampil di Beranda, ketuk → layar Kekayaan bersih.
-- [ ] Sembunyikan saldo: nominal kartu Beranda jadi Rp••••.
+- [x] Sembunyikan saldo: nominal kartu Beranda jadi Rp••••.
 - [x] PDF: blok Kekayaan bersih di halaman Posisi keuangan.
-- [ ] Excel: sheet "Kekayaan bersih" (Jenis, Nama, Keterangan, Nilai, Sumber) dibuka di Google Sheets / Excel.
-- [ ] Export satu dompet: tanpa blok & sheet Kekayaan bersih.
-- [ ] Backup lalu pulihkan: aset manual & catatan bulanan ikut kembali.
+- [x] Excel: berkas dari aplikasi berisi sheet "Kekayaan bersih" (Jenis, Nama, Keterangan, Nilai, Sumber), baris judul beku, filter otomatis; total cocok.
+- [ ] Excel: sheet "Kekayaan bersih" dibuka di Google Sheets / Excel.
+- [x] Export satu dompet: tanpa blok & sheet Kekayaan bersih.
+- [x] Backup lalu pulihkan: aset manual kembali; ringkasan "Ganti semua data?" menyebut jumlah aset & pinjaman.
+- [ ] Sesudah pulihkan dari HP lain: batang tren bulan-bulan lalu ikut kembali.
