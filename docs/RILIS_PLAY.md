@@ -100,3 +100,48 @@ lewat `--dart-define` (lihat `lib/features/ads/ad_ids.dart`) sebelum rilis produ
 - Uninstall → instal lagi → **Pulihkan pembelian** → Pro aktif kembali.
 - Refund (dengan cabut hak) → saat aplikasi dibuka, Pro dicabut (dicek ke daftar pembelian Play;
   offline/error tidak mengubah status). Akun Play yang berbeda dari akun pembeli juga dianggap tidak punya Pro.
+
+## 8. Mengajukan akses produksi
+
+Syarat akun pribadi baru: closed testing dengan minimal 12 penguji yang ikut serta terus-menerus 14 hari.
+Setelah tombol **Ajukan permohonan untuk produksi** aktif (Dasbor):
+
+1. Pastikan rilis pengujian tertutup terbaru sudah **terkirim untuk ditinjau** (Dasbor › Status pembaruan
+   harus bukan "Belum dikirim untuk ditinjau"; kalau masih, buka Ringkasan publikasi › Kirim untuk ditinjau).
+2. Jangan keluarkan penguji atau jeda track selama menunggu keputusan.
+3. Formulir punya tiga bagian: tentang closed test (rekrut penguji, keterlibatan, ringkasan masukan),
+   tentang aplikasi (sasaran pengguna, manfaat, perkiraan unduhan), dan kesiapan produksi
+   (perubahan dari masukan, alasan siap). Jawab dengan fakta; catat masukan penguji & perubahan
+   yang dibuat sejak closed test dimulai.
+4. Peninjauan biasanya 7 hari atau kurang. Google bisa meminta pengujian tambahan.
+
+## 9. Rilis produksi (pertama kali)
+
+Akses produksi belum berarti rilis. Sebelum build produksi:
+
+1. **Tanggal promo (P4):** hari terakhir promo = 3 bulan sejak tanggal rilis produksi yang direncanakan.
+   Tulis di sini: `PROMO_END = ____-__-__`. Harga perkenalan berlaku 30 hari sesudahnya.
+2. **ID iklan asli:**
+   - ID aplikasi AdMob di `android/app/src/main/AndroidManifest.xml` (sekarang masih ID uji
+     `ca-app-pub-3940256099942544~…`).
+   - ID unit banner & rewarded lewat `--dart-define` (lihat `lib/features/ads/ad_ids.dart`).
+3. **Versi:** naikkan `version:` di `pubspec.yaml` (nama & kode versi lebih tinggi dari rilis terakhir).
+4. Build:
+
+   ```bash
+   flutter build appbundle --release --no-tree-shake-icons \
+     --dart-define=PROMO_END=2027-02-28 \
+     --dart-define=ADMOB_BANNER_ID=ca-app-pub-xxx/yyy \
+     --dart-define=ADMOB_REWARDED_ID=ca-app-pub-xxx/zzz
+   ```
+
+   (ganti tanggal & ID dengan yang asli). Build tanpa `PROMO_END` = tanpa promo.
+5. **Uji build itu sebelum diunggah:** pasang menimpa versi sebelumnya (data & PIN utuh), kartu Lainnya
+   "Semua fitur Pro gratis · Sampai <tanggal>", iklan asli muncul (jangan diklik sendiri), scan struk,
+   PDF/Excel, backup otomatis.
+6. **Play Console:**
+   - Harga `hitungin_pro`: Rp39.000. Saat promo berakhir, ubah ke **Rp29.000** selama 30 hari harga
+     perkenalan, lalu kembali ke Rp39.000. Aplikasi menampilkan harga dari Google Play, jadi tidak perlu build.
+   - Halaman Play Store: tulis "Semua fitur Pro gratis sampai <tanggal>" di deskripsi; hapus saat promo selesai.
+   - Keamanan data: tetap seperti bagian 6 (backup otomatis & password-nya tersimpan di HP, tidak dikirim).
+7. Rilis bertahap (mis. 20% → 50% → 100%) supaya masalah ketahuan sebelum sampai ke semua pengguna.
