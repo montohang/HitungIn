@@ -6,6 +6,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../core/security/secure_store.dart';
 import 'data/billing.dart';
+import 'data/promo.dart';
 import 'data/entitlement_store.dart';
 
 @immutable
@@ -178,5 +179,13 @@ class ProController extends Notifier<ProState> {
 
 final proControllerProvider = NotifierProvider<ProController, ProState>(ProController.new);
 
-/// Pintasan yang paling sering dipakai layar.
-final isProProvider = Provider<bool>((ref) => ref.watch(proControllerProvider.select((s) => s.isPro)));
+/// Sudah membeli Pro (iklan, layar Premium). Fitur memakai [isProProvider].
+final ownsProProvider = Provider<bool>((ref) => ref.watch(proControllerProvider.select((s) => s.isPro)));
+
+/// Masa promo perkenalan (P4); diganti di tes.
+final promoProvider = Provider<Promo>((ref) => Promo.fromDefine());
+
+final promoPhaseProvider = Provider<PromoPhase>((ref) => ref.watch(promoProvider).phase(ref.watch(clockProvider)()));
+
+/// Fitur Pro terbuka: sudah membeli, atau selama promo perkenalan.
+final isProProvider = Provider<bool>((ref) => ref.watch(ownsProProvider) || ref.watch(promoPhaseProvider).unlocksPro);

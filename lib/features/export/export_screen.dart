@@ -143,7 +143,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
     if (_format == ExportFormat.csv && !await unlockCsvExport(context, ref)) return;
     setState(() => _busy = true);
     try {
-      final ExportInput x = await loadExportInput(ref.read(appDatabaseProvider), range: _range, now: _now, walletId: _wallet?.id, includeManualNet: ref.read(isProProvider));
+      final ExportInput x = await loadExportInput(ref.read(appDatabaseProvider), range: _range, now: _now, walletId: _wallet?.id);
       if (_format != ExportFormat.pdf && x.txs.isEmpty && _format == ExportFormat.csv) {
         _toast('Belum ada transaksi di periode ini.');
         return;

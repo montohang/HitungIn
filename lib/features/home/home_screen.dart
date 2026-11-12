@@ -39,6 +39,7 @@ import 'data/allowance.dart';
 import 'widgets/allowance_card.dart';
 import '../favorites/widgets/favorite_chips.dart';
 import '../goals/widgets/goal_home_card.dart';
+import '../premium/widgets/promo_home_card.dart';
 import '../networth/widgets/networth_home_card.dart';
 import '../rapor/widgets/rapor_entry.dart';
 
@@ -166,6 +167,7 @@ class HomeScreen extends ConsumerWidget {
                 hasBudget: budgets.isNotEmpty,
               ),
             ] else ...[
+              const PromoHomeCard(),
               const RaporHomeCard(),
               RecapHomeCard(hidden: hidden),
               // Susunan kartu pilihan pengguna (P2b, Pro); bawaan untuk versi gratis.

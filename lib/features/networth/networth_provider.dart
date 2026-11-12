@@ -9,7 +9,6 @@ import '../debts/data/debts_dao.dart';
 import '../debts/debts_provider.dart';
 import '../goals/data/goals_dao.dart';
 import '../goals/goals_provider.dart';
-import '../premium/pro_controller.dart';
 import '../wallets/data/wallets_dao.dart';
 import 'data/net_worth.dart';
 
@@ -35,7 +34,8 @@ final netWorthProvider = Provider<NetWorth?>((ref) {
     debts: debts,
     bills: bills,
     items: items,
-    includeManual: ref.watch(isProProvider),
+    // Aset manual hanya bisa ditambah dengan Pro, tapi yang sudah ada tetap terlihat (P4).
+    includeManual: true,
     setAside: goals.where((g) => !g.goal.archived).fold(0, (s, g) => s + g.saved),
     hintOf: (i) => netItemHint(i, now),
   );

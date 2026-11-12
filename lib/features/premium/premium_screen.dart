@@ -8,24 +8,19 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/logo_mark.dart';
 import 'data/pro_limits.dart';
+import 'data/promo.dart';
 import 'pro_controller.dart';
 import '../../core/widgets/hi_icons.dart';
 
-/// Harga cadangan bila Google Play belum mengirim harga (offline/emulator).
-const String fallbackProPrice = 'Rp59.000';
 
-/// Daftar keuntungan Pro. `true` = sudah ada, `false` = segera hadir.
+/// Daftar keuntungan Pro (Claude Design › Premium). `true` = sudah ada, `false` = segera hadir.
 const List<(IconData, String, String, bool)> proBenefits = [
-  (HiIcons.noAds, 'Tanpa iklan', 'Selamanya, di semua layar', true),
-  (HiIcons.target, 'Budget tanpa batas', 'Gratis: total + ${FreeLimits.categoryBudgets} kategori', true),
-  (HiIcons.calendar, 'Tagihan tanpa batas', 'Gratis: ${FreeLimits.activeBills} tagihan aktif', true),
-  (HiIcons.bell, 'Notifikasi pengingat tagihan', 'Tagihan, cicilan & utang diingatkan walau aplikasi tertutup', true),
-  (HiIcons.report, 'Laporan semua bulan', 'Gratis: bulan ini & bulan lalu', true),
-  (HiIcons.table, 'Ekspor CSV kapan saja', 'Gratis: sekali per iklan berhadiah', true),
-  (HiIcons.trendUp, 'Arus kas 12 bulan & filter dompet', 'Gratis: arus kas 6 bulan', true),
-  (HiIcons.repeat, 'Transaksi berulang', 'Gaji & langganan tercatat otomatis', true),
-  (HiIcons.palette, 'Aksen warna tambahan', 'Plum, Laut, Kopi, Arang', true),
-  (HiIcons.grid, 'Ikon aplikasi alternatif', 'Gelap, Emas, Terang', true),
+  (HiIcons.noAds, 'Tanpa iklan selamanya', 'Layar bersih di setiap halaman', true),
+  (HiIcons.folder, 'Backup otomatis', 'Harian ke folder pilihanmu, 7 salinan', true),
+  (HiIcons.scan, 'Scan struk & export Excel/PDF', 'Tanpa batas, semua periode', true),
+  (HiIcons.target, 'Budget, tagihan & target tanpa batas', 'Termasuk template budget 50/30/20', true),
+  (HiIcons.bars, 'Laporan & kekayaan bersih lengkap', 'Semua bulan, tren 12 bulan, emas & investasi', true),
+  (HiIcons.palette, 'Aksen warna & ikon aplikasi', 'Plum, Laut, Kopi, Arang · ikon alternatif', true),
 ];
 
 class PremiumScreen extends ConsumerStatefulWidget {
@@ -50,6 +45,10 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
     final t = context.text;
     final ProState s = ref.watch(proControllerProvider);
     final ProController ctl = ref.read(proControllerProvider.notifier);
+    final Promo promo = ref.watch(promoProvider);
+    final PromoPhase phase = ref.watch(promoPhaseProvider);
+    final bool intro = phase == PromoPhase.intro;
+    final String price = s.price ?? (intro ? introProPrice : normalProPrice);
 
     return Scaffold(
       appBar: AppBar(),
@@ -65,6 +64,19 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
               const AppBadge.pro(),
             ],
           ),
+          if (!s.isPro && phase.unlocksPro && promo.lastDay != null) ...[
+            const SizedBox(height: AppSpace.x16),
+            Container(
+              key: const Key('promo-pita'),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpace.x12, vertical: AppSpace.x8),
+              decoration: BoxDecoration(
+                color: c.warnSoft,
+                borderRadius: AppRadius.mdAll,
+              ),
+              child: Text('Semua fitur Pro gratis sampai ${promoDate(promo.lastDay!)}',
+                  style: t.caption.copyWith(fontWeight: FontWeight.w700, color: c.warnInk)),
+            ),
+          ],
           const SizedBox(height: AppSpace.x16),
           Text(s.isPro ? 'Terima kasih sudah mendukung HitungIn!' : widget.reason.headline, style: t.greeting),
           const SizedBox(height: AppSpace.x8),
@@ -129,9 +141,21 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
               if (s.error != null) _Note(icon: HiIcons.error, text: s.error!, color: c.danger),
               if (!s.available)
                 _Note(icon: HiIcons.info, text: 'Google Play tidak tersedia di perangkat ini.', color: c.muted),
+              if (!s.isPro && (phase.unlocksPro || intro))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpace.x8),
+                  child: Text(
+                    intro
+                        ? 'Harga perkenalan sampai ${promoDate(promo.introLastDay!)}, sesudahnya $normalProPrice.'
+                        : 'Beli sekarang: tanpa iklan & Pro tetap milikmu.',
+                    key: const Key('promo-catatan'),
+                    textAlign: TextAlign.center,
+                    style: t.caption.copyWith(color: c.muted),
+                  ),
+                ),
               if (!s.isPro)
                 AppButton(
-                  label: s.busy ? 'Membuka Google Play…' : 'Beli Pro · ${s.price ?? fallbackProPrice}',
+                  label: s.busy ? 'Membuka Google Play…' : 'Beli Pro · $price',
                   large: true,
                   onPressed: s.busy || s.pending || !s.available ? null : ctl.buy,
                 ),

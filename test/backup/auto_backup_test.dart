@@ -141,6 +141,13 @@ void main() {
     await e.db.close();
   });
 
+  test('status tersimpan utuh, termasuk pemberitahuan berhenti', () async {
+    final store = AutoBackupStore(MemorySecureStore());
+    await store.write(AutoBackupState(enabled: true, tree: 't', lastAt: start, stoppedNoticeAt: start, error: AutoBackupError.space));
+    final s = await store.read();
+    expect((s.enabled, s.tree, s.lastAt, s.stoppedNoticeAt, s.error), (true, 't', start, start, AutoBackupError.space));
+  });
+
   test('waktu terlewat, kartu salinan & notifikasi', () {
     final s = AutoBackupState(enabled: true, enabledAt: start, lastCheckAt: start);
     expect(autoBackupNeedsCatchUp(s, start.add(const Duration(days: 3))), isFalse);

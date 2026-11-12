@@ -44,7 +44,7 @@ class FakeBilling implements BillingGateway {
     id: proProductId,
     title: 'HitungIn Pro',
     description: 'Sekali bayar',
-    price: 'Rp59.000',
+    price: 'Rp39.000',
     rawPrice: 59000,
     currencyCode: 'IDR',
   );

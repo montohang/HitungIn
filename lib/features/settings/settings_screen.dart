@@ -32,6 +32,7 @@ import '../../core/utils/rupiah.dart';
 import '../security/pin_service.dart';
 import '../../core/widgets/app_chip.dart';
 import '../ads/ads_service.dart';
+import '../premium/data/promo.dart';
 import '../premium/data/pro_limits.dart';
 import '../premium/pro_controller.dart';
 import '../premium/widgets/pro_teaser.dart';
@@ -85,6 +86,9 @@ class SettingsScreen extends ConsumerWidget {
     final bool hasPin = ref.watch(appGateProvider.select((g) => g.hasPin));
     final bool bio = ref.watch(_biometricOnProvider).valueOrNull ?? false;
     final bool isPro = ref.watch(isProProvider);
+    final bool ownsPro = ref.watch(ownsProProvider);
+    final Promo promo = ref.watch(promoProvider);
+    final PromoPhase phase = ref.watch(promoPhaseProvider);
     final bool adPrivacy = ref.watch(_adPrivacyRequiredProvider).valueOrNull ?? false;
     final ({String label, bool fresh}) backup = backupAge(ref.watch(effectiveLastBackupProvider), now);
 
@@ -95,7 +99,7 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             Text('Lainnya', style: t.pageTitle),
             const SizedBox(height: AppSpace.block),
-            _PremiumCard(isPro: isPro, onTap: () => openPremium(context, isPro ? ProReason.umum : ProReason.iklan)),
+            _PremiumCard(owns: ownsPro, phase: phase, promo: promo, onTap: () => openPremium(context, ownsPro ? ProReason.umum : ProReason.iklan)),
             const SizedBox(height: AppSpace.x24),
             SettingsGroup(
               title: 'Kelola',
@@ -189,7 +193,7 @@ class SettingsScreen extends ConsumerWidget {
                   value: 'PDF · Excel · CSV',
                   onTap: () => context.push(Routes.export),
                 ),
-                if (!isPro && adPrivacy)
+                if (!ownsPro && adPrivacy)
                   SettingsTile(
                     icon: HiIcons.shield,
                     title: 'Privasi iklan',
@@ -236,10 +240,10 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Mode Pro (uji)',
                     subtitle: 'Hanya di build debug — tidak ada di Play Store',
                     trailing: Switch(
-                      value: isPro,
+                      value: ownsPro,
                       onChanged: (on) => ref.read(proControllerProvider.notifier).debugSetPro(on),
                     ),
-                    onTap: () => ref.read(proControllerProvider.notifier).debugSetPro(!isPro),
+                    onTap: () => ref.read(proControllerProvider.notifier).debugSetPro(!ownsPro),
                   ),
                 if (kDebugMode)
                   SettingsTile(
@@ -294,7 +298,7 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: AppSpace.x4),
             Text('Tanpa akun. Tanpa server. Datamu milikmu.',
                 textAlign: TextAlign.center, style: t.label.copyWith(color: c.muted, fontWeight: FontWeight.w500)),
-            if (!isPro) ...[
+            if (!ownsPro) ...[
               const SizedBox(height: AppSpace.x4),
               Text(
                 'Versi gratis menampilkan iklan Google AdMob (memakai ID iklan, bukan data keuanganmu).',
@@ -311,18 +315,28 @@ class SettingsScreen extends ConsumerWidget {
 }
 
 class _PremiumCard extends StatelessWidget {
-  const _PremiumCard({required this.isPro, required this.onTap});
+  const _PremiumCard({required this.owns, required this.phase, required this.promo, required this.onTap});
 
-  final bool isPro;
+  final bool owns;
+  final PromoPhase phase;
+  final Promo promo;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
+    final DateTime? last = promo.lastDay;
+    final (String title, String sub) = owns
+        ? ('HitungIn Pro aktif', 'Terima kasih sudah mendukung HitungIn!')
+        : phase.unlocksPro && last != null
+            ? ('Semua fitur Pro gratis', 'Sampai ${promoDate(last)} · beli untuk tanpa iklan')
+            : phase == PromoPhase.intro
+                ? ('Pro harga perkenalan $introProPrice', 'Sampai ${promoDate(promo.introLastDay!)}, sesudahnya $normalProPrice')
+                : ('Upgrade ke Premium', 'Sekali bayar, tanpa iklan selamanya');
     return Pressable.card(
       onTap: onTap,
-      semanticLabel: isPro ? 'HitungIn Pro aktif' : 'Upgrade ke Premium',
+      semanticLabel: title,
       child: Container(
         constraints: const BoxConstraints(minHeight: 80),
         padding: const EdgeInsets.all(AppSpace.card),
@@ -342,15 +356,14 @@ class _PremiumCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(isPro ? 'HitungIn Pro aktif' : 'Upgrade ke Premium',
-                      style: t.title.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
+                  Text(title, style: t.title.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
                   const SizedBox(height: AppSpace.x2),
-                  Text(isPro ? 'Terima kasih sudah mendukung HitungIn!' : 'Sekali bayar, tanpa iklan selamanya',
+                  Text(sub,
                       style: t.caption.copyWith(color: const Color(0xFFD8D5EE))),
                 ],
               ),
             ),
-            const AppBadge.pro(),
+            owns ? const AppBadge.pro() : const Icon(HiIcons.forward, size: 20, color: Colors.white),
           ],
         ),
       ),

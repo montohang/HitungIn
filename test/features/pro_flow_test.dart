@@ -39,9 +39,9 @@ void main() {
     await app.push(tester, '/premium?from=iklan');
 
     expect(find.text(ProReason.iklan.headline), findsWidgets);
-    expect(find.text('Beli Pro · Rp59.000'), findsOneWidget);
+    expect(find.text('Beli Pro · Rp39.000'), findsOneWidget);
     expect(find.text('Segera'), findsNothing, reason: 'semua manfaat sudah tersedia');
-    await app.tap('Beli Pro · Rp59.000');
+    await app.tap('Beli Pro · Rp39.000');
     expect(app.env.billing.buys, 1);
     expect(find.text('Membuka Google Play…'), findsOneWidget);
 

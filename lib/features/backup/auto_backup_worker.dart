@@ -10,6 +10,7 @@ import '../../core/db/data_providers.dart';
 import '../../core/db/providers.dart';
 import '../../core/security/secure_store.dart';
 import '../premium/data/entitlement_store.dart';
+import '../premium/data/promo.dart';
 import '../premium/pro_controller.dart';
 import '../settings/data/settings_dao.dart';
 import 'data/auto_backup.dart';
@@ -28,8 +29,16 @@ void autoBackupDispatcher() {
     const SecureStore secure = FlutterSecureStore();
     const AutoBackupStore store = AutoBackupStore(secure);
     try {
-      if (!(await store.read()).enabled) return true;
-      if (!await EntitlementStore(secure).isPro()) return true;
+      final AutoBackupState state = await store.read();
+      if (!state.enabled) return true;
+      if (!Promo.fromDefine().unlocksPro(DateTime.now()) && !await EntitlementStore(secure).isPro()) {
+        // Sekali saja: beri tahu bahwa backup otomatis berhenti (mis. promo selesai).
+        if (state.stoppedNoticeAt == null) {
+          await _notify('Backup otomatis berhenti', 'Fitur Pro tidak aktif lagi. Salinan lama tetap ada di folder dan bisa dipulihkan.');
+          await store.write(state.copyWith(stoppedNoticeAt: DateTime.now()));
+        }
+        return true;
+      }
       final AppDatabase db = AppDatabase(openEncryptedConnection());
       try {
         final DateTime now = DateTime.now();
@@ -71,6 +80,11 @@ Future<void> showAutoBackupNotice(AppDatabase db, AutoBackupStore store, DateTim
         s.copyWith(copyNoticeAt: now),
       ),
   };
+  await _notify(title, body);
+  await store.write(next);
+}
+
+Future<void> _notify(String title, String body) async {
   final FlutterLocalNotificationsPlugin plugin = FlutterLocalNotificationsPlugin();
   await plugin.initialize(
     settings: const InitializationSettings(android: AndroidInitializationSettings('@drawable/ic_notif')),
@@ -90,7 +104,6 @@ Future<void> showAutoBackupNotice(AppDatabase db, AutoBackupStore store, DateTim
       ),
     ),
   );
-  await store.write(next);
 }
 
 /// Jadwal Android. Dipisah supaya bisa dipalsukan di tes.
@@ -170,7 +183,12 @@ final autoBackupRunnerProvider = Provider<Future<AutoBackupOutcome> Function({bo
 final effectiveLastBackupProvider = Provider<DateTime?>((ref) {
   final DateTime? manual = ref.watch(lastBackupProvider).valueOrNull;
   final AutoBackupState? auto = ref.watch(autoBackupProvider).valueOrNull;
-  final DateTime? at = auto != null && auto.enabled && auto.error == null && ref.watch(isProProvider) ? auto.upToDateAt : null;
+  // Tanpa Pro (mis. promo selesai) salinan lama tetap nyata, hanya tidak lagi diperbarui.
+  final DateTime? at = auto == null || !auto.enabled || auto.error != null
+      ? null
+      : ref.watch(isProProvider)
+          ? auto.upToDateAt
+          : auto.lastAt;
   if (manual == null) return at;
   if (at == null) return manual;
   return at.isAfter(manual) ? at : manual;

@@ -48,6 +48,7 @@ class AutoBackupState {
     this.stallNoticeAt,
     this.copyNoticeAt,
     this.copyDismissedAt,
+    this.stoppedNoticeAt,
   });
 
   final bool enabled;
@@ -70,6 +71,9 @@ class AutoBackupState {
   final DateTime? copyNoticeAt;
   final DateTime? copyDismissedAt;
 
+  /// Pemberitahuan "berhenti karena Pro tidak aktif" sudah dikirim.
+  final DateTime? stoppedNoticeAt;
+
   /// Sampai kapan salinan terbaru masih sama dengan data.
   DateTime? get upToDateAt => lastAt == null ? null : (lastCheckAt ?? lastAt);
 
@@ -88,6 +92,7 @@ class AutoBackupState {
     DateTime? stallNoticeAt,
     DateTime? copyNoticeAt,
     DateTime? copyDismissedAt,
+    DateTime? stoppedNoticeAt,
   }) =>
       AutoBackupState(
         enabled: enabled ?? this.enabled,
@@ -103,6 +108,7 @@ class AutoBackupState {
         stallNoticeAt: stallNoticeAt ?? this.stallNoticeAt,
         copyNoticeAt: copyNoticeAt ?? this.copyNoticeAt,
         copyDismissedAt: copyDismissedAt ?? this.copyDismissedAt,
+        stoppedNoticeAt: stoppedNoticeAt ?? this.stoppedNoticeAt,
       );
 
   Map<String, Object?> toJson() => {
@@ -119,6 +125,7 @@ class AutoBackupState {
         'stallNoticeAt': stallNoticeAt?.toIso8601String(),
         'copyNoticeAt': copyNoticeAt?.toIso8601String(),
         'copyDismissedAt': copyDismissedAt?.toIso8601String(),
+        'stoppedNoticeAt': stoppedNoticeAt?.toIso8601String(),
       };
 
   static AutoBackupState fromJson(Map<String, Object?> j) {
@@ -137,6 +144,7 @@ class AutoBackupState {
       stallNoticeAt: at('stallNoticeAt'),
       copyNoticeAt: at('copyNoticeAt'),
       copyDismissedAt: at('copyDismissedAt'),
+      stoppedNoticeAt: at('stoppedNoticeAt'),
     );
   }
 }

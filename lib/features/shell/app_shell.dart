@@ -235,7 +235,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     final c = context.colors;
     final bool banner = AdPolicy.showBanner(
       tab: shell.currentIndex,
-      isPro: ref.watch(isProProvider),
+      isPro: ref.watch(ownsProProvider),
       adsReady: ref.watch(adsReadyProvider),
     );
     final ThemeSettings look = ref.watch(themeControllerProvider);

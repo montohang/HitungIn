@@ -75,7 +75,7 @@ lewat `--dart-define` (lihat `lib/features/ads/ad_ids.dart`) sebelum rilis produ
    (menu ini baru aktif setelah ada AAB dengan izin billing yang terunggah — langkah 4).
    - ID produk: `hitungin_pro` (harus persis; tidak bisa diubah)
    - Nama: HitungIn Pro · Deskripsi singkat fitur Pro
-   - Harga: Rp59.000 → Simpan → **Aktifkan**.
+   - Harga: Rp39.000 (harga perkenalan Rp29.000 selama 30 hari sesudah promo) → Simpan → **Aktifkan**.
 2. Setelan (menu utama Play Console, bukan per aplikasi) → **Pengujian lisensi** →
    tambahkan email penguji → respons lisensi `RESPOND_NORMALLY` → Simpan.
    Penguji lisensi melihat "Pesanan uji" dan tidak ditagih.

@@ -121,7 +121,7 @@ void main() {
 
     test('memuat harga dari Google Play', () async {
       await ctl().loadProduct();
-      expect(state().price, 'Rp59.000');
+      expect(state().price, 'Rp39.000');
       expect(state().available, isTrue);
     });
 

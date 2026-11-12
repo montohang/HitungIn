@@ -185,18 +185,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               const SizedBox(height: AppSpace.x16),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpace.x16, vertical: AppSpace.x4),
-                decoration:
-                    BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
+                decoration: BoxDecoration(color: c.surface, borderRadius: AppRadius.lgAll, border: Border.all(color: c.line)),
                 child: Column(
                   children: [
-                    const _InfoRow(
-                        label: 'Password backup',
-                        desc: 'Dipakai untuk membuka file backup',
-                        value: 'Ditanya tiap backup'),
-                    const _InfoRow(
-                        label: 'Lokasi',
-                        desc: 'Folder pilihanmu, bisa di Google Drive',
-                        value: 'Dipilih saat menyimpan'),
+                    const _InfoRow(label: 'Password backup', desc: 'Dipakai untuk membuka file backup', value: 'Ditanya tiap backup'),
+                    const _InfoRow(label: 'Lokasi', desc: 'Folder pilihanmu, bisa di Google Drive', value: 'Dipilih saat menyimpan'),
                     _AutoRow(state: auto, isPro: isPro, now: now),
                   ],
                 ),
@@ -205,8 +198,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               Row(
                 children: [
                   Expanded(
-                    child:
-                        AppButton(label: 'Pulihkan dari file', variant: AppButtonVariant.outline, onPressed: _restore),
+                    child: AppButton(label: 'Pulihkan dari file', variant: AppButtonVariant.outline, onPressed: _restore),
                   ),
                   const SizedBox(width: AppSpace.x8),
                   Expanded(
@@ -347,9 +339,8 @@ class _StatusCard extends StatelessWidget {
     );
   }
 
-  static String _size(int bytes) => bytes >= 1024 * 1024
-      ? '${(bytes / 1024 / 1024).toStringAsFixed(1).replaceAll('.', ',')} MB'
-      : '${(bytes / 1024).ceil()} KB';
+  static String _size(int bytes) =>
+      bytes >= 1024 * 1024 ? '${(bytes / 1024 / 1024).toStringAsFixed(1).replaceAll('.', ',')} MB' : '${(bytes / 1024).ceil()} KB';
 }
 
 class _AutoFailedBanner extends StatelessWidget {
@@ -449,11 +440,13 @@ class _AutoRow extends StatelessWidget {
     final DateTime? lastAt = state.lastAt;
     final String desc = failed
         ? 'Berhenti · perlu diperbaiki'
-        : on
-            ? lastAt == null
-                ? 'Aktif · belum ada salinan'
-                : 'Aktif · terakhir ${DateFmt.date(lastAt, now: now)}, ${DateFmt.time(lastAt)}'
-            : 'Sekali sehari saat HP mengisi daya';
+        : state.enabled && !isPro
+            ? 'Berhenti karena Pro tidak aktif · salinan lama tetap ada'
+            : on
+                ? lastAt == null
+                    ? 'Aktif · belum ada salinan'
+                    : 'Aktif · terakhir ${DateFmt.date(lastAt, now: now)}, ${DateFmt.time(lastAt)}'
+                : 'Sekali sehari saat HP mengisi daya';
     return Pressable(
       key: const Key('auto-baris'),
       onTap: () => isPro ? context.push(Routes.backupOtomatis) : openPremium(context, ProReason.backupOtomatis),
@@ -472,10 +465,7 @@ class _AutoRow extends StatelessWidget {
             ]),
           ),
           const SizedBox(width: AppSpace.x8),
-          if (on)
-            Icon(HiIcons.forward, size: 16, color: c.muted)
-          else
-            IgnorePointer(child: Switch(value: false, onChanged: (_) {})),
+          if (on) Icon(HiIcons.forward, size: 16, color: c.muted) else IgnorePointer(child: Switch(value: false, onChanged: (_) {})),
         ]),
       ),
     );

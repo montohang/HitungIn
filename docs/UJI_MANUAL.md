@@ -349,3 +349,18 @@ Pasang di atas versi lama (jangan uninstall) supaya migrasi skema v4 → v5 ikut
 - [ ] Mengisi daya sungguhan di Samsung A52: jadwal harian benar-benar jalan (pengaturan baterai bisa menunda).
 - [ ] Excel: sheet "Tren kekayaan" (P3h).
 - [x] Build rilis (kode dipangkas R8): pembaruan dari 0.1.0 ke 0.2.0 dengan kunci yang sama → PIN & data utuh; scan struk dari galeri, PDF, Excel, backup otomatis & tugas latar belakang berjalan.
+
+## 21. Promo perkenalan (P4, baru)
+Build dengan `--dart-define=PROMO_END=<tanggal>`; geser tanggal lewat Lainnya › Lompat ke tanggal 1 bulan depan (debug).
+- [ ] Tanpa `PROMO_END`: tidak ada promo, perilaku sama seperti sebelumnya.
+- [x] Selama promo (versi gratis): semua fitur Pro terbuka, label PRO hilang.
+- [ ] Iklan tetap tampil selama promo (emulator tanpa iklan termuat; cek di HP).
+- [x] Lainnya: kartu "Semua fitur Pro gratis · Sampai <tanggal> · beli untuk tanpa iklan".
+- [x] Premium: pita "Semua fitur Pro gratis sampai <tanggal>", catatan "Beli sekarang: tanpa iklan & Pro tetap milikmu", tombol Beli tetap ada.
+- [x] 7 hari terakhir: kartu Beranda "Fitur Pro gratis tinggal N hari" → Premium.
+- [ ] Sesudah promo: fitur kembali mengikuti aturan gratis; data yang sudah dibuat tetap terlihat (aset manual, target, dll.); backup otomatis berhenti.
+- [ ] 7 hari pertama sesudahnya: kartu Beranda "Promo Pro gratis sudah selesai"; Lainnya & Premium menampilkan harga perkenalan Rp29.000 sampai <tanggal>.
+- [ ] Sudah membeli Pro: tanpa iklan, tanpa kartu promo, kartu Lainnya "HitungIn Pro aktif".
+- [x] Backup otomatis tetap berjalan selama promo untuk versi gratis (salinan dibuat saat aplikasi dibuka).
+- [x] Sesudah promo: Lainnya harga perkenalan Rp29.000, label PRO kembali, Backup "Berhenti karena Pro tidak aktif · salinan lama tetap ada" & backup terakhir tetap tercatat.
+- [ ] Notifikasi "Backup otomatis berhenti" (sekali) dari tugas latar belakang sesudah promo.
