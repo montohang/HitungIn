@@ -46,11 +46,11 @@
               android:resource="@style/NormalTheme"
               />
         </activity>
-        <!-- ID aplikasi AdMob. Ini ID UJI Google — ganti dengan ID asli dari
-             konsol AdMob sebelum rilis (lihat lib/features/ads/ad_ids.dart). -->
+        <!-- ID aplikasi AdMob (HitungIn). Unit iklan: lib/features/ads/ad_ids.dart
+             (build debug memakai unit uji Google). -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-2760179272510023~3008114669" />
         <!-- Peluncur ikon Standar (activity kecil yang diteruskan ke MainActivity).
              Ikon lain (Pro) = activity-alias di bawah; hanya satu yang aktif.
              Lihat MainActivity.setIcon & lib/core/branding/app_icon_variants.dart. -->

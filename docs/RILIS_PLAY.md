@@ -39,8 +39,7 @@ Versi di `pubspec.yaml` harus dinaikkan tiap unggah (`0.2.0+2` → nama 0.2.0, k
 Hasil: `build/app/outputs/bundle/release/app-release.aab`.
 Tanpa `android/key.properties`, AAB ditandatangani kunci debug dan **ditolak** Play Console.
 
-Iklan: build ini memakai ID iklan uji AdMob (aman untuk internal testing). ID asli diisi
-lewat `--dart-define` (lihat `lib/features/ads/ad_ids.dart`) sebelum rilis produksi.
+Iklan: build rilis memakai unit iklan asli AdMob (lihat `lib/features/ads/ad_ids.dart`); build debug memakai unit uji.
 
 ## 3. Play Console — persiapan
 
@@ -121,21 +120,21 @@ Akses produksi belum berarti rilis. Sebelum build produksi:
 
 1. **Tanggal promo (P4):** hari terakhir promo = 3 bulan sejak tanggal rilis produksi yang direncanakan.
    Tulis di sini: `PROMO_END = ____-__-__`. Harga perkenalan berlaku 30 hari sesudahnya.
-2. **ID iklan asli:**
-   - ID aplikasi AdMob di `android/app/src/main/AndroidManifest.xml` (sekarang masih ID uji
-     `ca-app-pub-3940256099942544~…`).
-   - ID unit banner & rewarded lewat `--dart-define` (lihat `lib/features/ads/ad_ids.dart`).
+2. **ID iklan (sudah terpasang 12 Nov 2026):** aplikasi AdMob "HitungIn"
+   `ca-app-pub-2760179272510023~3008114669` di `AndroidManifest.xml`; unit "HitungIn Banner" &
+   "HitungIn Rewarded CSV" di `lib/features/ads/ad_ids.dart`. Build **rilis** otomatis memakai unit asli,
+   build debug memakai unit uji Google. Daftarkan HP sendiri sebagai perangkat uji di AdMob
+   (Setelan › Perangkat uji) dan jangan mengetuk iklan sendiri.
+   Sesudah rilis produksi: AdMob › Aplikasi › HitungIn › **Tambahkan toko** (tautkan ke Google Play)
+   supaya peninjauan selesai dan iklan tidak lagi dibatasi.
 3. **Versi:** naikkan `version:` di `pubspec.yaml` (nama & kode versi lebih tinggi dari rilis terakhir).
 4. Build:
 
    ```bash
-   flutter build appbundle --release --no-tree-shake-icons \
-     --dart-define=PROMO_END=2027-02-28 \
-     --dart-define=ADMOB_BANNER_ID=ca-app-pub-xxx/yyy \
-     --dart-define=ADMOB_REWARDED_ID=ca-app-pub-xxx/zzz
+   flutter build appbundle --release --no-tree-shake-icons --dart-define=PROMO_END=2027-02-28
    ```
 
-   (ganti tanggal & ID dengan yang asli). Build tanpa `PROMO_END` = tanpa promo.
+   (ganti tanggal dengan yang asli). Build tanpa `PROMO_END` = tanpa promo.
 5. **Uji build itu sebelum diunggah:** pasang menimpa versi sebelumnya (data & PIN utuh), kartu Lainnya
    "Semua fitur Pro gratis · Sampai <tanggal>", iklan asli muncul (jangan diklik sendiri), scan struk,
    PDF/Excel, backup otomatis.
