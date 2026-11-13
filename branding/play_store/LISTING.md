@@ -72,6 +72,8 @@ Hapus blok "🎉 PROMO PERKENALAN…" dan kalimat "Selama promo, …". Ganti den
 
 Setelah 30 Maret 2027 hapus juga baris itu.
 
+Ubah juga kalimat promo di kartu HitungIn beranda appgratis.id (repo `appgratis`, `pages/index.vue`), dan saat rilis produksi ganti status kartu dari "◐ Closed Testing" ke "● Live" + tautan Google Play.
+
 ## Aset grafis
 - Ikon (512×512): `icon_512.png`
 - Gambar fitur (1024×500): `feature_graphic_1024x500.png`
